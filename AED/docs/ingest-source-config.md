@@ -298,6 +298,11 @@ Zasady:
 | `kml.extended_data_as_object` | `ExtendedData/Data[@name]` jako obiekt `ExtendedData` |
 | `kml.strip_cdata` | usuń `CDATA` z `name` i `description` |
 | `kml.description_format` | `text` albo `html` |
+| `html_table.*` | tabela HTML: `orientation` (`rows`/`key_value`), `columns`, `require_headers`, `require_keys` |
+| `html_list.*` | lista/bloki tekstowe: `select`, `record_filter`, `fields`, `item_text_separator` |
+| `pdf_table.*` | PDF z warstwą tekstową: `columns`, `row_anchor`, `row_tolerance`, `multi_line` |
+
+Pełny kontrakt pól i decyzja dla PDF: [`ingest-html-pdf-sources.md`](./ingest-html-pdf-sources.md).
 
 ### 2.7. `records` i tożsamość
 
@@ -628,6 +633,8 @@ Zasady:
 | `arcgis_query` | ArcGIS REST `/query` | `json` | `where`, `outFields`, `returnGeometry`, `resultOffset` |
 | `ckan_datastore` | CKAN `datastore_search` | `json` | `limit/offset`, `total`, `fields` |
 | `html_table` | oficjalna tabela HTML bez API | `html_table` | tylko po zgodzie; heurystyka kolumn, zawsze `review` |
+| `html_list` | oficjalna lista HTML bez tabeli | `html_list` | tylko po zgodzie; selektor + filtr + regex pól |
+| `pdf_table` | urodzony cyfrowo PDF z tabelą i warstwą tekstową | `pdf_table` | bez OCR; rekonstrukcja po pozycjach słów |
 | `manual` | PDF, dokument, arkusz bez stabilnego URL | brak | import ręczny z kontrolą człowieka |
 
 ### 4.3. Macierz zgodności rodzin i parserów
@@ -641,6 +648,8 @@ Zasady:
 | `arcgis_query` | `json` |
 | `ckan_datastore` | `json` |
 | `html_table` | `html_table` |
+| `html_list` | `html_list` |
+| `pdf_table` | `pdf_table` |
 | `manual` | brak |
 
 Loader waliduje tę macierz. Para `file_static` + `jsonapi` jest błędem.
