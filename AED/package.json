@@ -37,6 +37,7 @@
     "core:build": "bun scripts/build-core-dataset.ts",
     "ingest:run": "bun scripts/ingest-run.ts",
     "db:seed": "bun backend/store/seed.ts",
+    "db:load-core": "bun scripts/load-core-to-store.ts",
     "map:tiles": "bash frontend/scripts/fetch-poland-pmtiles.sh"
   },
   "dependencies": {
