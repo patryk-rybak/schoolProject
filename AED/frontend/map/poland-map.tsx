@@ -9,6 +9,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 
+import polandBorder from "./poland-border.geo.json" with { type: "json" };
+
 // MapLibre v6 loads its worker from a URL. Serve the file copied into
 // public/ by scripts/copy-maplibre-worker.ts as a static asset: Nitro's dev
 // middleware bypasses server routes for Sec-Fetch-Dest: worker requests.
@@ -44,6 +46,51 @@ function createStyle(origin: string): maplibregl.StyleSpecification {
 		},
 		layers: layers("protomaps", namedFlavor("light"), { lang: "pl" }),
 	};
+}
+
+// Mask everything outside Poland: a world-sized outer ring with the Polish
+// border as a hole (even-odd fill). Border: Natural Earth 1:50m (public domain).
+const WORLD_LON = 180;
+// Web Mercator clips at ~85.06°; 85 covers the whole projected world.
+const WORLD_LAT = 85;
+const WORLD_RING: [number, number][] = [
+	[-WORLD_LON, -WORLD_LAT],
+	[WORLD_LON, -WORLD_LAT],
+	[WORLD_LON, WORLD_LAT],
+	[-WORLD_LON, WORLD_LAT],
+	[-WORLD_LON, -WORLD_LAT],
+];
+
+function addPolandMask(map: maplibregl.Map): void {
+	const border = polandBorder.geometry.coordinates as [number, number][][];
+	map.addSource("poland-mask", {
+		type: "geojson",
+		data: {
+			type: "Feature",
+			properties: {},
+			geometry: { type: "Polygon", coordinates: [WORLD_RING, ...border] },
+		},
+	});
+	map.addSource("poland-outline", {
+		type: "geojson",
+		data: {
+			type: "Feature",
+			properties: {},
+			geometry: { type: "Polygon", coordinates: border },
+		},
+	});
+	map.addLayer({
+		id: "poland-mask",
+		type: "fill",
+		source: "poland-mask",
+		paint: { "fill-color": "#f8fafc", "fill-opacity": 1 },
+	});
+	map.addLayer({
+		id: "poland-border",
+		type: "line",
+		source: "poland-outline",
+		paint: { "line-color": "#94a3b8", "line-width": 1.5 },
+	});
 }
 
 function addAedPoints(map: maplibregl.Map): void {
@@ -116,6 +163,7 @@ export function PolandMap() {
 
 		// AED points from the dev store via /data/aed.geojson (gov-api module).
 		map.on("load", () => {
+			addPolandMask(map);
 			addAedPoints(map);
 		});
 
