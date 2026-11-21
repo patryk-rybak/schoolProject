@@ -9,12 +9,13 @@
     ]
   },
   "imports": {
-    "#/*": "./src/*"
+    "#/*": "./frontend/*",
+    "#backend/*": "./backend/*"
   },
   "scripts": {
-    "postinstall": "bun scripts/copy-maplibre-worker.ts",
-    "predev": "bun scripts/copy-maplibre-worker.ts",
-    "prebuild": "bun scripts/copy-maplibre-worker.ts",
+    "postinstall": "bun frontend/scripts/copy-maplibre-worker.ts",
+    "predev": "bun frontend/scripts/copy-maplibre-worker.ts",
+    "prebuild": "bun frontend/scripts/copy-maplibre-worker.ts",
     "dev": "bunx --bun vite dev --port 3000",
     "build": "bunx --bun vite build",
     "preview": "bun .output/server/index.mjs",
@@ -37,7 +38,8 @@
     "config:smoke": "bun scripts/smoke-source-configs.ts",
     "config:verify": "bun run config:schema:check && bun test src/server/ingest/config src/server/ingest/canonical.test.ts src/server/ingest/core",
     "core:build": "bun scripts/build-core-dataset.ts",
-    "map:tiles": "bash scripts/fetch-poland-pmtiles.sh",
+    "db:seed": "bun backend/store/seed.ts",
+    "map:tiles": "bash frontend/scripts/fetch-poland-pmtiles.sh",
     "ingest:configs:build": "bun scripts/build-source-configs.ts",
     "ingest:configs:validate": "bun scripts/validate-source-configs.ts",
     "ingest:smoke": "bun scripts/smoke-source-configs.ts"

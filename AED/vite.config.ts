@@ -7,11 +7,15 @@ import { defineConfig } from "vite";
 // biome-ignore lint/style/noDefaultExport: Vite requires a default export.
 export default defineConfig({
 	resolve: { tsconfigPaths: true },
+	publicDir: "frontend/public",
 	ssr: { noExternal: ["maplibre-gl"] },
 	plugins: [
-		nitro({ preset: "bun" }),
+		nitro({
+			preset: "bun",
+			publicAssets: [{ dir: "frontend/public", baseURL: "/" }],
+		}),
 		tailwindcss(),
-		tanstackStart(),
+		tanstackStart({ srcDirectory: "frontend" }),
 		viteReact(),
 	],
 });

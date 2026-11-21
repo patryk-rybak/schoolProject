@@ -1,5 +1,6 @@
 import { layers, namedFlavor } from "@protomaps/basemaps";
 import { CircleAlert } from "lucide-react";
+// biome-ignore lint/performance/noNamespaceImport: MapLibre is used as both a value namespace and a type namespace here.
 import * as maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +15,14 @@ import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 // Keep ?v= in sync with the maplibre-gl version to bust caches on upgrades.
 const WORKER_URL = "/maplibre-gl-worker.mjs?v=6.19.0";
 
-// Tiles come from src/routes/api/pmtiles.ts (HTTP range support).
+// biome-ignore lint/style/noMagicNumbers: the geographic centre of Poland is a named constant here.
+const POLAND_CENTER: [number, number] = [19.1451, 51.9194];
+const POLAND_ZOOM = 5.4;
+const POLAND_MIN_ZOOM = 4;
+const POLAND_MAX_ZOOM = 18;
+const TILE_SOURCE_MAX_ZOOM = 15;
+
+// Tiles come from frontend/routes/api/pmtiles.ts (HTTP range support).
 function createStyle(origin: string): maplibregl.StyleSpecification {
 	return {
 		version: 8,
@@ -28,8 +36,9 @@ function createStyle(origin: string): maplibregl.StyleSpecification {
 				// The tile extract stops at zoom 15. Pin the source maxzoom so
 				// MapLibre overzooms (reuses z15 tiles) instead of requesting
 				// missing z16+ tiles when the map zooms further in.
-				maxzoom: 15,
+				maxzoom: TILE_SOURCE_MAX_ZOOM,
 				attribution:
+					// biome-ignore lint/security/noSecrets: attribution HTML, not a credential.
 					'<a href="https://protomaps.com">Protomaps</a> © <a href="https://openstreetmap.org">OpenStreetMap</a>',
 			},
 		},
@@ -53,10 +62,10 @@ export function PolandMap() {
 		const map = new maplibregl.Map({
 			container,
 			style: createStyle(globalThis.location.origin),
-			center: [19.1451, 51.9194], // Poland
-			zoom: 5.4,
-			minZoom: 4,
-			maxZoom: 18, // overzoom past the extract's zoom 15 tiles
+			center: POLAND_CENTER,
+			zoom: POLAND_ZOOM,
+			minZoom: POLAND_MIN_ZOOM,
+			maxZoom: POLAND_MAX_ZOOM, // overzoom past the extract's zoom 15 tiles
 			attributionControl: { compact: true },
 		});
 
@@ -84,7 +93,8 @@ export function PolandMap() {
 					<CircleAlert />
 					<AlertTitle>Nie udało się wczytać mapy</AlertTitle>
 					<AlertDescription>
-						{error} Uruchom <code>bun run map:tiles</code>, aby pobrać dane mapy.
+						{error} Uruchom <code>bun run map:tiles</code>, aby pobrać dane
+						mapy.
 					</AlertDescription>
 				</Alert>
 			) : null}

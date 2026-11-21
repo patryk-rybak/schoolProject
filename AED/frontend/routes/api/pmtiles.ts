@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 // PMTiles needs HTTP byte-range responses, which static hosting of
 // public/ does not provide in dev. Serve the archive with Bun.file.
 // Relative to the server's working directory, like the CLI scripts.
-const TILES_PATH = "public/poland.pmtiles";
+const TILES_PATH = "frontend/public/poland.pmtiles";
 const RANGE_PATTERN = /^bytes=(?<start>\d+)-(?<end>\d*)$/u;
 
 async function serveTiles(request: Request): Promise<Response> {
