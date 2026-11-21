@@ -1,7 +1,7 @@
 # Konfiguracje źródeł B+ (HTML/PDF)
 
 Pięć źródeł klasy B+ z audytu JST. Opis inspekcji, kontraktu parserów i decyzji
-dla PDF: [`../../../docs/ingest-html-pdf-sources.md`](../../../docs/ingest-html-pdf-sources.md).
+dla PDF: [`../../../../docs/ingest-html-pdf-sources.md`](../../../../docs/ingest-html-pdf-sources.md).
 
 | Plik | Źródło | Rodzina / parser | Rekordy | Uwagi |
 | --- | --- | --- | ---: | --- |
