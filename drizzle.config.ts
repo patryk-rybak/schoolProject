@@ -1,13 +1,14 @@
-import { config } from 'dotenv'
-import { defineConfig } from 'drizzle-kit'
+import { defineConfig } from "drizzle-kit";
 
-config({ path: ['.env.local', '.env'] })
+// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket access.
+const databaseUrl = Bun.env["DATABASE_URL"] ?? "dev.db";
 
+// biome-ignore lint/style/noDefaultExport: Drizzle Kit requires a default export.
 export default defineConfig({
-  out: './drizzle',
-  schema: './src/db/schema.ts',
-  dialect: 'sqlite',
-  dbCredentials: {
-    url: process.env.DATABASE_URL ?? 'dev.db',
-  },
-})
+	out: "./drizzle",
+	schema: "./src/db/schema.ts",
+	dialect: "sqlite",
+	dbCredentials: {
+		url: databaseUrl,
+	},
+});
