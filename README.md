@@ -81,6 +81,21 @@ bun run db:push
 Drizzle Kit runs on Bun too. `@libsql/client` is installed as a dev dependency because Drizzle Kit needs a SQLite client for its CLI commands; the application itself uses `bun:sqlite`.
 
 
+## Map
+
+The home page renders a [Protomaps](https://protomaps.com) basemap of Poland with [MapLibre GL JS](https://maplibre.org/) and Polish labels.
+
+Generate the local PMTiles extract (about 100 MB at zoom 10, ignored by git):
+
+```bash
+bun run map:tiles
+```
+
+The script downloads the latest Protomaps daily build and extracts Poland into `public/poland.pmtiles`. Override the output with `POLAND_MAXZOOM`, `POLAND_BBOX`, or `PROTOMAPS_PLANET_URL`. To use a hosted PMTiles archive instead, set `VITE_PROTOMAPS_PMTILES_URL`.
+
+`bun install` also copies the self-contained MapLibre worker into `public/` via the `postinstall` script, so the map does not depend on a worker CDN.
+
+
 ## Shadcn
 
 Add components using the latest version of [Shadcn](https://ui.shadcn.com/).

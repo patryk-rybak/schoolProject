@@ -1,14 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/')({ component: Home })
+import { PolandMap } from "#/components/map/poland-map";
 
 function Home() {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold">Welcome to TanStack Start</h1>
-      <p className="mt-4 text-lg">
-        Edit <code>src/routes/index.tsx</code> to get started.
-      </p>
-    </div>
-  )
+	return (
+		<main className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
+			<header>
+				<h1 className="font-bold text-4xl">Mapa Polski</h1>
+				<p className="mt-2 text-lg text-muted-foreground">
+					Protomaps + MapLibre GL JS · dane © OpenStreetMap
+				</p>
+			</header>
+			<PolandMap />
+		</main>
+	);
 }
+
+export const Route = createFileRoute("/")({ component: Home });

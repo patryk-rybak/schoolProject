@@ -1,11 +1,19 @@
-import { Database } from 'bun:sqlite'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
+import { Database } from "bun:sqlite";
+import { type BunSQLiteDatabase, drizzle } from "drizzle-orm/bun-sqlite";
 
-import * as schema from './schema.ts'
+import { todos } from "./schema.ts";
 
-const sqlite = new Database(process.env.DATABASE_URL ?? 'dev.db')
+// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket access.
+const databaseUrl = Bun.env["DATABASE_URL"] ?? "dev.db";
 
-sqlite.run('PRAGMA journal_mode = WAL;')
-sqlite.run('PRAGMA synchronous = NORMAL;')
+const sqlite: Database = new Database(databaseUrl);
 
-export const db = drizzle({ client: sqlite, schema })
+sqlite.run("PRAGMA journal_mode = WAL;");
+sqlite.run("PRAGMA synchronous = NORMAL;");
+
+const schema = { todos };
+
+export const db: BunSQLiteDatabase<typeof schema> = drizzle({
+	client: sqlite,
+	schema,
+});
