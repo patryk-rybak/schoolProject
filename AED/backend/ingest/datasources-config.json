@@ -1103,7 +1103,7 @@
 			"source": {
 				"id": "warszawa",
 				"name": "Lokalizacja defibrylatorów (AED) — m.st. Warszawa",
-				"enabled": false
+				"enabled": true
 			},
 			"connector": {
 				"family": "http_json",
@@ -1119,6 +1119,7 @@
 				"body": {},
 				"auth": {
 					"env": "WARSZAWA_API_TOKEN",
+					"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYlZaazZkLVlrMTZjMm1JZFlkRG9WUFFLWnZKYzktdU1ydy1vOFFWenU0IiwiaWF0IjoxNzk1MzAzMzMyfQ.8PEYx5jdc2m-oEh7hA-_IY79d-D6fxCWt6IQcrHXCJc",
 					"header": "Authorization",
 					"type": "header"
 				}

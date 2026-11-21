@@ -164,7 +164,7 @@ W `AED/backend/ingest/datasources-config.json` skonfigurowanych jest obecnie **1
 | `krosno` | Defibrylatory w Krośnie (dane.gov.pl) | file_static / csv | włączone (CC0 1.0) |
 | `marki` | Defibrylatory w Markach (dane.gov.pl) | file_static / csv | włączone (CC BY 4.0) |
 | `przemysl` | Otwarte Dane Przemyśl — AED (API SOD) | http_json / json | włączone (CC BY 4.0) |
-| `warszawa` | Lokalizacja AED — m.st. Warszawa | http_json / json | wyłączone: wymaga tokena API |
+| `warszawa` | Lokalizacja AED — m.st. Warszawa | http_json / json | włączone (CC BY 4.0); token API w `fetch.auth.token` (generacja: https://dane.um.warszawa.pl/pl/key-api) |
 | `belchatow` | Bełchatów (Google My Maps KML) | google_my_maps_kml / kml | wyłączone: decyzja licencyjna |
 | `lodz` | Łódź (Google My Maps KML) | google_my_maps_kml / kml | wyłączone: decyzja licencyjna |
 | `olsztyn` | Olsztyn (Google My Maps KML) | google_my_maps_kml / kml | wyłączone: decyzja licencyjna |
@@ -172,6 +172,6 @@ W `AED/backend/ingest/datasources-config.json` skonfigurowanych jest obecnie **1
 | `tczew` | Tczew (Google My Maps KML) | google_my_maps_kml / kml | wyłączone: decyzja licencyjna |
 | `zielona-gora` | Zielona Góra (Google My Maps KML) | google_my_maps_kml / kml | wyłączone: decyzja licencyjna |
 
-Aktywne (`enabled: true`) są 4 źródła z otwartą licencją: `openaedmap`, `krosno`, `marki`, `przemysl`. Sześć map KML ma `enabled: false` do czasu decyzji licencyjnej (brak deklaracji, ToS Google), a `warszawa` do czasu uzyskania tokena API.
+Aktywne (`enabled: true`) jest 5 źródeł z otwartą licencją: `openaedmap`, `krosno`, `marki`, `przemysl`, `warszawa`. Sześć map KML ma `enabled: false` do czasu decyzji licencyjnej (brak deklaracji, ToS Google). Token API Warszawy można wpisać wprost w JSON (`fetch.auth.token`, pusty = brak) albo podać przez zmienną `WARSZAWA_API_TOKEN` (env ma pierwszeństwo); klucz wygenerujesz na https://dane.um.warszawa.pl/pl/key-api. Z `--all` wszystkie 11 źródeł pobiera się poprawnie (19 462 rekordów).
 
 **Pozostałe 68 źródeł z tej listy to kandydaci do przyszłej integracji.** Priorytety z inwentarza: klasa B+ (Sława, Manowo, Tarnów Opolski, Suszec, Czarne) jako następne po parserach HTML/PDF (P2), większe listy klasy B po geokodowaniu (P2), małe listy B i cała klasa B- na końcu (P3, B- bez importu przed weryfikacją). Agregatory wymagają zgód licencyjnych lub porozumień partnerskich, zanim powstaną dla nich konektory.

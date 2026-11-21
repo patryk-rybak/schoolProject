@@ -394,13 +394,25 @@ const envNameSchema = z.string().regex(/^[A-Z][A-Z0-9_]{2,63}$/, {
 		"Nazwa zmiennej środowiskowej: wielkie litery, cyfry i _, 3-64 znaki.",
 });
 
+// Puste pole token/secret w JSON traktujemy jak brak wartości (slot do
+// wypełnienia); niepuste musi mieć min. 1 znak.
+const optionalSecretSchema = z
+	.string()
+	.optional()
+	.transform((value) => (value === "" ? undefined : value));
+
 export const authSchema = z.discriminatedUnion("type", [
 	z.strictObject({ type: z.literal("none") }),
-	z.strictObject({ type: z.literal("bearer"), env: envNameSchema }),
+	z.strictObject({
+		type: z.literal("bearer"),
+		env: envNameSchema.optional(),
+		token: optionalSecretSchema,
+	}),
 	z.strictObject({
 		type: z.literal("header"),
 		header: z.string().min(1),
-		env: envNameSchema,
+		env: envNameSchema.optional(),
+		token: optionalSecretSchema,
 		prefix: z.string().optional(),
 	}),
 	z.strictObject({
@@ -408,6 +420,8 @@ export const authSchema = z.discriminatedUnion("type", [
 		env: envNameSchema.optional(),
 		user_env: envNameSchema.optional(),
 		password_env: envNameSchema.optional(),
+		user: optionalSecretSchema,
+		password: optionalSecretSchema,
 	}),
 ]);
 
@@ -909,15 +923,31 @@ function refineSourceConfig(
 	}
 
 	const auth = value.fetch.auth;
+	if (auth?.type === "bearer" && !auth.env && !auth.token) {
+		ctx.addIssue({
+			code: "custom",
+			path: ["fetch", "auth"],
+			message: "Auth bearer wymaga env albo token.",
+		});
+	}
+	if (auth?.type === "header" && !auth.env && !auth.token) {
+		ctx.addIssue({
+			code: "custom",
+			path: ["fetch", "auth"],
+			message: "Auth header wymaga env albo token.",
+		});
+	}
 	if (auth?.type === "basic") {
-		const hasUserPair = Boolean(auth.user_env && auth.password_env);
+		const hasUserPair = Boolean(
+			(auth.user_env && auth.password_env) || (auth.user && auth.password),
+		);
 		const hasEnvPair = Boolean(auth.env && auth.password_env);
 		if (!hasUserPair && !hasEnvPair) {
 			ctx.addIssue({
 				code: "custom",
 				path: ["fetch", "auth"],
 				message:
-					"Auth basic wymaga password_env oraz user_env albo env (zgodnie z kontraktem sekretów).",
+					"Auth basic wymaga password_env oraz user_env albo env, albo pary user/password.",
 			});
 		}
 	}

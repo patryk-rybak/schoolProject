@@ -150,13 +150,13 @@ function authFromConfig(
 		return { headers: {}, missing: null };
 	}
 	if (auth.type === "bearer") {
-		const secret = env[auth.env];
-		if (!secret) return { headers: {}, missing: auth.env };
+		const secret = (auth.env ? env[auth.env] : undefined) ?? auth.token;
+		if (!secret) return { headers: {}, missing: auth.env ?? "token" };
 		return { headers: { Authorization: `Bearer ${secret}` }, missing: null };
 	}
 	if (auth.type === "header") {
-		const secret = env[auth.env];
-		if (!secret) return { headers: {}, missing: auth.env };
+		const secret = (auth.env ? env[auth.env] : undefined) ?? auth.token;
+		if (!secret) return { headers: {}, missing: auth.env ?? "token" };
 		return {
 			headers: { [auth.header]: `${auth.prefix ?? ""}${secret}` },
 			missing: null,
@@ -167,8 +167,9 @@ function authFromConfig(
 	if (encoded) {
 		return { headers: { Authorization: `Basic ${encoded}` }, missing: null };
 	}
-	const user = auth.user_env ? env[auth.user_env] : undefined;
-	const password = auth.password_env ? env[auth.password_env] : undefined;
+	const user = (auth.user_env ? env[auth.user_env] : undefined) ?? auth.user;
+	const password =
+		(auth.password_env ? env[auth.password_env] : undefined) ?? auth.password;
 	if (user && password) {
 		return {
 			headers: {
