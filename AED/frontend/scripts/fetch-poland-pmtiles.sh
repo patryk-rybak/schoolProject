@@ -7,7 +7,7 @@ set -euo pipefail
 #   bun run map:tiles
 #   POLAND_MAXZOOM=12 POLAND_BBOX=14.12,49.00,24.15,54.84 bun run map:tiles
 #
-# The output is written to public/poland.pmtiles and is ignored by git.
+# The output is written to frontend/public/poland.pmtiles and is ignored by git.
 # Existing archives are kept: set POLAND_FORCE=1 to regenerate one.
 # Defaults: maxzoom 15 (about 4 GB), 12 download threads. For a quick, small
 # extract use POLAND_MAXZOOM=10 (about 100 MB; the map overzooms past it).

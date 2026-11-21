@@ -55,6 +55,6 @@ Dane startowe: `bun run db:seed` (5 przykładowych rekordów, czyści tabelę).
 
 ## Uwagi
 
-- `dev.db` jest ignorowany przez git; migracje w `drizzle/` są wersjonowane.
+- `dev.db` jest ignorowany przez git; migracje w `backend/store/drizzle/` są wersjonowane.
 - `db:migrate` tworzy dodatkowo techniczną tabelę `__drizzle_migrations`
   (księgowość migracji), więc w bazie są dwie tabele: domena + techniczna.

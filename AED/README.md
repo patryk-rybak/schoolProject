@@ -82,7 +82,7 @@ bun run dev
 
 Aplikacja działa pod http://localhost:3000.
 
-`bun install` uruchamia `scripts/copy-maplibre-worker.ts`, który kopiuje worker MapLibre do `public/maplibre-gl-worker.mjs`.
+`bun install` uruchamia `frontend/scripts/copy-maplibre-worker.ts`, który kopiuje worker MapLibre do `frontend/public/maplibre-gl-worker.mjs`.
 
 ## Skrypty
 
@@ -115,7 +115,7 @@ Wygeneruj lokalny wyciąg PMTiles (domyślnie zoom 15, około 4 GB, ignorowany p
 bun run map:tiles
 ```
 
-Skrypt pobiera najnowszy dzienny build Protomaps i wycina Polskę do `public/poland.pmtiles`. Domyślnie używa `PMTILES_THREADS=12` i ponawia próbę do `PMTILES_ATTEMPTS=3` razy. Nadpisz ustawienia przez `POLAND_MAXZOOM`, `POLAND_BBOX`, `PMTILES_THREADS`, `PMTILES_ATTEMPTS` lub `PROTOMAPS_PLANET_URL`. Szybki, mały wyciąg: `POLAND_MAXZOOM=10 bun run map:tiles` (około 100 MB; mapa nadal przybliża, ale kafelki są rozmyte). Skrypt nie nadpisuje istniejącego archiwum i nie usuwa go przy nieudanej próbie; aby wymusić ponowne pobranie, ustaw `POLAND_FORCE=1`.
+Skrypt pobiera najnowszy dzienny build Protomaps i wycina Polskę do `frontend/public/poland.pmtiles`. Domyślnie używa `PMTILES_THREADS=12` i ponawia próbę do `PMTILES_ATTEMPTS=3` razy. Nadpisz ustawienia przez `POLAND_MAXZOOM`, `POLAND_BBOX`, `PMTILES_THREADS`, `PMTILES_ATTEMPTS` lub `PROTOMAPS_PLANET_URL`. Szybki, mały wyciąg: `POLAND_MAXZOOM=10 bun run map:tiles` (około 100 MB; mapa nadal przybliża, ale kafelki są rozmyte). Skrypt nie nadpisuje istniejącego archiwum i nie usuwa go przy nieudanej próbie; aby wymusić ponowne pobranie, ustaw `POLAND_FORCE=1`.
 
 Worker MapLibre jest ładowany jako statyczny zasób z `/maplibre-gl-worker.mjs?v=6.19.0`. Utrzymuj parametr `?v=` w `frontend/map/poland-map.tsx` zgodny z wersją `maplibre-gl`, aby unieważniać cache po aktualizacji. Nie serwuj workera przez route serwerowy: middleware Nitro w trybie dev kieruje żądania z `Sec-Fetch-Dest: worker` do plików statycznych i pomija route API.
 

@@ -20,7 +20,7 @@ tak szybko, jak to możliwe, również na telefonie.
 ## Zależności
 
 - dane: `backend/store/` → API/loader,
-- kafelki: `frontend/routes/api/pmtiles.ts`, `public/poland.pmtiles`,
+- kafelki: `frontend/routes/api/pmtiles.ts`, `frontend/public/poland.pmtiles`,
   `bun run map:tiles`,
 - styl: `frontend/components/ui/`.
 

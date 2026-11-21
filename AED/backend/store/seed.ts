@@ -1,9 +1,5 @@
-import {
-	addAedDevices,
-	clearAedDevices,
-	listAedDevices,
-} from "../backend/store/aed-store.ts";
-import type { NewAedDevice } from "../backend/store/schema.ts";
+import { addAedDevices, clearAedDevices, listAedDevices } from "./aed-store.ts";
+import type { NewAedDevice } from "./schema.ts";
 
 /**
  * Development seed: replaces the contents of `aed_devices` with a few dummy
