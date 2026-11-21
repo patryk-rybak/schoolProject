@@ -21,22 +21,45 @@ bun install
 bun run dev
 ```
 
-## Plan modułów
+## Struktura kodu
 
-Katalogi `frontend/` i `backend/` zawierają **wyłącznie dokumentację planowanych
-modułów** (bez kodu) — kod aplikacji pozostaje w `src/`. Dzięki temu wiadomo,
-co i gdzie będzie rozwijane.
+Cały kod aplikacji jest podzielony na dwie warstwy:
+
+```text
+AED/
+├── frontend/                 # routing, komponenty, hooki, style
+│   ├── routes/               # trasy TanStack (w tym /api/*)
+│   ├── router.tsx            # fabryka routera
+│   ├── routeTree.gen.ts      # generowany — nie edytować ręcznie
+│   ├── components/ui/        # komponenty shadcn (rejestr)
+│   ├── map/                  # mapa AED (MapLibre + Protomaps)
+│   ├── hooks/, lib/          # hooki i helpery klienta
+│   ├── auth-form/            # plan modułu: logowanie/rejestracja
+│   ├── aed-form/             # plan modułu: formularz AED
+│   └── social-media/         # plan modułu: propozycje postów
+└── backend/                  # dane, uwierzytelnianie, integracje
+    ├── auth/                 # better-auth (serwer)
+    ├── store/                # Drizzle + bun:sqlite, repozytorium AED
+    ├── ingest/               # plan modułu: pobieranie źródeł
+    ├── normalize/            # plan modułu: standaryzacja
+    └── gov-api/              # plan modułu: feed dla dane.gov.pl
+```
+
+Aliasy ścieżek: `#/*` → `frontend/*`, `#backend/*` → `backend/*`
+(analogicznie `@/*` i `@backend/*`).
+
+## Plan modułów
 
 | Warstwa | Moduł | Status |
 | --- | --- | --- |
 | frontend | [`auth-form/`](./frontend/auth-form/README.md) | planowane |
 | frontend | [`aed-form/`](./frontend/aed-form/README.md) | planowane |
-| frontend | [`map/`](./frontend/map/README.md) | częściowo istnieje |
+| frontend | [`map/`](./frontend/map/README.md) | działa (mapa bazowa) |
 | frontend | [`social-media/`](./frontend/social-media/README.md) | planowane |
 | backend | [`auth/`](./backend/auth/README.md) | częściowo istnieje |
 | backend | [`ingest/`](./backend/ingest/README.md) | planowane |
 | backend | [`normalize/`](./backend/normalize/README.md) | planowane |
-| backend | [`store/`](./backend/store/README.md) | planowane |
+| backend | [`store/`](./backend/store/README.md) | działa (dev) |
 | backend | [`gov-api/`](./backend/gov-api/README.md) | planowane |
 
 ## Stack
@@ -82,9 +105,9 @@ Aplikacja działa pod http://localhost:3000.
 
 ## Mapa
 
-Strona główna (`src/routes/index.tsx`) renderuje `src/components/map/poland-map.tsx`: MapLibre GL JS wyśrodkowany na Polsce (`19.1451, 51.9194`), z polskimi etykietami z Protomaps, kontrolkami nawigacji i skali oraz alertem shadcn, gdy mapa nie może się wczytać.
+Strona główna (`frontend/routes/index.tsx`) renderuje `frontend/map/poland-map.tsx`: MapLibre GL JS wyśrodkowany na Polsce (`19.1451, 51.9194`), z polskimi etykietami z Protomaps, kontrolkami nawigacji i skali oraz alertem shadcn, gdy mapa nie może się wczytać.
 
-Wyciąg kafelków kończy się na zoomie 15, a mapa pozwala dojść do zoomu 18. Źródło ma przypięte `maxzoom: 15`, więc MapLibre overzoomuje kafelki z15 zamiast żądać brakujących kafelków. Kafelki pochodzą z `/api/pmtiles` (`src/routes/api/pmtiles.ts`), który obsługuje nagłówki `Range` i odpowiada `206 Partial Content`. Nie podłączaj PMTiles bezpośrednio do pliku statycznego, ponieważ hosting statyczny nie zwraca zakresów bajtów wymaganych przez PMTiles.
+Wyciąg kafelków kończy się na zoomie 15, a mapa pozwala dojść do zoomu 18. Źródło ma przypięte `maxzoom: 15`, więc MapLibre overzoomuje kafelki z15 zamiast żądać brakujących kafelków. Kafelki pochodzą z `/api/pmtiles` (`frontend/routes/api/pmtiles.ts`), który obsługuje nagłówki `Range` i odpowiada `206 Partial Content`. Nie podłączaj PMTiles bezpośrednio do pliku statycznego, ponieważ hosting statyczny nie zwraca zakresów bajtów wymaganych przez PMTiles.
 
 Wygeneruj lokalny wyciąg PMTiles (domyślnie zoom 15, około 4 GB, ignorowany przez git):
 
@@ -94,11 +117,11 @@ bun run map:tiles
 
 Skrypt pobiera najnowszy dzienny build Protomaps i wycina Polskę do `public/poland.pmtiles`. Domyślnie używa `PMTILES_THREADS=12` i ponawia próbę do `PMTILES_ATTEMPTS=3` razy. Nadpisz ustawienia przez `POLAND_MAXZOOM`, `POLAND_BBOX`, `PMTILES_THREADS`, `PMTILES_ATTEMPTS` lub `PROTOMAPS_PLANET_URL`. Szybki, mały wyciąg: `POLAND_MAXZOOM=10 bun run map:tiles` (około 100 MB; mapa nadal przybliża, ale kafelki są rozmyte). Skrypt nie nadpisuje istniejącego archiwum i nie usuwa go przy nieudanej próbie; aby wymusić ponowne pobranie, ustaw `POLAND_FORCE=1`.
 
-Worker MapLibre jest ładowany jako statyczny zasób z `/maplibre-gl-worker.mjs?v=6.19.0`. Utrzymuj parametr `?v=` w `src/components/map/poland-map.tsx` zgodny z wersją `maplibre-gl`, aby unieważniać cache po aktualizacji. Nie serwuj workera przez route serwerowy: middleware Nitro w trybie dev kieruje żądania z `Sec-Fetch-Dest: worker` do plików statycznych i pomija route API.
+Worker MapLibre jest ładowany jako statyczny zasób z `/maplibre-gl-worker.mjs?v=6.19.0`. Utrzymuj parametr `?v=` w `frontend/map/poland-map.tsx` zgodny z wersją `maplibre-gl`, aby unieważniać cache po aktualizacji. Nie serwuj workera przez route serwerowy: middleware Nitro w trybie dev kieruje żądania z `Sec-Fetch-Dest: worker` do plików statycznych i pomija route API.
 
 ## UI
 
-Projekt używa wyłącznie natywnych komponentów shadcn/ui generowanych przez CLI: `alert`, `badge`, `button` i `card`. Są zarządzane przez rejestr shadcn, bazują na Radix UI i zachowują styl `new-york` oraz motyw oparty na zmiennych CSS w `src/styles.css`. Nie edytuj wygenerowanych plików w `src/components/ui/` ręcznie i nie dodawaj własnych prymitywów zamiast komponentów shadcn.
+Projekt używa wyłącznie natywnych komponentów shadcn/ui generowanych przez CLI: `alert`, `badge`, `button` i `card`. Są zarządzane przez rejestr shadcn, bazują na Radix UI i zachowują styl `new-york` oraz motyw oparty na zmiennych CSS w `frontend/styles.css`. Nie edytuj wygenerowanych plików w `frontend/components/ui/` ręcznie i nie dodawaj własnych prymitywów zamiast komponentów shadcn.
 
 ```bash
 bunx --bun shadcn@latest add <nazwa>
@@ -106,11 +129,11 @@ bunx --bun shadcn@latest add <nazwa>
 
 ## Database
 
-Aplikacja używa natywnego sterownika SQLite Buna przez `drizzle-orm/bun-sqlite`. Plik bazy pochodzi z `DATABASE_URL` (domyślnie `dev.db`), a `src/db/index.ts` włącza WAL i `synchronous = NORMAL`. Schemat znajduje się w `src/db/schema.ts`.
+Aplikacja używa natywnego sterownika SQLite Buna przez `drizzle-orm/bun-sqlite`. Plik bazy pochodzi z `DATABASE_URL` (domyślnie `dev.db`), a `backend/store/index.ts` włącza WAL i `synchronous = NORMAL`. Schemat znajduje się w `backend/store/schema.ts`.
 
 W wersji deweloperskiej istnieje jedna tabela domenowa `aed_devices` (tymczasowa,
 kolumny mogą się zmieniać). Funkcje dostępu dla innych modułów są w
-`src/db/aed-store.ts` (`addAedDevice`, `addAedDevices`, `listAedDevices`,
+`backend/store/aed-store.ts` (`addAedDevice`, `addAedDevices`, `listAedDevices`,
 `getAedDevice`, `countAedDevices`, `clearAedDevices`).
 
 ```bash
@@ -125,7 +148,7 @@ Drizzle Kit działa na Bunie. `@libsql/client` jest zależnością deweloperską
 
 ## Auth
 
-better-auth jest skonfigurowany w `src/lib/auth.ts` (logowanie e-mailem i hasłem, plugin `tanstackStartCookies`), klient w `src/lib/auth-client.ts`, a handler w `src/routes/api/auth/$.ts`.
+better-auth jest skonfigurowany w `backend/auth/auth.ts` (logowanie e-mailem i hasłem, plugin `tanstackStartCookies`), klient w `frontend/lib/auth-client.ts`, a handler w `frontend/routes/api/auth/$.ts`.
 
 Ustaw w `.env.local`:
 
@@ -138,9 +161,9 @@ Sekret wygenerujesz przez `bunx --bun @better-auth/cli secret`.
 
 ## Routing
 
-Routing jest plikowy i oparty na TanStack Router. Pliki w `src/routes/` tworzą route'y, a `src/router.tsx` buduje router z `routeTree.gen.ts`. Nie edytuj `src/routeTree.gen.ts` ręcznie; generuje go `bun run dev` lub `bun run build`.
+Routing jest plikowy i oparty na TanStack Router. Pliki w `frontend/routes/` tworzą route'y, a `frontend/router.tsx` buduje router z `routeTree.gen.ts`. Nie edytuj `frontend/routeTree.gen.ts` ręcznie; generuje go `bun run dev` lub `bun run build`.
 
-Aby dodać route, dodaj plik w `src/routes/`:
+Aby dodać route, dodaj plik w `frontend/routes/`:
 
 ```tsx
 import { createFileRoute } from "@tanstack/react-router";
@@ -154,7 +177,7 @@ function About() {
 }
 ```
 
-Layout aplikacji znajduje się w `src/routes/__root.tsx` i używa `shellComponent` do renderowania dokumentu HTML.
+Layout aplikacji znajduje się w `frontend/routes/__root.tsx` i używa `shellComponent` do renderowania dokumentu HTML.
 
 ## Server Functions i API Routes
 
@@ -185,7 +208,7 @@ export const Route = createFileRoute("/api/hello")({
 
 ## Data Fetching
 
-Dane ładuj przez `loader` TanStack Router lub przez server functions. Aplikacja nie ma integracji z TanStack Query: nie ma providera `QueryClient` ani devtools. Jeśli w przyszłości dodasz Query, zainstaluj `@tanstack/react-query` i podłącz provider w `src/router.tsx`.
+Dane ładuj przez `loader` TanStack Router lub przez server functions. Aplikacja nie ma integracji z TanStack Query: nie ma providera `QueryClient` ani devtools. Jeśli w przyszłości dodasz Query, zainstaluj `@tanstack/react-query` i podłącz provider w `frontend/router.tsx`.
 
 ```tsx
 import { createFileRoute } from "@tanstack/react-router";
@@ -218,7 +241,7 @@ Zmienne środowiskowe mieszkają w `.env.local` (nigdy nie commitowanym). Bun ł
 - `BETTER_AUTH_URL` — bazowy URL better-auth
 - `BETTER_AUTH_SECRET` — sekret podpisujący better-auth
 
-W kodzie serwerowym używaj `process.env` lub `Bun.env`, a w kliencie `import.meta.env` dla zmiennych z prefiksem `VITE_`. Nie ma modułu walidacji `src/env.ts`; kafelki zawsze pochodzą z `/api/pmtiles`.
+W kodzie serwerowym używaj `process.env` lub `Bun.env`, a w kliencie `import.meta.env` dla zmiennych z prefiksem `VITE_`. Nie ma modułu walidacji `frontend/env.ts`; kafelki zawsze pochodzą z `/api/pmtiles`.
 
 ## Linting i formatowanie
 

@@ -1,6 +1,6 @@
 # Backend · Uwierzytelnianie i uprawnienia
 
-**Status:** częściowo istnieje · **Kod:** `src/lib/auth.ts`, `src/routes/api/auth/$.ts`
+**Status:** częściowo istnieje · **Kod:** `backend/auth/auth.ts`, `frontend/routes/api/auth/$.ts`
 
 ## Cel
 
@@ -17,7 +17,7 @@ Wiedzieć, kto modyfikuje dane, i dopuszczać do tego tylko osoby uprawnione.
 
 ## Zależności
 
-- `src/db/` — tabele better-auth w istniejącej bazie,
+- `backend/store/` — tabele better-auth w istniejącej bazie,
 - `frontend/auth-form/` — interfejs logowania.
 
 ## Stan obecny

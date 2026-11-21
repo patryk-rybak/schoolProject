@@ -1,6 +1,6 @@
 # Frontend · Mapa AED
 
-**Status:** częściowo istnieje · **Kod:** `src/components/map/`, `src/routes/index.tsx`
+**Status:** częściowo istnieje · **Kod:** `frontend/map/`, `frontend/routes/index.tsx`
 
 ## Cel
 
@@ -20,12 +20,12 @@ tak szybko, jak to możliwe, również na telefonie.
 ## Zależności
 
 - dane: `backend/store/` → API/loader,
-- kafelki: `src/routes/api/pmtiles.ts`, `public/poland.pmtiles`,
+- kafelki: `frontend/routes/api/pmtiles.ts`, `public/poland.pmtiles`,
   `bun run map:tiles`,
-- styl: `src/components/ui/`.
+- styl: `frontend/components/ui/`.
 
 ## Stan obecny
 
 Działa mapa Polski (MapLibre 6 + Protomaps, polskie etykiety) w
-`src/components/map/poland-map.tsx`, serwowanie kafelków z obsługą zakresów
+`frontend/map/poland-map.tsx`, serwowanie kafelków z obsługą zakresów
 bajtów oraz strona główna. Brak warstwy AED, filtrów i panelu szczegółów.

@@ -18,11 +18,11 @@ i założyć konto, zanim dopuszczone zostanie dodawanie lub edycja rekordów.
 ## Zależności
 
 - backend: [`../backend/auth/`](../backend/auth/README.md) — sesje i role,
-- `src/lib/auth-client.ts` — klient better-auth,
-- `src/components/ui/` — pola i przyciski shadcn.
+- `frontend/lib/auth-client.ts` — klient better-auth,
+- `frontend/components/ui/` — pola i przyciski shadcn.
 
 ## Stan obecny
 
 Skonfigurowany jest better-auth po stronie serwera
-(`src/lib/auth.ts`, `src/routes/api/auth/$.ts`). Brak jakiegokolwiek
+(`backend/auth/auth.ts`, `frontend/routes/api/auth/$.ts`). Brak jakiegokolwiek
 interfejsu logowania.

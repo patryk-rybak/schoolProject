@@ -1,8 +1,7 @@
 # Backend
 
-Warstwa danych i integracji. Katalog zawiera **wyłącznie plan modułów** — kod
-nadal mieszka w `src/` (Drizzle, better-auth, trasy API) i będzie rozbudowywany
-wraz z powstawaniem kolejnych części.
+Warstwa danych i integracji — tutaj mieszka kod backendu (baza, uwierzytelnianie)
+oraz opisy planowanych modułów.
 
 | Moduł | Zakres | Status |
 | --- | --- | --- |

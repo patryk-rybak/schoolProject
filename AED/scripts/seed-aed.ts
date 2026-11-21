@@ -2,8 +2,8 @@ import {
 	addAedDevices,
 	clearAedDevices,
 	listAedDevices,
-} from "../src/db/aed-store.ts";
-import type { NewAedDevice } from "../src/db/schema.ts";
+} from "../backend/store/aed-store.ts";
+import type { NewAedDevice } from "../backend/store/schema.ts";
 
 /**
  * Development seed: replaces the contents of `aed_devices` with a few dummy
