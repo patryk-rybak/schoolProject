@@ -8,6 +8,7 @@ set -euo pipefail
 #   POLAND_MAXZOOM=12 POLAND_BBOX=14.12,49.00,24.15,54.84 bun run map:tiles
 #
 # The output is written to public/poland.pmtiles and is ignored by git.
+# Existing archives are kept: set POLAND_FORCE=1 to regenerate one.
 # Defaults: maxzoom 15 (about 4 GB), 12 download threads. For a quick, small
 # extract use POLAND_MAXZOOM=10 (about 100 MB; the map overzooms past it).
 # Set PROTOMAPS_PLANET_URL to use a specific planet build instead of the latest.
@@ -19,6 +20,14 @@ MAXZOOM="${POLAND_MAXZOOM:-15}"
 THREADS="${PMTILES_THREADS:-12}"
 ATTEMPTS="${PMTILES_ATTEMPTS:-3}"
 BIN_DIR="${PMTILES_BIN_DIR:-$HOME/.local/bin}"
+
+mkdir -p "$(dirname "$OUT")"
+
+if [ -s "$OUT" ] && [ "${POLAND_FORCE:-0}" != "1" ]; then
+	echo "Keeping existing archive: $OUT ($(du -h "$OUT" | cut -f1))" >&2
+	echo "Set POLAND_FORCE=1 to regenerate it." >&2
+	exit 0
+fi
 
 if ! command -v pmtiles >/dev/null 2>&1; then
 	if [ -x "$BIN_DIR/pmtiles" ]; then
@@ -50,15 +59,20 @@ fi
 
 mkdir -p "$(dirname "$OUT")"
 
+# Extract to a temporary file and swap it in only on success, so a failed
+# download never destroys a working archive.
+TMP="$OUT.tmp.$$"
+trap 'rm -f "$TMP"' EXIT
+
 echo "Extracting Poland from $BUILD_URL"
 echo "  bbox=$BBOX maxzoom=$MAXZOOM output=$OUT"
 
 attempt=1
 while true; do
 	# Remove any partial archive from a previous attempt before retrying.
-	rm -f "$OUT"
+	rm -f "$TMP"
 
-	if pmtiles extract "$BUILD_URL" "$OUT" \
+	if pmtiles extract "$BUILD_URL" "$TMP" \
 		--bbox="$BBOX" \
 		--maxzoom="$MAXZOOM" \
 		--download-threads="$THREADS"; then
@@ -69,6 +83,7 @@ while true; do
 
 	if [ "$attempt" -ge "$ATTEMPTS" ]; then
 		echo "Extraction failed after $ATTEMPTS attempts (exit $status)." >&2
+		echo "Existing archive, if any, was left untouched." >&2
 		exit "$status"
 	fi
 
@@ -76,5 +91,8 @@ while true; do
 	echo "Extract failed (exit $status); retrying in 5s ($attempt/$ATTEMPTS)..." >&2
 	sleep 5
 done
+
+mv "$TMP" "$OUT"
+trap - EXIT
 
 echo "Done: $(du -h "$OUT" | cut -f1)"
