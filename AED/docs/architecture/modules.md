@@ -31,7 +31,7 @@ AED/
 │   │   ├── ingest/
 │   │   │   ├── types.ts          # cross-lane contracts (no db/http imports)
 │   │   │   ├── errors.ts         # ConfigError, FetchError, ParseError, reason codes
-│   │   │   ├── registry.ts       # SourceDefinition[] + registry loader/upsert
+│   │   │   ├── registry.ts       # YAML SourceConfig[] + registry loader/upsert
 │   │   │   ├── run.ts            # orchestration for one source run
 │   │   │   ├── lock.ts           # acquire/reap sync_run lock
 │   │   │   ├── hash.ts           # stable JSON stringify + sha256

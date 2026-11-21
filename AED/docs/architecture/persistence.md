@@ -273,7 +273,8 @@ chars for the dane.gov.pl harvester), `facility_id`, device fields
 (`label`, `manufacturer`, `model`, `serial_number` restricted,
 `device_type`, `pads_type`, expiries), `status`, `status_reason`,
 `access_type`, `is_24_7`, `requires_dispatcher`, `fee`, `photo_url`,
-`merged_into_id`, timestamps.
+`is_public`, `merged_into_id`, timestamps. A merged loser keeps its row with
+`merged_into_id` set and `is_public = 0`; the dedup lane owns that transition.
 
 Canonical identity rules:
 
@@ -415,6 +416,10 @@ their keys and invariants here so migrations can be generated once:
 - `metric_snapshot`: `id`, `captured_at`, `payload_json` for health dashboards.
 - `export_run`: `id`, `started_at`, `finished_at`, `status`, `data_sha256`,
   `row_count`, `license_mode`, `feed_sha256`, `error`.
+- `merge_override`: `id`, `kind` (`force_merge`, `do_not_merge`, `field_pin`,
+  `force_status`, `ignore_source`, `ignore_field`), `subject_json`, `reason`,
+  `actor`, `created_at`, `expires_at`, `active`. Owned by dedup-merge; the merge
+  engine reads it before applying automatic decisions.
 
 These are append-only or role-guarded; the merge engine never writes them.
 
