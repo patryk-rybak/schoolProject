@@ -15,10 +15,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up environment (TODO)
+        # Replace this step with your language setup action later (e.g., setup-node, setup-python)
         run: echo "TODO: Configure environment"
 
       - name: Install dependencies (TODO)
+        # Replace this step with dependency installation later (e.g., npm ci, pip install -r requirements.txt)
         run: echo "TODO: Install dependencies"
 
       - name: Run tests (TODO)
+        # Replace this step with your actual test command later (e.g., npm test, pytest)
         run: exit 1
