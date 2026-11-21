@@ -1,6 +1,6 @@
 # Backend · Agregacja i baza danych
 
-**Status:** częściowo istnieje (wersja deweloperska) · **Kod:** `src/db/`
+**Status:** częściowo istnieje (wersja deweloperska) · **Kod:** `backend/store/`
 
 ## Cel
 
@@ -23,7 +23,7 @@ zmieniać; docelowy model powstanie później.
 | `source` | text | skąd rekord (`seed`, `manual`, …) |
 | `created_at`, `updated_at` | integer | znaczniki czasu |
 
-Funkcje dla innych modułów (`src/db/aed-store.ts`):
+Funkcje dla innych modułów (`backend/store/aed-store.ts`):
 
 ```ts
 import {
@@ -33,7 +33,7 @@ import {
 	getAedDevice,
 	countAedDevices,
 	clearAedDevices,
-} from "#/db/aed-store";
+} from "#backend/store/aed-store";
 ```
 
 Dane startowe: `bun run db:seed` (5 przykładowych rekordów, czyści tabelę).
@@ -49,7 +49,7 @@ Dane startowe: `bun run db:seed` (5 przykładowych rekordów, czyści tabelę).
 
 ## Zależności
 
-- `src/db/` — klient Drizzle (`bun:sqlite`, WAL),
+- `backend/store/` — klient Drizzle (`bun:sqlite`, WAL),
 - [`../normalize/`](../normalize/README.md) — dane wejściowe,
 - [`../gov-api/`](../gov-api/README.md) — odbiorca danych.
 

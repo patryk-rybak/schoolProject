@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PolandMap } from "#/components/map/poland-map";
+import { PolandMap } from "#/map/poland-map";
 import { Badge } from "#/components/ui/badge";
 import {
 	Card,

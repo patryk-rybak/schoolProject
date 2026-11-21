@@ -1,8 +1,7 @@
 # Frontend
 
-Warstwa interfejsu użytkownika. Katalog zawiera **wyłącznie plan modułów** —
-kod nadal mieszka w `src/` i będzie tu przenoszony/rozbudowywany wraz z
-powstawaniem kolejnych części.
+Warstwa interfejsu użytkownika — tutaj mieszka kod frontendu (routing, komponenty,
+hooki, style) oraz opisy planowanych modułów.
 
 | Moduł | Zakres | Status |
 | --- | --- | --- |
@@ -13,7 +12,7 @@ powstawaniem kolejnych części.
 
 Zasady wspólne dla wszystkich modułów frontendu:
 
-- komponenty z `src/components/ui/` (shadcn, `new-york`) — bez ręcznego
+- komponenty z `frontend/components/ui/` (shadcn, `new-york`) — bez ręcznego
   duplikowania primitywów,
 - WCAG 2.2 AA i pełna responsywność (320 px → desktop),
 - brak sekretów w kodzie klienta; dane przez loadery/server functions,

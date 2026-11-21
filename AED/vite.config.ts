@@ -11,7 +11,7 @@ export default defineConfig({
 	plugins: [
 		nitro({ preset: "bun" }),
 		tailwindcss(),
-		tanstackStart(),
+		tanstackStart({ srcDirectory: "frontend" }),
 		viteReact(),
 	],
 });

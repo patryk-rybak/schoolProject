@@ -38,7 +38,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 3. Keep `bun run dev` working; Vite and Nitro must run on the Bun runtime.
 4. Never commit secrets or local artifacts. `.env.local`, `*.db*`, `.output`, `.tanstack`, and `node_modules` are ignored.
 5. Every commit must follow Conventional Commits. See below.
-6. Do not hand-edit generated files, especially `src/routeTree.gen.ts`.
+6. Do not hand-edit generated files, especially `frontend/routeTree.gen.ts`.
 7. Keep diffs focused. Do not reformat unrelated files or rewrite generated UI components.
 8. Verify with real commands before declaring work complete.
 
@@ -75,37 +75,37 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 
 ## Architecture
 
-- `src/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `api/auth/$.ts`, `api/pmtiles.ts`)
-- `src/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
-- `src/components/ui/` — the only shadcn/ui components in use (`alert`, `badge`, `button`, `card`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
-- `src/components/map/poland-map.tsx` — MapLibre + Protomaps map of Poland
-- `src/hooks/use-mobile.ts` — generated shadcn hook
-- `src/db/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`
-- `src/db/schema.ts` — Drizzle schema
-- `src/lib/auth.ts` — better-auth server config
-- `src/lib/auth-client.ts` — better-auth client
-- `src/styles.css` — Tailwind v4 theme and CSS variables
+- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `api/auth/$.ts`, `api/pmtiles.ts`)
+- `frontend/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
+- `frontend/components/ui/` — the only shadcn/ui components in use (`alert`, `badge`, `button`, `card`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
+- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland
+- `frontend/hooks/use-mobile.ts` — generated shadcn hook
+- `backend/store/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`
+- `backend/store/schema.ts` — Drizzle schema
+- `backend/auth/auth.ts` — better-auth server config
+- `frontend/lib/auth-client.ts` — better-auth client
+- `frontend/styles.css` — Tailwind v4 theme and CSS variables
 - `drizzle.config.ts` — Drizzle Kit config
 - `vite.config.ts` — Vite, TanStack Start, Tailwind, and Nitro plugins
 - `scripts/fetch-poland-pmtiles.sh` — downloads a Protomaps extract for Poland
 - `scripts/copy-maplibre-worker.ts` — copies the MapLibre worker into `public/`; no `api/maplibre-worker.ts` route exists
 
-There is no `src/integrations/` directory and no `src/env.ts` validation module. Read server configuration from `process.env` and client `VITE_` variables from `import.meta.env`. There is no TanStack Query provider or devtools integration; use route loaders and server functions.
+There is no `frontend/integrations/` directory and no `frontend/env.ts` validation module. Read server configuration from `process.env` and client `VITE_` variables from `import.meta.env`. There is no TanStack Query provider or devtools integration; use route loaders and server functions.
 
-Path aliases: both `#/*` and `@/*` map to `./src/*`.
+Path aliases: `#/*` and `@/*` map to `./frontend/*`; `#backend/*` and `@backend/*` map to `./backend/*`.
 
 ## Runtime and Data Rules
 
 - `DATABASE_URL` defaults to `dev.db`. Bun loads `.env.local` automatically.
 - Drizzle Kit needs `@libsql/client` (dev dependency) because its CLI does not support `bun:sqlite`. Never use it at runtime; the app uses `bun:sqlite`.
 - Run database tooling with Bun: `bun run db:*`.
-- WAL mode is configured in `src/db/index.ts`. Keep it.
+- WAL mode is configured in `backend/store/index.ts`. Keep it.
 - Prefer Drizzle's synchronous APIs (`db.select().from(...).all()`) in Bun-native server code.
 - Schema changes require a generated migration and a corresponding `db:push` or `db:migrate`.
-- The development database has exactly one domain table, `aed_devices` (`src/db/schema.ts`). Access it through `src/db/aed-store.ts`, not by importing `db` directly. The table and its columns are temporary; the final AED model will replace it.
+- The development database has exactly one domain table, `aed_devices` (`backend/store/schema.ts`). Access it through `backend/store/aed-store.ts`, not by importing `db` directly. The table and its columns are temporary; the final AED model will replace it.
 - `public/poland.pmtiles` is generated locally and ignored by git. Run `bun run map:tiles` after cloning or when the map data is stale. The script defaults to `POLAND_MAXZOOM=15` (about 4 GB), `PMTILES_THREADS=12`, and `PMTILES_ATTEMPTS=3`; override with `POLAND_BBOX` or `PROTOMAPS_PLANET_URL` when needed. The map pins the source `maxzoom` to 15 and overzooms those tiles up to `maxZoom: 18`. The script keeps an existing archive untouched and extracts to a temporary file before swapping, so failed downloads and normal runs never re-download or destroy it; set `POLAND_FORCE=1` to regenerate.
 - `public/maplibre-gl-worker.mjs` is copied by `postinstall`/`predev`/`prebuild` and ignored by git. The map loads it as a static asset (`/maplibre-gl-worker.mjs?v=6.19.0`); keep the `?v=` query in sync with the `maplibre-gl` version so caches are invalidated. Do not serve the worker through a server route: Nitro's dev middleware routes `Sec-Fetch-Dest: worker` requests to static assets and skips API routes.
-- The PMTiles archive is served by `src/routes/api/pmtiles.ts` with HTTP byte-range support; static hosting does not provide the range responses PMTiles needs.
+- The PMTiles archive is served by `frontend/routes/api/pmtiles.ts` with HTTP byte-range support; static hosting does not provide the range responses PMTiles needs.
 
 Environment variables live in `.env.local` (never committed):
 
@@ -120,16 +120,16 @@ Environment variables live in `.env.local` (never committed):
 - Keep the generated components on their Radix UI base; do not swap in another primitive library.
 - Use the generated `cn` helper (from the `cn` package) or `#/lib/utils`.
 - Use `lucide-react` for icons.
-- Preserve the `new-york` style and CSS-variable theme in `components.json` and `src/styles.css`.
+- Preserve the `new-york` style and CSS-variable theme in `components.json` and `frontend/styles.css`.
 
 ## Code Style
 
 - Biome formatter: tabs, double quotes, organized imports.
 - `bun run check` enables every Biome rule group (including nursery) and fails on warnings. Framework-specific nursery/style rules are skipped explicitly in the script; keep that list deliberate and documented.
 - TypeScript runs with all strict flags, including `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, and `noPropertyAccessFromIndexSignature`.
-- `src/components/**` is excluded from Biome and the TypeScript root include. `src/components/ui/` is registry-managed shadcn code; add or update it with the shadcn CLI. Hand-written components such as `src/components/map/poland-map.tsx` live alongside it and are covered by project conventions even though the directory is excluded.
+- `frontend/components/**` is excluded from Biome and the TypeScript root include. `frontend/components/ui/` is registry-managed shadcn code; add or update it with the shadcn CLI. Hand-written components such as `frontend/map/poland-map.tsx` live alongside it and are covered by project conventions even though the directory is excluded.
 - Avoid `any`, prefer inferred types, and keep server-only code out of client components.
-- Do not edit `src/routeTree.gen.ts`; regenerate it with `bun run dev` or `bun run build`.
+- Do not edit `frontend/routeTree.gen.ts`; regenerate it with `bun run dev` or `bun run build`.
 - Tests: there is no test suite yet. If you add tests, use `bun test` and place `*.test.ts` files near the code they cover.
 
 ## Git and Pull Requests

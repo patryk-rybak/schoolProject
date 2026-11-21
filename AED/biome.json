@@ -8,7 +8,8 @@
 	"files": {
 		"ignoreUnknown": false,
 		"includes": [
-			"**/src/**/*",
+			"**/frontend/**/*",
+			"**/backend/**/*",
 			"**/*.ts",
 			"**/*.tsx",
 			"!**/node_modules",
@@ -20,9 +21,9 @@
 			"!**/skills-lock.json",
 			"!**/public",
 			"!**/dane.gov.pl",
-			"!**/src/components",
-			"!**/src/routeTree.gen.ts",
-			"!**/src/styles.css"
+			"!**/frontend/components",
+			"!**/frontend/routeTree.gen.ts",
+			"!**/frontend/styles.css"
 		]
 	},
 	"formatter": {
