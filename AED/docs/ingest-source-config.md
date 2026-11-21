@@ -18,13 +18,14 @@ Pliki tego projektu:
 | [`../backend/ingest/examples/krosno-dane-gov-pl.yaml`](../backend/ingest/examples/krosno-dane-gov-pl.yaml) | Krosno, CSV z BOM i spacjami w nagłówkach |
 | [`../backend/ingest/examples/marki-dane-gov-pl.yaml`](../backend/ingest/examples/marki-dane-gov-pl.yaml) | Marki, podwójnie cytowany CSV i zamienione osie |
 | [`../backend/ingest/examples/warszawa-api.yaml`](../backend/ingest/examples/warszawa-api.yaml) | Warszawa, POST JSON z tokenem |
-
-Wszystkie pięć konfiguracji przechodzi walidację względem schematu. Użyty
-sposób sprawdzenia:
+| [`../backend/ingest/examples/kml/`](../backend/ingest/examples/kml/) | Osiem konfiguracji JSON: sześć punktowych map Google My Maps oraz guardy Bydgoszcz (brak geometrii) i Piła (polygony) |
 
 Znormalizowany inwentarz 69 źródeł, z przypisaniem `source_id`, priorytetu,
 rodziny connectora, parsera, licencji, statusu TERYT i blockerów, znajduje się w
 [`research/source-inventory/README.md`](./research/source-inventory/README.md).
+
+Wszystkie konfiguracje przechodzą walidację względem schematu. Użyty
+sposób sprawdzenia:
 
 ```bash
 cd AED/backend/ingest
@@ -35,6 +36,9 @@ jsonschema.Draft202012Validator.check_schema(schema)
 v = jsonschema.Draft202012Validator(schema)
 for f in sorted(glob.glob("examples/*.yaml")):
     v.validate(yaml.safe_load(open(f)))
+    print("OK", f)
+for f in sorted(glob.glob("examples/kml/*.json")):
+    v.validate(json.load(open(f)))
     print("OK", f)
 PY
 ```
@@ -135,10 +139,13 @@ odrzucenia rekordu.
 ogranicza się do `name`, `lat`, `lon`, a `confidence` jest niska.
 
 **Q9. KML bez geometrii i KML z polygonami (Google My Maps).**
-Bydgoszcz ma 114 `Placemark` bez `coordinates`. Piła ma 97 polygonów zasięgu
-osiedli, nie punkty AED. Samo `mid` nie wystarcza. Connector `google_my_maps_kml`
-musi sprawdzić nazwę dokumentu, typ geometrii i udział punktów. Mapy bez punktów
-kończą jako `review` albo `reject`, nie jako źródło.
+Probe 2026-11-21: Bydgoszcz ma 114 `Placemark`, w tym 111 bez `coordinates`,
+1 `Point`, 1 `LineString` i 1 `Polygon`. Piła ma 97 `Placemark`, w tym 25
+`Point`, 9 `Polygon` i 63 bez geometrii; wcześniejszy audyt opisywał ją jako
+czyste polygony. Samo `mid` nie wystarcza. Connector `google_my_maps_kml` musi
+sprawdzić nazwę dokumentu, typ geometrii i udział punktów. Mapy bez punktów
+kończą jako `review` albo `reject`, nie jako źródło. Polygony zasięgu osiedli
+nigdy nie stają się rekordami `aed`.
 
 **Q10. e-mapa ładuje dane JavaScriptem.**
 Bez headless browsera nie ma prostego eksportu. `html_table` nie widzi danych.
@@ -280,6 +287,16 @@ Zasady:
 | `xlsx.header_row` | indeks wiersza nagłówka |
 | `kml.point_only` | odrzuć polygon/linestring |
 | `kml.document_name_must_match` | zabezpieczenie przed podmianą mapy |
+| `kml.document_name_pattern` | regex dla nazwy dokumentu, gdy dokładny string jest zbyt kruchy |
+| `kml.placemark_name_pattern` | filtr nazw placemarków, np. prefiks `defibrylator - ` |
+| `kml.require_coordinates` | placemark bez `Point/coordinates` nie tworzy rekordu AED |
+| `kml.on_missing_geometry` | `reject`, `review` albo `skip` dla braku geometrii |
+| `kml.on_non_point_geometry` | `reject`, `review` albo `skip` dla polygonu/linii |
+| `kml.min_point_ratio` | minimalny udział punktów wśród placemarków z geometrią |
+| `kml.on_low_point_ratio` | `warn`, `review` albo `fail`, gdy udział punktów spada |
+| `kml.extended_data_as_object` | `ExtendedData/Data[@name]` jako obiekt `ExtendedData` |
+| `kml.strip_cdata` | usuń `CDATA` z `name` i `description` |
+| `kml.description_format` | `text` albo `html` |
 
 ### 2.7. `records` i tożsamość
 
@@ -406,9 +423,9 @@ To jest kluczowe dla zasady "brak danych to nie dane negatywne".
 
 | Grupa | Funkcje |
 | --- | --- |
-| String | `trim`, `lower`, `upper`, `collapse_ws`, `strip_prefix`, `strip_suffix`, `replace`, `substring`, `concat`, `split`, `join`, `pad_postcode` |
+| String | `trim`, `lower`, `upper`, `collapse_ws`, `strip_prefix`, `strip_suffix`, `replace`, `substring`, `concat`, `split`, `join`, `pad_postcode`, `strip_html` |
 | Typy | `to_string`, `to_float`, `to_int`, `to_bool`, `to_date`, `to_datetime` |
-| Kolekcje | `first`, `length`, `json` |
+| Kolekcje | `first`, `length`, `json`, `stable_hash` |
 | Daty | `date_age_days`, `date_is_before`, `date_is_after` |
 | Adresy | `normalize_address`, `parse_house_number`, `normalize_postcode` |
 | Kontakt | `normalize_phone`, `normalize_email`, `normalize_url` |
@@ -939,7 +956,7 @@ store                 ->  publish (CSV/GeoJSON) -> dane.gov.pl harvester
 
 ### Kryteria akceptacji
 
-1. Wszystkie pięć konfiguracji przechodzi walidację schematu.
+1. Wszystkie konfiguracje przechodzą walidację schematu.
 2. Ten sam snapshot i config dają identyczny wynik (determinizm).
 3. Odrzucony rekord ma czytelny powód i nie trafia do publikacji.
 4. Brak danych nie jest mapowany na `false` ani `0`.
