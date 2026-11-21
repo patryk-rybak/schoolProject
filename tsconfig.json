@@ -1,6 +1,14 @@
 {
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", ".output", ".tanstack", "src/components"],
+  "exclude": [
+    "node_modules",
+    ".output",
+    ".tanstack",
+    ".claude",
+    ".agents",
+    ".jcode",
+    "src/components"
+  ],
   "compilerOptions": {
     "target": "ESNext",
     "jsx": "react-jsx",

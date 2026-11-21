@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "packageManager": "bun@1.4.5",
+  "intent": {
+    "skills": ["@tanstack/*"]
+  },
   "imports": {
     "#/*": "./src/*"
   },
@@ -85,6 +88,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "shadcn": "^4.23.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.0"

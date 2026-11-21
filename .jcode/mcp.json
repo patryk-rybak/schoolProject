@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "bunx",
+      "args": ["--no-install", "--bun", "shadcn", "mcp"]
+    }
+  }
+}

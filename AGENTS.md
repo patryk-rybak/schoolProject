@@ -1,3 +1,15 @@
+<!-- intent-skills:start -->
+## Skill Loading
+
+Use the repository’s installed Intent. If it is unavailable, report the missing dependency instead of downloading a replacement.
+Before editing files for a substantial task:
+- Run `bunx --no-install --package @tanstack/intent intent list` from the workspace root to see available local skills.
+- If a listed skill matches the task, run `bunx --no-install --package @tanstack/intent intent load <package>#<skill>` before changing files.
+- Use the loaded `SKILL.md` guidance while making the change.
+- Monorepos: when working across packages, run the skill check from the workspace root and prefer the local skill for the package being changed.
+- Multiple matches: prefer the most specific local skill for the package or concern you are changing; load additional skills only when the task spans multiple packages or concerns.
+<!-- intent-skills:end -->
+
 # AGENTS.md
 
 Guidance for AI coding agents working in this repository. Keep this file current when the stack, commands, or workflow change.
@@ -44,6 +56,14 @@ Guidance for AI coding agents working in this repository. Keep this file current
 | Typecheck | `bun run typecheck` |
 | Run all checks | `bun run verify` |
 | Auto-fix lint/format | `bun run check:write` |
+
+## Agent Tooling
+
+- TanStack packages ship Agent Skills. `package.json#intent.skills` permits `@tanstack/*`, and the `intent-skills` block at the top of this file explains how to list and load them.
+- The shadcn skill is installed at `.claude/skills/shadcn` and is available in Jcode as `/shadcn`. It reads `components.json` and runs the shadcn CLI for project-aware work.
+- The shadcn MCP server is configured in `.jcode/mcp.json` and `.mcp.json` with `bunx --no-install --bun shadcn mcp`.
+- The MCP server is daemon-scoped and starts outside the project directory. Pass `registries: ["@shadcn"]` to MCP search and view calls; use the `/shadcn` skill when an operation needs project configuration.
+- Keep MCP commands on Bun. Do not add npm-only MCP wrappers.
 
 ## Architecture
 
