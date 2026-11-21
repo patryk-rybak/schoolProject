@@ -42,12 +42,19 @@ export const ADDRESS_SOURCES = [
 ] as const;
 
 export const PUBLISH_STATES = ["published", "quarantined", "archived"] as const;
+export const CLAIM_STATUSES = [
+	"unclaimed",
+	"pending",
+	"verified",
+	"rejected",
+] as const;
 
 export type LocationStatus = (typeof LOCATION_STATUSES)[number];
 export type GeomSource = (typeof GEOM_SOURCES)[number];
 export type AddressKind = (typeof ADDRESS_KINDS)[number];
 export type AddressSource = (typeof ADDRESS_SOURCES)[number];
 export type PublishState = (typeof PUBLISH_STATES)[number];
+export type ClaimStatus = (typeof CLAIM_STATUSES)[number];
 
 const nullableText = z.string().nullable();
 const nullableConfidence = z.number().min(0).max(1).nullable();
@@ -87,7 +94,12 @@ export const canonicalAedRecordSchema = z
 			.nullable(),
 		geocode_note: nullableText,
 		publish_state: z.enum(PUBLISH_STATES).default("quarantined"),
+		claim_status: z.enum(CLAIM_STATUSES).default("unclaimed"),
+		claimed_by: nullableText.default(null),
+		claimed_at: nullableText.default(null),
+		claim_note: nullableText.default(null),
 		field_provenance: z.record(z.string(), z.string()).optional(),
+		attributes: z.record(z.string(), z.unknown()).optional(),
 	})
 	.superRefine((record, ctx) => {
 		const hasPoint = record.lat !== null && record.lon !== null;

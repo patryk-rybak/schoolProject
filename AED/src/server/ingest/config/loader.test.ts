@@ -37,19 +37,18 @@ afterEach(() => {
 });
 
 describe("source config registry", () => {
-	test("loads all 12 tabular configs without errors", () => {
+	test("loads all 11 tabular configs without errors", () => {
 		const registry = loadSourceConfigsOrThrow({ force: true });
-		expect(registry.configs).toHaveLength(12);
+		expect(registry.configs).toHaveLength(11);
 		expect(registry.errors).toEqual([]);
-		expect(registry.byId.size).toBe(12);
-		expect(registry.summary.total).toBe(12);
+		expect(registry.byId.size).toBe(11);
+		expect(registry.summary.total).toBe(11);
 		expect(registry.summary.addressOnly).toBe(0);
-		expect(registry.summary.withCoordinates).toBe(12);
+		expect(registry.summary.withCoordinates).toBe(11);
 		expect(registry.summary.byParser["csv"]).toBe(2);
 		expect(registry.summary.byParser["json"]).toBe(2);
 		expect(registry.summary.byParser["geojson"]).toBe(1);
 		expect(registry.summary.byParser["kml"]).toBe(6);
-		expect(registry.summary.byParser["pdf_table"]).toBe(1);
 	});
 
 	test("all checked-in configs validate against the generated JSON Schema", () => {
@@ -63,7 +62,7 @@ describe("source config registry", () => {
 		const files = readdirSync(sourceDir)
 			.filter((file) => file.endsWith(".json"))
 			.sort();
-		expect(files).toHaveLength(12);
+		expect(files).toHaveLength(11);
 		for (const file of files) {
 			const value = JSON.parse(readFileSync(join(sourceDir, file), "utf8"));
 			const ok = validate(value);
@@ -89,7 +88,7 @@ describe("source config registry", () => {
 		const second = loadSourceConfigs({ force: true });
 		expect(second.summary).toEqual(first.summary);
 		expect(second.loadedAt >= first.loadedAt).toBe(true);
-		expect(getSourceConfigSummary().total).toBe(12);
+		expect(getSourceConfigSummary().total).toBe(11);
 	});
 
 	test("reports JSON parse and Zod errors without throwing", () => {

@@ -15,7 +15,7 @@ schema so the code and docs can be compared without a build step.
 | `source-config.generated.schema.json` | generated Draft 2020-12 schema (do not edit by hand) |
 | `schema.test.ts` | examples, generated schema, refinements and form error tests |
 | `loader.ts` | reads `backend/ingest/sources/*.json`, validates each file and keeps one in-memory registry |
-| `loader.test.ts` | 12-file tabular registry, Zod/JSON Schema parity and error-path tests |
+| `loader.test.ts` | 11-file tabular registry, Zod/JSON Schema parity and error-path tests |
 | `../../../scripts/generate-source-config-schema.ts` | writes or checks the generated artifact |
 
 ## Runtime loader

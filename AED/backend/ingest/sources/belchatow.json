@@ -241,7 +241,6 @@
 		"on_error": "reject",
 		"require_location": "point",
 		"required": [
-			"name",
 			"lat",
 			"lon"
 		]

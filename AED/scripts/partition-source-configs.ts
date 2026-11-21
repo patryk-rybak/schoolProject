@@ -48,6 +48,9 @@ function excludeReason(row: JsonObject): string | null {
 	if (parser === "manual") {
 		return "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)";
 	}
+	if (parser === "pdf_table") {
+		return "PDF document, not a machine-readable/tabular source";
+	}
 	if (family === "html_table" || family === "html_list") {
 		return "HTML source: registry keeps only machine-readable/tabular formats";
 	}
@@ -142,7 +145,7 @@ const moved = [...movedById.values()].sort((left, right) =>
 const manifest = {
 	generated_at: new Date().toISOString(),
 	policy:
-		"Only machine-readable/tabular sources (CSV, JSON, GeoJSON, KML, PDF table) stay in backend/ingest/sources. All HTML sources, JPG/PNG maps, DOCX/PDF prose and e-mapa JavaScript pages are moved here.",
+		"Only machine-readable/tabular sources (CSV, JSON, GeoJSON, KML) stay in backend/ingest/sources. All HTML, PDF, JPG/PNG, DOCX and e-mapa sources are moved here.",
 	active_count: kept.length,
 	excluded_count: moved.length,
 	excluded: moved,

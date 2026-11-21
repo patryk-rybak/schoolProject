@@ -1,10 +1,10 @@
 # Źródła wyłączone z rejestru tabularnego
 
-Wygenerowano: 2026-11-21T20:36:38.146Z
+Wygenerowano: 2026-11-21T21:03:47.907Z
 
-Only machine-readable/tabular sources (CSV, JSON, GeoJSON, KML, PDF table) stay in backend/ingest/sources. All HTML sources, JPG/PNG maps, DOCX/PDF prose and e-mapa JavaScript pages are moved here.
+Only machine-readable/tabular sources (CSV, JSON, GeoJSON, KML) stay in backend/ingest/sources. All HTML, PDF, JPG/PNG, DOCX and e-mapa sources are moved here.
 
-Aktywne: **12** · wyłączone: **57**
+Aktywne: **11** · wyłączone: **58**
 
 | źródło | rodzina | powód |
 | --- | --- | --- |
@@ -14,6 +14,7 @@ Aktywne: **12** · wyłączone: **57**
 | `budzow` | `manual/manual` | manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa) |
 | `bydgoszcz` | `html_table/html_table` | HTML source: registry keeps only machine-readable/tabular formats |
 | `czaplinek` | `manual/manual` | manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa) |
+| `czarne` | `pdf_table/pdf_table` | PDF document, not a machine-readable/tabular source |
 | `dopiewo` | `manual/manual` | manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa) |
 | `dziadowa-kloda` | `manual/manual` | manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa) |
 | `gdansk` | `html_table/html_table` | HTML source: registry keeps only machine-readable/tabular formats |

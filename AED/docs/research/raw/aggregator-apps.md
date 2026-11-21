@@ -719,7 +719,7 @@ Brak pól AED.
 
 ### 13.5 Ocena
 
-**Brak.** To nie jest agregator AED. W obecnych materiałach nie ma potwierdzenia produkcyjnej mapy AED. Gdyby taka funkcja powstała, najbardziej prawdopodobnym zapleczem byłaby warstwa OpenAEDMap/OSM, ale to wymaga odrębnego potwierdzenia u wydawcy.
+**Brak.** To nie jest agregator AED.
 
 ### 13.6 Mapowanie
 
@@ -762,7 +762,7 @@ Brak pól AED.
 
 ### 14.5 Ocena
 
-**Brak.** To nie jest agregator AED.
+**Brak.** To nie jest agregator AED. W obecnych materiałach nie ma potwierdzenia produkcyjnej mapy AED. Gdyby taka funkcja powstała, najbardziej prawdopodobnym zapleczem byłaby warstwa OpenAEDMap/OSM, ale to wymaga odrębnego potwierdzenia u wydawcy.
 
 ### 14.6 Mapowanie
 
