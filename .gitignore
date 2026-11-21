@@ -1,2 +1,18 @@
-# Local dataset directory – changes here should not be tracked
-dane.gov.pl/
+node_modules
+*.db
+*.db-wal
+*.db-shm
+*.pmtiles
+public/maplibre-gl-worker.mjs
+.DS_Store
+dist
+dist-ssr
+*.local
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+__unconfig*
+todos.json
