@@ -21,4 +21,4 @@ jobs:
         run: echo "TODO: Install dependencies"
 
       - name: Run tests (TODO)
-        run: echo "No tests configured yet - passing placeholder"
+        run: exit 1
