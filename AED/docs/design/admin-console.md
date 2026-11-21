@@ -164,6 +164,9 @@ Jeden `review_item` na problem. Typy:
 | `duplicate_candidate` | scoring 0,60 do 0,80 | dwa rekordy obok siebie, odległość, adres, operator, wynik |
 | `coordinate_conflict` | dwa źródła, różne współrzędne > 100 m | mapa, oba punkty, źródła |
 | `bad_coordinates` | poza Polską lub odwrócona kolejność osi | współrzędne, walidacja, sugestia korekty |
+| `address_only` | rekord ma adres, ale brak punktu albo geokoder jest poniżej progu | adres, źródło, wynik geokodera, akcje „geokoduj ponownie” i „zostaw bez punktu” |
+| `geocode_conflict` | punkt źródła i geokoder są > 1 km od siebie albo adresy się wykluczają | mapa z dwoma kandydatami, dowody, wybór punktu |
+| `address_missing` | rekord ma tylko nazwę obiektu, bez adresu i punktu | nazwa, źródło, link do BIP, akcja „poproś o adres” |
 | `field_conflict` | różne `status`, `access_type`, `operator` | wartości i źródła |
 | `missing_license` | rekord bez licencji lub z `BAD_LICENSE` | źródło, payload |
 | `removed_candidate` | źródło zniknęło, rekord nadal w bazie | ostatnie wystąpienie, źródła alternatywne |

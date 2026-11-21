@@ -151,7 +151,7 @@ praca nad rekordem bez poprawy źródła jest bezcelowa.
 
 | Waga | Znaczenie | Przykłady |
 | --- | --- | --- |
-| `fatal` | rekordu nie da się opublikować i nie ma czego recenzować | brak współrzędnych i geometrii, `NaN`, poza Polską, brak licencji i brak zgody, duplikat klucza z różną treścią |
+| `fatal` | rekordu nie da się opublikować i nie ma czego recenzować | `NaN`, poza Polską, brak licencji i brak zgody, duplikat klucza z różną treścią |
 | `quarantine` | rekord może być poprawny, ale wymaga człowieka lub dodatkowego dowodu | niejednoznaczna kolejność osi, punkt daleko od obszaru źródła, konflikt statusu, duplikat kandydat, przyszła data |
 | `warning` | rekord publikowalny, ale jakość pola jest ograniczona | niepoprawny kod pocztowy, nieznany typ obiektu, brak daty weryfikacji, nieparsowalne godziny |
 | `info` | normalizacja zastosowana, brak wpływu na jakość | trim nagłówka, zmiana `12345` na `12-345`, usunięcie parametru trackingowego |
@@ -300,11 +300,12 @@ rekordzie.
 
 | Pole | Wymagane | Reguła | Kod i waga |
 | --- | --- | --- | --- |
-| `lat` | tak | liczba skończona, 7 miejsc, WGS84 | `geo.lat.invalid` / `fatal` |
-| `lon` | tak | liczba skończona, 7 miejsc, WGS84 | `geo.lon.invalid` / `fatal` |
+| `lat` | warunkowo | liczba skończona, 7 miejsc, WGS84; wymagane dla `point/geocoded` | `geo.lat.invalid` / `fatal` |
+| `lon` | warunkowo | liczba skończona, 7 miejsc, WGS84; wymagane dla `point/geocoded` | `geo.lon.invalid` / `fatal` |
+| `location_status` | tak | `point|geocoded|address_only|unresolved|conflict` | `geo.location.status` / `warning` |
 | `country_code` | tak | zawsze `PL`; inne = odrzuć z tego zbioru | `geo.country.not_pl` / `fatal` |
 | `coord_precision_m` | nie | tylko z jawnych wartości lub tabeli źródła | `geo.precision.invalid` / `warning` |
-| `geom_source` | nie | `source | geocode | registry | survey | derived` | `geo.geom_source.invalid` / `warning` |
+| `geom_source` | warunkowo | `source | geocode | registry | survey | derived | none` | `geo.geom_source.invalid` / `warning` |
 | `voivodeship` | nie | nazwa urzędowa, title case | `geo.region.unknown` / `warning` |
 | `county` | nie | nazwa urzędowa | j.w. |
 | `commune` | nie | nazwa urzędowa | j.w. |
@@ -376,8 +377,10 @@ Zasady dodatkowe:
   Nie zgaduj z nazwy osi; stosuj test zakresu.
 - **KML:** zawsze `lon,lat,alt`; ignoruj `alt` (zwykle `0`), zapisz
   `coord_precision_m = 15` tylko jeśli źródło ma geometrię punktową; dla list
-  adresowych bez geometrii nie twórz punktu z centrum miejscowości bez
-  oznaczenia `geom_source=geocode` i `coord_precision_m=1000`.
+  adresowych bez geometrii nie twórz punktu z centrum miejscowości. Wynik
+  dopasowany tylko do miejscowości ustawia `location_status=address_only`,
+  `geom_source=none` i nie jest publikowany na mapie. Wyjątek wymaga jawnej
+  decyzji recenzenta i `coord_precision_m=1000`.
 
 #### 3.3.3 Obszar źródła
 
@@ -411,6 +414,15 @@ nie `reject`; recenzent może zaakceptować z uzasadnieniem.
   `1000 m`. Nie ustawiaj `15 m` bez pomiaru.
 - Punkt z geokodera nigdy nie dostaje `verification_status=confirmed` ani
   `probable` z tego powodu. To tylko lokalizacja, nie potwierdzenie urządzenia.
+- `location_status` rozróżnia `point`, `geocoded`, `address_only`,
+  `unresolved` i `conflict`. Rekord z adresem i bez punktu jest
+  `address_only`, a nie `reject`. Rekord bez adresu i punktu jest `unresolved`
+  z `geo.location.missing` / `quarantine`.
+- `geocoded` wymaga confidence >= 0.8 i precyzji 50 m (budynek) lub 200 m
+  (ulica). Dopasowanie do miejscowości daje `address_only` i nie jest
+  publikowane jako punkt AED.
+- `address_only`, `unresolved` i `conflict` nie trafiają do GeoJSON ani na
+  mapę. Mogą być w panelu i w wewnętrznym CSV.
 
 #### 3.3.5 Odległości i konflikty
 
@@ -834,8 +846,9 @@ konflikt pozostaje widoczny do review.
 - `attachment` Base64 -> media lokalne, nie URL; sprawdź rozmiar i typ.
 - Brak tokena to błąd ingestii (`sync_run.status=failed`, HTTP 403), nie błąd
   normalizacji. Nie twórz pustego rekordu.
-- API może zwracać `null` dla współrzędnych; wtedy rekord bez geometrii odpada
-  z mapy (`MISSING_COORDS`), ale może zostać jako `candidate` w bazie.
+- API może zwracać `null` dla współrzędnych; wtedy rekord dostaje
+  `location_status=address_only` lub `unresolved`, odpada z mapy i GeoJSON,
+  ale może zostać jako `candidate` w bazie i w panelu.
 
 #### 3.11.7 KML i listy HTML
 
@@ -843,6 +856,8 @@ konflikt pozostaje widoczny do review.
   `geom_source=source`, `coord_precision_m=15`, `last_verified_at=null`.
 - KML z `Placemark` bez `coordinates` to lista adresowa, nie geometria. Nie
   geokoduj automatycznie bez adresu; jeśli adres jest, geokoduj z precyzją 200 m.
+- Po geokodowaniu listy adresowej ustaw `location_status=geocoded` lub
+  `address_only`; nie ustawiaj `point` ani `verification_status=confirmed`.
 - Lista HTML bez współrzędnych: dopuszczalna tylko jako `candidate` lub po
   geokodowaniu; nie publikuj jako `confirmed`.
 - HTML może mieć kolejność `lat, lon` albo `lon, lat`; stosuj test zakresu.

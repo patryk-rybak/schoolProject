@@ -193,19 +193,22 @@ Fixture'y są małe (maks. 50 rekordów) i pozbawione danych osobowych. Pełne p
 6. Marki: wiersz `Numer Id=7` z `21.7203, 49.7188` jest poprawny i nie trafia do review.
 7. Krosno: nagłówki ` Nazwa` i ` Adres` są trimowane.
 8. Rekord poza Polską daje `OUT_OF_POLAND`.
-9. Rekord bez współrzędnych daje `MISSING_COORDS`.
-10. Dwa rekordy 3 m od siebie z różnymi `serial_number` dają dwa `aed` i jedno `facility`.
-11. Ten sam OSM `node_id` w OSM i OpenAEDMap daje jeden `aed` i dwa aliasy.
-12. E-mail osoby fizycznej jest zamieniany na `null` przez `redactPII`.
+9. Rekord z adresem i bez współrzędnych daje `location_status=address_only`, nie `MISSING_COORDS`, i nie trafia do GeoJSON.
+10. Rekord bez adresu i bez współrzędnych daje `geo.location.missing` / `unresolved`.
+11. Geokoder z confidence 0.86 daje `location_status=geocoded`, `coord_precision_m=50` i nie zmienia `verification_status`.
+12. `address_only` znika z `bbox`, `near` i `sort=distance`; wraca tylko z `include_address_only=true`.
+13. Dwa rekordy 3 m od siebie z różnymi `serial_number` dają dwa `aed` i jedno `facility`.
+14. Ten sam OSM `node_id` w OSM i OpenAEDMap daje jeden `aed` i dwa aliasy.
+15. E-mail osoby fizycznej jest zamieniany na `null` przez `redactPII`.
 
 **Filtry i projekcja:**
 
-13. `include_removed=false` nie zwraca `removed`.
-14. `sort=distance` bez `near` daje `MISSING_NEAR`.
-15. Nieznany parametr daje `UNKNOWN_PARAM`.
-16. `bbox` większy niż 4 stopnie daje `BBOX_TOO_LARGE`.
-17. Projekcja publiczna nie zawiera kluczy z listy zabronionych na żadnym poziomie zagnieżdżenia.
-18. `confidence` jest przycinane do 0 do 1.
+16. `include_removed=false` nie zwraca `removed`.
+17. `sort=distance` bez `near` daje `MISSING_NEAR`.
+18. Nieznany parametr daje `UNKNOWN_PARAM`.
+19. `bbox` większy niż 4 stopnie daje `BBOX_TOO_LARGE`.
+20. Projekcja publiczna nie zawiera kluczy z listy zabronionych na żadnym poziomie zagnieżdżenia.
+21. `confidence` jest przycinane do 0 do 1.
 
 ### 4.4 Testy kontraktowe
 

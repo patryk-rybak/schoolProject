@@ -635,9 +635,10 @@ erDiagram
 | --- | --- | --- | --- |
 | `name` | string | tak | nazwa obiektu/urządzenia |
 | `facility_type` | enum | tak | typ obiektu (patrz §8.4) |
-| `lat` | float | tak | szerokość geograficzna WGS84 |
-| `lon` | float | tak | długość geograficzna WGS84 |
-| `coord_precision_m` | float | nie | szacowana precyzja w metrach |
+| `lat` | float/null | warunkowo | szerokość geograficzna WGS84; wymagana dla `location_status=point/geocoded` |
+| `lon` | float/null | warunkowo | długość geograficzna WGS84; wymagana dla `location_status=point/geocoded` |
+| `location_status` | enum | tak | `point`, `geocoded`, `address_only`, `unresolved`, `conflict` (patrz §10.4) |
+| `coord_precision_m` | float/null | nie | szacowana precyzja w metrach; `null` dla `address_only` |
 | `country_code` | string(2) | tak | `PL` |
 | `voivodeship` | string | nie | województwo |
 | `county` | string | nie | powiat |
@@ -648,6 +649,14 @@ erDiagram
 | `house_number` | string | nie | numer domu/lokalu |
 | `postcode` | string | nie | kod pocztowy `XX-XXX` |
 | `address_text` | string | nie | pełny adres do wyświetlenia |
+| `address_kind` | enum | nie | `building`, `street`, `locality`, `object_only`, `none` |
+| `address_source` | enum | nie | `source`, `registry`, `geocode`, `derived` |
+| `address_confidence` | float/null | nie | jakość dopasowania adresu, 0-1 |
+| `geom_source` | enum | warunkowo | `source`, `geocode`, `registry`, `survey`, `derived`, `none` |
+| `geocode_provider` | string/null | nie | dostawca geokodera |
+| `geocode_version` | string/null | nie | wersja danych i algorytmu geokodera |
+| `geocode_confidence` | float/null | nie | confidence geokodera, 0-1 |
+| `geocoded_at` | datetime/null | nie | czas geokodowania, nie weryfikacji |
 | `teryt_voivodeship` | string(2) | nie | TERYT województwa |
 | `teryt_county` | string(4) | nie | TERYT powiatu |
 | `teryt_commune` | string(7) | nie | TERYT gminy |
@@ -879,6 +888,31 @@ erDiagram
 
 W UI pokazuj `coord_precision_m` jako „dokładność lokalizacji”, a nie ukrywaj jej.
 
+### 10.4 Stan lokalizacji i rekordy adresowe
+
+`lat`/`lon` są opcjonalne. Brak geometrii nie jest błędem krytycznym, jeśli
+istnieje adres. Stan lokalizacji opisuje `location_status`:
+
+| `location_status` | `lat/lon` | `geom_source` | Znaczenie | Publikacja mapowa |
+| --- | --- | --- | --- | --- |
+| `point` | tak | `source`, `registry`, `survey`, `derived` | punkt ze źródła | tak |
+| `geocoded` | tak | `geocode` | punkt z geokodera adresu | tak, z oznaczeniem przybliżenia |
+| `address_only` | `null` | `none` | adres bez punktu | nie |
+| `unresolved` | `null` | `none` | brak adresu i punktu | nie |
+| `conflict` | zależnie | zależnie | punkt i adres się wykluczają | nie, do review |
+
+Zasady:
+
+- Geokodowanie nie zmienia `verification_status` i nie daje `confirmed`.
+- Punkt z geokodera wymaga `geocode_confidence >= 0,8`, `coord_precision_m`
+  równego 50 m (budynek) lub 200 m (ulica) oraz `geocoded_at`.
+- `address_only` nie trafia do GeoJSON ani na mapę publiczną. Może być
+  widoczne w API JSON tylko z jawną flagą `include_address_only=true`.
+- `lat=0, lon=0` jest błędem `geo.coord.null_island`, nie punktem.
+- Szczegóły modelu, geokodowania i priorytetów źródeł:
+  [`design/address-only-sources.md`](./design/address-only-sources.md) i
+  [`design/address-only-source-priority.md`](./design/address-only-source-priority.md).
+
 ---
 
 ## 11. Status, weryfikacja i świeżość
@@ -1073,10 +1107,21 @@ CREATE TABLE facility (
   teryt_commune         TEXT,
   simc                  TEXT,
   ulic                  TEXT,
-  lat                   REAL NOT NULL,
-  lon                   REAL NOT NULL,
+  lat                   REAL,
+  lon                   REAL,
+  location_status       TEXT NOT NULL DEFAULT 'unresolved',
+                        -- point | geocoded | address_only | unresolved | conflict
+  address_kind          TEXT,                    -- building | street | locality | object_only | none
+  address_source        TEXT,                    -- source | registry | geocode | derived
+  address_confidence    REAL,
   coord_precision_m     REAL,
   geom_source           TEXT,
+  geocode_provider      TEXT,
+  geocode_version       TEXT,
+  geocode_confidence    REAL,
+  geocoded_at           TEXT,
+  geocode_input_sha256  TEXT,
+  geocode_note          TEXT,
   opening_hours         TEXT,
   access_scope          TEXT,
   indoor                INTEGER,
@@ -1084,7 +1129,17 @@ CREATE TABLE facility (
   room                  TEXT,
   entrance_description  TEXT,
   created_at            TEXT NOT NULL,
-  updated_at            TEXT NOT NULL
+  updated_at            TEXT NOT NULL,
+  CHECK (
+    (lat IS NULL AND lon IS NULL) OR (lat IS NOT NULL AND lon IS NOT NULL)
+  ),
+  CHECK (
+    location_status IN ('point','geocoded','address_only','unresolved','conflict')
+  ),
+  CHECK (
+    (location_status IN ('point','geocoded') AND lat IS NOT NULL AND lon IS NOT NULL)
+    OR (location_status IN ('address_only','unresolved','conflict'))
+  )
 );
 
 -- Urządzenie
@@ -1128,6 +1183,26 @@ CREATE TABLE observation (
   notes                 TEXT,
   photo_url             TEXT,
   created_at            TEXT NOT NULL
+);
+
+-- Próby geokodowania (historia, cache, audyt)
+CREATE TABLE geocode_attempt (
+  id                    TEXT PRIMARY KEY,
+  facility_id           TEXT NOT NULL REFERENCES facility(id),
+  input_sha256          TEXT NOT NULL,
+  normalized_address    TEXT NOT NULL,
+  provider              TEXT NOT NULL,
+  provider_version      TEXT,
+  status                TEXT NOT NULL,            -- hit | no_match | error | stale
+  match_level           TEXT,                     -- building | street | locality | none
+  confidence            REAL,
+  lat                   REAL,
+  lon                   REAL,
+  precision_m           REAL,
+  raw_result_json       TEXT,
+  error                 TEXT,
+  attempted_at          TEXT NOT NULL,
+  UNIQUE (input_sha256, provider, provider_version)
 );
 
 -- Aliasy źródeł
@@ -1192,11 +1267,13 @@ CREATE TABLE audit_log (
 -- Indeksy
 CREATE INDEX idx_source_record_source ON source_record(source_id, source_record_id);
 CREATE INDEX idx_facility_geo ON facility(lat, lon);
+CREATE INDEX idx_facility_location_status ON facility(location_status);
 CREATE INDEX idx_facility_teryt ON facility(teryt_commune);
 CREATE INDEX idx_aed_facility ON aed(facility_id);
 CREATE INDEX idx_aed_status ON aed(status);
 CREATE INDEX idx_observation_aed ON observation(aed_id, observed_at);
 CREATE INDEX idx_alias_source_record ON aed_alias(source_id, source_record_id);
+CREATE INDEX idx_geocode_facility ON geocode_attempt(facility_id, attempted_at);
 ```
 
 **Drizzle:** mapuj 1:1 na `sqliteTable`; dla `lat`/`lon` użyj `real`, dla `payload_json` `text({ mode: "json" })`, dla timestampów `text` w ISO 8601 (SQLite nie ma `timestamptz`). Włącz WAL i `synchronous=NORMAL` (już jest w `src/db/index.ts`).
@@ -1209,13 +1286,14 @@ CREATE INDEX idx_alias_source_record ON aed_alias(source_id, source_record_id);
 
 ```text
 aed_id,public_code,ext_ident,name,facility_type,operator_name,operator_type,
-lat,lon,coord_precision_m,country_code,voivodeship,county,commune,city,district,
+lat,lon,location_status,geom_source,coord_precision_m,country_code,voivodeship,county,commune,city,district,
 street,house_number,postcode,address_text,teryt_commune,
 access_type,opening_hours,is_24_7,indoor,level,room,entrance_description,
 manufacturer,model,label,device_type,pads_type,
 status,verification_status,confidence,last_verified_at,
 phone,email,website,photo_url,source_url,
-license_id,attribution,updated_at,fetched_at
+license_id,attribution,updated_at,fetched_at,
+geocode_provider,geocode_confidence,geocoded_at,address_kind,address_confidence
 ```
 
 **Zasady:**
@@ -1224,6 +1302,10 @@ license_id,attribution,updated_at,fetched_at
 - `is_24_7`, `indoor` → `true`/`false`/puste,
 - `confidence` → liczba 0–1 z kropką,
 - `fetched_at`/`updated_at` → ISO 8601 UTC,
+- dla `location_status=address_only` pola `lat`, `lon` i `coord_precision_m`
+  są puste,
+- `address_only` nie trafia do publicznego CSV bez prawa publikacji źródła;
+  wewnętrzny eksport administracyjny może je zawierać,
 - nie eksportuj `serial_number`, kodów dostępu, prywatnych e-maili; `phone`/`email` tylko kontakt organizacyjny.
 
 ### 14.2 GeoJSON (RFC 7946)
@@ -1259,6 +1341,16 @@ license_id,attribution,updated_at,fetched_at
 }
 ```
 
+**Zasady GeoJSON:**
+
+- `address_only`, `unresolved` i `conflict` nie są eksportowane. Feature
+  zawsze ma geometrię `Point`.
+- `geocoded` jest eksportowany jako `Point` z
+  `properties.location_status="geocoded"` i `properties.coord_precision_m`
+  (50 lub 200). Klient mapy musi pokazać oznaczenie przybliżenia.
+- `geometry: null` jest dopuszczalne tylko w wewnętrznym JSON API z
+  `include_address_only=true`, nigdy w publicznym GeoJSON.
+
 ### 14.3 JSON rekord (API aplikacji)
 
 ```json
@@ -1267,9 +1359,16 @@ license_id,attribution,updated_at,fetched_at
   "public_code": "PL-AED-14-7K3M9Q2",
   "name": "AED w Urzędzie Dzielnicy",
   "location": {
+    "status": "geocoded",
     "lat": 52.2297,
     "lon": 21.0075,
-    "coord_precision_m": 15,
+    "coord_precision_m": 50,
+    "geom_source": "geocode",
+    "geocoder": "uug",
+    "geocoded_at": "2026-11-21T18:00:00Z",
+    "geocode_confidence": 0.86,
+    "address_kind": "building",
+    "address_confidence": 0.9,
     "address": {
       "city": "Warszawa",
       "street": "aleja Solidarności",
@@ -1324,7 +1423,8 @@ license_id,attribution,updated_at,fetched_at
 
 | Kod | Warunek |
 | --- | --- |
-| `MISSING_COORDS` | brak `lat`/`lon` i brak geometrii |
+| `MISSING_LOCATION` | brak `lat`/`lon` i brak adresu (rekord zostaje jako `unresolved` do review) |
+| `MISSING_COORDS` | brak `lat`/`lon`, ale jest adres: nie jest błędem, `location_status=address_only` |
 | `OUT_OF_POLAND` | `lat` poza 49,0–54,9 lub `lon` poza 14,1–24,2 |
 | `INVALID_COORDS` | `NaN`, `Infinity`, wartość nieliczbowa |
 | `DUPLICATE_SOURCE_ID` | ten sam `(source_id, source_record_id)` w jednym snapshocie |
@@ -1351,6 +1451,16 @@ license_id,attribution,updated_at,fetched_at
 5. Dwa rekordy w odległości 3 m z różnymi `serial_number` → dwa `aed`, jedno `facility`.
 6. Ten sam OSM `node_id` w OpenAEDMap i OSM → jeden `aed`, dwa aliasy.
 7. Rekord poza Polską → `reject`, powód `OUT_OF_POLAND`.
+8. Rekord z pełnym adresem i `lat/lon = NULL` → `accept`,
+   `location_status=address_only`, brak w GeoJSON, obecny w panelu i w API z
+   `include_address_only=true`.
+9. Rekord z adresem, dla którego geokoder zwrócił budynek z confidence 0.86 →
+   `location_status=geocoded`, `coord_precision_m=50`, `verification_status`
+   bez zmian.
+10. Rekord z samą nazwą obiektu, bez adresu i punktu → `unresolved` z
+    `geo.location.missing`, bez `aed`.
+11. Ten sam adres i ta sama wersja geokodera → identyczny `geocode_attempt`,
+    bez nowego wiersza.
 
 ---
 
@@ -1628,8 +1738,8 @@ Zasady dla nowych źródeł:
 
 1. **Importuj najpierw klasę A:** OpenAEDMap/OSM jako bazę, potem Warszawa, Marki, Przemyśl, Krosno, Łódź, Zielona Góra, Bełchatów, Pawłowice, Olsztyn, Tczew.
 2. **B+ podnieś do A** parserem HTML/PDF: Sława, Manowo, Tarnów Opolski, Suszec, Czarne.
-3. **B traktuj jako weryfikację**, nie jako źródło masowe. Geokoduj adresy i oznacz `confidence` niżej.
-4. **Nie importuj B- bez weryfikacji:** Kcynia, Żuromin, Rzekuń, UMWL, Dziadowa Kłoda, Nowa Sól, Świdnica, Dopiewo, Koszęcin.
+3. **B traktuj jako weryfikację**, nie jako źródło masowe. Geokoduj adresy i oznacz `confidence` niżej. Kolejność wdrożenia: [`design/address-only-source-priority.md`](./design/address-only-source-priority.md).
+4. **Nie importuj B- bez weryfikacji:** Kcynia, Żuromin, Rzekuń, UMWL, Dziadowa Kłoda, Nowa Sól, Świdnica, Dopiewo, Koszęcin. Najpierw uzupełnij adres; sama nazwa obiektu daje `unresolved`, nie `aed`.
 5. **Wystąp o licencje** do gmin z A/B+. Wszystkie mają „wszystkie prawa zastrzeżone” albo brak deklaracji. Potrzebna jest zgoda na redystrybucję.
 6. **Uzupełnij 108 gmin** bez strony w Wikidata. Rekomendowany klucz: TERYT + BIP powiatu. To jedyna luka pokrycia.
 7. **Nie buduj na Geoportal WMS.** Użyj OpenAEDMap bezpośrednio.

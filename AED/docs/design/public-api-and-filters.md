@@ -63,6 +63,7 @@ Wszystkie parametry są opcjonalne. Nieznany parametr jest błędem `400 UNKNOWN
 | `status` | CSV | brak | `active`, `out_of_service`, `removed`, `planned`, `unknown` | status urządzenia |
 | `access_type` | CSV | brak | `public`, `permissive`, `customers`, `private`, `key`, `code`, `dispatcher`, `unknown` | dostęp |
 | `verification_status` | CSV | brak | `confirmed`, `probable`, `unverified`, `stale`, `disputed`, `candidate`, `removed` | pewność |
+| `location_status` | CSV | `point,geocoded` | `point`, `geocoded`, `address_only`, `unresolved`, `conflict` | skąd pochodzi lokalizacja |
 | `source` | CSV | brak | slug z `/sources` | źródło |
 | `device_type` | CSV | brak | `public_aed`, `trainer`, `unknown` | typ urządzenia |
 | `is_24_7` | bool | brak | `true`/`false` | tylko jawnie potwierdzone |
@@ -71,6 +72,7 @@ Wszystkie parametry są opcjonalne. Nieznany parametr jest błędem `400 UNKNOWN
 | `q` | string | brak | 2 do 80 znaków | nazwa, adres, operator, `public_code` |
 | `updated_since` | datetime | brak | ISO 8601 | rekordy zmienione po dacie |
 | `include_removed` | bool | `false` | `true`/`false` | dołącza `removed` do wyników |
+| `include_address_only` | bool | `false` | `true`/`false` | dołącza rekordy bez `lat/lon`; wymaga `limit <= 200`; nie działa w GeoJSON |
 | `sort` | enum | `relevance` | `relevance`, `distance`, `updated`, `confidence`, `name` | sortowanie |
 | `limit` | int | 100 | 1 do 500 | rozmiar strony |
 | `cursor` | string | brak | opaque | kursor następnej strony |
@@ -82,6 +84,8 @@ Reguły łączenia:
 - `sort=distance` wymaga `near`, inaczej `400 MISSING_NEAR`,
 - `sort=relevance` bez `q` zachowuje się jak `updated` malejąco,
 - `include_removed=true` wymaga `status` zawierającego `removed` lub braku `status`.
+- `include_address_only=true` wymaga źródła z prawem publikacji i `limit <= 200`.
+- `bbox`, `near` i `sort=distance` pomijają `address_only` oraz `unresolved`.
 
 ### 3.2 Przykłady
 
@@ -114,9 +118,14 @@ GET /api/v1/aed.geojson?bbox=20.85,52.10,21.20,52.35&source=openaedmap,przemysl
       "name": "AED w Urzędzie Dzielnicy",
       "facility_type": "municipal_office",
       "location": {
+        "status": "point",
         "lat": 52.2297,
         "lon": 21.0075,
         "coord_precision_m": 15,
+        "geom_source": "source",
+        "geocoded_at": null,
+        "geocode_confidence": null,
+        "address_kind": "building",
         "indoor": true,
         "level": "0",
         "entrance_description": "wejście główne, hol",
@@ -300,7 +309,8 @@ Kody błędów: `UNKNOWN_PARAM`, `INVALID_COORDINATE`, `BBOX_TOO_LARGE`, `MISSIN
 | --- | --- | --- | --- | --- |
 | `aed_id`, `public_code` | TAK | tylko `public_code` jako `id` | TAK | identyfikatory publiczne |
 | `name`, `facility_type` | TAK | TAK | TAK | |
-| `lat`, `lon`, `coord_precision_m` | TAK | geometria + `coord_precision_m` | TAK | |
+| `location.status`, `lat`, `lon`, `coord_precision_m` | TAK | geometria + `location_status`, `coord_precision_m` | TAK | `address_only` tylko z flagą i tylko dla źródeł publikowalnych |
+| `geom_source`, `geocoded_at`, `geocode_confidence`, `address_kind` | TAK | TAK (spłaszczone) | TAK | `geocoded` zawsze widoczne jako lokalizacja przybliżona |
 | adres i TERYT | TAK | wybrane pola | TAK | bez numeru mieszkania osoby fizycznej |
 | `access_*`, `status`, `verification_*`, `confidence` | TAK | TAK | TAK | |
 | `operator_name`, `operator_type`, kontakt organizacyjny | TAK | `operator_name` | TAK | tylko kontakt instytucji |
