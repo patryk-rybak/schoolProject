@@ -18,6 +18,7 @@ Pliki tego projektu:
 | [`../backend/ingest/examples/krosno-dane-gov-pl.yaml`](../backend/ingest/examples/krosno-dane-gov-pl.yaml) | Krosno, CSV z BOM i spacjami w nagłówkach |
 | [`../backend/ingest/examples/marki-dane-gov-pl.yaml`](../backend/ingest/examples/marki-dane-gov-pl.yaml) | Marki, podwójnie cytowany CSV i zamienione osie |
 | [`../backend/ingest/examples/warszawa-api.yaml`](../backend/ingest/examples/warszawa-api.yaml) | Warszawa, POST JSON z tokenem |
+| [`../backend/ingest/examples/generic-address-list.yaml`](../backend/ingest/examples/generic-address-list.yaml) | Szablon listy adresowej bez geometrii, `address_only` + geokodowanie |
 | [`../backend/ingest/examples/kml/`](../backend/ingest/examples/kml/) | Osiem konfiguracji JSON: sześć punktowych map Google My Maps oraz guardy Bydgoszcz (brak geometrii) i Piła (polygony) |
 
 Znormalizowany inwentarz 69 źródeł, z przypisaniem `source_id`, priorytetu,
@@ -340,13 +341,40 @@ normalizacja liczy `aed_id` jako `UUIDv5(namespace, "{source_id}:{source_record_
 | Pole | Znaczenie |
 | --- | --- |
 | `required` | lista pól kanonicznych, bez których rekord jest odrzucany lub do review |
+| `require_location` | `none`, `address_or_point`, `point`; dla źródeł adresowych `address_or_point` |
 | `coords.bbox` | `[minLon, minLat, maxLon, maxLat]` |
 | `coords.on_invalid` | `reject`, `review`, `null` |
+| `coords.on_missing` | `accept`, `review`, `reject`; domyślnie `review` |
 | `enums` | walidacja słowników kontrolnych |
 | `on_error` | domyślna akcja dla błędu pola: `reject` lub `review` |
 
 Dla Marki bbox jest wąski i celowo odrzuca wiersz 7 do review. Dla OSM bbox
 obejmuje całą Polskę. Dla Warszawy i Przemyśla także.
+
+### 2.9. `geocoding`
+
+Dla źródeł bez `lat/lon` konfiguracja może zawierać sekcję `geocoding`. To
+deklaracja kaskady, progów i cache, nie kod.
+
+| Pole | Znaczenie |
+| --- | --- |
+| `enabled` | czy uruchamiać geokodowanie dla rekordów `address_only` |
+| `strategy` | `structured_first`, `text_first`, `structured_only` |
+| `provider_order` | kolejność `prg`, `uug`, `nominatim` |
+| `address_template` | szablon adresu z pól strukturalnych |
+| `required_components` | minimalne składniki adresu, np. `city`, `street` |
+| `min_confidence` | próg dla `location_status=geocoded`, domyślnie 0.8 |
+| `precision_m` | precyzja dla `building`, `street`, `locality` |
+| `on_failure` | `address_only`, `review` lub `reject` |
+| `cache_ttl_days` / `refresh_after_days` | cache i odświeżanie |
+| `verification` | porównanie z OSM i limit promocji weryfikacji |
+
+Zasady:
+
+- Geokodowanie nie zmienia `verification_status` i nie daje `confirmed`.
+- Dopasowanie do miejscowości daje `address_only`, nie punkt na mapie.
+- `address_only` nie trafia do GeoJSON; w API tylko z `include_address_only=true`.
+- Model i testy: [`design/address-only-sources.md`](./design/address-only-sources.md).
 
 ---
 

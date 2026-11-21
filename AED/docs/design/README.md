@@ -17,6 +17,7 @@ Model kanoniczny z dokumentu bazowego odpowiada na pytanie **jak wygląda rekord
 3. **Jak wykrywamy awarie, starzenie danych i naruszenia licencji** ([`observability-licensing.md`](./observability-licensing.md)).
 4. **Jak wdrażamy, testujemy i odbieramy rozwiązanie** ([`rollout-testing-acceptance.md`](./rollout-testing-acceptance.md)).
 5. **Jak źródła powstają, są wersjonowane i aktywowane** przez kreator, dry-run, shadow i bramki ([`source-config-lifecycle.md`](./source-config-lifecycle.md)).
+6. **Jak przyjmować źródła bez geometrii i jak je geokodować bez fałszywej pewności** ([`address-only-sources.md`](./address-only-sources.md)).
 
 Dokumenty są pisane pod implementację w istniejącym stacku: TanStack Start, Bun, `bun:sqlite`, Drizzle, better-auth, MapLibre. Nie wprowadzają nowej infrastruktury poza opcjonalnym zewnętrznym zbieraniem metryk.
 
@@ -54,6 +55,7 @@ Dokumenty są pisane pod implementację w istniejącym stacku: TanStack Start, B
 | D18 | Hosty źródeł przechodzą politykę URL i allowlistę; produkcja przez proxy egress | SSRF przy onboardingu jest realnym wektorem | config, ops |
 | D19 | Zmiana mapowania unieważnia kandydatów przez `config_revision` i wymusza pełny refresh | Inaczej nowe mapowanie nie utworzy kandydatów | config, storage |
 | D20 | Licencja, pierwsza aktywacja runtime i rollback po incydencie `license`/`security` wymagają czterech oczu, jeśli są dwaj admini | Prawo i bezpieczeństwo przed wygodą | config |
+| D21 | Geometria jest opcjonalna; `address_only` nie jest publikowane na mapie, a geokodowanie nigdy nie promuje weryfikacji | Listy B/B- są dowodem adresu, nie potwierdzeniem urządzenia | address |
 
 ## 4. Mapa dokumentów
 
@@ -80,6 +82,8 @@ flowchart LR
 | --- | --- | --- |
 | [`admin-console.md`](./admin-console.md) | zespół backendu i frontendu, redakcja | role, trasy, ekrany, maszyna stanów przebiegu, API administracyjne |
 | [`source-config-lifecycle.md`](./source-config-lifecycle.md) | backend, security, redakcja | CRUD i wersjonowanie konfiguracji, kreator, inferencja, dry-run, shadow, bramki, SSRF, sekrety, audyt, rollback |
+| [`address-only-sources.md`](./address-only-sources.md) | backend, frontend mapy, redakcja | model `address_only`, geokodowanie, weryfikacja, publikacja, konfiguracja, migracja |
+| [`address-only-source-priority.md`](./address-only-source-priority.md) | redakcja, data lead | scoring i kolejność wdrożenia 44 źródeł B i 9 B- |
 | [`public-api-and-filters.md`](./public-api-and-filters.md) | frontend mapy, partnerzy, harwester | endpointy, parametry filtrów, koperta odpowiedzi, widoczność pól, stany UI |
 | [`observability-licensing.md`](./observability-licensing.md) | ops, prawo, redakcja | logi, metryki, SLO, katalog alertów, bramki licencyjne, RODO |
 | [`rollout-testing-acceptance.md`](./rollout-testing-acceptance.md) | cały zespół, oceniający | fazy, testy, kryteria akceptacji, rollback, definicja ukończenia |

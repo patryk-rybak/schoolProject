@@ -12,6 +12,12 @@ DSL i dryfu znajduje się w
 | `krosno-dane-gov-pl.yaml` | Krosno CSV | `file_static` / `csv` | BOM, spacje w nagłówkach, CC0 |
 | `marki-dane-gov-pl.yaml` | Marki CSV | `file_static` / `csv` | podwójne cytowanie, zamienione osie |
 | `warszawa-api.yaml` | Warszawa API | `http_json` / `json` | POST, token z env, `enabled=false` |
+| `generic-address-list.yaml` | szablon B/B- | `html_list` / `html_list` | brak `lat/lon`, `address_only`, geokodowanie, `enabled=false` |
+| `kml/*.json` | Sześć map Google My Maps + dwa przypadki brzegowe | `google_my_maps_kml` / `kml` | JSON, punkty i guardy Bydgoszcz/Piła; patrz [`kml/README.md`](./kml/README.md) |
+
+Konfiguracje KML są w JSON, bo odpowiadają kanonicznej postaci
+`source_config_version.config_json`. Pozostałe przykłady są w YAML dla
+czytelności. Oba formaty walidują się tym samym schematem.
 
 ## Walidacja
 
@@ -25,6 +31,9 @@ v = jsonschema.Draft202012Validator(schema)
 for f in sorted(glob.glob("examples/*.yaml")):
     v.validate(yaml.safe_load(open(f)))
     print("OK", f)
+for f in sorted(glob.glob("examples/kml/*.json")):
+    v.validate(json.load(open(f)))
+    print("OK", f)
 PY
 ```
 
@@ -35,3 +44,5 @@ PY
 - Dla nowego źródła najpierw sprawdź format i pułapki w
   `docs/research/raw/`, potem dopiero pisz konfigurację.
 - `enabled: false` oznacza szablon, który nie może wejść do produkcji.
+- `generic-address-list.yaml` nie mapuje `lat/lon`. Rekord powstaje jako
+  `address_only`, a punkt może dodać tylko geokoder z sekcji `geocoding`.
