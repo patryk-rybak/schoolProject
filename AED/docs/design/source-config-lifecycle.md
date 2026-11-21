@@ -79,6 +79,8 @@ Zasady:
 3. `source.config_json` i `source.config_version` pozostają jako **zdenormalizowany mirror aktywnej wersji** dla kodu, który jeszcze ich używa. Są aktualizowane wyłącznie w transakcji aktywacji i nie są źródłem prawdy.
 4. `source.id` jest niezmienne. Zmiana identyfikatora to nowe źródło i migracja historii, nigdy `UPDATE`.
 5. Connector family i parser muszą istnieć w kodzie. Jeśli wnioskowanie wskaże format bez obsługi, kreator kończy się stanem `needs_connector`, a nie improwizowanym scraperem.
+6. Dla `managed_by='code'` plik YAML z `backend/ingest/sources/` pozostaje źródłem prawdy. Loader liczy `source_sha256` i `config_sha256`, a jeśli nie ma wersji o tym hashu, tworzy ją jako `origin='code'` i aktywuje w transakcji. Code review i CI są bramką tego trybu; UI nie pozwala edytować takiej wersji.
+7. Dla `managed_by='runtime'` nie ma pliku YAML w repozytorium. Wersje powstają wyłącznie przez kreator/API i przechodzą pełne bramki. Eksport konfiguracji do pliku jest kopią audytową, nie źródłem prawdy.
 
 ### 4.2 Wymagania integracyjne dla innych lane'ów
 
@@ -94,6 +96,7 @@ Te punkty nie są zmianą cudzego projektu, ale muszą wejść do wspólnego kon
 | Fetch | przyjmować `UrlPolicy` i `SecretResolver` z tego dokumentu, nie własne wyjątki | `ingestion.md` §4, `operations.md` §9 |
 | Eksport | nie eksportować pól z wersji, która nie jest `active` | `observability-licensing.md` |
 | `source-config.schema.json` | dodać opcjonalny blok `activation` (`canary`, `auto_rollback`, `watch_window_runs`, `rollback_revision`), blok `schedule` (`cron`, `timezone`, `jitter_seconds`), `auth.user_env`/`auth.password_env` dla `basic`, a w `publish`: `allowed_for_ingest`, `allowed_for_export`, `terms_hash`, `terms_checked_at` | schemat konfiguracji |
+| `source_config` i `config_sha256` | `ingestion.md` §3 definiuje `source_config` i hash po dokładnych bajtach YAML. Ten projekt ujednolica nazwę na `source_config_version` i rozdziela `config_sha256` (kanoniczny JSON, tożsamość semantyczna) od `source_sha256` (dokładne bajty importu, audyt). Loader używa `config_sha256` do wykrycia zmiany mapowania, a `source_sha256` tylko do audytu pliku. | `ingestion.md` §3, `persistence.md` §3.1 |
 | `access_type` i `update_frequency` | ujednolicić enum: schemat ma `file`, `api`, `html`, `kml`, `manual` oraz `continuous`, `daily`, `weekly`, `monthly`, `quarterly`, `once`, `unknown`, a `admin-console.md` używa też `wms`, `wfs`, `app`, `manual`, `hourly`. Do czasu migracji `app` traktujemy jak `manual`, a `hourly` jak `daily` | schemat, `admin-console.md` |
 | `source.id` | ujednolicić wzorzec: schemat dopuszcza `^[a-z0-9][a-z0-9._-]*$`, a `admin-console.md` wymaga `^[a-z][a-z0-9_]{2,31}$`. Rekomendacja: schemat plus limit 32 znaków i zakaz `..` | schemat, `admin-console.md` |
 
@@ -152,8 +155,9 @@ CREATE TABLE source_config_version (
   revision          INTEGER NOT NULL,              -- 1..n per source
   schema_version    INTEGER NOT NULL,              -- version: 1 ze schematu
   config_json       TEXT NOT NULL,                 -- kanoniczny JSON, bez komentarzy YAML
-  config_sha256     TEXT NOT NULL,
+  config_sha256     TEXT NOT NULL,                 -- hash kanonicznego JSON
   yaml_source       TEXT,                          -- oryginał importu, tylko do podglądu
+  source_sha256     TEXT,                          -- hash dokładnych bajtów importu, audyt
   origin            TEXT NOT NULL CHECK (origin IN ('code','admin','import','fork')),
   state             TEXT NOT NULL CHECK (state IN (
                       'draft','validated','dry_run_passed','shadowing','ready',
@@ -172,7 +176,8 @@ CREATE TABLE source_config_version (
 
 Uwagi:
 
-- `config_sha256` liczymy po kanonicznym JSON: klucze sortowane, brak `undefined`, liczby bez `-0`, stringi NFC. Ten sam dokument zaimportowany z YAML i JSON ma ten sam hash. Komentarze YAML nie wchodzą do hasha i nie są przechowywane w `config_json`; oryginał zostaje w `yaml_source` tylko dla audytu.
+- `config_sha256` liczymy po kanonicznym JSON: klucze sortowane, brak `undefined`, liczby bez `-0`, stringi NFC. Ten sam dokument zaimportowany z YAML i JSON ma ten sam hash. Komentarze YAML nie wchodzą do hasha i nie są przechowywane w `config_json`; oryginał zostaje w `yaml_source`, a jego dokładny hash w `source_sha256`, tylko dla audytu importu.
+- `ingestion.md` §3 opisuje hash po dokładnych bajtach pliku. Ten dokument zaostrza kontrakt: `source_sha256` zostaje dla pliku, ale `config_sha256` jest semantyczny, bo runtime CRUD porównuje dokumenty, a nie formatowanie. Loader musi używać `config_sha256` do decyzji o pełnym refreshu.
 - Hash nie jest globalnie unikalny w obrębie źródła: `fork` i rollback muszą móc odtworzyć tę samą treść w nowej rewizji. API domyślnie wykrywa identyczną treść i zwraca `409 identical_config` ze wskazaniem istniejącej rewizji; `fork` oraz jawne `allow_duplicate=true` tworzą nowy draft. Aktywna może być tylko jedna wersja, więc duplikat treści nie jest niebezpieczny.
 - `state` jest cache'em stanu dla szybkich zapytań. Prawda o przejściach jest w `source_config_event`.
 - Wiersze `active` i `superseded` nie są usuwane. `revoked` dotyczy tylko draftów i wersji, które nigdy nie były aktywne.
@@ -234,7 +239,7 @@ CREATE TABLE source_gate_report (
 );
 ```
 
-Raport jest ważny 7 dni. Aktywacja sprawdza, że `config_sha256` bieżącej wersji jest równy raportowi i że raport nie wygasł. Zmiana choćby jednego znaku konfiguracji unieważnia raport. Raportów może być wiele dla tego samego hasha i `policy_version`; wybieramy najnowszy nieprzeterminowany, dlatego nie ma unikalności na tych kolumnach.
+Raport jest ważny 7 dni. Aktywacja sprawdza, że `config_sha256` bieżącej wersji jest równy raportowi i że raport nie wygasł. Każda zmiana semantyczna konfiguracji, czyli nowy `config_sha256`, unieważnia raport; zmiana komentarza YAML lub formatowania nie, bo nie zmienia kanonicznego JSON. Raportów może być wiele dla tego samego hasha i `policy_version`; wybieramy najnowszy nieprzeterminowany, dlatego nie ma unikalności na tych kolumnach.
 
 ### 5.4 `source_test_result`
 
