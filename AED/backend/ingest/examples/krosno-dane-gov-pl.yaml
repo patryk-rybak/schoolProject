@@ -1,0 +1,172 @@
+# Krosno — CSV z dane.gov.pl (dataset 3624).
+#
+# 21 wierszy, UTF-8 z BOM, sześć kolumn. Cztery nazwy kolumn mają wiodącą
+# spację, dlatego trim_headers jest obowiązkowy. Kolejność osi: lon, lat.
+# Licencja: CC0 1.0. Aktualizacja jednorazowa, plik z 2024-02-19.
+version: 1
+
+source:
+  id: krosno
+  name: Defibrylatory w Krośnie
+  publisher: Urząd Miasta Krosna
+  homepage_url: https://dane.gov.pl/pl/dataset/3624
+  access_type: file
+  reliability_tier: official_local
+  license:
+    id: CC0-1.0
+    url: https://creativecommons.org/publicdomain/zero/1.0/
+    attribution: "Miasto Krosno — dane.gov.pl"
+    share_alike: false
+  coverage:
+    country: PL
+    teryt: ["186101"]
+    notes: 21 rekordów; tylko sześć pól opisowych, brak operatora i statusu.
+  update_frequency: once
+  enabled: true
+  notes: >
+    Nagłówki: "Długość geograficzna", "Szerokość geograficzna", " Nazwa",
+    " Lokalizacja", " Adres", " Numer Id". Po trim_headers nazwy są bez spacji.
+    "Nazwa" to zawsze "Defibrylator"; nazwę obiektu zawiera "Lokalizacja".
+
+connector:
+  family: file_static
+  parser: csv
+  notes: Prosty CSV bez cudzysłowów w danych; BOM i wiodące spacje w nagłówkach.
+
+fetch:
+  url: https://api.dane.gov.pl/media/resources/20240219/Defibrylator_jAmxQcp.csv
+  method: GET
+  timeout_ms: 30000
+  retries:
+    max: 2
+    backoff_ms: 1000
+  rate_limit:
+    requests_per_minute: 30
+  conditional:
+    etag: true
+    last_modified: true
+  pagination:
+    type: none
+  user_agent: "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+
+parse:
+  encoding: utf-8-sig
+  trim_headers: true
+  csv:
+    delimiter: ","
+    quote: '"'
+    header: true
+    skip_rows: 0
+    empty_as_null: true
+
+records:
+  path: "$"
+  identity:
+    source_record_id:
+      template: "krosno:{Numer Id}"
+    dataset_id:
+      const: "dane.gov.pl:3624"
+    stable: true
+  dedupe:
+    key:
+      - field: Numer Id
+    keep: last
+    on_duplicate: reject
+
+map:
+  name:
+    field: Lokalizacja
+  label:
+    field: Nazwa
+  facility_type:
+    const: unknown
+  lat:
+    func: to_float
+    args:
+      - field: "Szerokość geograficzna"
+  lon:
+    func: to_float
+    args:
+      - field: "Długość geograficzna"
+  coord_precision_m:
+    const: 15
+  country_code:
+    const: PL
+  address_text:
+    field: Adres
+  access_type:
+    const: unknown
+  device_type:
+    const: public_aed
+  status:
+    const: unknown
+  verification_status:
+    const: unverified
+  confidence:
+    const: 0.6
+  operator_name:
+    const: Urząd Miasta Krosna
+  operator_type:
+    const: municipality
+  source_updated_at:
+    const: "2024-02-19"
+
+validate:
+  required:
+    - name
+    - lat
+    - lon
+  coords:
+    bbox: [14.1, 49.0, 24.2, 54.9]
+    on_invalid: reject
+  enums: true
+  on_error: reject
+
+drift:
+  baseline:
+    record_count: 21
+    generated_at: "2026-11-21"
+    schema_fields:
+      - Długość geograficzna
+      - Szerokość geograficzna
+      - Nazwa
+      - Lokalizacja
+      - Adres
+      - Numer Id
+  schema:
+    on_new_field: review
+    on_missing_field: fail
+    on_type_change: review
+    on_header_order_change: review
+  volume:
+    min_records: 15
+    max_delta_ratio: 0.5
+    on_breach: review
+  quality:
+    max_coord_invalid_ratio: 0.0
+    max_duplicate_id_ratio: 0.0
+    max_null_ratio:
+      name: 0.0
+      lat: 0.0
+      lon: 0.0
+    on_breach: review
+  axis:
+    enabled: true
+    max_suspicious_ratio: 0.0
+    on_breach: review
+  golden_sample:
+    size: 10
+    required_match_ratio: 1.0
+  actions:
+    warn: log
+    review: quarantine
+    fail: disable
+
+publish:
+  enabled: true
+  license_id: CC0-1.0
+  attribution: "Miasto Krosno — dane.gov.pl"
+  redact: []
+  exports:
+    - csv
+    - geojson

@@ -25,4 +25,13 @@ referencyjnym** każdego źródła.
 
 ## Stan obecny
 
-Brak. W repozytorium nie ma jeszcze żadnego connectora.
+Brak kodu. Zdefiniowano kontrakt konfiguracji i zestaw przykładów:
+
+- [`source-config.schema.json`](./source-config.schema.json): JSON Schema 2020-12,
+- [`examples/`](./examples/): pięć konfiguracji: OpenAEDMap, Przemyśl, Krosno,
+  Marki, Warszawa,
+- [`../../docs/ingest-source-config.md`](../../docs/ingest-source-config.md):
+  inwentarz formatów, mapping DSL, rodziny connectorów i wykrywanie dryfu.
+
+Kolejny krok: loader konfiguracji i pierwsze dwa connectory (`file_static`,
+`http_json`).

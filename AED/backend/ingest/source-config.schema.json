@@ -1,0 +1,520 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aed.local/schemas/source-config.schema.json",
+  "title": "AED source connector configuration",
+  "description": "Deklaratywna konfiguracja źródła AED: pobranie, parsowanie, mapowanie i dryf. Brak kodu wykonywalnego.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "source", "connector", "fetch", "parse", "records", "map", "validate", "drift"],
+  "properties": {
+    "version": { "const": 1 },
+    "source": { "$ref": "#/$defs/source" },
+    "connector": { "$ref": "#/$defs/connector" },
+    "fetch": { "$ref": "#/$defs/fetch" },
+    "parse": { "$ref": "#/$defs/parse" },
+    "records": { "$ref": "#/$defs/records" },
+    "map": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/canonicalField" },
+      "additionalProperties": { "$ref": "#/$defs/fieldSpec" }
+    },
+    "validate": { "$ref": "#/$defs/validate" },
+    "drift": { "$ref": "#/$defs/drift" },
+    "publish": { "$ref": "#/$defs/publish" }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "publisher", "access_type", "reliability_tier", "license"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "name": { "type": "string" },
+        "publisher": { "type": "string" },
+        "homepage_url": { "type": "string", "format": "uri" },
+        "access_type": { "enum": ["file", "api", "html", "kml", "manual"] },
+        "reliability_tier": { "enum": ["authoritative", "official_local", "community", "aggregator", "derived", "app", "register"] },
+        "license": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "string" },
+            "url": { "type": "string", "format": "uri" },
+            "attribution": { "type": "string" },
+            "share_alike": { "type": "boolean" }
+          }
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "country": { "type": "string", "pattern": "^[A-Z]{2}$" },
+            "teryt": { "type": "array", "items": { "type": "string" } },
+            "notes": { "type": "string" }
+          }
+        },
+        "update_frequency": { "enum": ["continuous", "daily", "weekly", "monthly", "quarterly", "once", "unknown"] },
+        "enabled": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "connector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "parser"],
+      "properties": {
+        "family": { "enum": ["file_static", "http_json", "http_json_api", "google_my_maps_kml", "arcgis_query", "ckan_datastore", "html_table", "manual"] },
+        "parser": { "enum": ["csv", "xlsx", "json", "geojson", "kml", "jsonapi", "html_table"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "fetch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "method": { "enum": ["GET", "POST"] },
+        "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+        "query": { "type": "object", "additionalProperties": { "type": ["string", "number", "boolean"] } },
+        "body": { "type": "object", "additionalProperties": true },
+        "auth": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": { "enum": ["none", "bearer", "header", "basic"] },
+            "header": { "type": "string" },
+            "env": { "type": "string" },
+            "prefix": { "type": "string" }
+          }
+        },
+        "timeout_ms": { "type": "integer", "minimum": 1000 },
+        "retries": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max": { "type": "integer", "minimum": 0 },
+            "backoff_ms": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "rate_limit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "requests_per_minute": { "type": "number", "minimum": 0.1 } }
+        },
+        "conditional": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "etag": { "type": "boolean" },
+            "last_modified": { "type": "boolean" }
+          }
+        },
+        "pagination": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "enum": ["none", "page", "offset", "cursor", "link_header"] },
+            "page_param": { "type": "string" },
+            "offset_param": { "type": "string" },
+            "limit_param": { "type": "string" },
+            "page_size": { "type": "integer", "minimum": 1 },
+            "start_page": { "type": "integer", "minimum": 0 },
+            "start_offset": { "type": "integer", "minimum": 0 },
+            "total_path": { "type": "string" },
+            "cursor_path": { "type": "string" },
+            "next_path": { "type": "string" }
+          }
+        },
+        "user_agent": { "type": "string" }
+      }
+    },
+    "parse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "encoding": { "type": "string" },
+        "trim_headers": { "type": "boolean" },
+        "csv": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "delimiter": { "type": "string" },
+            "quote": { "type": "string" },
+            "skip_rows": { "type": "integer", "minimum": 0 },
+            "header": { "type": "boolean" },
+            "unwrap_outer_quotes": { "type": "boolean" },
+            "repair_double_quotes": { "type": "boolean" },
+            "empty_as_null": { "type": "boolean" }
+          }
+        },
+        "json": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "unwrap_string": { "type": "boolean" } }
+        },
+        "xlsx": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sheet": { "type": ["integer", "string"] },
+            "header_row": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "kml": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "point_only": { "type": "boolean" },
+            "document_name_must_match": { "type": "string" }
+          }
+        }
+      }
+    },
+    "records": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "identity"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Ścieżka do tablicy rekordów. '$' oznacza całą tablicę lub plik. JSON: dot-path lub JSON Pointer. XML/KML: XPath. CSV/XLSX: '$'."
+        },
+        "identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source_record_id"],
+          "properties": {
+            "source_record_id": { "$ref": "#/$defs/expr" },
+            "dataset_id": { "$ref": "#/$defs/expr" },
+            "stable": { "type": "boolean" }
+          }
+        },
+        "dedupe": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "key": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/expr" } },
+            "keep": { "enum": ["first", "last"] },
+            "on_duplicate": { "enum": ["warn", "reject", "merge"] }
+          }
+        }
+      }
+    },
+    "fieldSpec": {
+      "oneOf": [
+        { "$ref": "#/$defs/expr" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value"],
+          "properties": {
+            "value": { "$ref": "#/$defs/expr" },
+            "required": { "type": "boolean" },
+            "on_missing": { "enum": ["null", "reject", "review", "default"] },
+            "default": {},
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "note": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "expr": {
+      "oneOf": [
+        { "type": "string", "description": "Skrót do { field: '...' }." },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["field"],
+          "properties": { "field": { "type": "string" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pointer"],
+          "properties": { "pointer": { "type": "string" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["builtin"],
+          "properties": { "builtin": { "enum": ["fetched_at", "now", "row_index", "source_id"] } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["const"],
+          "properties": { "const": {} }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["func", "args"],
+          "properties": {
+            "func": { "type": "string" },
+            "args": { "type": "array", "items": { "$ref": "#/$defs/expr" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coalesce"],
+          "properties": { "coalesce": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/expr" } } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["template"],
+          "properties": {
+            "template": { "type": "string" },
+            "vars": { "type": "object", "additionalProperties": { "$ref": "#/$defs/expr" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["regex"],
+          "properties": {
+            "regex": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["in", "pattern"],
+              "properties": {
+                "in": { "$ref": "#/$defs/expr" },
+                "pattern": { "type": "string" },
+                "group": { "type": "integer", "minimum": 0 },
+                "flags": { "type": "string" }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["map"],
+          "properties": {
+            "map": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "cases"],
+              "properties": {
+                "value": { "$ref": "#/$defs/expr" },
+                "cases": { "type": "object" },
+                "default": {}
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["when", "then"],
+          "properties": {
+            "when": { "$ref": "#/$defs/condition" },
+            "then": { "$ref": "#/$defs/expr" },
+            "else": { "$ref": "#/$defs/expr" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coord"],
+          "properties": { "coord": { "$ref": "#/$defs/coordSpec" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["json"],
+          "properties": { "json": { "$ref": "#/$defs/expr" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["first"],
+          "properties": { "first": { "$ref": "#/$defs/expr" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lookup"],
+          "properties": {
+            "lookup": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["file", "key"],
+              "properties": {
+                "file": { "type": "string" },
+                "key": { "$ref": "#/$defs/expr" },
+                "default": {}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "left"],
+      "properties": {
+        "op": { "enum": ["eq", "neq", "in", "not_in", "exists", "missing", "empty", "non_empty", "regex", "gt", "gte", "lt", "lte"] },
+        "left": { "$ref": "#/$defs/expr" },
+        "right": {}
+      }
+    },
+    "coordSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "oneOf": [
+            { "$ref": "#/$defs/expr" },
+            { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/expr" } }
+          ]
+        },
+        "lat": { "$ref": "#/$defs/expr" },
+        "lon": { "$ref": "#/$defs/expr" },
+        "format": { "enum": ["geojson", "kml", "pair", "object", "wkt"] },
+        "order": { "enum": ["lat_lon", "lon_lat"] },
+        "delimiter": { "type": "string" },
+        "pick": { "enum": ["lat", "lon", "both"] },
+        "unwrap_single": { "type": "boolean" },
+        "precision_m": { "type": ["number", "null"] },
+        "axis_policy": { "enum": ["declared", "auto_detect", "swap_if_invalid"] },
+        "on_invalid": { "enum": ["reject", "review", "null"] }
+      },
+      "anyOf": [{ "required": ["from"] }, { "required": ["lat", "lon"] }]
+    },
+    "canonicalField": {
+      "enum": [
+        "public_code", "source_record_id", "source_url", "name", "description", "note",
+        "facility_type", "lat", "lon", "coord_precision_m", "country_code",
+        "voivodeship", "county", "commune", "city", "district", "street",
+        "house_number", "postcode", "address_text", "teryt_voivodeship",
+        "teryt_county", "teryt_commune", "simc", "ulic", "indoor", "level", "room",
+        "entrance_description", "access_type", "opening_hours", "is_24_7",
+        "requires_dispatcher", "fee", "wheelchair_access", "label", "manufacturer",
+        "model", "serial_number", "device_type", "pads_type", "installed_at",
+        "battery_expiry", "pads_expiry", "last_inspection_at", "next_inspection_at",
+        "status", "status_reason", "verification_status", "confidence",
+        "last_verified_at", "last_seen_at", "is_public", "operator_name",
+        "operator_type", "phone", "email", "website", "photo_url", "photo_license",
+        "source_updated_at"
+      ]
+    },
+    "validate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": { "type": "array", "items": { "$ref": "#/$defs/canonicalField" } },
+        "coords": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bbox": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": { "type": "number" },
+              "description": "[minLon, minLat, maxLon, maxLat]."
+            },
+            "on_invalid": { "enum": ["reject", "review", "null"] }
+          }
+        },
+        "enums": { "type": "boolean" },
+        "on_error": { "enum": ["reject", "review"] }
+      }
+    },
+    "action": { "enum": ["ignore", "warn", "review", "fail"] },
+    "drift": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "baseline": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "record_count": { "type": ["integer", "null"] },
+            "schema_file": { "type": "string" },
+            "schema_fields": { "type": "array", "items": { "type": "string" } },
+            "generated_at": { "type": "string" }
+          }
+        },
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "on_new_field": { "$ref": "#/$defs/action" },
+            "on_missing_field": { "$ref": "#/$defs/action" },
+            "on_type_change": { "$ref": "#/$defs/action" },
+            "on_header_order_change": { "$ref": "#/$defs/action" }
+          }
+        },
+        "volume": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min_records": { "type": "integer", "minimum": 0 },
+            "max_records": { "type": ["integer", "null"] },
+            "max_delta_ratio": { "type": "number", "minimum": 0 },
+            "on_breach": { "$ref": "#/$defs/action" }
+          }
+        },
+        "quality": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_coord_invalid_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+            "max_duplicate_id_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+            "max_null_ratio": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 } },
+            "on_breach": { "$ref": "#/$defs/action" }
+          }
+        },
+        "axis": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "max_suspicious_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+            "on_breach": { "$ref": "#/$defs/action" }
+          }
+        },
+        "golden_sample": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "file": { "type": "string" },
+            "size": { "type": "integer", "minimum": 1 },
+            "required_match_ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "actions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "warn": { "enum": ["log"] },
+            "review": { "enum": ["quarantine"] },
+            "fail": { "enum": ["disable", "abort"] }
+          }
+        }
+      }
+    },
+    "publish": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "license_id": { "type": "string" },
+        "attribution": { "type": "string" },
+        "redact": { "type": "array", "items": { "$ref": "#/$defs/canonicalField" } },
+        "exports": { "type": "array", "items": { "enum": ["csv", "geojson", "json"] } }
+      }
+    }
+  }
+}

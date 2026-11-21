@@ -1,0 +1,184 @@
+# Marki — CSV z dane.gov.pl (dataset 4955).
+#
+# 8 wierszy. Plik jest podwójnie cytowany: każdy wiersz jest owinięty w jeden
+# cudzysłów, a wewnętrzne cudzysłowy są podwojone. Standardowy parser widzi
+# jedną kolumnę. Najpierw zdejmij zewnętrzne cudzysłowy i zamień "" na ",
+# potem parsuj CSV.
+#
+# UWAGA: nagłówek deklaruje "Długość geograficzna, Szerokość geograficzna"
+# (lon, lat), ale 7 z 8 wierszy ma wartości w kolejności lat, lon. Wiersz
+# Numer Id=7 (21.720344, 49.718809) jest błędny i zostanie skierowany do
+# review przez wąski bbox Marki.
+# Licencja: CC BY 4.0.
+version: 1
+
+source:
+  id: marki
+  name: Defibrylatory w Markach
+  publisher: Miasto Marki
+  homepage_url: https://dane.gov.pl/pl/dataset/4955
+  access_type: file
+  reliability_tier: official_local
+  license:
+    id: CC-BY-4.0
+    url: https://creativecommons.org/licenses/by/4.0/
+    attribution: "Miasto Marki — dane.gov.pl, CC BY 4.0"
+    share_alike: false
+  coverage:
+    country: PL
+    teryt: ["143101"]
+    notes: 8 rekordów; CSV i XLSX. CSV ma wadliwe cytowanie i niespójną kolejność osi.
+  update_frequency: once
+  enabled: true
+  notes: >
+    Preferowany parser CSV po naprawie cytowania; XLSX jest alternatywą.
+    Wiersz Numer Id=7 nie należy do Marek i musi trafić do kolejki review,
+    nie na mapę.
+
+connector:
+  family: file_static
+  parser: csv
+  notes: Dwustopniowe parsowanie (outer quotes, potem CSV) i walidacja bbox Marki.
+
+fetch:
+  url: https://api.dane.gov.pl/media/resources/20250710/Defibrylator_GminaMiastoMarki_1.csv
+  method: GET
+  timeout_ms: 30000
+  retries:
+    max: 2
+    backoff_ms: 1000
+  rate_limit:
+    requests_per_minute: 30
+  conditional:
+    etag: true
+    last_modified: true
+  pagination:
+    type: none
+  user_agent: "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+
+parse:
+  encoding: utf-8-sig
+  trim_headers: true
+  csv:
+    delimiter: ","
+    quote: '"'
+    header: true
+    skip_rows: 0
+    unwrap_outer_quotes: true
+    repair_double_quotes: true
+    empty_as_null: true
+
+records:
+  path: "$"
+  identity:
+    source_record_id:
+      template: "marki:{Numer Id}"
+    dataset_id:
+      const: "dane.gov.pl:4955"
+    stable: true
+  dedupe:
+    key:
+      - field: Numer Id
+    keep: last
+    on_duplicate: reject
+
+map:
+  name:
+    field: Lokalizacja
+  label:
+    field: Nazwa
+  facility_type:
+    const: unknown
+  # Kolumna "Długość geograficzna" faktycznie zawiera szerokość (lat).
+  lat:
+    func: to_float
+    args:
+      - field: "Długość geograficzna"
+  # Kolumna "Szerokość geograficzna" faktycznie zawiera długość (lon).
+  lon:
+    func: to_float
+    args:
+      - field: "Szerokość geograficzna"
+  coord_precision_m:
+    const: 15
+  country_code:
+    const: PL
+  address_text:
+    field: Adres
+  access_type:
+    const: unknown
+  device_type:
+    const: public_aed
+  status:
+    const: unknown
+  verification_status:
+    const: unverified
+  confidence:
+    const: 0.6
+  operator_name:
+    const: Miasto Marki
+  operator_type:
+    const: municipality
+  source_updated_at:
+    const: "2025-07-10"
+
+validate:
+  required:
+    - name
+    - lat
+    - lon
+  coords:
+    # Wąski bbox Marki: [minLon, minLat, maxLon, maxLat].
+    bbox: [21.05, 52.28, 21.18, 52.38]
+    on_invalid: review
+  enums: true
+  on_error: review
+
+drift:
+  baseline:
+    record_count: 8
+    generated_at: "2026-11-21"
+    schema_fields:
+      - Długość geograficzna
+      - Szerokość geograficzna
+      - Nazwa
+      - Lokalizacja
+      - Adres
+      - Numer Id
+  schema:
+    on_new_field: review
+    on_missing_field: fail
+    on_type_change: review
+    on_header_order_change: fail
+  volume:
+    min_records: 6
+    max_delta_ratio: 0.5
+    on_breach: review
+  quality:
+    max_coord_invalid_ratio: 0.13
+    max_duplicate_id_ratio: 0.0
+    max_null_ratio:
+      name: 0.0
+      lat: 0.0
+      lon: 0.0
+    on_breach: review
+  axis:
+    enabled: true
+    max_suspicious_ratio: 0.13
+    on_breach: review
+  golden_sample:
+    size: 8
+    required_match_ratio: 1.0
+  actions:
+    warn: log
+    review: quarantine
+    fail: disable
+
+publish:
+  enabled: true
+  license_id: CC-BY-4.0
+  attribution: "Miasto Marki — dane.gov.pl, CC BY 4.0"
+  redact: []
+  exports:
+    - csv
+    - geojson

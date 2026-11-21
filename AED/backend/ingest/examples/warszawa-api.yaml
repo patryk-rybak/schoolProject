@@ -1,0 +1,218 @@
+# Warszawa — API Otwartych Danych (dane.gov.pl dataset 39512).
+#
+# POST wymaga nagłówka Authorization. Bez tokena API zwraca HTTP 403:
+# "Access denied: Nieautoryzowany: brak ważnego tokena lub API key".
+# Token trzymamy w env WARSZAWA_API_TOKEN, nigdy w konfiguracji.
+#
+# Nie wiadomo, czy puste body zwraca całą listę, czy wymaga pojedynczego
+# defibrillator_id. Przed produkcją trzeba potwierdzić tryb listowania
+# (pagination/enumeracja ID) i dopisać go do fetch. Do tego czasu config
+# działa jako szablon i nie może być włączony bez testu.
+# Licencja: CC BY 4.0.
+version: 1
+
+source:
+  id: warszawa
+  name: Lokalizacja defibrylatorów (AED) — m.st. Warszawa
+  publisher: m.st. Warszawa
+  homepage_url: https://dane.gov.pl/pl/dataset/39512
+  access_type: api
+  reliability_tier: official_local
+  license:
+    id: CC-BY-4.0
+    url: https://creativecommons.org/licenses/by/4.0/
+    attribution: "m.st. Warszawa — dane.gov.pl, CC BY 4.0"
+    share_alike: false
+  coverage:
+    country: PL
+    teryt: ["146501"]
+    notes: Najbardziej kompletny schemat miejski; brak statusu i daty weryfikacji.
+  update_frequency: daily
+  enabled: false
+  notes: >
+    API wymaga tokena. device_availability jest opisowe (np. "Ograniczona"),
+    więc nie mapujemy go wprost na boolean. attachment to Base64, nie URL.
+    Włącznik enabled=false do czasu potwierdzenia trybu listowania.
+
+connector:
+  family: http_json
+  parser: json
+  notes: POST JSON; odpowiedź to tablica obiektów GeoJSON-like.
+
+fetch:
+  url: https://dane.um.warszawa.pl/api/action/get_scb_lokalizacja_defibrylatorow
+  method: POST
+  headers:
+    Content-Type: application/json
+  body: {}
+  auth:
+    type: header
+    header: Authorization
+    env: WARSZAWA_API_TOKEN
+  timeout_ms: 30000
+  retries:
+    max: 3
+    backoff_ms: 1500
+  rate_limit:
+    requests_per_minute: 30
+  conditional:
+    etag: false
+    last_modified: false
+  pagination:
+    type: none
+  user_agent: "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+
+parse:
+  encoding: utf-8
+  json:
+    unwrap_string: false
+
+records:
+  path: "$"
+  identity:
+    source_record_id:
+      template: "warszawa:{properties.defibrillator_id}"
+    dataset_id:
+      const: "dane.gov.pl:39512"
+    stable: true
+  dedupe:
+    key:
+      - field: properties.defibrillator_id
+    keep: last
+    on_duplicate: reject
+
+map:
+  name:
+    coalesce:
+      - field: properties.location_object_name
+      - field: properties.location_building
+      - field: properties.location_description
+  facility_type:
+    const: unknown
+  lat:
+    coord:
+      from: geometry
+      format: geojson
+      pick: lat
+      unwrap_single: true
+      on_invalid: reject
+  lon:
+    coord:
+      from: geometry
+      format: geojson
+      pick: lon
+      unwrap_single: true
+      on_invalid: reject
+  coord_precision_m:
+    const: 15
+  country_code:
+    const: PL
+  city:
+    field: properties.location_city
+  street:
+    field: properties.location_street
+  postcode:
+    field: properties.location_postcode
+  address_text:
+    template: "{street}, {postcode} {city}"
+    vars:
+      street:
+        field: properties.location_street
+      postcode:
+        field: properties.location_postcode
+      city:
+        field: properties.location_city
+  entrance_description:
+    field: properties.location_description
+  note:
+    field: properties.device_access_description
+  access_type:
+    map:
+      value:
+        field: properties.device_public_access
+      cases:
+        "tak": public
+        "yes": public
+        "true": public
+        "public": public
+        "nie": private
+        "no": private
+        "false": private
+      default: unknown
+  is_24_7:
+    when:
+      op: regex
+      left:
+        field: properties.device_availability
+      right: "(?i)24"
+    then: true
+    else: null
+  manufacturer:
+    field: properties.device_manufacturer
+  device_type:
+    const: public_aed
+  status:
+    const: unknown
+  verification_status:
+    const: unverified
+  confidence:
+    const: 0.8
+  operator_name:
+    const: m.st. Warszawa
+  operator_type:
+    const: municipality
+  source_updated_at:
+    const: "2026-06-01"
+
+validate:
+  required:
+    - name
+    - lat
+    - lon
+  coords:
+    bbox: [14.1, 49.0, 24.2, 54.9]
+    on_invalid: reject
+  enums: true
+  on_error: reject
+
+drift:
+  baseline:
+    record_count: null
+    generated_at: "2026-11-21"
+  schema:
+    on_new_field: warn
+    on_missing_field: review
+    on_type_change: fail
+    on_header_order_change: ignore
+  volume:
+    min_records: 1
+    max_delta_ratio: 1.0
+    on_breach: review
+  quality:
+    max_coord_invalid_ratio: 0.02
+    max_duplicate_id_ratio: 0.0
+    max_null_ratio:
+      name: 0.1
+      lat: 0.0
+      lon: 0.0
+    on_breach: review
+  axis:
+    enabled: false
+  golden_sample:
+    size: 10
+    required_match_ratio: 0.95
+  actions:
+    warn: log
+    review: quarantine
+    fail: disable
+
+publish:
+  enabled: false
+  license_id: CC-BY-4.0
+  attribution: "m.st. Warszawa — dane.gov.pl, CC BY 4.0"
+  redact:
+    - serial_number
+    - phone
+  exports:
+    - csv
+    - geojson
