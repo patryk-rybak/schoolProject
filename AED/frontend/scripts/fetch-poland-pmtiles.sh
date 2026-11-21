@@ -60,7 +60,9 @@ fi
 mkdir -p "$(dirname "$OUT")"
 
 # Extract to a temporary file and swap it in only on success, so a failed
-# download never destroys a working archive.
+# download never destroys a working archive. The temporary name is ignored by
+# git; a `git clean -fdX` during a long extract will unlink it while pmtiles
+# keeps writing to the open file, so the archive is verified before the swap.
 TMP="$OUT.tmp.$$"
 trap 'rm -f "$TMP"' EXIT
 
@@ -76,7 +78,25 @@ while true; do
 		--bbox="$BBOX" \
 		--maxzoom="$MAXZOOM" \
 		--download-threads="$THREADS"; then
-		break
+		if [ -s "$TMP" ]; then
+			sync "$TMP" 2>/dev/null || sync
+			if pmtiles verify "$TMP"; then
+				if ! mv -f "$TMP" "$OUT"; then
+					echo "Extracted archive could not be moved to $OUT." >&2
+					echo "It was left at $TMP." >&2
+					trap - EXIT
+					exit 1
+				fi
+				trap - EXIT
+				echo "Done: $(du -h "$OUT" | cut -f1)"
+				exit 0
+			fi
+			echo "Extracted archive failed verification." >&2
+		else
+			echo "Extract reported success but $TMP is missing." >&2
+			echo "Another process may have removed it (ignored files match 'git clean -fdX')." >&2
+		fi
+		status=1
 	else
 		status=$?
 	fi
@@ -91,8 +111,3 @@ while true; do
 	echo "Extract failed (exit $status); retrying in 5s ($attempt/$ATTEMPTS)..." >&2
 	sleep 5
 done
-
-mv "$TMP" "$OUT"
-trap - EXIT
-
-echo "Done: $(du -h "$OUT" | cut -f1)"
