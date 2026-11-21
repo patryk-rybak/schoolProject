@@ -75,6 +75,7 @@ Aplikacja działa pod http://localhost:3000.
 | Build | `bun run build` |
 | Podgląd builda | `bun run preview` |
 | Migracje | `bun run db:generate`, `bun run db:migrate`, `bun run db:push` |
+| Dane startowe (dev) | `bun run db:seed` |
 | Drizzle Studio | `bun run db:studio` |
 | Kafelki mapy | `bun run map:tiles` |
 | Nowy komponent shadcn | `bunx --bun shadcn@latest add <nazwa>` |
@@ -107,10 +108,17 @@ bunx --bun shadcn@latest add <nazwa>
 
 Aplikacja używa natywnego sterownika SQLite Buna przez `drizzle-orm/bun-sqlite`. Plik bazy pochodzi z `DATABASE_URL` (domyślnie `dev.db`), a `src/db/index.ts` włącza WAL i `synchronous = NORMAL`. Schemat znajduje się w `src/db/schema.ts`.
 
+W wersji deweloperskiej istnieje jedna tabela domenowa `aed_devices` (tymczasowa,
+kolumny mogą się zmieniać). Funkcje dostępu dla innych modułów są w
+`src/db/aed-store.ts` (`addAedDevice`, `addAedDevices`, `listAedDevices`,
+`getAedDevice`, `countAedDevices`, `clearAedDevices`).
+
 ```bash
 bun run db:generate
 bun run db:migrate
 bun run db:push
+bun run db:seed      # 5 przykładowych rekordów do dev.db
+bun run db:studio
 ```
 
 Drizzle Kit działa na Bunie. `@libsql/client` jest zależnością deweloperską, ponieważ CLI Drizzle Kit potrzebuje klienta SQLite; aplikacja w runtime używa `bun:sqlite`.

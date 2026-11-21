@@ -27,6 +27,7 @@
     "db:push": "bunx --bun drizzle-kit push",
     "db:pull": "bunx --bun drizzle-kit pull",
     "db:studio": "bunx --bun drizzle-kit studio",
+    "db:seed": "bun scripts/seed-aed.ts",
     "map:tiles": "bash scripts/fetch-poland-pmtiles.sh"
   },
   "dependencies": {
