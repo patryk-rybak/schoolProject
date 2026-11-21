@@ -159,8 +159,11 @@ Backend publikuje dane AED w formacie harwestera dane.gov.pl (`urn:otwarte-dane:
 | `/data/aed.geojson` | rejestr AED jako GeoJSON |
 
 Zasoby muszą być dostępne przez HTTPS, dlatego do testów lokalnych służy
-`bun run dev:tls` (self-signed proxy na porcie 3443). Szczegóły, mapowanie pól,
-test z lokalnym portalem i ograniczenia: [`backend/gov-api/README.md`](./backend/gov-api/README.md).
+`bun run dev:tls` (self-signed proxy na porcie 3443).
+
+Pełna instrukcja testu end-to-end z lokalnym portalem (łącznie z wymaganym
+workerem Celery, regułą `ufw` i obejściem walidacji formularza dla adresów IP):
+[`backend/gov-api/README.md`](./backend/gov-api/README.md).
 
 ```bash
 bun run dev
