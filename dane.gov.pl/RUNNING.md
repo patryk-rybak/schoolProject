@@ -85,6 +85,14 @@ docker compose -f docker-compose.local.yml ps --all
 
 ## 5. Load the initial data and search indexes
 
+Before the first run, remove the invalid `"timeout": 1` entries that the
+shipped `local.py.sample` puts into the Elasticsearch index settings (see
+Troubleshooting):
+
+```bash
+sed -i '/"timeout": 1,/d' mcod/settings/local.py
+```
+
 `init_mcod_db` runs migrations, copies the sample media files and loads
 `basic_data.json`:
 
@@ -135,6 +143,18 @@ Drop the file argument to run the whole suite.
 
 ## Troubleshooting
 
+- **`unknown setting [index.timeout]` while building indexes** –
+  `mcod/settings/local.py.sample` ships `"timeout": 1` inside
+  `ELASTICSEARCH_DSL_INDEX_SETTINGS` and `ELASTICSEARCH_HISTORIES_IDX_SETTINGS`.
+  django-elasticsearch-dsl forwards it into the index body, and Elasticsearch
+  6.8 rejects it. Remove the two lines from `mcod/settings/local.py`:
+
+  ```bash
+  sed -i '/"timeout": 1,/d' mcod/settings/local.py
+  ```
+
+  The `./mcod` directory is bind-mounted into the containers, so no rebuild is
+  required; just re-run `search_index --rebuild -f`.
 - **401 pulling `discourse` image** – keep the Discourse containers out of the
   `up` command, as shown above.
 - **`mcod.local` returns 502** – the frontend dev server is not running on port
