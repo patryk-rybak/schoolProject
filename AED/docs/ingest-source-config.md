@@ -22,6 +22,10 @@ Pliki tego projektu:
 Wszystkie pięć konfiguracji przechodzi walidację względem schematu. Użyty
 sposób sprawdzenia:
 
+Znormalizowany inwentarz 69 źródeł, z przypisaniem `source_id`, priorytetu,
+rodziny connectora, parsera, licencji, statusu TERYT i blockerów, znajduje się w
+[`research/source-inventory/README.md`](./research/source-inventory/README.md).
+
 ```bash
 cd AED/backend/ingest
 python3 - <<'PY'

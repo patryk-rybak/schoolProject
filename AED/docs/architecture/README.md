@@ -8,6 +8,9 @@ to the other backend lanes. They refine the model in
 and are the integration contract for the connector, dedup, lifecycle, and ops
 lanes.
 
+The normalized 69-source inventory that feeds connector configuration lives in
+[`../research/source-inventory/README.md`](../research/source-inventory/README.md).
+
 | Document | Covers |
 | --- | --- |
 | [persistence.md](./persistence.md) | tables, keys, indexes, Drizzle mapping, migrations, retention |

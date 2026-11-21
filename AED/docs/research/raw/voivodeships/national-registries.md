@@ -160,3 +160,5 @@ Te pięć źródeł można stosunkowo łatwo podnieść do klasy A:
 | [`google-my-maps-kml.md`](./google-my-maps-kml.md) | KML, pułapki, parsowanie |
 | [`geoportal-osm-wms.md`](./geoportal-osm-wms.md) | korekta Geoportal |
 | `{wojewodztwo}.md` | raporty 16 województw |
+| [`../../source-inventory/README.md`](../../source-inventory/README.md) | znormalizowany inwentarz 69 źródeł: priorytety, connector/parser, licencje, TERYT i blockery |
+| [`../../source-inventory/normalized-source-inventory.csv`](../../source-inventory/normalized-source-inventory.csv) | maszynowa wersja znormalizowanego inwentarza (69 wierszy) |
