@@ -200,7 +200,7 @@ Jeden adres to zwykle jedno `facility`. Dwa różne `facility_type` pod tym samy
 
 ### 4.1. Cel
 
-Blocking redukuje pary z `O(n^2)` do `O(n * k)` przy wysokim `candidate recall`. Nie podejmuje decyzji.
+Blocking redukuje pary z `O(n^2)` do `O(n * k)` przy wysokim `candidate recall`. Nie podejmuje decyzji. Domyślny promień kandydatów to 100 m, zgodnie z `ingestion.md`. Scoring obsługuje do 150 m, bo para może zostać znaleziona przez adres, serial lub external id.
 
 ### 4.2. Klucze
 
@@ -210,7 +210,7 @@ Blocking redukuje pary z `O(n^2)` do `O(n * k)` przy wysokim `candidate recall`.
 | `external` | `namespace:value` | Jawne identyfikatory. |
 | `serial` | `manufacturer|serial_number` | Ten sam numer seryjny. |
 | `label` | `normalized(label)` + `city` lub `operator` | Lokalne numery AED. |
-| `geo` | `geohash7(lat, lon)` i 8 sąsiadów | Około 150 m. |
+| `geo` | `geohash7(lat, lon)` i 8 sąsiadów, filtr 100 m | Domyślny promień. Pary z exact/address/serial mogą dojść do 150 m. |
 | `address` | `teryt_commune|ulic|house_number` lub `street|house|city` | Działa bez geometrii. |
 | `operator` | `nip` lub `regon` lub `normalized(operator_name)` | Ten sam podmiot. |
 | `phone` | `E.164(phone)` | Kontakt organizacyjny. |

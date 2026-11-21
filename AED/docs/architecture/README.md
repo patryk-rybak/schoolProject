@@ -12,6 +12,7 @@ lanes.
 | --- | --- |
 | [persistence.md](./persistence.md) | tables, keys, indexes, Drizzle mapping, migrations, retention |
 | [ingestion.md](./ingestion.md) | stage graph, cross-lane types, idempotency, absence, replay |
+| [dedup.md](./dedup.md) | identity, blocking, scoring, merge survivorship, overrides, review queue, fixtures |
 | [operations.md](./operations.md) | scheduling, CLI commands, secrets, retries, locks, runbook |
 | [modules.md](./modules.md) | directory layout, dependency rules, per-lane hand-offs, test plan |
 
