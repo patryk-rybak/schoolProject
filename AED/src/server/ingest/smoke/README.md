@@ -1,7 +1,7 @@
 # Live smoke harness
 
-Reusable, read-only smoke test for the active declarative source configs in
-`backend/ingest/sources/`. It answers one question per family: does the live
+Reusable, read-only smoke test for the declarative sources in
+`backend/ingest/datasources-config.json`. It answers one question per family: does the live
 source still respond, parse with the configured shape, and satisfy the minimum
 mapping contract?
 
@@ -24,20 +24,19 @@ cd AED
 bun scripts/smoke-source-configs.ts                       # all configs live
 bun scripts/smoke-source-configs.ts --family html_table    # one family
 bun scripts/smoke-source-configs.ts --source krosno,marki  # selected ids
-bun scripts/smoke-source-configs.ts --active-only          # only the active registry
 bun scripts/smoke-source-configs.ts --ignore-robots        # compliance override
 bun scripts/smoke-source-configs.ts --no-write --quiet     # CI-friendly
 bun scripts/smoke-source-configs.ts --fail-on=failed       # nonzero on error
 ```
 
-Defaults: concurrency 4, timeout 30 s, both `backend/ingest/sources` and
-`backend/ingest/sources-excluded` (so the report still covers all 69), disabled
-configs included, `robots.txt` respected for HTML and KML, JSON report at
+Defaults: concurrency 4, timeout 30 s, the single
+`backend/ingest/datasources-config.json` registry, disabled configs included,
+`robots.txt` respected for HTML and KML, JSON report at
 `docs/research/source-inventory/config-smoke-report.json`, Markdown at
 `docs/research/source-inventory/config-smoke-report.md`.
 
-Each result carries `registry: "active" | "excluded"`. The Markdown report
-labels both groups and summarises them separately.
+Every result is labelled `registry: "active"`; there is no separate excluded
+registry any more.
 
 ## Family behavior
 

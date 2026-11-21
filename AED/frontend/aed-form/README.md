@@ -20,8 +20,8 @@ bezpośrednio w aplikacji — przez opiekuna urządzenia lub redakcję.
 
 ## Zależności
 
-- backend: [`../backend/store/`](../backend/store/README.md) — zapis rekordów,
-- backend: [`../backend/auth/`](../backend/auth/README.md) — kto może edytować,
+- backend: [`../../backend/store/`](../../backend/store/README.md) — zapis rekordów,
+- backend: [`../../backend/auth/`](../../backend/auth/README.md) — kto może edytować,
 - `frontend/map/` — wspólny komponent wyboru punktu na mapie.
 
 ## Stan obecny

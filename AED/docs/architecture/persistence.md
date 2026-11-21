@@ -100,15 +100,17 @@ must resume from the previous cursor, not from a partially advanced one.
 
 #### `source_config` — immutable configuration snapshots
 
-The config lane keeps one YAML file per source. The loader validates it against
-`backend/ingest/source-config.schema.json`, then stores the exact bytes here.
-This is what makes a historical `sync_run` reproducible after the YAML changes.
+The config lane keeps the single `backend/ingest/datasources-config.json`
+registry. The loader validates it against
+`backend/ingest/datasources-config.schema.json`, then stores the exact
+per-source config bytes here. This is what makes a historical `sync_run`
+reproducible after the registry changes.
 
 | Column | Type | Notes |
 | --- | --- | --- |
 | `source_id` | text PK FK | one active config per source |
 | `version` | integer | config contract version |
-| `config_yaml` | text | exact validated YAML |
+| `config_yaml` | text | exact validated per-source config JSON (column name retained for compatibility) |
 | `config_sha256` | text | SHA-256 of `config_yaml` |
 | `baseline_json` | json | drift baseline (counts, schema, golden sample) |
 | `baseline_sha256` | text | hash of baseline |

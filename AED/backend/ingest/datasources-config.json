@@ -1,0 +1,2966 @@
+{
+	"version": 1,
+	"sources": [
+		{
+			"connector": {
+				"family": "google_my_maps_kml",
+				"notes": "Punktowy KML; ExtendedData.gx_media_links mapowane na photo_url.",
+				"parser": "kml"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 32
+				},
+				"golden_sample": {
+					"required_match_ratio": 0.95,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "warn",
+					"on_new_field": "review",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 0.2,
+					"min_records": 28,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": false,
+					"last_modified": false
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 6
+				},
+				"retries": {
+					"backoff_ms": 2000,
+					"max": 2
+				},
+				"timeout_ms": 30000,
+				"url": "https://www.google.com/maps/d/kml?mid=171VXaQTmWbIPbtUvHfuzwQredJE3krA&forcekml=1",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"city": {
+					"const": "Bełchatów"
+				},
+				"confidence": {
+					"const": 0.55
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"description": {
+					"args": [
+						{
+							"field": "description"
+						}
+					],
+					"func": "strip_html"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"lat": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lat",
+						"precision_m": 15
+					}
+				},
+				"lon": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lon",
+						"precision_m": 15
+					}
+				},
+				"name": {
+					"field": "name"
+				},
+				"photo_license": {
+					"const": "unknown"
+				},
+				"photo_url": {
+					"field": "ExtendedData.gx_media_links"
+				},
+				"source_url": {
+					"const": "https://belchatow.pl/mapa-defibrylatorow-aed/"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"kml": {
+					"document_name_must_match": "Wykaz defibrylatorów AED na terenie Bełchatowa",
+					"point_only": true
+				}
+			},
+			"publish": {
+				"attribution": "Mapa Google My Maps Miasta Bełchatów; brak licencji",
+				"enabled": false,
+				"exports": [],
+				"license_id": "NOASSERTION",
+				"redact": [
+					"serial_number"
+				]
+			},
+			"records": {
+				"dedupe": {
+					"keep": "first",
+					"key": [
+						{
+							"field": "name"
+						},
+						{
+							"field": "coordinates"
+						}
+					],
+					"on_duplicate": "warn"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "google-my-maps:171VXaQTmWbIPbtUvHfuzwQredJE3krA"
+					},
+					"source_record_id": {
+						"template": "{source_id}:kml:{digest}",
+						"vars": {
+							"digest": {
+								"args": [
+									{
+										"field": "name"
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lon"
+										}
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lat"
+										}
+									}
+								],
+								"func": "stable_hash"
+							},
+							"source_id": {
+								"builtin": "source_id"
+							}
+						}
+					},
+					"stable": false
+				},
+				"path": "//Placemark"
+			},
+			"source": {
+				"access_type": "kml",
+				"coverage": {
+					"country": "PL",
+					"notes": "32 punkty w probie 2026-11-21 (licznik stabilny w dwóch pobraniach). Nazwa placemarku to obiekt + ulica; brak osobnego pola adresu.",
+					"teryt": [
+						"100101"
+					]
+				},
+				"enabled": false,
+				"homepage_url": "https://belchatow.pl/mapa-defibrylatorow-aed/",
+				"id": "belchatow",
+				"license": {
+					"attribution": "Mapa Google My Maps Miasta Bełchatów; brak deklaracji licencji",
+					"id": "NOASSERTION",
+					"share_alike": false,
+					"url": "https://www.google.com/intl/pl/maps/terms.html"
+				},
+				"name": "Wykaz defibrylatorów AED na terenie Bełchatowa (KML)",
+				"notes": "Brak licencji i daty. Opis placemarku to zwykle osadzony obraz; 10/32 ma ExtendedData.gx_media_links. Włącznik enabled=false do decyzji licencyjnej.",
+				"publisher": "Miasto Bełchatów",
+				"reliability_tier": "official_local",
+				"update_frequency": "unknown"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "file_static",
+				"notes": "Prosty CSV bez cudzysłowów w danych; BOM i wiodące spacje w nagłówkach.",
+				"parser": "csv"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": true,
+					"max_suspicious_ratio": 0,
+					"on_breach": "review"
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 21,
+					"schema_fields": [
+						"Długość geograficzna",
+						"Szerokość geograficzna",
+						"Nazwa",
+						"Lokalizacja",
+						"Adres",
+						"Numer Id"
+					]
+				},
+				"golden_sample": {
+					"required_match_ratio": 1,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "review",
+					"on_missing_field": "fail",
+					"on_new_field": "review",
+					"on_type_change": "review"
+				},
+				"volume": {
+					"max_delta_ratio": 0.5,
+					"min_records": 15,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": true,
+					"last_modified": true
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 30
+				},
+				"retries": {
+					"backoff_ms": 1000,
+					"max": 2
+				},
+				"timeout_ms": 30000,
+				"url": "https://api.dane.gov.pl/media/resources/20240219/Defibrylator_jAmxQcp.csv",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"address_text": {
+					"field": "Adres"
+				},
+				"confidence": {
+					"const": 0.6
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"label": {
+					"field": "Numer Id"
+				},
+				"lat": {
+					"args": [
+						{
+							"field": "Szerokość geograficzna"
+						}
+					],
+					"func": "to_float"
+				},
+				"lon": {
+					"args": [
+						{
+							"field": "Długość geograficzna"
+						}
+					],
+					"func": "to_float"
+				},
+				"name": {
+					"field": "Lokalizacja"
+				},
+				"operator_name": {
+					"const": null
+				},
+				"operator_type": {
+					"const": null
+				},
+				"source_updated_at": {
+					"const": "2024-02-19"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"csv": {
+					"delimiter": ",",
+					"empty_as_null": true,
+					"header": true,
+					"quote": "\"",
+					"skip_rows": 0
+				},
+				"encoding": "utf-8-sig",
+				"trim_headers": true
+			},
+			"publish": {
+				"allowed_for_export": true,
+				"allowed_for_ingest": true,
+				"attribution": "Miasto Krosno — dane.gov.pl",
+				"enabled": true,
+				"exports": [
+					"csv",
+					"geojson"
+				],
+				"license_id": "CC0-1.0",
+				"redact": [],
+				"terms_checked_at": "2026-11-21T00:00:00Z",
+				"terms_hash": "sha256:4f7659a6941f5160fc0afde17380d7312ab8d5382a6e5355ee07c7d6d7d2349d",
+				"terms_url": "https://creativecommons.org/publicdomain/zero/1.0/"
+			},
+			"records": {
+				"dedupe": {
+					"keep": "last",
+					"key": [
+						{
+							"field": "Numer Id"
+						}
+					],
+					"on_duplicate": "reject"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "dane.gov.pl:3624"
+					},
+					"source_record_id": {
+						"template": "krosno:{Numer Id}"
+					},
+					"stable": true
+				},
+				"path": "$"
+			},
+			"source": {
+				"access_type": "file",
+				"coverage": {
+					"country": "PL",
+					"notes": "21 rekordów; tylko sześć pól opisowych, brak operatora i statusu.",
+					"teryt": [
+						"186101"
+					]
+				},
+				"enabled": true,
+				"homepage_url": "https://dane.gov.pl/pl/dataset/3624",
+				"id": "krosno",
+				"license": {
+					"attribution": "Miasto Krosno — dane.gov.pl",
+					"id": "CC0-1.0",
+					"share_alike": false,
+					"url": "https://creativecommons.org/publicdomain/zero/1.0/"
+				},
+				"name": "Defibrylatory w Krośnie",
+				"notes": "Nagłówki: \"Długość geograficzna\", \"Szerokość geograficzna\", \" Nazwa\", \" Lokalizacja\", \" Adres\", \" Numer Id\". Po trim_headers nazwy są bez spacji. \"Nazwa\" to zawsze \"Defibrylator\"; nazwę obiektu zawiera \"Lokalizacja\".\n",
+				"publisher": "Urząd Miasta Krosna",
+				"reliability_tier": "official_local",
+				"update_frequency": "once"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"name",
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "google_my_maps_kml",
+				"notes": "Punktowy KML; normalizacja prefiksu nazwy i opisu HTML.",
+				"parser": "kml"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 136
+				},
+				"golden_sample": {
+					"required_match_ratio": 0.95,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "warn",
+					"on_new_field": "review",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 0.2,
+					"min_records": 120,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": false,
+					"last_modified": false
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 6
+				},
+				"retries": {
+					"backoff_ms": 2000,
+					"max": 2
+				},
+				"timeout_ms": 30000,
+				"url": "https://www.google.com/maps/d/kml?mid=1FMKFbebKJPYqD4C87pXWPqNjEHuEswE&forcekml=1",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"city": {
+					"const": "Łódź"
+				},
+				"confidence": {
+					"const": 0.55
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"description": {
+					"args": [
+						{
+							"field": "description"
+						}
+					],
+					"func": "strip_html"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"entrance_description": {
+					"args": [
+						{
+							"field": "description"
+						}
+					],
+					"func": "strip_html"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"indoor": {
+					"else": null,
+					"then": true,
+					"when": {
+						"left": {
+							"field": "description"
+						},
+						"op": "regex",
+						"right": "(?i)wewnątrz"
+					}
+				},
+				"lat": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lat",
+						"precision_m": 15
+					}
+				},
+				"lon": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lon",
+						"precision_m": 15
+					}
+				},
+				"name": {
+					"args": [
+						{
+							"args": [
+								{
+									"field": "name"
+								},
+								{
+									"const": "defibrylator - "
+								}
+							],
+							"func": "strip_prefix"
+						}
+					],
+					"func": "trim"
+				},
+				"source_url": {
+					"const": "https://www.lodz.pl/artykul/defibrylatory-na-ulicach-lodzi-jak-ich-uzywac-gdzie-je-znajdziesz-mapa-58563/"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"kml": {
+					"document_name_must_match": "defibrylatory AED",
+					"point_only": true
+				}
+			},
+			"publish": {
+				"attribution": "Mapa Google My Maps Miasta Łódź; brak licencji",
+				"enabled": false,
+				"exports": [],
+				"license_id": "NOASSERTION",
+				"redact": [
+					"serial_number"
+				]
+			},
+			"records": {
+				"dedupe": {
+					"keep": "first",
+					"key": [
+						{
+							"field": "name"
+						},
+						{
+							"field": "coordinates"
+						}
+					],
+					"on_duplicate": "warn"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "google-my-maps:1FMKFbebKJPYqD4C87pXWPqNjEHuEswE"
+					},
+					"source_record_id": {
+						"template": "{source_id}:kml:{digest}",
+						"vars": {
+							"digest": {
+								"args": [
+									{
+										"field": "name"
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lon"
+										}
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lat"
+										}
+									}
+								],
+								"func": "stable_hash"
+							},
+							"source_id": {
+								"builtin": "source_id"
+							}
+						}
+					},
+					"stable": false
+				},
+				"path": "//Placemark"
+			},
+			"source": {
+				"access_type": "kml",
+				"coverage": {
+					"country": "PL",
+					"notes": "136 punktów w probie 2026-11-21 (licznik stabilny w dwóch pobraniach); 135/136 z opisem. Artykuł z 2023 r. podaje 87 AED, mapa 136.",
+					"teryt": [
+						"106101"
+					]
+				},
+				"enabled": false,
+				"homepage_url": "https://www.lodz.pl/artykul/defibrylatory-na-ulicach-lodzi-jak-ich-uzywac-gdzie-je-znajdziesz-mapa-58563/",
+				"id": "lodz",
+				"license": {
+					"attribution": "Mapa Google My Maps Miasta Łódź; brak deklaracji licencji",
+					"id": "NOASSERTION",
+					"share_alike": false,
+					"url": "https://www.google.com/intl/pl/maps/terms.html"
+				},
+				"name": "Defibrylatory AED w Łodzi (Google My Maps, KML)",
+				"notes": "Brak licencji i daty; endpoint nieudokumentowany. Nazwa placemarku ma prefiks 'defibrylator - '. Opis zawiera piętro/obiekt i informację 'wewnątrz'. Włącznik enabled=false do decyzji licencyjnej.",
+				"publisher": "Miasto Łódź",
+				"reliability_tier": "official_local",
+				"update_frequency": "unknown"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "file_static",
+				"notes": "Dwustopniowe parsowanie (outer quotes, potem CSV) i walidacja bbox Marki.",
+				"parser": "csv"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": true,
+					"max_suspicious_ratio": 0.13,
+					"on_breach": "review"
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 8,
+					"schema_fields": [
+						"Długość geograficzna",
+						"Szerokość geograficzna",
+						"Nazwa",
+						"Lokalizacja",
+						"Adres",
+						"Numer Id"
+					]
+				},
+				"golden_sample": {
+					"required_match_ratio": 1,
+					"size": 8
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0.13,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "fail",
+					"on_missing_field": "fail",
+					"on_new_field": "review",
+					"on_type_change": "review"
+				},
+				"volume": {
+					"max_delta_ratio": 0.5,
+					"min_records": 6,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": true,
+					"last_modified": true
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 30
+				},
+				"retries": {
+					"backoff_ms": 1000,
+					"max": 2
+				},
+				"timeout_ms": 30000,
+				"url": "https://api.dane.gov.pl/media/resources/20250710/Defibrylator_GminaMiastoMarki_1.csv",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"address_text": {
+					"field": "Adres"
+				},
+				"confidence": {
+					"const": 0.6
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"label": {
+					"field": "Numer Id"
+				},
+				"lat": {
+					"args": [
+						{
+							"field": "Długość geograficzna"
+						}
+					],
+					"func": "to_float"
+				},
+				"lon": {
+					"args": [
+						{
+							"field": "Szerokość geograficzna"
+						}
+					],
+					"func": "to_float"
+				},
+				"name": {
+					"field": "Lokalizacja"
+				},
+				"operator_name": {
+					"const": null
+				},
+				"operator_type": {
+					"const": null
+				},
+				"source_updated_at": {
+					"const": "2025-07-10"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"csv": {
+					"delimiter": ",",
+					"empty_as_null": true,
+					"header": true,
+					"quote": "\"",
+					"repair_double_quotes": true,
+					"skip_rows": 0,
+					"unwrap_outer_quotes": true
+				},
+				"encoding": "utf-8-sig",
+				"trim_headers": true
+			},
+			"publish": {
+				"allowed_for_export": true,
+				"allowed_for_ingest": true,
+				"attribution": "Miasto Marki — dane.gov.pl, CC BY 4.0",
+				"enabled": true,
+				"exports": [
+					"csv",
+					"geojson"
+				],
+				"license_id": "CC-BY-4.0",
+				"redact": [],
+				"terms_checked_at": "2026-11-21T00:00:00Z",
+				"terms_hash": "sha256:2c31f90b734f0e2dd5dc017737eb2094e133be99a188396659c9cdb3bd3d0625",
+				"terms_url": "https://creativecommons.org/licenses/by/4.0/"
+			},
+			"records": {
+				"dedupe": {
+					"keep": "last",
+					"key": [
+						{
+							"field": "Numer Id"
+						}
+					],
+					"on_duplicate": "reject"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "dane.gov.pl:4955"
+					},
+					"source_record_id": {
+						"template": "marki:{Numer Id}"
+					},
+					"stable": true
+				},
+				"path": "$"
+			},
+			"source": {
+				"access_type": "file",
+				"coverage": {
+					"country": "PL",
+					"notes": "8 rekordów; CSV i XLSX. CSV ma wadliwe cytowanie i niespójną kolejność osi.",
+					"teryt": [
+						"143101"
+					]
+				},
+				"enabled": true,
+				"homepage_url": "https://dane.gov.pl/pl/dataset/4955",
+				"id": "marki",
+				"license": {
+					"attribution": "Miasto Marki — dane.gov.pl, CC BY 4.0",
+					"id": "CC-BY-4.0",
+					"share_alike": false,
+					"url": "https://creativecommons.org/licenses/by/4.0/"
+				},
+				"name": "Defibrylatory w Markach",
+				"notes": "Preferowany parser CSV po naprawie cytowania; XLSX jest alternatywą. Wiersz Numer Id=7 nie należy do Marek i musi trafić do kolejki review, nie na mapę.\n",
+				"publisher": "Miasto Marki",
+				"reliability_tier": "official_local",
+				"update_frequency": "once"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						21.05,
+						52.28,
+						21.18,
+						52.38
+					],
+					"on_invalid": "review"
+				},
+				"enums": true,
+				"on_error": "review",
+				"require_location": "point",
+				"required": [
+					"name",
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "google_my_maps_kml",
+				"notes": "Punktowy KML; guard nazwy dokumentu; brak ExtendedData.",
+				"parser": "kml"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 43
+				},
+				"golden_sample": {
+					"required_match_ratio": 0.95,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "warn",
+					"on_new_field": "review",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 0.2,
+					"min_records": 38,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": false,
+					"last_modified": false
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 6
+				},
+				"retries": {
+					"backoff_ms": 2000,
+					"max": 2
+				},
+				"timeout_ms": 30000,
+				"url": "https://www.google.com/maps/d/kml?mid=1J5zJj9kL49uq8799g5qNgfl21NoztwzK&forcekml=1",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"city": {
+					"const": "Olsztyn"
+				},
+				"confidence": {
+					"const": 0.55
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"lat": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lat",
+						"precision_m": 15
+					}
+				},
+				"lon": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lon",
+						"precision_m": 15
+					}
+				},
+				"name": {
+					"field": "name"
+				},
+				"source_url": {
+					"const": "https://olsztyn.eu/urzad-miasta/zdrowie/defibrylatory-na-terenie-olsztyna.html"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"kml": {
+					"document_name_must_match": "Mapa ogólnodostępnych defibrylatorów AED w Olsztynie",
+					"point_only": true
+				}
+			},
+			"publish": {
+				"attribution": "Mapa Google My Maps Miasta Olsztyn; brak licencji",
+				"enabled": false,
+				"exports": [],
+				"license_id": "NOASSERTION",
+				"redact": [
+					"serial_number"
+				]
+			},
+			"records": {
+				"dedupe": {
+					"keep": "first",
+					"key": [
+						{
+							"field": "name"
+						},
+						{
+							"field": "coordinates"
+						}
+					],
+					"on_duplicate": "warn"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "google-my-maps:1J5zJj9kL49uq8799g5qNgfl21NoztwzK"
+					},
+					"source_record_id": {
+						"template": "{source_id}:kml:{digest}",
+						"vars": {
+							"digest": {
+								"args": [
+									{
+										"field": "name"
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lon"
+										}
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lat"
+										}
+									}
+								],
+								"func": "stable_hash"
+							},
+							"source_id": {
+								"builtin": "source_id"
+							}
+						}
+					},
+					"stable": false
+				},
+				"path": "//Placemark"
+			},
+			"source": {
+				"access_type": "kml",
+				"coverage": {
+					"country": "PL",
+					"notes": "43 punkty w probie 2026-11-21 (licznik stabilny w dwóch pobraniach). Lista HTML na stronie miasta ma 54 pozycje (duplikaty i pozycje poza mapą); KML jest źródłem geometrii.",
+					"teryt": [
+						"286201"
+					]
+				},
+				"enabled": false,
+				"homepage_url": "https://olsztyn.eu/urzad-miasta/zdrowie/defibrylatory-na-terenie-olsztyna.html",
+				"id": "olsztyn",
+				"license": {
+					"attribution": "Mapa Google My Maps Miasta Olsztyn; brak deklaracji licencji",
+					"id": "NOASSERTION",
+					"share_alike": false,
+					"url": "https://www.google.com/intl/pl/maps/terms.html"
+				},
+				"name": "Mapa ogólnodostępnych defibrylatorów AED w Olsztynie (KML)",
+				"notes": "Brak licencji i daty. KML ma tylko nazwę instytucji i współrzędne, bez opisu i adresu strukturalnego. Włącznik enabled=false do decyzji licencyjnej.",
+				"publisher": "Miasto Olsztyn",
+				"reliability_tier": "official_local",
+				"update_frequency": "unknown"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "file_static",
+				"notes": "Pojedynczy duży plik GeoJSON; pobieranie warunkowe po ETag/Last-Modified.",
+				"parser": "geojson"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 18298
+				},
+				"golden_sample": {
+					"required_match_ratio": 0.95,
+					"size": 25
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0.01,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0.5
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "warn",
+					"on_new_field": "review",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 0.5,
+					"min_records": 10000,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": true,
+					"last_modified": true
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 6
+				},
+				"retries": {
+					"backoff_ms": 2000,
+					"max": 2
+				},
+				"timeout_ms": 120000,
+				"url": "https://openaedmap.org/api/v1/countries/PL.geojson",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"else": {
+						"map": {
+							"cases": {
+								"customers": "customers",
+								"no": "private",
+								"permissive": "permissive",
+								"private": "private",
+								"public": "public",
+								"yes": "public"
+							},
+							"default": "unknown",
+							"value": {
+								"field": "access"
+							}
+						}
+					},
+					"then": "key",
+					"when": {
+						"left": {
+							"field": "locked"
+						},
+						"op": "eq",
+						"right": "yes"
+					}
+				},
+				"city": {
+					"coalesce": [
+						{
+							"field": "addr:city"
+						},
+						{
+							"field": "addr:place"
+						}
+					]
+				},
+				"confidence": {
+					"const": 0.55
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"description": {
+					"field": "description"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"email": {
+					"coalesce": [
+						{
+							"field": "contact:email"
+						},
+						{
+							"field": "email"
+						}
+					]
+				},
+				"entrance_description": {
+					"coalesce": [
+						{
+							"field": "defibrillator:location:pl"
+						},
+						{
+							"field": "defibrillator:location"
+						}
+					]
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"fee": {
+					"args": [
+						{
+							"field": "fee"
+						}
+					],
+					"func": "to_bool"
+				},
+				"house_number": {
+					"field": "addr:housenumber"
+				},
+				"indoor": {
+					"args": [
+						{
+							"field": "indoor"
+						}
+					],
+					"func": "to_bool"
+				},
+				"is_24_7": {
+					"else": null,
+					"then": true,
+					"when": {
+						"left": {
+							"field": "opening_hours"
+						},
+						"op": "eq",
+						"right": "24/7"
+					}
+				},
+				"label": {
+					"field": "ref"
+				},
+				"last_verified_at": {
+					"args": [
+						{
+							"field": "check_date"
+						}
+					],
+					"func": "to_date"
+				},
+				"lat": {
+					"coord": {
+						"format": "geojson",
+						"from": "geometry",
+						"on_invalid": "reject",
+						"pick": "lat"
+					}
+				},
+				"level": {
+					"field": "level"
+				},
+				"lon": {
+					"coord": {
+						"format": "geojson",
+						"from": "geometry",
+						"on_invalid": "reject",
+						"pick": "lon"
+					}
+				},
+				"manufacturer": {
+					"field": "manufacturer"
+				},
+				"model": {
+					"field": "model"
+				},
+				"name": {
+					"coalesce": [
+						{
+							"field": "name"
+						},
+						{
+							"field": "defibrillator:location:pl"
+						},
+						{
+							"field": "defibrillator:location"
+						},
+						{
+							"field": "operator"
+						},
+						{
+							"const": "Defibrylator AED"
+						}
+					]
+				},
+				"note": {
+					"field": "note"
+				},
+				"opening_hours": {
+					"field": "opening_hours"
+				},
+				"operator_name": {
+					"field": "operator"
+				},
+				"operator_type": {
+					"map": {
+						"cases": {
+							"government": "government",
+							"ngo": "ngo",
+							"private": "business",
+							"public": "government"
+						},
+						"default": "unknown",
+						"value": {
+							"field": "operator:type"
+						}
+					}
+				},
+				"phone": {
+					"coalesce": [
+						{
+							"field": "phone"
+						},
+						{
+							"field": "contact:phone"
+						}
+					]
+				},
+				"photo_license": {
+					"field": "image:license"
+				},
+				"photo_url": {
+					"field": "image"
+				},
+				"postcode": {
+					"field": "addr:postcode"
+				},
+				"room": {
+					"field": "room"
+				},
+				"serial_number": {
+					"field": "serial_number"
+				},
+				"source_url": {
+					"template": "https://www.openstreetmap.org/{osm_type}/{osm_id}",
+					"vars": {
+						"osm_id": {
+							"args": [
+								{
+									"field": "@osm_id"
+								}
+							],
+							"func": "to_string"
+						},
+						"osm_type": {
+							"args": [
+								{
+									"field": "@osm_type"
+								}
+							],
+							"func": "lower"
+						}
+					}
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"street": {
+					"field": "addr:street"
+				},
+				"verification_status": {
+					"else": "unverified",
+					"then": "probable",
+					"when": {
+						"left": {
+							"args": [
+								{
+									"field": "check_date"
+								},
+								{
+									"builtin": "fetched_at"
+								}
+							],
+							"func": "date_age_days"
+						},
+						"op": "lte",
+						"right": 365
+					}
+				},
+				"website": {
+					"coalesce": [
+						{
+							"field": "contact:website"
+						},
+						{
+							"field": "website"
+						}
+					]
+				},
+				"wheelchair_access": {
+					"map": {
+						"cases": {
+							"limited": "limited",
+							"no": "no",
+							"yes": "yes"
+						},
+						"default": "unknown",
+						"value": {
+							"field": "wheelchair"
+						}
+					}
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"json": {
+					"unwrap_string": false
+				}
+			},
+			"publish": {
+				"allowed_for_export": true,
+				"allowed_for_ingest": true,
+				"attribution": "© OpenStreetMap contributors",
+				"enabled": true,
+				"exports": [
+					"geojson",
+					"csv"
+				],
+				"license_id": "ODbL-1.0",
+				"redact": [
+					"serial_number"
+				],
+				"terms_checked_at": "2026-11-21T00:00:00Z",
+				"terms_hash": "sha256:b8d8aebb21bf405f93f6e21bbf0d8f0a749844f9812ec58692f189add6402b47",
+				"terms_url": "https://opendatacommons.org/licenses/odbl/1-0/"
+			},
+			"records": {
+				"dedupe": {
+					"keep": "last",
+					"key": [
+						{
+							"field": "@osm_type"
+						},
+						{
+							"field": "@osm_id"
+						}
+					],
+					"on_duplicate": "warn"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "openaedmap:PL"
+					},
+					"source_record_id": {
+						"template": "{@osm_type}/{@osm_id}"
+					},
+					"stable": true
+				},
+				"path": "/features"
+			},
+			"source": {
+				"access_type": "file",
+				"coverage": {
+					"country": "PL",
+					"notes": "Eksport tylko node; 2 waye z tagiem emergency=defibrillator nie trafiają do PL.geojson."
+				},
+				"enabled": true,
+				"homepage_url": "https://openaedmap.org/",
+				"id": "openaedmap",
+				"license": {
+					"attribution": "© OpenStreetMap contributors",
+					"id": "ODbL-1.0",
+					"share_alike": true,
+					"url": "https://opendatacommons.org/licenses/odbl/1-0/"
+				},
+				"name": "OpenAEDMap — eksport krajowy PL",
+				"notes": "Źródło bazowe P0. Brak statusu działania, adresy addr:* pokryte ok. 0,4%, check_date ok. 32,7%. Każdy rekord musi pozostać unverified/probable, nigdy confirmed bez weryfikacji terenowej.\n",
+				"publisher": "OpenAEDMap / OpenStreetMap contributors",
+				"reliability_tier": "community",
+				"update_frequency": "continuous"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"name",
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "google_my_maps_kml",
+				"notes": "Punktowy KML; prefiks nazwy usuwany, description mapowany na address_text.",
+				"parser": "kml"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 12
+				},
+				"golden_sample": {
+					"required_match_ratio": 0.95,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "warn",
+					"on_new_field": "review",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 0.2,
+					"min_records": 10,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": false,
+					"last_modified": false
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 6
+				},
+				"retries": {
+					"backoff_ms": 2000,
+					"max": 2
+				},
+				"timeout_ms": 30000,
+				"url": "https://www.google.com/maps/d/kml?mid=1DSs_ESjkEU6AaxZjgpLgwtk5tlG11gc&forcekml=1",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"address_text": {
+					"field": "description"
+				},
+				"confidence": {
+					"const": 0.55
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"lat": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lat",
+						"precision_m": 15
+					}
+				},
+				"lon": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lon",
+						"precision_m": 15
+					}
+				},
+				"name": {
+					"args": [
+						{
+							"args": [
+								{
+									"field": "name"
+								},
+								{
+									"const": "Defibrylator AED - "
+								}
+							],
+							"func": "strip_prefix"
+						}
+					],
+					"func": "trim"
+				},
+				"source_url": {
+					"const": "https://www.pawlowice.pl/mieszkaniec/zdrowie/mapa-defibrylatorow-aed"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"kml": {
+					"document_name_must_match": "Defibrylatory AED - Gmina Pawłowice",
+					"point_only": true
+				}
+			},
+			"publish": {
+				"attribution": "Mapa Google My Maps Gminy Pawłowice; brak licencji",
+				"enabled": false,
+				"exports": [],
+				"license_id": "NOASSERTION",
+				"redact": [
+					"serial_number"
+				]
+			},
+			"records": {
+				"dedupe": {
+					"keep": "first",
+					"key": [
+						{
+							"field": "name"
+						},
+						{
+							"field": "coordinates"
+						}
+					],
+					"on_duplicate": "warn"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "google-my-maps:1DSs_ESjkEU6AaxZjgpLgwtk5tlG11gc"
+					},
+					"source_record_id": {
+						"template": "{source_id}:kml:{digest}",
+						"vars": {
+							"digest": {
+								"args": [
+									{
+										"field": "name"
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lon"
+										}
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lat"
+										}
+									}
+								],
+								"func": "stable_hash"
+							},
+							"source_id": {
+								"builtin": "source_id"
+							}
+						}
+					},
+					"stable": false
+				},
+				"path": "//Placemark"
+			},
+			"source": {
+				"access_type": "kml",
+				"coverage": {
+					"country": "PL",
+					"notes": "12 punktów w probie 2026-11-21 (licznik stabilny w dwóch pobraniach); w tym 7 OSP. TERYT gminy do potwierdzenia w rejestrze przed aktywacją.",
+					"teryt": [
+						"241004"
+					]
+				},
+				"enabled": false,
+				"homepage_url": "https://www.pawlowice.pl/mieszkaniec/zdrowie/mapa-defibrylatorow-aed",
+				"id": "pawlowice",
+				"license": {
+					"attribution": "Mapa Google My Maps Gminy Pawłowice; brak deklaracji licencji",
+					"id": "NOASSERTION",
+					"share_alike": false,
+					"url": "https://www.google.com/intl/pl/maps/terms.html"
+				},
+				"name": "Defibrylatory AED - Gmina Pawłowice (KML)",
+				"notes": "Brak licencji i daty. Nazwa ma prefiks 'Defibrylator AED - ', a description zawiera adres. Włącznik enabled=false do decyzji licencyjnej.",
+				"publisher": "Gmina Pawłowice",
+				"reliability_tier": "official_local",
+				"update_frequency": "unknown"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "http_json",
+				"notes": "Paginacja page/per_page; total_rows w odpowiedzi. Limit 120 req/min.",
+				"parser": "json"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 21,
+					"schema_fields": [
+						"id",
+						"name",
+						"description",
+						"category",
+						"city",
+						"street",
+						"home_number",
+						"postcode",
+						"phone",
+						"email",
+						"www",
+						"gallery",
+						"attachments",
+						"links",
+						"geometry",
+						"longitude",
+						"latitude",
+						"youtube_url",
+						"panorama_url"
+					]
+				},
+				"golden_sample": {
+					"required_match_ratio": 1,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"email": 0.9,
+						"name": 0,
+						"phone": 0.9,
+						"website": 0.9
+					},
+					"on_breach": "warn"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "review",
+					"on_new_field": "warn",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 0.5,
+					"min_records": 15,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": true,
+					"last_modified": true
+				},
+				"method": "GET",
+				"pagination": {
+					"limit_param": "per_page",
+					"page_param": "page",
+					"page_size": 100,
+					"start_page": 1,
+					"total_path": "/total_rows",
+					"type": "page"
+				},
+				"rate_limit": {
+					"requests_per_minute": 60
+				},
+				"retries": {
+					"backoff_ms": 1000,
+					"max": 3
+				},
+				"timeout_ms": 30000,
+				"url": "https://dane.przemysl.eu/wp-json/sod/v1/resources/15/structured",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"city": {
+					"field": "city"
+				},
+				"confidence": {
+					"const": 0.85
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"email": {
+					"args": [
+						{
+							"field": "email"
+						}
+					],
+					"func": "normalize_email"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"house_number": {
+					"on_missing": "null",
+					"value": {
+						"field": "home_number"
+					}
+				},
+				"label": {
+					"args": [
+						{
+							"field": "name"
+						}
+					],
+					"func": "derive_device_identifier"
+				},
+				"last_verified_at": {
+					"const": "2024-11-05"
+				},
+				"lat": {
+					"args": [
+						{
+							"field": "latitude"
+						}
+					],
+					"func": "to_float"
+				},
+				"lon": {
+					"args": [
+						{
+							"field": "longitude"
+						}
+					],
+					"func": "to_float"
+				},
+				"name": {
+					"args": [
+						{
+							"field": "name"
+						}
+					],
+					"func": "derive_location_name"
+				},
+				"operator_name": {
+					"const": null
+				},
+				"operator_type": {
+					"const": null
+				},
+				"phone": {
+					"args": [
+						{
+							"field": "phone"
+						}
+					],
+					"func": "normalize_phone"
+				},
+				"photo_url": {
+					"field": "gallery[0].url"
+				},
+				"postcode": {
+					"field": "postcode"
+				},
+				"source_updated_at": {
+					"const": "2024-11-05"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"street": {
+					"field": "street"
+				},
+				"verification_status": {
+					"const": "unverified"
+				},
+				"website": {
+					"args": [
+						{
+							"field": "www"
+						}
+					],
+					"func": "normalize_url"
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"json": {
+					"unwrap_string": false
+				}
+			},
+			"publish": {
+				"allowed_for_export": true,
+				"allowed_for_ingest": true,
+				"attribution": "Miasto Przemyśl — Portal Otwartych Danych, CC BY 4.0",
+				"enabled": true,
+				"exports": [
+					"geojson",
+					"csv"
+				],
+				"license_id": "CC-BY-4.0",
+				"redact": [],
+				"terms_checked_at": "2026-11-21T00:00:00Z",
+				"terms_hash": "sha256:2c31f90b734f0e2dd5dc017737eb2094e133be99a188396659c9cdb3bd3d0625",
+				"terms_url": "https://creativecommons.org/licenses/by/4.0/"
+			},
+			"records": {
+				"dedupe": {
+					"keep": "last",
+					"key": [
+						{
+							"field": "id"
+						}
+					],
+					"on_duplicate": "reject"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "przemysl:13:15"
+					},
+					"source_record_id": {
+						"template": "przemysl:15:{id}"
+					},
+					"stable": true
+				},
+				"path": "/rows"
+			},
+			"source": {
+				"access_type": "api",
+				"coverage": {
+					"country": "PL",
+					"notes": "21 rekordów, geometria Point EPSG:4326. Mirror dane.gov.pl: CC0 1.0.",
+					"teryt": [
+						"186201"
+					]
+				},
+				"enabled": true,
+				"homepage_url": "https://dane.przemysl.eu/",
+				"id": "przemysl",
+				"license": {
+					"attribution": "Miasto Przemyśl — Portal Otwartych Danych, CC BY 4.0",
+					"id": "CC-BY-4.0",
+					"share_alike": false,
+					"url": "https://creativecommons.org/licenses/by/4.0/"
+				},
+				"name": "Otwarte Dane Przemyśl — defibrylatory AED",
+				"notes": "Deklarowana aktualizacja codzienna, ale plik źródłowy pochodzi z 2024-11-05. Duplikat numeru AED 7639 w rekordach 757 i 764. Brak operatora, statusu, godzin i informacji o wejściu.\n",
+				"publisher": "Gmina Miasto Przemyśl",
+				"reliability_tier": "official_local",
+				"update_frequency": "daily"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"name",
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "google_my_maps_kml",
+				"notes": "Punktowy KML; minimalny schemat, tylko name i coordinates.",
+				"parser": "kml"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 13
+				},
+				"golden_sample": {
+					"required_match_ratio": 0.95,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "warn",
+					"on_new_field": "review",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 0.2,
+					"min_records": 10,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": false,
+					"last_modified": false
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 6
+				},
+				"retries": {
+					"backoff_ms": 2000,
+					"max": 2
+				},
+				"timeout_ms": 30000,
+				"url": "https://www.google.com/maps/d/kml?mid=1FJwYx26MGn5rWzS6mN2GJN_OZvy-EzY&forcekml=1",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"city": {
+					"const": "Tczew"
+				},
+				"confidence": {
+					"const": 0.55
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"lat": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lat",
+						"precision_m": 15
+					}
+				},
+				"lon": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lon",
+						"precision_m": 15
+					}
+				},
+				"name": {
+					"field": "name"
+				},
+				"source_url": {
+					"const": "https://tczew.pl/aed/"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"kml": {
+					"document_name_must_match": "AED Tczew",
+					"point_only": true
+				}
+			},
+			"publish": {
+				"attribution": "Mapa Google My Maps Miasta Tczew; brak licencji",
+				"enabled": false,
+				"exports": [],
+				"license_id": "NOASSERTION",
+				"redact": [
+					"serial_number"
+				]
+			},
+			"records": {
+				"dedupe": {
+					"keep": "first",
+					"key": [
+						{
+							"field": "name"
+						},
+						{
+							"field": "coordinates"
+						}
+					],
+					"on_duplicate": "warn"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "google-my-maps:1FJwYx26MGn5rWzS6mN2GJN_OZvy-EzY"
+					},
+					"source_record_id": {
+						"template": "{source_id}:kml:{digest}",
+						"vars": {
+							"digest": {
+								"args": [
+									{
+										"field": "name"
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lon"
+										}
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lat"
+										}
+									}
+								],
+								"func": "stable_hash"
+							},
+							"source_id": {
+								"builtin": "source_id"
+							}
+						}
+					},
+					"stable": false
+				},
+				"path": "//Placemark"
+			},
+			"source": {
+				"access_type": "kml",
+				"coverage": {
+					"country": "PL",
+					"notes": "13 punktów w probie 2026-11-21 (licznik stabilny w dwóch pobraniach); wcześniejszy audyt podawał 12. KML ma tylko nazwę i współrzędne, bez opisu.",
+					"teryt": [
+						"221401"
+					]
+				},
+				"enabled": false,
+				"homepage_url": "https://tczew.pl/aed/",
+				"id": "tczew",
+				"license": {
+					"attribution": "Mapa Google My Maps Miasta Tczew; brak deklaracji licencji",
+					"id": "NOASSERTION",
+					"share_alike": false,
+					"url": "https://www.google.com/intl/pl/maps/terms.html"
+				},
+				"name": "AED Tczew (Google My Maps, KML)",
+				"notes": "Brak licencji i daty. Nazwa placemarku to ulica + obiekt; brak strukturalnego adresu. Włącznik enabled=false do decyzji licencyjnej.",
+				"publisher": "Miasto Tczew",
+				"reliability_tier": "official_local",
+				"update_frequency": "unknown"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "http_json",
+				"notes": "POST JSON; odpowiedź to tablica obiektów GeoJSON-like.",
+				"parser": "json"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": null
+				},
+				"golden_sample": {
+					"required_match_ratio": 0.95,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0.02,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0.1
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "review",
+					"on_new_field": "warn",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 1,
+					"min_records": 1,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"auth": {
+					"env": "WARSZAWA_API_TOKEN",
+					"header": "Authorization",
+					"type": "header"
+				},
+				"body": {},
+				"conditional": {
+					"etag": false,
+					"last_modified": false
+				},
+				"headers": {
+					"Content-Type": "application/json"
+				},
+				"method": "POST",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 30
+				},
+				"retries": {
+					"backoff_ms": 1500,
+					"max": 3
+				},
+				"timeout_ms": 30000,
+				"url": "https://dane.um.warszawa.pl/api/action/get_scb_lokalizacja_defibrylatorow",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"map": {
+						"cases": {
+							"false": "private",
+							"nie": "private",
+							"niepubliczny": "private",
+							"no": "private",
+							"ogolnodostepny": "public",
+							"ogólnodostępny": "public",
+							"prywatny": "private",
+							"public": "public",
+							"publiczny": "public",
+							"tak": "public",
+							"true": "public",
+							"yes": "public"
+						},
+						"default": "unknown",
+						"value": {
+							"args": [
+								{
+									"field": "properties.device_public_access"
+								}
+							],
+							"func": "lower"
+						}
+					}
+				},
+				"address_text": {
+					"template": "{street}, {postcode} {city}",
+					"vars": {
+						"city": {
+							"field": "properties.location_city"
+						},
+						"postcode": {
+							"field": "properties.location_postcode"
+						},
+						"street": {
+							"field": "properties.location_street"
+						}
+					}
+				},
+				"city": {
+					"field": "properties.location_city"
+				},
+				"confidence": {
+					"const": 0.8
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"entrance_description": {
+					"field": "properties.location_description"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"is_24_7": {
+					"else": null,
+					"then": true,
+					"when": {
+						"left": {
+							"args": [
+								{
+									"field": "properties.device_access_description"
+								}
+							],
+							"func": "lower"
+						},
+						"op": "regex",
+						"right": "(24|całodob|calodob)"
+					}
+				},
+				"label": {
+					"field": "properties.defibrillator_id"
+				},
+				"lat": {
+					"coord": {
+						"format": "geojson",
+						"from": "geometry",
+						"on_invalid": "reject",
+						"pick": "lat",
+						"unwrap_single": true
+					}
+				},
+				"lon": {
+					"coord": {
+						"format": "geojson",
+						"from": "geometry",
+						"on_invalid": "reject",
+						"pick": "lon",
+						"unwrap_single": true
+					}
+				},
+				"manufacturer": {
+					"field": "properties.device_manufacturer"
+				},
+				"name": {
+					"coalesce": [
+						{
+							"field": "properties.location_object_name"
+						},
+						{
+							"field": "properties.location_building"
+						},
+						{
+							"field": "properties.location_description"
+						}
+					]
+				},
+				"note": {
+					"field": "properties.device_access_description"
+				},
+				"operator_name": {
+					"const": null
+				},
+				"operator_type": {
+					"const": null
+				},
+				"postcode": {
+					"field": "properties.location_postcode"
+				},
+				"source_updated_at": {
+					"const": "2026-06-01"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"street": {
+					"field": "properties.location_street"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"json": {
+					"unwrap_string": false
+				}
+			},
+			"publish": {
+				"allowed_for_export": true,
+				"allowed_for_ingest": true,
+				"attribution": "m.st. Warszawa — dane.gov.pl, CC BY 4.0",
+				"enabled": false,
+				"exports": [
+					"csv",
+					"geojson"
+				],
+				"license_id": "CC-BY-4.0",
+				"redact": [
+					"serial_number",
+					"phone"
+				],
+				"terms_checked_at": "2026-11-21T00:00:00Z",
+				"terms_hash": "sha256:2c31f90b734f0e2dd5dc017737eb2094e133be99a188396659c9cdb3bd3d0625",
+				"terms_url": "https://creativecommons.org/licenses/by/4.0/"
+			},
+			"records": {
+				"dedupe": {
+					"keep": "last",
+					"key": [
+						{
+							"field": "properties.defibrillator_id"
+						}
+					],
+					"on_duplicate": "reject"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "dane.gov.pl:39512"
+					},
+					"source_record_id": {
+						"template": "warszawa:{properties.defibrillator_id}"
+					},
+					"stable": true
+				},
+				"path": "$"
+			},
+			"source": {
+				"access_type": "api",
+				"coverage": {
+					"country": "PL",
+					"notes": "Najbardziej kompletny schemat miejski; brak statusu i daty weryfikacji.",
+					"teryt": [
+						"146501"
+					]
+				},
+				"enabled": false,
+				"homepage_url": "https://dane.gov.pl/pl/dataset/39512",
+				"id": "warszawa",
+				"license": {
+					"attribution": "m.st. Warszawa — dane.gov.pl, CC BY 4.0",
+					"id": "CC-BY-4.0",
+					"share_alike": false,
+					"url": "https://creativecommons.org/licenses/by/4.0/"
+				},
+				"name": "Lokalizacja defibrylatorów (AED) — m.st. Warszawa",
+				"notes": "API wymaga tokena. device_availability jest opisowe (np. \"Ograniczona\"), więc nie mapujemy go wprost na boolean. attachment to Base64, nie URL. Włącznik enabled=false do czasu potwierdzenia trybu listowania.\n",
+				"publisher": "m.st. Warszawa",
+				"reliability_tier": "official_local",
+				"update_frequency": "daily"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"name",
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		},
+		{
+			"connector": {
+				"family": "google_my_maps_kml",
+				"notes": "Pojedynczy dokument KML; guard nazwy dokumentu, wyłącznie geometria Point.",
+				"parser": "kml"
+			},
+			"drift": {
+				"actions": {
+					"fail": "disable",
+					"review": "quarantine",
+					"warn": "log"
+				},
+				"axis": {
+					"enabled": false
+				},
+				"baseline": {
+					"generated_at": "2026-11-21",
+					"record_count": 165
+				},
+				"golden_sample": {
+					"required_match_ratio": 0.95,
+					"size": 10
+				},
+				"quality": {
+					"max_coord_invalid_ratio": 0,
+					"max_duplicate_id_ratio": 0,
+					"max_null_ratio": {
+						"lat": 0,
+						"lon": 0,
+						"name": 0
+					},
+					"on_breach": "review"
+				},
+				"schema": {
+					"on_header_order_change": "ignore",
+					"on_missing_field": "warn",
+					"on_new_field": "review",
+					"on_type_change": "fail"
+				},
+				"volume": {
+					"max_delta_ratio": 0.2,
+					"min_records": 150,
+					"on_breach": "review"
+				}
+			},
+			"fetch": {
+				"conditional": {
+					"etag": false,
+					"last_modified": false
+				},
+				"method": "GET",
+				"pagination": {
+					"type": "none"
+				},
+				"rate_limit": {
+					"requests_per_minute": 6
+				},
+				"retries": {
+					"backoff_ms": 2000,
+					"max": 2
+				},
+				"timeout_ms": 30000,
+				"url": "https://www.google.com/maps/d/kml?mid=1WXrqKMAgKA_kzG5aF6bMiXpaFVA&forcekml=1",
+				"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+			},
+			"map": {
+				"access_type": {
+					"const": "unknown"
+				},
+				"confidence": {
+					"const": 0.55
+				},
+				"coord_precision_m": {
+					"const": 15
+				},
+				"country_code": {
+					"const": "PL"
+				},
+				"description": {
+					"field": "description"
+				},
+				"device_type": {
+					"const": "public_aed"
+				},
+				"facility_type": {
+					"const": "unknown"
+				},
+				"lat": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lat",
+						"precision_m": 15
+					}
+				},
+				"lon": {
+					"coord": {
+						"format": "kml",
+						"from": "coordinates",
+						"on_invalid": "reject",
+						"pick": "lon",
+						"precision_m": 15
+					}
+				},
+				"name": {
+					"field": "name"
+				},
+				"source_url": {
+					"const": "https://www.zielona-gora.pl/mapa-lokalizacji-automatycznych-defibrylatorow-w-zielonej-gorze/"
+				},
+				"status": {
+					"const": "unknown"
+				},
+				"verification_status": {
+					"const": "unverified"
+				}
+			},
+			"parse": {
+				"encoding": "utf-8",
+				"kml": {
+					"document_name_must_match": "AED w Zielonej Górze",
+					"point_only": true
+				}
+			},
+			"publish": {
+				"attribution": "Mapa Google My Maps Miasta Zielona Góra; brak licencji",
+				"enabled": false,
+				"exports": [],
+				"license_id": "NOASSERTION",
+				"redact": [
+					"serial_number"
+				]
+			},
+			"records": {
+				"dedupe": {
+					"keep": "first",
+					"key": [
+						{
+							"field": "name"
+						},
+						{
+							"field": "coordinates"
+						}
+					],
+					"on_duplicate": "warn"
+				},
+				"identity": {
+					"dataset_id": {
+						"const": "google-my-maps:1WXrqKMAgKA_kzG5aF6bMiXpaFVA"
+					},
+					"source_record_id": {
+						"template": "{source_id}:kml:{digest}",
+						"vars": {
+							"digest": {
+								"args": [
+									{
+										"field": "name"
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lon"
+										}
+									},
+									{
+										"const": "|"
+									},
+									{
+										"coord": {
+											"format": "kml",
+											"from": "coordinates",
+											"pick": "lat"
+										}
+									}
+								],
+								"func": "stable_hash"
+							},
+							"source_id": {
+								"builtin": "source_id"
+							}
+						}
+					},
+					"stable": false
+				},
+				"path": "//Placemark"
+			},
+			"source": {
+				"access_type": "kml",
+				"coverage": {
+					"country": "PL",
+					"notes": "165 punktów w probie 2026-11-21 (licznik stabilny w dwóch pobraniach); 93/165 z opisem. Strona źródłowa z 2017 r., brak daty modyfikacji KML.",
+					"teryt": [
+						"086201"
+					]
+				},
+				"enabled": false,
+				"homepage_url": "https://www.zielona-gora.pl/mapa-lokalizacji-automatycznych-defibrylatorow-w-zielonej-gorze/",
+				"id": "zielona-gora",
+				"license": {
+					"attribution": "Mapa Google My Maps Miasta Zielona Góra; brak deklaracji licencji",
+					"id": "NOASSERTION",
+					"share_alike": false,
+					"url": "https://www.google.com/intl/pl/maps/terms.html"
+				},
+				"name": "AED w Zielonej Górze (Google My Maps, KML)",
+				"notes": "Eksport nieudokumentowanego endpointu Google My Maps. Brak licencji i daty; źródło jest użyteczne do seedowania i weryfikacji, ale wymaga zgody wydawcy przed ingestią i eksportem. Włącznik enabled=false do czasu decyzji licencyjnej (G2).",
+				"publisher": "Miasto Zielona Góra",
+				"reliability_tier": "official_local",
+				"update_frequency": "unknown"
+			},
+			"validate": {
+				"coords": {
+					"bbox": [
+						14.1,
+						49,
+						24.2,
+						54.9
+					],
+					"on_invalid": "reject"
+				},
+				"enums": true,
+				"on_error": "reject",
+				"require_location": "point",
+				"required": [
+					"lat",
+					"lon"
+				]
+			},
+			"version": 1
+		}
+	]
+}

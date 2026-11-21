@@ -11,8 +11,8 @@ type Args = {
 
 function parseArgs(argv: string[]): Args {
 	const args: Args = {
-		outDir: resolve(process.cwd(), "data/core"),
-		rawDir: resolve(process.cwd(), "data/core/raw"),
+		outDir: resolve(process.cwd(), ".data/core"),
+		rawDir: resolve(process.cwd(), ".data/core/raw"),
 		write: true,
 	};
 	const sources: string[] = [];
@@ -34,8 +34,8 @@ function parseArgs(argv: string[]): Args {
 			console.log(
 				[
 					"Użycie: bun scripts/build-core-dataset.ts [opcje]",
-					"  --raw-dir <dir>   katalog surowych snapshotów (domyślnie data/core/raw)",
-					"  --out-dir <dir>   katalog wyjściowy (domyślnie data/core)",
+					"  --raw-dir <dir>   katalog surowych snapshotów (domyślnie .data/core/raw)",
+					"  --out-dir <dir>   katalog wyjściowy (domyślnie .data/core)",
 					"  --source <id>     tylko wskazane źródło (można powtarzać / po przecinku)",
 					"  --no-write        tylko policz, nie zapisuj plików",
 				].join("\n"),

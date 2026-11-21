@@ -12,14 +12,8 @@ Pliki tego projektu:
 
 | Plik | Rola |
 | --- | --- |
-| [`../backend/ingest/source-config.schema.json`](../backend/ingest/source-config.schema.json) | JSON Schema 2020-12 dla konfiguracji źródła |
-| [`../backend/ingest/examples/openaedmap-pl.yaml`](../backend/ingest/examples/openaedmap-pl.yaml) | OSM/OpenAEDMap, GeoJSON krajowy |
-| [`../backend/ingest/examples/przemysl-sod.yaml`](../backend/ingest/examples/przemysl-sod.yaml) | Przemyśl, REST JSON `/structured` |
-| [`../backend/ingest/examples/krosno-dane-gov-pl.yaml`](../backend/ingest/examples/krosno-dane-gov-pl.yaml) | Krosno, CSV z BOM i spacjami w nagłówkach |
-| [`../backend/ingest/examples/marki-dane-gov-pl.yaml`](../backend/ingest/examples/marki-dane-gov-pl.yaml) | Marki, podwójnie cytowany CSV i zamienione osie |
-| [`../backend/ingest/examples/warszawa-api.yaml`](../backend/ingest/examples/warszawa-api.yaml) | Warszawa, POST JSON z tokenem |
-| [`../backend/ingest/examples/generic-address-list.yaml`](../backend/ingest/examples/generic-address-list.yaml) | Szablon listy adresowej bez geometrii, `address_only` + geokodowanie |
-| [`../backend/ingest/examples/kml/`](../backend/ingest/examples/kml/) | Osiem konfiguracji JSON: sześć punktowych map Google My Maps oraz guardy Bydgoszcz (brak geometrii) i Piła (polygony) |
+| [`../backend/ingest/datasources-config.json`](../backend/ingest/datasources-config.json) | Pojedynczy rejestr źródeł: OpenAEDMap, Przemyśl, Krosno, Marki, Warszawa, konfiguracje HTML/PDF, KML i manualne |
+| [`../backend/ingest/datasources-config.schema.json`](../backend/ingest/datasources-config.schema.json) | JSON Schema 2020-12 dla rejestru i wpisu źródła |
 
 Znormalizowany inwentarz 69 źródeł, z przypisaniem `source_id`, priorytetu,
 rodziny connectora, parsera, licencji, statusu TERYT i blockerów, znajduje się w
@@ -31,16 +25,12 @@ sposób sprawdzenia:
 ```bash
 cd AED/backend/ingest
 python3 - <<'PY'
-import json, glob, yaml, jsonschema
-schema = json.load(open("source-config.schema.json"))
+import json, jsonschema
+schema = json.load(open("datasources-config.schema.json"))
 jsonschema.Draft202012Validator.check_schema(schema)
 v = jsonschema.Draft202012Validator(schema)
-for f in sorted(glob.glob("examples/*.yaml")):
-    v.validate(yaml.safe_load(open(f)))
-    print("OK", f)
-for f in sorted(glob.glob("examples/kml/*.json")):
-    v.validate(json.load(open(f)))
-    print("OK", f)
+v.validate(json.load(open("datasources-config.json")))
+print("OK datasources-config.json")
 PY
 ```
 
@@ -48,8 +38,8 @@ PY
 
 ## 0. TL;DR
 
-1. **Jedno źródło to jeden plik YAML plus jeden z rodziny connectorów.** Nie
-   piszemy osobnego kodu dla Krosna, Marek i Przemyśla. Różnice są w konfiguracji.
+1. **Jedno źródło to jeden wpis w rejestrze JSON plus jeden z rodziny connectorów.**
+   Nie piszemy osobnego kodu dla Krosna, Marek i Przemyśla. Różnice są w konfiguracji.
 2. **Konfiguracja jest danymi, nie kodem.** Mapping DSL nie ma `eval`, nie ma
    JavaScriptu, nie ma dostępu do sieci. Wykonuje tylko white-listowane funkcje.
 3. **Schemat kanoniczny jest kontraktem.** Klucze w `map` pochodzą z zamkniętej
@@ -941,7 +931,7 @@ store                 ->  publish (CSV/GeoJSON) -> dane.gov.pl harvester
 
 ### 7.3. Ładowanie konfiguracji
 
-- Katalog `backend/ingest/sources/*.yaml` w produkcji, `examples/*.yaml` w testach.
+- Rejestr `backend/ingest/datasources-config.json` w produkcji i testach.
 - Loader waliduje schemat i macierz rodzin przy starcie.
 - `source_config.config_sha256` pozwala odtworzyć, która wersja wygenerowała
   dany `sync_run`.
@@ -963,7 +953,7 @@ store                 ->  publish (CSV/GeoJSON) -> dane.gov.pl harvester
 
 ### Faza 1: fundament
 
-- [ ] dodać `source-config.schema.json` do CI i walidować wszystkie pliki YAML,
+- [ ] dodać `datasources-config.schema.json` do CI i walidować rejestr JSON,
 - [ ] napisać loader konfiguracji w `backend/ingest`,
 - [ ] dodać testy schematu: poprawny config, literówka w polu, zła para
       rodzina/parser, brak wymaganej sekcji,

@@ -1,21 +1,19 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseCanonicalAedRecord } from "../canonical";
-import { sourceConfigSchema } from "../config/schema";
+import { getSourceConfig } from "../config/loader";
 import { mapSourceRecord } from "./map";
 import { parseRawSource } from "./parse";
 import { RawSnapshotError, loadRawSnapshot } from "./raw";
 
 function loadConfig(id: string) {
-	const raw = JSON.parse(
-		readFileSync(
-			join(process.cwd(), "backend/ingest/sources", `${id}.json`),
-			"utf8",
-		),
-	) as unknown;
-	return sourceConfigSchema.parse(raw);
+	const config = getSourceConfig(id);
+	if (!config) {
+		throw new Error(`Brak konfiguracji źródła ${id}.`);
+	}
+	return config;
 }
 
 describe("core parser and mapper", () => {

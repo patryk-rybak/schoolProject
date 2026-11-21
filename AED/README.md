@@ -40,7 +40,7 @@ AED/
 └── backend/                  # dane, uwierzytelnianie, integracje
     ├── auth/                 # better-auth (serwer)
     ├── store/                # Drizzle + bun:sqlite, repozytorium AED
-    ├── ingest/               # plan modułu: pobieranie źródeł
+    ├── ingest/               # pobieranie źródeł i budowa rdzenia
     ├── normalize/            # plan modułu: standaryzacja
     └── gov-api/              # plan modułu: feed dla dane.gov.pl
 ```
@@ -57,7 +57,7 @@ Aliasy ścieżek: `#/*` → `frontend/*`, `#backend/*` → `backend/*`
 | frontend | [`map/`](./frontend/map/README.md) | działa (mapa bazowa) |
 | frontend | [`social-media/`](./frontend/social-media/README.md) | planowane |
 | backend | [`auth/`](./backend/auth/README.md) | częściowo istnieje |
-| backend | [`ingest/`](./backend/ingest/README.md) | planowane |
+| backend | [`ingest/`](./backend/ingest/README.md) | działa (dev) |
 | backend | [`normalize/`](./backend/normalize/README.md) | planowane |
 | backend | [`store/`](./backend/store/README.md) | działa (dev) |
 | backend | [`gov-api/`](./backend/gov-api/README.md) | planowane |
@@ -101,8 +101,26 @@ Aplikacja działa pod http://localhost:3000.
 | Migracje | `bun run db:generate`, `bun run db:migrate`, `bun run db:push` |
 | Dane startowe (dev) | `bun run db:seed` |
 | Drizzle Studio | `bun run db:studio` |
+| Ingest źródeł i budowa core | `bun run ingest:run` |
 | Kafelki mapy | `bun run map:tiles` |
 | Nowy komponent shadcn | `bunx --bun shadcn@latest add <nazwa>` |
+
+## Dane AED (ingest)
+
+Rejestr źródeł to jeden plik `backend/ingest/datasources-config.json`.
+`source.enabled=false` wyłącza źródło w zwykłym przebiegu; `--all` (lub jawne
+`--source <id>`) pobiera je mimo bramki. Pełny przebieg:
+
+```bash
+bun run ingest:run
+```
+
+Skrypt najpierw zapisuje **surowe snapshoty** do `.data/core/raw/`
+(`<source-id>.<ext>` + `.meta.json` z `sha256`, HTTP, licencją i liczbą
+rekordów), a potem buduje wspólny zbiór kanoniczny w `.data/core/`. Katalog
+`.data/` jest ignorowany przez git. Opcje `--no-fetch`, `--no-write`,
+`--out-dir` i `--raw-dir` pozwalają sterować przebiegiem. Szczegóły:
+[`backend/ingest/README.md`](./backend/ingest/README.md).
 
 ## Mapa
 
