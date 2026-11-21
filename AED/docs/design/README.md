@@ -16,6 +16,7 @@ Model kanoniczny z dokumentu bazowego odpowiada na pytanie **jak wygląda rekord
 2. **Co dokładnie widzi mapa i publiczne API** oraz jakie filtry są częścią kontraktu ([`public-api-and-filters.md`](./public-api-and-filters.md)).
 3. **Jak wykrywamy awarie, starzenie danych i naruszenia licencji** ([`observability-licensing.md`](./observability-licensing.md)).
 4. **Jak wdrażamy, testujemy i odbieramy rozwiązanie** ([`rollout-testing-acceptance.md`](./rollout-testing-acceptance.md)).
+5. **Jak źródła powstają, są wersjonowane i aktywowane** przez kreator, dry-run, shadow i bramki ([`source-config-lifecycle.md`](./source-config-lifecycle.md)).
 
 Dokumenty są pisane pod implementację w istniejącym stacku: TanStack Start, Bun, `bun:sqlite`, Drizzle, better-auth, MapLibre. Nie wprowadzają nowej infrastruktury poza opcjonalnym zewnętrznym zbieraniem metryk.
 
@@ -43,6 +44,16 @@ Dokumenty są pisane pod implementację w istniejącym stacku: TanStack Start, B
 | D8 | Każdy przebieg ma budżet błędów i alert po przekroczeniu progu odrzuceń lub spadku wolumenu | Cicha degradacja danych jest groźniejsza niż głośna awaria | ops |
 | D9 | Wydanie jest fazowe: P0 OSM/OpenAEDMap + Przemyśl, P1 gminy, P2 rejestry i zgłoszenia | Zgodne z roadmapą modelu kanonicznego | rollout |
 | D10 | Odbioru dokonujemy na lokalnej instancji dane.gov.pl, nie tylko na mockach | Harwester, MD5 i XSD to realne wymagania portalu | rollout |
+| D11 | Źródła mają `managed_by = code \| runtime`; rejestr kodowy jest ziarnem, źródła runtime są wersjonowane w bazie | Dodawanie źródeł bez deployu bez zrywania kontraktu rejestru | config |
+| D12 | Konfiguracja jest niezmiennym JSON z `revision` i `config_sha256`; `version: 1` to wersja schematu | Odtwarzalność i porównywanie wersji | config |
+| D13 | Cykl wersji `draft -> validated -> dry_run_passed -> shadowing -> ready -> active` z gałęziami `rejected`/`revoked`/`paused` | Nie da się przeskoczyć bramki | config |
+| D14 | Dry-run i shadow nie tworzą `source_record`, `record_candidate`, `observation`, `aed_alias` ani `aed` | Izolacja testów od danych publicznych | config |
+| D15 | Aktywacja wymaga `admin`, świeżego raportu bramek i minimum udanych shadow | Chroni przed nieprzetestowanym wdrożeniem | config, rollout |
+| D16 | Rollback jest natychmiastowy, przebieg w toku kończy na przypiętej wersji, dane wycofuje `retract` | Odtwarzalność i brak osieroconych aliasów | config |
+| D17 | Sekrety to referencje `AED_*`; opcjonalny sejf AES-256-GCM, wartość nigdy nie jest zwracana | Zgodność z `operations.md` i bezpieczeństwo UI | config, ops |
+| D18 | Hosty źródeł przechodzą politykę URL i allowlistę; produkcja przez proxy egress | SSRF przy onboardingu jest realnym wektorem | config, ops |
+| D19 | Zmiana mapowania unieważnia kandydatów przez `config_revision` i wymusza pełny refresh | Inaczej nowe mapowanie nie utworzy kandydatów | config, storage |
+| D20 | Licencja, pierwsza aktywacja runtime i rollback po incydencie `license`/`security` wymagają czterech oczu, jeśli są dwaj admini | Prawo i bezpieczeństwo przed wygodą | config |
 
 ## 4. Mapa dokumentów
 
@@ -56,6 +67,8 @@ flowchart LR
     API --> MAP["Mapa publiczna"]
     ADMIN["Panel administracyjny"] --> ING
     ADMIN --> DB
+    ADMIN --> CFG["Konfiguracja źródeł: wersje, bramki"]
+    CFG --> ING
     OBS["Metryki, logi, alerty"] -.-> ING
     OBS -.-> API
     OBS -.-> GOV
@@ -66,6 +79,7 @@ flowchart LR
 | Dokument | Odbiorca | Najważniejsze artefakty |
 | --- | --- | --- |
 | [`admin-console.md`](./admin-console.md) | zespół backendu i frontendu, redakcja | role, trasy, ekrany, maszyna stanów przebiegu, API administracyjne |
+| [`source-config-lifecycle.md`](./source-config-lifecycle.md) | backend, security, redakcja | CRUD i wersjonowanie konfiguracji, kreator, inferencja, dry-run, shadow, bramki, SSRF, sekrety, audyt, rollback |
 | [`public-api-and-filters.md`](./public-api-and-filters.md) | frontend mapy, partnerzy, harwester | endpointy, parametry filtrów, koperta odpowiedzi, widoczność pól, stany UI |
 | [`observability-licensing.md`](./observability-licensing.md) | ops, prawo, redakcja | logi, metryki, SLO, katalog alertów, bramki licencyjne, RODO |
 | [`rollout-testing-acceptance.md`](./rollout-testing-acceptance.md) | cały zespół, oceniający | fazy, testy, kryteria akceptacji, rollback, definicja ukończenia |
@@ -96,6 +110,9 @@ flowchart LR
 | rekord kanoniczny (`aed`) | urządzenie po normalizacji i deduplikacji |
 | kolejka review | rekordy wymagające decyzji człowieka: konflikt, złe współrzędne, duplikat |
 | bramka licencyjna | warunek, bez którego źródło nie może być pobierane lub eksportowane |
+| wersja konfiguracji | niezmienny, numerowany dokument konfiguracji źródła z hashem treści |
+| bramka aktywacji | warunek z dowodem, który musi przejść konfiguracja przed zapisem danych kanonicznych |
+| shadow | pełny pipeline w izolacji, bez zapisu danych kanonicznych |
 | świeżość | czas od `last_verified_at` lub od ostatniego udanego przebiegu, zależnie od kontekstu |
 
 ## 7. Powiązania z istniejącym kodem
@@ -107,6 +124,7 @@ flowchart LR
 | Auth | e-mail/hasło, brak ról | role i guardy z `admin-console.md` |
 | Mapa | podkład Protomaps, brak AED | warstwa, filtry i panel z `public-api-and-filters.md` |
 | Testy | brak | plan z `rollout-testing-acceptance.md` |
+| Konfiguracja źródeł | brak | wersjonowany CRUD, kreator i bramki z `source-config-lifecycle.md` |
 | CI | krok `TODO` | realne `typecheck`, `check`, `test`, walidacja feedu |
 
 ## 8. Otwarte pytania
@@ -120,6 +138,7 @@ flowchart LR
 ## 9. Jak czytać ten zestaw
 
 - Implementator backendu zaczyna od `admin-console.md` (sekcje 5 i 8) oraz `public-api-and-filters.md` (sekcje 3 i 4).
+- Implementator konfiguracji źródeł zaczyna od `source-config-lifecycle.md` (sekcje 5, 7, 10 i 12).
 - Implementator frontendu zaczyna od `public-api-and-filters.md` (sekcje 6 i 7).
 - Osoba oceniająca zaczyna od `rollout-testing-acceptance.md` (sekcja 6, tabela kryteriów).
 - Ops i prawo zaczynają od `observability-licensing.md` (sekcje 4 i 6).
