@@ -1,0 +1,15 @@
+{
+  "source_id": "tczew",
+  "fetched_at": "2026-11-21T21:06:15Z",
+  "final_url": "https://www.google.com/maps/d/kml?mid=1FJwYx26MGn5rWzS6mN2GJN_OZvy-EzY&forcekml=1",
+  "http_status": 200,
+  "content_type": "text/xml; charset=utf-8",
+  "bytes": 4836,
+  "sha256": "99f7ad12fe8ed6e72500cadfc7920fdaf2605042687c7738224d3ef20c5c1ac9",
+  "raw_file": "data/core/raw/tczew.kml",
+  "config_path": "backend/ingest/sources/tczew.json",
+  "license_id": "NOASSERTION",
+  "placemark_count": 13,
+  "point_count": 13,
+  "parse_notes": "XML parsed; Document name='AED Tczew'. Document name matches config. Placemark=13; geometry counts={'Point': 13}. Placemarks with non-empty description=0; with ExtendedData=0. point_only holds: only Point geometries present. Config parser=kml; encoding expected=utf-8."
+}

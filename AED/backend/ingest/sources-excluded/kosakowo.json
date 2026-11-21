@@ -1,0 +1,205 @@
+{
+	"connector": {
+		"family": "html_list",
+		"notes": "Lista lokalizacji jest wklejonym postem Facebooka: dziesięć leaf-divów `div[dir=auto]` z tekstem typu „OSP i Straż Gminna – Kosakowo”. Selektor `div` + zakotwiczony record_filter wybiera dokładnie te 10 wpisów; nie ma adresów ani współrzędnych.",
+		"parser": "html_list"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": false,
+			"max_suspicious_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 10
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 1,
+			"max_duplicate_id_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "ignore",
+			"on_missing_field": "review",
+			"on_new_field": "review",
+			"on_type_change": "review"
+		},
+		"volume": {
+			"max_delta_ratio": 0.5,
+			"min_records": 10,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": true,
+			"last_modified": true
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 6
+		},
+		"retries": {
+			"backoff_ms": 1500,
+			"max": 2
+		},
+		"timeout_ms": 30000,
+		"url": "https://gminakosakowo.pl/aktualnosci/informacja-o-zainstalowanych-ogolnodostepnych-defibrylatorach-aed-w-gminie-kosakowo/",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"geocoding": {
+		"address_template": "{address_text}, {city}",
+		"cache_ttl_days": 365,
+		"enabled": false,
+		"geoportal": {
+			"endpoint": "https://services.gugik.gov.pl/uug/",
+			"max_results": 5,
+			"min_accuracy": 0.8,
+			"only_exact_numbers": true,
+			"output_srid": 4326,
+			"request": "GetAddress",
+			"srid": 2180
+		},
+		"min_confidence": 0.8,
+		"on_failure": "address_only",
+		"provider_order": [
+			"gugik-uug"
+		],
+		"rate_limit": {
+			"requests_per_minute": 30
+		},
+		"required_components": [
+			"city"
+		],
+		"strategy": "structured_first"
+	},
+	"map": {
+		"access_type": {
+			"const": "unknown"
+		},
+		"address_text": {
+			"const": null
+		},
+		"city": {
+			"field": "place"
+		},
+		"confidence": {
+			"const": 0.3
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"name": {
+			"field": "name"
+		},
+		"source_url": {
+			"const": "https://gminakosakowo.pl/aktualnosci/informacja-o-zainstalowanych-ogolnodostepnych-defibrylatorach-aed-w-gminie-kosakowo/"
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"verification_status": {
+			"const": "unverified"
+		}
+	},
+	"parse": {
+		"encoding": "utf-8",
+		"html_list": {
+			"collapse_whitespace": true,
+			"empty_as_null": true,
+			"fields": {
+				"name": {
+					"group": 1,
+					"regex": "^(.+?)\\s+–\\s+"
+				},
+				"place": {
+					"group": 1,
+					"regex": "–\\s+([^.]+)\\.?$"
+				}
+			},
+			"max_records": 12,
+			"min_records": 10,
+			"record_filter": {
+				"regex": "^[^–]{1,80}\\s+–\\s+(Kosakowo|Rewa|Suchy Dwór|Pogórze|Mechelinki|Kazimierz|przy ogrodzeniu)\\.?$"
+			},
+			"select": "div",
+			"trim": true
+		},
+		"trim_headers": true
+	},
+	"publish": {
+		"allowed_for_export": false,
+		"allowed_for_ingest": false,
+		"attribution": "Kosakowo — NOASSERTION",
+		"enabled": false,
+		"exports": [],
+		"license_id": "NOASSERTION"
+	},
+	"records": {
+		"identity": {
+			"source_record_id": {
+				"template": "kosakowo:{row_index}"
+			},
+			"stable": false
+		},
+		"path": "$"
+	},
+	"schedule": {
+		"cron": "0 3 * * 1",
+		"jitter_seconds": 300,
+		"timezone": "Europe/Warsaw"
+	},
+	"source": {
+		"access_type": "html",
+		"coverage": {
+			"country": "PL",
+			"notes": "pomorskie; gmina wiejska; Wykaz 10 obiektów bez adresów i współrzędnych; link do OpenAEDMap. 10 obiektów; brak adresów i współrzędnych; link do OpenAEDMap.",
+			"teryt": [
+				"2211052"
+			]
+		},
+		"enabled": false,
+		"homepage_url": "https://gminakosakowo.pl/aktualnosci/informacja-o-zainstalowanych-ogolnodostepnych-defibrylatorach-aed-w-gminie-kosakowo/",
+		"id": "kosakowo",
+		"license": {
+			"attribution": "Kosakowo: brak deklaracji licencji",
+			"id": "NOASSERTION"
+		},
+		"name": "Kosakowo",
+		"notes": "Wykaz 10 obiektów bez adresów i współrzędnych; link do OpenAEDMap. 10 obiektów; brak adresów i współrzędnych; link do OpenAEDMap.",
+		"publisher": "Kosakowo",
+		"reliability_tier": "official_local",
+		"update_frequency": "unknown"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				14.07,
+				49,
+				24.15,
+				54.84
+			],
+			"on_invalid": "review",
+			"on_missing": "review"
+		},
+		"enums": true,
+		"on_error": "review",
+		"require_location": "none",
+		"required": [
+			"name"
+		]
+	},
+	"version": 1
+}

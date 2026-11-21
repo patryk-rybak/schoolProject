@@ -1,0 +1,1443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>defibrylatory AED</name>
+    <description/>
+    <Style id="icon-1592-DB4436-normal">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+    </Style>
+    <Style id="icon-1592-DB4436-highlight">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+    </Style>
+    <StyleMap id="icon-1592-DB4436">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1592-DB4436-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1592-DB4436-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Style id="icon-1592-DB4436-nodesc-normal">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="icon-1592-DB4436-nodesc-highlight">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="icon-1592-DB4436-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1592-DB4436-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1592-DB4436-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name>defibrylatory</name>
+      <Placemark>
+        <name>defibrylator - Paradna 36</name>
+        <description><![CDATA[3 Dom Pomocy Społecznej<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4797692,51.7093566,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Podgórna 2/14</name>
+        <description><![CDATA[5 Dom Pomocy Społecznej<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.48769,51.7398892,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Złotnicza 10, 91-836 Łódź</name>
+        <description><![CDATA[6 Dom Pomocy Społecznej<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4632551,51.7899422,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Rojna 15, 91-142 Łódź</name>
+        <description><![CDATA[Dom Pomocy Społecznej<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3898256,51.793533,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Spadkowa 4/6, 91-232 Łódź</name>
+        <description><![CDATA[Dom Pomocy Społecznej<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3486576,51.8097085,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Rudzka 56, 93-423 Łódź </name>
+        <description><![CDATA[Dom Pomocy Społecznej<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4338917,51.7061796,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Przyrodnicza 24/26, 91-480 Łódź</name>
+        <description><![CDATA[DPS „Dom kombatanta”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4502671,51.802865,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Dojazdowa 5/7, 91-503 Łódź</name>
+        <description><![CDATA[DPS „Pogodna Jesień”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4754559,51.8103702,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Bydgoska 17, Łódź</name>
+        <description><![CDATA[MCM Bałuty<br>	Przychodnia Zdrowia „Bydgoska”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4256771,51.7871523,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Karola Libelta 16, Łódź</name>
+        <description><![CDATA[MCM Bałuty<br>Przychodnia Zdrowia „Karola Libelta”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.479871,51.790564,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Murarska 4, Łódź</name>
+        <description><![CDATA[MCM Bałuty<br>Przychodnia Zdrowia „Murarska”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4463797,51.7966839,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Traktorowa 61, Łódź</name>
+        <description><![CDATA[MCM Bałuty<br>Przychodnia Zdrowia „Traktorowa”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.394813,51.7951462,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Nastrojowa 10, Łódź</name>
+        <description><![CDATA[MCM Bałuty<br>Przychodnia Zdrowia „Nastrojowa”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4406531,51.8238227,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Motylowa 4, Łódź</name>
+        <description><![CDATA[MCM Bałuty<br>Przychodnia Zdrowia „Motylowa”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4285632,51.8189804,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[defibrylator - Przychodnia Zdrowia "Wielkopolska", ul. Wielkopolska 55, Łódź]]></name>
+        <description><![CDATA[MCM Bałuty	Przychodnia Zdrowia "Wielkopolska"	<br>ul. Wielkopolska 55	<br>wewnątrz, parter Poradnia Dziecięca	<br>godz: 8.00-18.00 w dni robocze]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3986881,51.7938255,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Felińskiego 7, 93-252 Łódź</name>
+        <description><![CDATA[MCM Górna<br>Poradnia<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4972906,51.7324029,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator -  ul. Cieszkowskiego 6, 93-504 Łódź</name>
+        <description><![CDATA[MCM Górna<br>Poradnia<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4492115,51.73373,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Odrzańska 29, 93-472 Łódź</name>
+        <description><![CDATA[MCM Górna<br>Poradnia<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4239543,51.7144106,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Lecznicza 6, 93-173 Łódź</name>
+        <description><![CDATA[MCM im. dr. K. Jonschera<br>Przychodnia<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4731739,51.7348956,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Zarzewska 56/28, Łódź</name>
+        <description><![CDATA[MCM im. dr. K. Jonschera<br>Przychodnia<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4735142,51.7431775,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Kasprzaka 27, Łódź</name>
+        <description><![CDATA[MCM Polesie<br>Przychodnia nr 33<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4277675,51.7762426,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Olimpijska 7a, Łódź</name>
+        <description><![CDATA[MCM Polesie<br>Przychodnia nr 36<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4120399,51.746038,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. A. Struga 86, Łódź</name>
+        <description><![CDATA[MCM Polesie<br>Specjalistyczna Przychodnia dla Dzieci, Młodzieży i Dorosłych<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4341873,51.7617247,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Garnizonowa 38, Łódź</name>
+        <description><![CDATA[MCM Polesie<br>Przychodnia nr 34<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3847852,51.7726373,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Wileńska 25, Łódź</name>
+        <description><![CDATA[MCM Polesie<br>Przychodnia nr 35<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4263947,51.7521518,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Kusocińskiego 140a, Łódź</name>
+        <description><![CDATA[MCM Polesie<br>Przychodnia nr 37<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3862773,51.74558,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - al. Piłsudskiego 138, Łódź</name>
+        <description><![CDATA[Miejska Arena Kultury i Sportu<br>Stadion miejski<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5123917,51.7652966,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Stadion, al. Unii Lubelskiej 2, Łódź</name>
+        <description><![CDATA[Miejska Arena Kultury i Sportu<br>Stadion Miejski<br>al. Unii Lubelskiej 2, 94-020 Łódź<br>wewnątrz budynku, wejście główne - parter, hol	całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4266964,51.7580305,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Przybyszewskiego 253, Łódź</name>
+        <description><![CDATA[Miejskie Centrum Terapii i Profilaktyki Zdrowotnej Oddział Diagnostyczno-Obserwacyjny<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5153191,51.7503812,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Niciarniana 41, Łódź</name>
+        <description><![CDATA[Miejskie Centrum Terapii i Profilaktyki Zdrowotnej<br>Poradnia]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5087428,51.7595794,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Stefanowskiego 28, Łódź</name>
+        <description><![CDATA[MOSIR<br>Lodowisko Bombonierka<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.453986,51.7505576,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. ks. Skorupki 21, 90-532 Łódź</name>
+        <description><![CDATA[MOSIR<br>Hala Sportowa Wielofunkcyjna<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4517526,51.7494819,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Stanisława Małachowskiego 5/7, Łódź</name>
+        <description><![CDATA[MOSIR<br>Obiekt Sportowy Hala<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4988928,51.770401,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Sobolowa 1, Łódź</name>
+        <description><![CDATA[MOSIR<br>Pływalnia sezonowa<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5129051,51.7615454,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Śląska 168, Łódź</name>
+        <description><![CDATA[MOSIR<br>Obiekt Rekreacyjno-Wypoczynkowy „Młynek”<br>wewnątrz, w budynku przystani, pomieszczenie medyczne<br>w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5226258,51.7252228,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Głowackiego 10/12, Łódź</name>
+        <description><![CDATA[MOSIR<br>Pływalnia „Promienistych”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.470461,51.789537,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Popiełuszki 13b, Łódź</name>
+        <description><![CDATA[MOSIR<br>Lodowisko „Retkinia”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3893575,51.7405086,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Skrzydlata 75, Łódź</name>
+        <description><![CDATA[MOSIR	Obiekt Rekreacyjno-Wypoczynkowy „Arturówek”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4729671,51.823699,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Rzgowska 247, Łódź</name>
+        <description><![CDATA[MOSIR	Obiekt Rekreacyjno-Wypoczynkowy „Stawy Jana”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4856323,51.7128446,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Karpacka 61, Łódź</name>
+        <description><![CDATA[MOSIR<br>Obiekt Sportowy „Karpacka”<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4617057,51.7243854,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Krańcówka na Kurczakach</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.<br>Krańcówka<br>na zewnątrz budynku dyspozytorni]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.486686,51.7183991,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Krańcówka Tramwajowa Retkinia Al. Wyszyńskiego Łódź</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.<br>Krańcówka<br>na zewnątrz budynku]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.383618,51.7422812,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Krańcówka Dąbrowa Łódź</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.	<br>Krańcówka	Dąbrowa Łódź<br>na zewnątrz budynku]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5098262,51.7359348,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Krańcówka	Pabianicka – IKEA Łódź</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.	<br>Krańcówka	Pabianicka – IKEA Łódź<br>na zewnątrz budynku]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4139757,51.7005274,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Krańcówka Kusocińskiego Łódź</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.	<br>Krańcówka	Kusocińskiego Łódź<br>na zewnątrz budynku]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3833751,51.7476291,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Krańcówka Pl. Niepodległości, Łódź</name>
+        <description><![CDATA[Krańcówka <br>Pl. Niepodległości Łódź<br>na zewnątrz budynku]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4639244,51.7400437,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Gdańska 13, Łódź</name>
+        <description><![CDATA[Muzeum Tradycji Niepodległościowych<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4474612,51.7757115,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Zgierska 147, Łódź</name>
+        <description><![CDATA[Muzeum Tradycji Niepodległościowych<br>Oddział Martyrologii Radogoszcz<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4390669,51.8093505,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - aleja Pamięci Ofiar Litzmannstadt Getto 12</name>
+        <description><![CDATA[Muzeum Tradycji Niepodległościowych<br>Oddział Stacja Radegast<br>zewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4810333,51.8017161,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Janosika 158, Łódź</name>
+        <description><![CDATA[OSP Łódź- Sikawa<br>na zewnątrz siedziby OSP]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5235978,51.7950435,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Kolumny 312,93-642 Łódź</name>
+        <description><![CDATA[OSP Łódź- Wiskitno<br>siedziba OSP<br>na zewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5483753,51.7121522,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Rokicińska 335, Łódź</name>
+        <description><![CDATA[OSP Łódź-Andrzejów<br>na zewnątrz siedziby OSP]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.6126968,51.7400235,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Pszczelna 84</name>
+        <description><![CDATA[OSP Łódź-Łagiewniki	<br>na zewnątrz siedziby OSP]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4651243,51.8411387,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Plonowa 18, 91-156 Łódź</name>
+        <description><![CDATA[OSP Łódź-Mikołajew<br>na zewnątrz siedziby OSP]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3578266,51.8037779,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Pomorska 406, 92-735 Łódź</name>
+        <description><![CDATA[OSP Łódź-Mileszki<br>na zewnątrz siedziby OSP]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5686816,51.770415,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Byszewska 1/2, 92-770 Łódź</name>
+        <description><![CDATA[OSP Łódź-Nowosolna<br>na zewnątrz siedziby OSP]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.591177,51.794378,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Stare Złotno 73, 94-314 Łódź</name>
+        <description><![CDATA[OSP Łódź-Stare Złotno<br>na zewnątrz siedziby OSP]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3655,51.768,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Lucjana Rydla 19, 93-203 Łódź</name>
+        <description><![CDATA[Straż Miejska w Łodzi<br>Posterunek<br>	wewnątrz - przy dyżurce]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4975392,51.735206,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Wólczańska 121/123, 90-521 Łódź</name>
+        <description><![CDATA[Straż Miejska w Łodzi<br>Posterunek	ul. Wólczańska 121/123<br>wewnątrz - przy dyżurce]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4537298,51.7596579,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Mokra 10, Łódź</name>
+        <description><![CDATA[Straż Miejska w Łodzi<br>Posterunek	ul. Mokra 10 Łódź<br>wewnątrz - przy dyżurce]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4251173,51.7898491,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Pabianicka 2, Łódź</name>
+        <description><![CDATA[Urząd Stanu Cywilnego<br>wewnątrz budynku]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4632203,51.7379624,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - al. Adama Mickiewicza 15</name>
+        <description>Przystanek Piotrkowska Centrum</description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4564261,51.758784,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Strykowska 10/18, Łódź</name>
+        <description><![CDATA[Zespół Szkół Elektroniczno-Informatycznych Im. Jana Szczepanika w Łodzi<br>wewnątrz, parter, na głównym holu	<br>w godz: 7.00-19.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4865581,51.7947716,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Rojna 39, Łódź</name>
+        <description><![CDATA[Miejska Biblioteka Publiczna w Łodzi<br>Filia nr 13<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3764485,51.7947275,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Moniuszki 5, Łódź</name>
+        <description><![CDATA[Miejska Biblioteka Publiczna w Łodzi<br>Mediateka Memo (Filia nr 29)]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4585668,51.7680455,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Wróblewskiego 67, Łódź</name>
+        <description><![CDATA[Miejska Biblioteka Publiczna w Łodzi	<br>Filia nr 35<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4244443,51.7493818,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Ketlinga 21</name>
+        <description><![CDATA[Miejska Biblioteka Publiczna w Łodzi	<br>Filia nr 52<br>wewnątrz ]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5709295,51.7492836,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Zachodnia 47</name>
+        <description><![CDATA[Urząd Miasta Łodzi	<br>siedziba UMŁ <br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.451276,51.779272,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Smugowa 30/32</name>
+        <description><![CDATA[Urząd Miasta Łodzi<br>siedziba UMŁ <br> wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4661719,51.7836045,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - al. Piłsudskiego 100</name>
+        <description><![CDATA[Urząd Miasta Łodzi<br>siedziba UMŁ <br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4996901,51.7634869,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - al. Politechniki 32</name>
+        <description><![CDATA[Urząd Miasta Łodzi<br>siedziba UMŁ<br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4524122,51.7417847,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Krzemieniecka 2B</name>
+        <description><![CDATA[Urząd Miasta Łodzi<br>siedziba UMŁ <br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4258012,51.7550828,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Piotrkowska 104</name>
+        <description><![CDATA[Urząd Miasta Łodzi	<br>siedziba UMŁ <br>wewnątrz]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4585226,51.7644533,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Bolesława Limanowskiego 147/149</name>
+        <description>Zakład Przewozu Osób Niepełnosprawnych MPK-Łódź, ul. Limanowskiego 147/149</description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4260119,51.7927809,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - krańcówka Janów ul. Hetmańska</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.<br>Krańcówka	ul. Hetmańska -Janów<br>na zewnątrz budynku]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5750796,51.7520532,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - MOSiR, Studencka 7</name>
+        <description><![CDATA[MOSIR	Obiekt rekreacyjny "Arturówek"	<br>ul. Studencka 7	<br>wewnątrz - budynek techniczny<br>w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4708944,51.8243091,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[defibrylator - pływalnia "Wodny Raj", Wiernej Rzeki 2, Łódź]]></name>
+        <description><![CDATA[MOSiR	Pływalnia całoroczna "Wodny Raj"<br>ul. Wiernej Rzeki 2	<br>w pomieszczeniu medycznym	<br>w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3801872,51.7933056,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Grupowa Oczyszczalnia Ścieków, ul. Sanitariuszek 70/72 Łódź</name>
+        <description><![CDATA[ZWIK	Grupowa Oczyszczalnia Ścieków<br>ul. Sanitariuszek 70/72<br>wewnątrz, dyspozytornia - piętro 1<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3486575,51.7274518,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ZWiK, ul. Graniczna 54</name>
+        <description><![CDATA[ZWIK	Zakład Wodociągów i Kanalizacji<br>ul. Graniczna 54, Łódź<br>wewnątrz, Budynek A-1<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4643111,51.70075,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - 2 sztuki - ZWiK, ul. Wierzbowa 52</name>
+        <description><![CDATA[ZWIK	Zakład Wodociągów i Kanalizacji<br>ul. Wierzbowa 52	<br>1. wewnątrz, Budynek B pok. B-202 całodobowo<br>2. wewnątrz, Budynek A, II piętro, pok. A-219	dni robocze 7.00-15.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4798776,51.7694397,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Bławatna 19/21</name>
+        <description><![CDATA[ZWIK	Zakład Wodociągów i Kanalizacji<br>ul. Bławatna 19/21<br>wewnątrz, <br>I piętro budynku energetyczno-administracyjnego<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5251615,51.729442,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - budynek Policji, ul. Stokowska 21/25</name>
+        <description><![CDATA[KMP w Łodzi	<br>Wydział Ruchu Drogowego KMP	<br>ul. Stokowska 21/25<br>	wewnątrz budynku, II piętro i parter ]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.508187,51.7903907,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - 2 sztuki - budynek Policji - ul. Henryka Sienkiewicza 28</name>
+        <description><![CDATA[KMP w Łodzi, ul. Sienkiewicza 28/30, wewnątrz budynku<br>1. I Komisariat Policji KMP , parter <br>2. Pomieszczenie dla Osób Zatrzymanych, parter , pokój pielęgniarski, przy wejściu głównym]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4622811,51.7673099,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Marynarska 39</name>
+        <description><![CDATA[MCM Bałuty	Przychodnia Zdrowia "Marynarska"<br>	ul. Marynarska 39<br>wewnątrz budynku,<br>parter gabinet zabiegowy	<br>w godzinach 8.00-18.00 w dni robocze]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4650004,51.7894332,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Atlas Arena al. Bandurskiego 7, 94-020 Łódź</name>
+        <description><![CDATA[Miejska Arena Kultury i Sportu<br>Atlas Arena<br>al. Bandurskiego 7, 94-020 Łódź<br>wewnątrz budynku<br>wejście główne nr 1,<br>na poziomie -1, hol<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4254861,51.7572292,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Sport Arena al. Unii Lubelskiej 2, 94-020 Łódź</name>
+        <description><![CDATA[Miejska Arena Kultury i Sportu<br>Sport Arena<br>al. Unii Lubelskiej 2, 94-020 Łódź<br>wewnątrz budynku,<br>wejście główne - parter, hol	<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4238017,51.7587295,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Komisariat - Armii Krajowej 33</name>
+        <description><![CDATA[KMP w Łodzi<br>III Komisariat Policji KMP<br>ul. Armii Krajowej 33<br>wewnątrz budynku, parter]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4005215,51.7443388,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - budynek Policji - Tuwima 12a</name>
+        <description><![CDATA[KMP w Łodzi<br>KMP Pomieszczenie dla Osób Zatrzymanych<br>ul. Tuwima 12a<br>wewnątrz budynku, przy wejściu głównym]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4597126,51.766919,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - ul. Nowogrodzka 2A</name>
+        <description><![CDATA[Teatr Powszechny<br>ul. Nowogrodzka 2b<br>wewnątrz budynku<br>w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5081548,51.7672792,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Centralne Muzeum Włókiennictwa, ul. Piotrkowska 282</name>
+        <description><![CDATA[Centralne Muzeum Włókiennictwa	Muzeum<br>ul. Piotrkowska 282<br>wewnątrz , przy wejściu do szatni<br>w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4618468,51.7451308,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - EC1 Recepcja - Juliana Tuwima 46</name>
+        <description><![CDATA[EC1 Łódż - Miasto Kultury<br>Recepcja	ul. Tuwima 46<br>wewnątrz, <br>recepcja budynku	<br>w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4674398,51.7665472,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - EC1, Centrum Nauki i Techniki - Targowa 1/3</name>
+        <description><![CDATA[EC1 Łódż - Miasto Kultury<br>Centrum Nauki i Techniki	<br>ul. Targowa 1/3<br>wewnątrz, kasy biletowe	<br>w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4671191,51.7672488,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - EC1 Łódż - Miasto Kultury Narodowe Centrum Kultury Filmowej ul Targowa 1/3</name>
+        <description><![CDATA[EC1 Łódż - Miasto Kultury<br>Narodowe Centrum Kultury Filmowej<br>ul Targowa 1/3<br>wewnątrz, foyer<br>w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4696563,51.7681891,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - EC1 Łódż - Miasto Kultury Centrum Komiksu i Narracji Interaktywnej ul. Targowa 1/3</name>
+        <description><![CDATA[EC1 Łódż - Miasto Kultury	Centrum Komiksu i Narracji Interaktywnej<br>ul. Targowa 1/3<br>wewnątrz, <br>foyer i kasy biletowe	w godzinach pracy obiektu]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4699178,51.7670637,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - MPO - Tokarzewskiego 2</name>
+        <description><![CDATA[MPO Łódź	Siedziba MPO - Łódź<br>ul. Tokarzewskiego 2	<br>wewnątrz, portiernia<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4571981,51.79373,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - sortownia MPO - Zamiejska 1</name>
+        <description><![CDATA[MPO Łódź	Obiekt sortowni<br>ul. Zamiejska 1<br>wewnątrz,<br>pomieszczenie biurowe w budynku sortowni <br> godz: 6.00-21.45]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3926117,51.7272675,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - DPS - 28 Pułku Strzelców Kaniowskich 32</name>
+        <description><![CDATA[2 Dom Pomocy Społecznej	siedziba DPS<br>ul. 28 Pułku strzelców Kaniowskich 32, 90-640 Łódź	<br>wewnątrz, <br>w dyżurce pielęgniarek na II Oddziale	całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4414363,51.7664227,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - MPK - Bolesława Limanowskiego 147</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.<br>Zakład Eksploatacji Autobusów nr 1<br>ul. Limanowskiego 147/149<br>wewnątrz, dyspozytornia]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4258467,51.7918449,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - MPK, Nowe Sady 15</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.	Zakład Eksploatacji Autobusów nr 2<br>	ul. Nowe Sady 15	<br>wewnątrz, dyspozytornia]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4314986,51.745924,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - 2 sztuki - MPK, Tramwajowa 6</name>
+        <description><![CDATA[MPK Łódź sp. z o.o., ul. Tramwajowa 6<br>1. Zakład Techniki - wewnątrz, korytarz hali<br>2. Dział Obsługi Klienta - infolinia]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4770599,51.7711246,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - MPK Telefoniczna 30/44</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.<br>Zakład Eksploatacji Tramwajów nr 1<br>ul. Telefoniczna 30/44<br>wewnątrz, dyspozytornia]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5050636,51.7842517,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - MPK - Pabianicka 215</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.	Zakład Eksploatacji Tramwajów nr 2	ul. Pabianicka 215	<br>magazyn 33]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4234741,51.7080814,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator, MPK, Ul. Gen. Jarosława Dąbrowskiego 23</name>
+        <description><![CDATA[MPK Łódź sp. z o.o.	Zakład Torów i Sieci,<br>ul. Dąbrowskiego 23<br>wewnątrz, dyspozytornia, parter]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4791097,51.737004,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - ZOO, ul. Konstantynowska 8/10</name>
+        <description><![CDATA[Holding Łódź - ZOO<br>ZOO	ul. Konstantynowska 8/10 <br>w budynku głównym, na przeciwko kas wejściowych. <br>Przy punkcie medycznym (w pomieszczeniu ochrony<br>	całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4125314,51.7638396,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Miejskie Centrum Medyczne „Widzew” - Piłsudskiego 157</name>
+        <description><![CDATA[MCM Widzew	Miejskie Centrum Medyczne "Widzew" <br>	Al. Marsz. J. Piłsudskiego 157<br>wewnątrz budynku w rejestracji ogólnej na parterze <br>	w godz: 8.00-18.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.508947,51.7628865,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[Defibrylator - Miejskie Centrum Medyczne "Widzew" - Elsnera 19]]></name>
+        <description><![CDATA[MCM Widzew	Miejskie Centrum Medyczne "Widzew"<br>ul. Elsnera 19<br>wewnątrz budynku w rejestracji na parterze<br>w godz.: 8.00-18.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5332271,51.7570578,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[Defibrylator - Miejskie Centrum Medyczne "Widzew" w Łodzi - Sacharowa 21A]]></name>
+        <description><![CDATA[MCM Widzew	Miejskie Centrum Medyczne "Widzew",  ul. Sacharowa 21a<br>wewnątrz budynku w rejestracji na parterze<br>w godz: 8.00-18.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5393591,51.758591,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[Defibrylator - Miejskie Centrum Medyczne "Śródmieście" sp. z o.o. - Piotrkowska 113]]></name>
+        <description><![CDATA[MCM Śródmieście	Miejskie Centrum Medyczne "Śródmieście",  ul. Piotrkowska 113<br>wewnątrz, <br>gabinet zabiegowy POZ nr. 5 pierwsze piętro	<br>w godz: 7.00-18.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4570549,51.7637416,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[Defibrylator - Miejskie Centrum Medyczne "Śródmieście" sp. z o.o. - Próchnika 11]]></name>
+        <description><![CDATA[MCM Śródmieście	Miejskie Centrum Medyczne "Śródmieście"	ul. Próchnika 11<br>wewnątrz,<br>gabinet zabiegowy POZ nr. 4 parter<br>w godz: 7.00-18.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4530261,51.7747283,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Miejskie Centrum Medyczne „Śródmieście” - Pomorska 59</name>
+        <description><![CDATA[MCM Śródmieście	Miejskie Centrum Medyczne "Śródmieście"<br>ul. Pomorska 59<br>wewnątrz, gabinet zabiegowy POZ nr. 4 parter<br>w godz.: 7.00-18.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4684855,51.7778414,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[Defibrylator - Przychodnia "Maratońska" – Miejskie Centrum Medyczne "Polesie" w Łodzi - Maratońska 71]]></name>
+        <description><![CDATA[MCM Polesie	Miejskie Centrum Medyczne "Polesie", ul. Maratońska 71<br>wewnątrz,<br>parter budynku - gabinet zabiegowy	<br>w godz: 7.00-18.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3925573,51.7402963,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - DPS, Stanisława Przybyszewskiego 255/267</name>
+        <description><![CDATA[Centrum Rehabilitacyjno-Opiekuńcze Domu Pomocy Społecznej, ul. Przybyszewskiego 255/267<br>budynek B piętro 1- gabinet zabiegowy,<br>budynek C piętro 1- gabinet zabiegowy	całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5172834,51.7502016,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Fabryka Ludwika Grohmana — Łódzka Specjalna Strefa Ekonomiczna SA</name>
+        <styleUrl>#icon-1592-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            19.4756743,51.7556911,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - MCM Górna Poradnia, ul. Tatrzańska 109</name>
+        <description><![CDATA[MCM Górna	Poradnia	ul. Tatrzańska 109,<br>wewnątrz, <br>gabinet diagnostyczno-zabiegowy nr 106, pierwsze piętro<br>godz.: 7:45 do 18:30 w dni robocze]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4941088,51.7365233,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - MCM Górna Poradnia ul. Rzgowska 170</name>
+        <description><![CDATA[MCM Górna	Poradnia	ul. Rzgowska 170,<br>	wewnątrz,<br>gabinet diagnostyczno-zabiegowy,<br> pierwsze piętro	<br>godz.: 7:45 do 18:30 w dni robocze]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4858846,51.7200955,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Poradnia MCM Górna, Ignacego Paderewskiego 6</name>
+        <description><![CDATA[MCM Górna	Poradnia, ul. Paderewskiego 6<br>	wewnątrz, <br>gabinet diagnostyczno-zabiegowy nr 5, parter	<br>godz: 8.00 do 18:00 w dni robocze]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.458466,51.7293835,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylatory - Aquapark Fala, Al. Unii Lubelskiej 4</name>
+        <description><![CDATA[Aqua Park Łódź Sp. z o.o. , Al. Unii Lubelskiej 4<br>wewnątrz:<br>1- hol główny, <br>2-strefa saun, <br>3-pomieszczenie dyżurne ratowników<br>godz. pracy obiektu: wt-pt 7.00-22.00, pn, weekendy, święta 9.00-22.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4211861,51.7641548,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Delfibrylatory - Lotnisko, ul. Gen. Maczka 35</name>
+        <description><![CDATA[Port Lotniczy Łódź im. Władysława Reymonta Sp. o.o.	Port Lotniczy -Terminal Pasażerski, ul. Gen. Maczka 35, 94-328 Łódź<br>wewnątrz obiektu:<br>1. Hol Główny – odloty przy Pokoju Pierwszej Pomocy, <br>2 odloty przy Punkcie Kontroli Bezpieczeństwa, 3- przyloty Pomieszczenie odbioru bagażu, <br>4-Korytarz przy pomieszczeniach biurowych całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4004602,51.7268466,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - MOPS, ul. płk. Jana Kilińskiego 102</name>
+        <description><![CDATA[Miejski Ośrodek Pomocy Społecznej w Łodzi	MOPS, ul. Kilińskiego 102/102a, 90 – 012 Łódź	wewnątrz budynku,<br> hol główny, parter <br>poniedziałek, środa, czwartek, piątek – godz.: 8:00 – 16:00, <br>wtorek: 8:00 –17:00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4672294,51.7638741,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła i Przedszkole, Mieczysławy Ćwiklińskiej 9</name>
+        <description><![CDATA[Przedszkole Miejskie nr 175  i<br>Szkoła Podstawowa nr 34 im. Wisławy Szymborskiej	Szkoła	ul. Ćwiklińskiej 9, 92-508 Łódź	<br>wewnątrz, <br>parter, przy wejściu głównym szkoły<br>w godz:6.30-20.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5374873,51.755892,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła Podstawowa nr 42 im. S. Staszica, ul. Przyszkole 42</name>
+        <description><![CDATA[Szkoła Podstawowa nr 42 im. Stanisława Staszica	Szkoła, ul. Przyszkole 42, 93-552 Łódź<br>	wewnątrz budynku, <br>korytarz na parterze budynku	<br>w godz: 6.00-22.00 (w godzinach pracy szkoły)]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4466819,51.7319366,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, ul. Turoszowska 10</name>
+        <description><![CDATA[Szkoła Podstawowa nr 56 im. Bronisława Czecha, ul. Turoszowska 10, 91-025 Łódź<br>	wewnątrz szkoły, <br>parter<br>	w godz: 8:00 - 16:00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.414837,51.7898718,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, ul. Maratońska 47B</name>
+        <description><![CDATA[Integracyjna Szkoła Podstawowa nr 67 im. Janusza Korczaka, ul. Maratońska 47 b, 94-102 Łódź<br>wewnątrz,<br>parter przy głównym wejściu<br>od poniedziałku do piątku w godzinach 6.00-17.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3948159,51.7418728,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, Ratajska 2/4</name>
+        <description><![CDATA[Szkoła Podstawowa nr 116 im. Aleksego Rżewskiego, ul. Ratajska 2/ 4, 91-231 Łódź<br>na zewnątrz budynku<br>przy wejściu głównym<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3736718,51.8108818,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, ul. Dzwonowa 18/20</name>
+        <description><![CDATA[Szkoła Podstawowa nr 125 im. Janusza Korczaka, ul. Dzwonowa 18/ 20, 93-429 Łódź<br>	wewnątrz,<br>parter, przy wejściu głównym	<br>w godz.: 6.00-20.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4459819,51.7113612,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, ul. Powszechna 15</name>
+        <description><![CDATA[Szkoła Podstawowa nr 162 im. Jana Nowaka Jeziorańskiego, ul. Powszechna 15, 93-321 Łódź<br>	wewnątrz, <br>parter przy wejściu głównym<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4923948,51.7161242,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, ul. Napoleońska 7</name>
+        <description><![CDATA[Szkoła Podstawowa nr 169 im. Marii Dąbrowskiej, ul. Napoleońska 7/ 17, 94-231 Łódź<br>	wewnątrz,<br>parter,<br>w sekretariacie szkoły<br>w godz: 6.00-20.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.3849084,51.7795307,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, ul. Jugosłowiańska 2</name>
+        <description><![CDATA[Zespół Szkolno-Przedszkolny nr 2, ul. Jugosłowiańska 2, 92-720 Łódź<br>wewnątrz budynku - portiernia<br>w godz: 7.00-19.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5874986,51.7928975,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, ul. Janosika 136</name>
+        <description><![CDATA[Zespół Szkolno-Przedszkolny nr 6,	ul. Janosika 136, 92-108 Łódź<br>wewnątrz,<br>parter, przy wejściu głównym<br>w godz.: 7.00-19.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5237124,51.791894,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Liceum - ul. Feliksa Perla 11</name>
+        <description><![CDATA[XVIII Liceum Ogólnokształcące im. Jędrzeja Śniadeckiego, ul. Perla 11, 94-203 Łódź<br>	wewnątrz parter - przy sekretariacie.<br>w godzinach pracy szkoły<br>od poniedziałku do piątku 6.00-18.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4126495,51.7755358,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Liceum - ul. Królewska 13/15</name>
+        <description><![CDATA[XLII Liceum Ogólnokształcące im. Ireny Sendlerowej, ul. Królewska 13/15, 93-319 Łódź<br>	wewnątrz, <br>pomieszczenie dyżurki, parter	<br> w godzinach pracy szkoły 7.00-20.00]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.482184,51.7151714,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Szkoła, ul. Czajkowskiego 14</name>
+        <description><![CDATA[Zespół Szkół Ogólnokształcących nr 1	Szkoła	ul. Czajkowskiego 14, 92-511 Łódź<br>wewnątrz, portiernia	<br>całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5415775,51.755277,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator - Ośrodek, ul. Tkacka 34/36</name>
+        <description><![CDATA[Specjalny Ośrodek Szkolno-Wychowawczy nr 3 im. dr. Henryka Jordana "Jordanówka"<br>ul. Tkacka 34/36, 90-156 Łódź	<br>wewnątrz, parter przy wejściu głównym	całodobowo]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4919086,51.7716436,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ludwika Zamenhofa 2</name>
+        <description><![CDATA[I Oddział ZUS w Łodzi<br>90-431 Łódź, Zamenhofa 2<br>Telefon do obsługi AED:<br>(42) 638 24 88<br>Dokładne miejsce:<br>parter, wejście główne, ochrona<br>Dostępność:<br>całodobowo w każdy dzień tygodnia.]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4568051,51.7620948,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Lipiec Reymontowskich 11</name>
+        <description><![CDATA[II Inspektorat ZUS w Łodzi<br>91-120 Łódź, ul. Lipiec Reymontowskich 11<br>Telefon do obsługi AED: <br>(42) 638 20 64 <br>Dokładne miejsce:<br>parter, wejście B<br>Dostępność:<br>całodobowo w każdy dzień tygodnia]]></description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.4054639,51.7941015,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>defibrylator - Szkoła Podstawowa nr 12 im. Mariana Batki</name>
+        <description>ul. Juliusza Jurczyńskiego 1/3, 92-305 Łódź -  Przed wejściem do szkoły -  całodobowo</description>
+        <styleUrl>#icon-1592-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            19.5454444,51.7607633,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

@@ -1,0 +1,220 @@
+# Otwarte Dane Przemyśl — endpoint /structured (nieudokumentowany w OpenAPI).
+#
+# Najlepszy pojedynczy endpoint tabelaryczno-przestrzenny: 21 wierszy,
+# 19 kolumn, w tym geometry, longitude i latitude. Nie używać format=csv:
+# body jest JSON-owym literałem stringa i domyślnie zwraca 10 z 21 wierszy.
+# Licencja: CC BY 4.0 (mirror dane.gov.pl deklaruje CC0 1.0).
+version: 1
+
+source:
+  id: przemysl
+  name: Otwarte Dane Przemyśl — defibrylatory AED
+  publisher: Gmina Miasto Przemyśl
+  homepage_url: https://dane.przemysl.eu/
+  access_type: api
+  reliability_tier: official_local
+  license:
+    id: CC-BY-4.0
+    url: https://creativecommons.org/licenses/by/4.0/
+    attribution: "Miasto Przemyśl — Portal Otwartych Danych, CC BY 4.0"
+    share_alike: false
+  coverage:
+    country: PL
+    teryt: ["186201"]
+    notes: "21 rekordów, geometria Point EPSG:4326. Mirror dane.gov.pl: CC0 1.0."
+  update_frequency: daily
+  enabled: true
+  notes: >
+    Deklarowana aktualizacja codzienna, ale plik źródłowy pochodzi z 2024-11-05.
+    Duplikat numeru AED 7639 w rekordach 757 i 764. Brak operatora, statusu,
+    godzin i informacji o wejściu.
+
+connector:
+  family: http_json
+  parser: json
+  notes: Paginacja page/per_page; total_rows w odpowiedzi. Limit 120 req/min.
+
+fetch:
+  url: https://dane.przemysl.eu/wp-json/sod/v1/resources/15/structured
+  method: GET
+  timeout_ms: 30000
+  retries:
+    max: 3
+    backoff_ms: 1000
+  rate_limit:
+    requests_per_minute: 60
+  conditional:
+    etag: true
+    last_modified: true
+  pagination:
+    type: page
+    page_param: page
+    limit_param: per_page
+    page_size: 100
+    start_page: 1
+    total_path: /total_rows
+  user_agent: "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+
+parse:
+  encoding: utf-8
+  json:
+    unwrap_string: false
+
+records:
+  path: /rows
+  identity:
+    source_record_id:
+      template: "przemysl:15:{id}"
+    dataset_id:
+      const: "przemysl:13:15"
+    stable: true
+  dedupe:
+    key:
+      - field: id
+    keep: last
+    on_duplicate: reject
+
+map:
+  name:
+    func: derive_location_name
+    args:
+      - field: name
+  facility_type:
+    const: unknown
+  lat:
+    func: to_float
+    args:
+      - field: latitude
+  lon:
+    func: to_float
+    args:
+      - field: longitude
+  coord_precision_m:
+    const: 15
+  country_code:
+    const: PL
+  city:
+    field: city
+  street:
+    field: street
+  house_number:
+    value:
+      field: home_number
+    on_missing: "null"
+  postcode:
+    field: postcode
+  access_type:
+    const: unknown
+  label:
+    func: derive_device_identifier
+    args:
+      - field: name
+  device_type:
+    const: public_aed
+  status:
+    const: unknown
+  verification_status:
+    const: unverified
+  confidence:
+    const: 0.85
+  last_verified_at:
+    const: "2024-11-05"
+  # The local portal has no operator field. The publisher is Straż Miejska,
+  # not necessarily the device operator, so do not invent an operator value.
+  operator_name:
+    const: null
+  operator_type:
+    const: null
+  phone:
+    func: normalize_phone
+    args:
+      - field: phone
+  email:
+    func: normalize_email
+    args:
+      - field: email
+  website:
+    func: normalize_url
+    args:
+      - field: www
+  photo_url:
+    field: "gallery[0].url"
+  source_updated_at:
+    const: "2024-11-05"
+
+validate:
+  required:
+    - name
+    - lat
+    - lon
+  coords:
+    bbox: [14.1, 49.0, 24.2, 54.9]
+    on_invalid: reject
+  enums: true
+  on_error: reject
+
+drift:
+  baseline:
+    record_count: 21
+    generated_at: "2026-11-21"
+    schema_fields:
+      - id
+      - name
+      - description
+      - category
+      - city
+      - street
+      - home_number
+      - postcode
+      - phone
+      - email
+      - www
+      - gallery
+      - attachments
+      - links
+      - geometry
+      - longitude
+      - latitude
+      - youtube_url
+      - panorama_url
+  schema:
+    on_new_field: warn
+    on_missing_field: review
+    on_type_change: fail
+    on_header_order_change: ignore
+  volume:
+    min_records: 15
+    max_delta_ratio: 0.5
+    on_breach: review
+  quality:
+    max_coord_invalid_ratio: 0.0
+    max_duplicate_id_ratio: 0.0
+    max_null_ratio:
+      name: 0.0
+      phone: 0.9
+      email: 0.9
+      website: 0.9
+    on_breach: warn
+  axis:
+    enabled: false
+  golden_sample:
+    size: 10
+    required_match_ratio: 1.0
+  actions:
+    warn: log
+    review: quarantine
+    fail: disable
+
+publish:
+  enabled: true
+  license_id: CC-BY-4.0
+  attribution: "Miasto Przemyśl — Portal Otwartych Danych, CC BY 4.0"
+  allowed_for_ingest: true
+  allowed_for_export: true
+  terms_url: "https://creativecommons.org/licenses/by/4.0/"
+  terms_hash: "sha256:2c31f90b734f0e2dd5dc017737eb2094e133be99a188396659c9cdb3bd3d0625"
+  terms_checked_at: "2026-11-21T00:00:00Z"
+  redact: []
+  exports:
+    - geojson
+    - csv

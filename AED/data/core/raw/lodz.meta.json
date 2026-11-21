@@ -1,0 +1,15 @@
+{
+  "source_id": "lodz",
+  "fetched_at": "2026-11-21T21:06:50Z",
+  "final_url": "https://www.google.com/maps/d/kml?mid=1FMKFbebKJPYqD4C87pXWPqNjEHuEswE&forcekml=1",
+  "http_status": 200,
+  "content_type": "text/xml; charset=utf-8",
+  "bytes": 59519,
+  "sha256": "418fa25a54ebc8f33d37bfd9781e34632421b200169458a943473b8ff0eebfba",
+  "raw_file": "data/core/raw/lodz.kml",
+  "config_path": "backend/ingest/sources/lodz.json",
+  "license_id": "NOASSERTION",
+  "placemark_count": 136,
+  "point_count": 136,
+  "parse_notes": "XML parsed; Document name='defibrylatory AED'. Document name matches config. Placemark=136; geometry counts={'Point': 136}. Placemarks with non-empty description=135; with ExtendedData=0. point_only holds: only Point geometries present. Config parser=kml; encoding expected=utf-8."
+}

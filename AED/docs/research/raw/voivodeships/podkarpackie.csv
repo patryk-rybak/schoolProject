@@ -1,0 +1,16 @@
+unit,qid,type,candidate_score,registry_hint,class,url,aed_points,format,license,fields,coordinates,notes,verified
+Krosno,,miasto,,,A,"https://dane.gov.pl/pl/dataset/3624,defibrylatory-zlokalizowane-w-miescie-krosno",21,CSV,CC0 1.0,"Długość geograficzna | Szerokość geograficzna | Nazwa | Lokalizacja | Adres | Numer Id","EPSG:4326, lon,lat","jednorazowo 2024-02-19; brak operatora; spacje wiodące w nazwach pól",2026-11-21
+Przemyśl,,miasto,,,A,"https://dane.gov.pl/pl/dataset/4581,lokalizacje-aed-automatycznych-defibrylatorow-zewn",21,"GeoJSON | JSON | CSV | GML",CC0 1.0,"id | name | description | category | city | street | home_number | postcode | phone | email | www | geometry","EPSG:4326, GeoJSON [lon,lat]; CSV {lat,long}; GML lat lon","codzienna deklaracja, ostatnia zmiana 2024-11-06; description edukacyjny",2026-11-21
+Stalowa Wola,Q751140,miasto,,,B,https://www.stalowawola.pl/pl/514-aed.html,unknown,HTML,brak,brak,brak,"tylko link do OpenAEDMap; brak własnej listy i liczby punktów",2026-11-21
+powiat stalowowolski,Q692459,powiat,10,true,C,"https://stalowowolski.pl/asp/defibrylator-aed-w-sowiik-u,2,artykul,1,337",1,HTML,brak,nazwa obiektu,brak,"1 AED na SOWiIK; news",2026-11-21
+Grodzisko Dolne,Q2149308,gmina wiejska,9,true,C,https://samorzad.gov.pl/web/gmina-grodzisko-dolne/mamy-nowe-defibrylatory-na-terenie-gminy,~11,HTML,brak,"nazwa miejscowości | remiza OSP",brak,"ok. 11 AED przy remizach OSP; brak wykazu, 11 zdjęć",2026-11-21
+Besko,Q1820835,gmina wiejska,8,true,C,"https://www.besko.pl/asp/bezpieczne-besko-aed-dostepne-dla-kazdego,12,artykul,1,2453",1,HTML,brak,nazwa obiektu,brak,1 AED przy Urzędzie Gminy,2026-11-21
+Jasło,Q848983,gmina miejska,6,true,C,https://um.jaslo.pl/?s=defibrylator,3,HTML,brak,nazwa OSP,brak,"min. 3 OSP; brak pełnej listy",2026-11-21
+Przecław,Q2325374,gmina miejsko-wiejska,5,false,C,https://przeclaw.org/artykul/akcja-defibrylacja-uratuj-zycie,1,HTML,brak,nazwa obiektu,brak,1 AED na Urzędzie Miejskim,2026-11-21
+Czermin,Q2462957,gmina wiejska,5,false,C,https://czermin.pl/2026/11/10/defibrylator-aed-dostepny-dla-wszystkich/,1,HTML,brak,nazwa obiektu,brak,1 AED dostępny dla mieszkańców,2026-11-21
+Trzebownisko,Q2324512,gmina wiejska,4,true,C,https://trzebownisko.pl/aktualnosci/defibrylatory-aed-trafia-do-szkol,10,HTML,brak,liczba szkół,brak,"10 szkół i przedszkoli; brak nazw i adresów",2026-11-21
+Rzeszów,,miasto,,,C,https://erzeszow.pl/pl/517-wyszukiwarka/7390-wyniki-wyszukiwania.html?srch-term=defibrylator,0,HTML,brak,brak,brak,"5 artykułów; brak rejestru; dane.erzeszow.pl to raporty",2026-11-21
+urząd marszałkowski,,urząd marszałkowski,,,C,https://www.podkarpackie.pl/index.php/zdrowie/aktualnosci/defibrylatory-dla-granicznych-punktow-medycznych,3,HTML,brak,typ stacji pogotowia,brak,"3 LIFEPAK 15 dla stacji pogotowia; nie rejestr publiczny",2026-11-21
+Ulanów,Q2225043,gmina miejsko-wiejska,4,true,D,https://ulanow.iap.pl/wiadomosci/szukaj?q=defibrylator,0,HTML,brak,brak,brak,0 wyników,2026-11-21
+Bobrowice,Q515216,gmina wiejska,3,true,D,https://bobrowice.pl/?s=defibrylator,0,HTML,brak,brak,brak,"gmina w woj. lubuskim; fałszywe przypisanie",2026-11-21
+Jarosław,Q778068,gmina wiejska,0,true,D,https://jaroslaw.itl.pl/,0,HTML,brak,brak,brak,"domena parkująca; prawdziwa strona gminajaroslaw.pl bez treści AED",2026-11-21

@@ -25,4 +25,17 @@ referencyjnym** każdego źródła.
 
 ## Stan obecny
 
-Brak. W repozytorium nie ma jeszcze żadnego connectora.
+Brak kodu. Zdefiniowano kontrakt konfiguracji i zestaw przykładów:
+
+- [`source-config.schema.json`](./source-config.schema.json): JSON Schema 2020-12,
+- [`examples/`](./examples/): sześć konfiguracji bazowych: OpenAEDMap, Przemyśl,
+  Krosno, Marki, Warszawa; do tego osiem konfiguracji KML w
+  [`examples/kml/`](./examples/kml/): Zielona Góra, Łódź, Olsztyn, Bełchatów,
+  Pawłowice, Tczew oraz guardy dla Bydgoszczy (brak geometrii) i Piły
+  (polygony zasięgu), a także szablon listy adresowej bez geometrii,
+- [`../../docs/ingest-source-config.md`](../../docs/ingest-source-config.md):
+  inwentarz formatów, mapping DSL, rodziny connectorów i wykrywanie dryfu.
+
+Kolejny krok: loader konfiguracji i pierwsze dwa connectory (`file_static`,
+`http_json`), potem `html_list` z geokodowaniem adresu. Model rekordu bez
+`lat/lon` opisuje [`../../docs/design/address-only-sources.md`](../../docs/design/address-only-sources.md).

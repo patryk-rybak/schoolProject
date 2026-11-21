@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Mapa ogólnodostępnych defibrylatorów AED w Olsztynie</name>
+    <description/>
+    <Style id="icon-1660-7CB342-nodesc-normal">
+      <IconStyle>
+        <color>ff42b37c</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="icon-1660-7CB342-nodesc-highlight">
+      <IconStyle>
+        <color>ff42b37c</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="icon-1660-7CB342-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1660-7CB342-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1660-7CB342-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name> Istniejące AED</name>
+      <Placemark>
+        <name>Urząd Miasta Olsztyna, Plac Jana Pawła II 1</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4798098,53.7787884,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Warmińsko-Mazurski Urząd Wojewódzki, al. M.J. Piłsudskiego 7/9</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.486004,53.7773008,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Urząd Marszałkowski Województwa Warmińsko -Mazurskiego, ul. Emilii Plater 1</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4859898,53.7764388,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Komenda Miejska Policji, ul. Partyzantów 23</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4888881,53.783145,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Komenda Wojewódzka Policji, ul. Pstrowskiego 3</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.485253,53.7674573,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Komenda Miejska Państwowej Straży Pożarnej / Wojewódzkie Centrum Powiadamiania Ratunkowego,
+ul. Niepodległości 16</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4766672,53.77267,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Miejski Przedsiębiorstwo Energetyki Cieplnej, ul. Słoneczna 46</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4451567,53.7474085,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Wojewódzka Stacja Pogotowia Ratunkowego, ul. Pstrowskiego 28 B</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.498628,53.760638,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Uniwersytet Warmińsko-Mazurski, Straż Uniwersytecka ul. Oczapowskiego 6</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4600482,53.7594067,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Uniwersytet Warmińsko-Mazurski, Rektorat - ul. Oczapowskiego 2
+</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.461115,53.7604529,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Uniwersytet Warmińsko-Mazurski, Regionalne Centrum Informatyczne - ul. Słoneczna 54</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4561623,53.7439806,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Uniwersytet Warmińsko-Mazurski, Biblioteka Główna - ul. Oczapowskiego 12B</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4581901,53.7522087,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Uniwersytet Warmińsko-Mazurski, Basen UWM - ul. Tuwima 9</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4657542,53.7573695,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Warmińsko-Mazurski Oddział Okręgowy PCK, ul. Partyzantów 82</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.483141,53.7816011,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Wojewódzki Ośrodek Ruchu Drogowego, ul. Towarowa 17</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.5261778,53.7821471,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Wodne Centrum Rekreacyjno - Sportowe „Aquasfera”, al. M. J. Piłsudskiego 69 B,</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.5057707,53.7721949,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>CRS UKIEL</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4498344,53.7780598,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>„Lancet” Centrum Medyczne, al. Wojska Polskiego 39</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4826098,53.7914475,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Fundacja Inicjatyw Społecznych ul. Kanofojskiego 3</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4559879,53.7552341,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Siedziba Spółdzielni Mieszkaniowej JAROTY, ul. Wańkowicza 9</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4977983,53.7540988,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sklep Biedronka, ul. Bartąska 1</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4834905,53.7394181,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Narodowy Bank Polski Oddział Okręgowy w Olsztynie, al. M.J. Piłsudskiego 11/17</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4887077,53.7764268,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ambulatorium dla Nietrzeźwych ul. Metalowa 5</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4958628,53.7609452,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>„Auchan Olsztyn”, ul. Sikorskiego 2B</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4837658,53.7508495,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>MediaMarkt Polska, ul. Sikorskiego 2 b</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4840216,53.7518991,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Carrefour ul. Krasickiego 1 b</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.5057359,53.7501673,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sklep sportowy Decathlon, ul. Dorantta 3</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4947058,53.731384,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Urząd Skarbowy w Olsztynie, al. M. J. Piłsudskiego 59</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4981262,53.7739063,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Generalna Dyrekcja Dróg Krajowych i Autostrad, Aleja Warszawska 89</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4664534,53.7672121,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przychodnia Specjalistyczna w Olsztynie, ul. Dworcowa 28</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.5009857,53.7749102,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Galeria Warmińska, ul. Tuwima 26</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4851186,53.7540983,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zakład Ubezpieczeń Społecznych, Plac Konsulatu Polskiego 4</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.482082,53.7805045,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>MICHELIN Polska S.A., ul. Leonharda 9</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.5127853,53.7709941,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Uniwersytet Warmińsko-Mazurski, Akademicki Dom Mieszkalno-Rotacyjny ul. Żołnierska 14 c</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4876295,53.7705372,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>„Aura Centrum Olsztyna”, ul. Piłsudskiego 16</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4829482,53.777117,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sąd Rejonowy w Olsztynie, ul. Dąbrowszczaków 33</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.482875,53.7782933,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sąd Okręgowy w Olsztynie, ul. Dąbrowszczaków 44</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4839271,53.77853,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sąd Rejonowy w Olsztynie, ul. Partyzantów 70</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4891679,53.7827443,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Komenda Wojewódzka Policji, ul. Partyzantów 6/8</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4829638,53.782109,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Administracja Osiedla Nagórki, ul. Murzynowskiego 12</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.5003125,53.7565992,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Administracja Osiedla Pieczewo, ul. B.Jeziołowicza 11</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.5105661,53.7433031,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Administracja Osiedla Jaroty, ul. K. Jaroszyka 14</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4943775,53.7423178,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przedsiębiorstwo
+Wodociągów i Kanalizacji; Biuro Obsługi Klienta, budynek A ul. Oficerska 16A.</name>
+        <styleUrl>#icon-1660-7CB342-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            20.4911121,53.8007959,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "source": {
+    "id": "suszec",
+    "name": "Dane lokalizacji urządzeń AED na terenie gminy Suszec",
+    "publisher": "Gmina Suszec",
+    "homepage_url": "https://suszec.pl/pl/6556/17612/informacja-na-temat-danych-lokalizacji-urzadzen-aed-na-terenie-gminy-suszec.html",
+    "access_type": "html",
+    "reliability_tier": "official_local",
+    "license": {
+      "id": "NOASSERTION",
+      "attribution": "Gmina Suszec — https://suszec.pl/pl/6556/17612/informacja-na-temat-danych-lokalizacji-urzadzen-aed-na-terenie-gminy-suszec.html (brak deklaracji licencji)"
+    },
+    "coverage": {
+      "country": "PL",
+      "teryt": ["2410062"],
+      "notes": "Gmina wiejska Suszec, śląskie. 5 punktów: 4 AED w samochodach OSP i 1 kapsuła 24/7."
+    },
+    "update_frequency": "unknown",
+    "enabled": false,
+    "notes": "Pięć tabel key-value. require_keys odrzuca tabele kontaktowe i godziny urzędu. Selektor sprawdzony na stronie live 2026-11-21 (5 tabel z wymaganymi kluczami)."
+  },
+  "connector": {
+    "family": "html_table",
+    "parser": "html_table",
+    "notes": "Tabele key-value z wymaganymi kluczami; tabele kontaktowe odrzucane przez require_keys."
+  },
+  "fetch": {
+    "url": "https://suszec.pl/pl/6556/17612/informacja-na-temat-danych-lokalizacji-urzadzen-aed-na-terenie-gminy-suszec.html",
+    "method": "GET",
+    "timeout_ms": 30000,
+    "retries": { "max": 2, "backoff_ms": 1500 },
+    "rate_limit": { "requests_per_minute": 6 },
+    "conditional": { "etag": true, "last_modified": true },
+    "pagination": { "type": "none" },
+    "user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+  },
+  "parse": {
+    "encoding": "utf-8",
+    "trim_headers": false,
+    "html_table": {
+      "select": "table",
+      "require_keys": ["Lokalizacja urządzenia", "Opis lokalizacji", "Dostęp"],
+      "orientation": "key_value",
+      "key_column": 0,
+      "value_column": 1,
+      "value_join": "space",
+      "normalize_headers": true,
+      "trim": true,
+      "collapse_whitespace": true,
+      "empty_as_null": true,
+      "skip_empty_rows": true,
+      "min_records": 5,
+      "max_records": 5
+    }
+  },
+  "records": {
+    "path": "$",
+    "identity": {
+      "source_record_id": { "template": "suszec:{Lokalizacja urządzenia}" },
+      "dataset_id": { "const": "suszec:html:aed" },
+      "stable": true
+    },
+    "dedupe": { "key": [{ "field": "Lokalizacja urządzenia" }], "keep": "last", "on_duplicate": "reject" }
+  },
+  "map": {
+    "source_url": { "const": "https://suszec.pl/pl/6556/17612/informacja-na-temat-danych-lokalizacji-urzadzen-aed-na-terenie-gminy-suszec.html" },
+    "name": { "regex": { "in": { "field": "Opis lokalizacji" }, "pattern": "^(.*?)\\s+\\d{2}-\\d{3}" } },
+    "label": { "template": "{Lokalizacja urządzenia}" },
+    "description": { "field": "Opis lokalizacji" },
+    "note": { "field": "Mobilność urządzenia" },
+    "facility_type": {
+      "when": { "op": "regex", "left": { "field": "Opis lokalizacji" }, "right": "(?i)Remiza" },
+      "then": "osp_fire_station",
+      "else": {
+        "when": { "op": "regex", "left": { "field": "Opis lokalizacji" }, "right": "(?i)kościoła|garażu" },
+        "then": "public_space",
+        "else": "unknown"
+      }
+    },
+    "lat": {
+      "coord": {
+        "from": { "field": "Lokalizacja urządzenia" },
+        "format": "pair",
+        "order": "lat_lon",
+        "delimiter": ",",
+        "pick": "lat",
+        "precision_m": 15,
+        "axis_policy": "declared",
+        "on_invalid": "review"
+      }
+    },
+    "lon": {
+      "coord": {
+        "from": { "field": "Lokalizacja urządzenia" },
+        "format": "pair",
+        "order": "lat_lon",
+        "delimiter": ",",
+        "pick": "lon",
+        "precision_m": 15,
+        "axis_policy": "declared",
+        "on_invalid": "review"
+      }
+    },
+    "coord_precision_m": { "const": 15 },
+    "country_code": { "const": "PL" },
+    "postcode": { "regex": { "in": { "field": "Opis lokalizacji" }, "pattern": "(\\d{2}-\\d{3})" } },
+    "city": { "regex": { "in": { "field": "Opis lokalizacji" }, "pattern": "\\d{2}-\\d{3}\\s+([^\\s]+)" } },
+    "address_text": { "regex": { "in": { "field": "Opis lokalizacji" }, "pattern": "(\\d{2}-\\d{3}.*)$" } },
+    "entrance_description": { "field": "Mobilność urządzenia" },
+    "access_type": {
+      "when": { "op": "regex", "left": { "field": "Dostęp" }, "right": "(?i)bez ograniczeń" },
+      "then": "public",
+      "else": {
+        "when": { "op": "regex", "left": { "field": "Dostęp" }, "right": "(?i)po wezwaniu" },
+        "then": "dispatcher",
+        "else": "unknown"
+      }
+    },
+    "opening_hours": { "field": "Godziny funkcjonowania" },
+    "is_24_7": {
+      "when": {
+        "op": "regex",
+        "left": { "coalesce": [{ "field": "Dostęp" }, { "field": "Godziny funkcjonowania" }] },
+        "right": "(?i)całodobowo"
+      },
+      "then": true,
+      "else": null
+    },
+    "phone": { "field": "Nr telefonu zarządcy" },
+    "device_type": { "const": "public_aed" },
+    "status": { "const": "unknown" },
+    "verification_status": { "const": "unverified" },
+    "confidence": { "const": 0.8 },
+    "last_verified_at": { "const": null },
+    "operator_name": { "const": null },
+    "operator_type": { "const": "unknown" },
+    "source_updated_at": { "const": "2022-02-10" }
+  },
+  "validate": {
+    "required": ["name", "lat", "lon"],
+    "require_location": "point",
+    "coords": { "bbox": [18.72, 49.96, 18.84, 50.07], "on_invalid": "review", "on_missing": "review" },
+    "enums": true,
+    "on_error": "review"
+  },
+  "drift": {
+    "baseline": {
+      "record_count": 5,
+      "generated_at": "2026-11-21",
+      "schema_fields": ["Lokalizacja urządzenia", "Mobilność urządzenia", "Opis lokalizacji", "Nr telefonu zarządcy", "Dostęp", "Godziny funkcjonowania"]
+    },
+    "schema": { "on_new_field": "review", "on_missing_field": "fail", "on_type_change": "review", "on_header_order_change": "ignore" },
+    "volume": { "min_records": 4, "max_delta_ratio": 0.5, "on_breach": "review" },
+    "quality": {
+      "max_coord_invalid_ratio": 0.0,
+      "max_duplicate_id_ratio": 0.0,
+      "max_null_ratio": { "name": 0.0, "lat": 0.0, "lon": 0.0 },
+      "on_breach": "review"
+    },
+    "axis": { "enabled": true, "max_suspicious_ratio": 0.0, "on_breach": "review" },
+    "actions": { "warn": "log", "review": "quarantine", "fail": "disable" }
+  },
+  "publish": {
+    "enabled": false,
+    "license_id": "NOASSERTION",
+    "allowed_for_ingest": false,
+    "allowed_for_export": false,
+    "attribution": "Gmina Suszec — brak deklaracji licencji; publikacja wymaga zgody wydawcy",
+    "redact": ["phone"],
+    "exports": []
+  },
+  "schedule": { "cron": "0 3 * * 1", "timezone": "Europe/Warsaw", "jitter_seconds": 300 }
+}

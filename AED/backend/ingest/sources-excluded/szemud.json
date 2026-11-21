@@ -1,0 +1,187 @@
+{
+	"connector": {
+		"family": "manual",
+		"notes": "Live check 2026-11-21: strona BIP HTML 200 text/html; treść to osadzony obraz JPG (image/jpeg) z mapą 13 lokalizacji, bez listy tekstowej i bez współrzędnych. Blockery: LICENSE_NOASSERTION, IMAGE_ONLY, OCR_REQUIRED, GEOCODE_REQUIRED.",
+		"parser": "manual"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": false,
+			"max_suspicious_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 13
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 1,
+			"max_duplicate_id_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "ignore",
+			"on_missing_field": "review",
+			"on_new_field": "review",
+			"on_type_change": "review"
+		},
+		"volume": {
+			"max_delta_ratio": 0.5,
+			"min_records": 1,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": true,
+			"last_modified": true
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 6
+		},
+		"retries": {
+			"backoff_ms": 1500,
+			"max": 2
+		},
+		"timeout_ms": 30000,
+		"url": "https://szemud.pl/defibrylatory-aed.html",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"geocoding": {
+		"address_template": "{address_text}, {city}",
+		"cache_ttl_days": 365,
+		"enabled": true,
+		"geoportal": {
+			"endpoint": "https://services.gugik.gov.pl/uug/",
+			"max_results": 5,
+			"min_accuracy": 0.8,
+			"only_exact_numbers": true,
+			"output_srid": 4326,
+			"request": "GetAddress",
+			"srid": 2180
+		},
+		"min_confidence": 0.8,
+		"on_failure": "address_only",
+		"provider_order": [
+			"gugik-uug"
+		],
+		"rate_limit": {
+			"requests_per_minute": 30
+		},
+		"required_components": [
+			"city"
+		],
+		"strategy": "structured_first"
+	},
+	"map": {
+		"access_type": {
+			"const": "unknown"
+		},
+		"address_text": {
+			"field": "Adres"
+		},
+		"city": {
+			"const": "Szemud"
+		},
+		"confidence": {
+			"const": 0.3
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"name": {
+			"field": "Nazwa"
+		},
+		"source_url": {
+			"const": "https://szemud.pl/defibrylatory-aed.html"
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"verification_status": {
+			"const": "unverified"
+		}
+	},
+	"parse": {
+		"manual": {
+			"document_url": "https://szemud.pl/files/image/defibrylatory.jpg",
+			"format": "image",
+			"instructions": "Ręczna transkrypcja mapy JPG (13 lokalizacji z adresami). Odczytaj adresy z obrazu i geokoduj je przez GUGiK; nie ma listy tekstowej ani współrzędnych. Włącz po dodaniu transkrypcji i zgody wydawcy."
+		}
+	},
+	"publish": {
+		"allowed_for_export": false,
+		"allowed_for_ingest": false,
+		"attribution": "Szemud — NOASSERTION",
+		"enabled": false,
+		"exports": [],
+		"license_id": "NOASSERTION"
+	},
+	"records": {
+		"identity": {
+			"source_record_id": {
+				"template": "szemud:{row_index}"
+			},
+			"stable": false
+		},
+		"path": "$"
+	},
+	"schedule": {
+		"cron": "0 3 * * 1",
+		"jitter_seconds": 300,
+		"timezone": "Europe/Warsaw"
+	},
+	"source": {
+		"access_type": "manual",
+		"coverage": {
+			"country": "PL",
+			"notes": "pomorskie; gmina wiejska; Live check 2026-11-21: strona BIP HTML 200 text/html; treść to osadzony obraz JPG (image/jpeg) z mapą 13 lokalizacji, bez listy tekstowej i bez współrzędnych. Blockery: LICENSE_NOASSERTION, IMAGE_ONLY, OCR_REQUIRED, GEOCODE_REQUIRED.",
+			"teryt": [
+				"2215092"
+			]
+		},
+		"enabled": false,
+		"homepage_url": "https://szemud.pl/defibrylatory-aed.html",
+		"id": "szemud",
+		"license": {
+			"attribution": "Szemud: brak deklaracji licencji",
+			"id": "NOASSERTION"
+		},
+		"name": "Szemud",
+		"notes": "Live check 2026-11-21: strona BIP HTML 200 text/html; treść to osadzony obraz JPG (image/jpeg) z mapą 13 lokalizacji, bez listy tekstowej i bez współrzędnych. Blockery: LICENSE_NOASSERTION, IMAGE_ONLY, OCR_REQUIRED, GEOCODE_REQUIRED.",
+		"publisher": "Szemud",
+		"reliability_tier": "official_local",
+		"update_frequency": "unknown"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				14.07,
+				49,
+				24.15,
+				54.84
+			],
+			"on_invalid": "review",
+			"on_missing": "review"
+		},
+		"enums": true,
+		"on_error": "review",
+		"require_location": "address_or_point",
+		"required": [
+			"name"
+		]
+	},
+	"version": 1
+}

@@ -10,7 +10,8 @@ aby mapa i portal dane.gov.pl pokazywały ten sam zestaw pól niezależnie od
 
 ## Zakres
 
-- mapowanie pól każdego źródła na wspólny model rekordu AED,
+- mapowanie pól każdego źródła na wspólny model rekordu AED według
+  [`docs/design/aed-data-quality-spec.md`](../../docs/design/aed-data-quality-spec.md),
 - walidacja współrzędnych (obszar Polski) i odrzucanie błędnych rekordów
   z czytelnym powodem,
 - normalizacja adresów i przypisanie TERYT (gmina/powiat/województwo),
@@ -26,4 +27,7 @@ aby mapa i portal dane.gov.pl pokazywały ten sam zestaw pól niezależnie od
 
 ## Stan obecny
 
-Brak. Model rekordu i reguły mapowania nie zostały jeszcze zdefiniowane.
+Brak kodu. Model rekordu i reguły mapowania są zdefiniowane w
+[`docs/design/aed-data-quality-spec.md`](../../docs/design/aed-data-quality-spec.md)
+(walidacja pól, cykl życia, pewność, kwarantanna i raporty jakości).
+Implementacja silnika reguł i fixtures pozostaje do wykonania.

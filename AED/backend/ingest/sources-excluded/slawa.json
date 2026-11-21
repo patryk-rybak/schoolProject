@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "source": {
+    "id": "slawa",
+    "name": "AED w Gminie Sława",
+    "publisher": "Gmina Sława",
+    "homepage_url": "https://slawa.pl/aed-w-gminie-slawa/",
+    "access_type": "html",
+    "reliability_tier": "official_local",
+    "license": {
+      "id": "NOASSERTION",
+      "attribution": "Gmina Sława — https://slawa.pl/aed-w-gminie-slawa/ (brak deklaracji licencji)"
+    },
+    "coverage": {
+      "country": "PL",
+      "teryt": ["0812013"],
+      "notes": "Gmina miejsko-wiejska Sława, lubuskie. Jedna tabela, 13 wierszy, wszystkie ze współrzędnymi."
+    },
+    "update_frequency": "unknown",
+    "enabled": false,
+    "notes": "Tabela HTML z 13 wierszami i 7 kolumnami. Selektor i liczba wierszy sprawdzone na stronie live 2026-11-21. Brak deklaracji licencji: ingest i publikacja wyłączone."
+  },
+  "connector": {
+    "family": "html_table",
+    "parser": "html_table",
+    "notes": "Jedna tabela HTML. Kolumny nadpisane krótkimi nazwami, aby uniknąć długich nagłówków z NBSP."
+  },
+  "fetch": {
+    "url": "https://slawa.pl/aed-w-gminie-slawa/",
+    "method": "GET",
+    "timeout_ms": 30000,
+    "retries": { "max": 2, "backoff_ms": 1500 },
+    "rate_limit": { "requests_per_minute": 6 },
+    "conditional": { "etag": true, "last_modified": true },
+    "pagination": { "type": "none" },
+    "user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+  },
+  "parse": {
+    "encoding": "utf-8",
+    "trim_headers": true,
+    "html_table": {
+      "select": "table",
+      "table_index": 0,
+      "orientation": "rows",
+      "columns": ["lp", "city", "name", "address", "access_text", "coords", "notes"],
+      "header_row": 0,
+      "data_start_row": 1,
+      "normalize_headers": true,
+      "trim": true,
+      "collapse_whitespace": true,
+      "empty_as_null": true,
+      "skip_empty_rows": true,
+      "min_records": 13,
+      "max_records": 20
+    }
+  },
+  "records": {
+    "path": "$",
+    "identity": {
+      "source_record_id": { "template": "slawa:{lp}" },
+      "dataset_id": { "const": "slawa:html:aed" },
+      "stable": true
+    },
+    "dedupe": { "key": [{ "field": "lp" }], "keep": "last", "on_duplicate": "reject" }
+  },
+  "map": {
+    "source_url": { "const": "https://slawa.pl/aed-w-gminie-slawa/" },
+    "name": { "field": "name" },
+    "label": { "template": "slawa:{lp}" },
+    "description": { "field": "notes" },
+    "note": { "coalesce": [{ "field": "notes" }, { "field": "access_text" }] },
+    "facility_type": { "const": "unknown" },
+    "lat": {
+      "coord": {
+        "from": { "field": "coords" },
+        "format": "pair",
+        "order": "lat_lon",
+        "delimiter": ",",
+        "pick": "lat",
+        "precision_m": 15,
+        "axis_policy": "declared",
+        "on_invalid": "review"
+      }
+    },
+    "lon": {
+      "coord": {
+        "from": { "field": "coords" },
+        "format": "pair",
+        "order": "lat_lon",
+        "delimiter": ",",
+        "pick": "lon",
+        "precision_m": 15,
+        "axis_policy": "declared",
+        "on_invalid": "review"
+      }
+    },
+    "coord_precision_m": { "const": 15 },
+    "country_code": { "const": "PL" },
+    "city": { "field": "city" },
+    "address_text": { "field": "address" },
+    "entrance_description": { "field": "notes" },
+    "access_type": {
+      "when": { "op": "regex", "left": { "field": "access_text" }, "right": "dla wszystkich" },
+      "then": "public",
+      "else": {
+        "when": { "op": "regex", "left": { "field": "access_text" }, "right": "dla danego podmiotu" },
+        "then": "private",
+        "else": "unknown"
+      }
+    },
+    "is_24_7": {
+      "when": { "op": "regex", "left": { "field": "access_text" }, "right": "całodobowo" },
+      "then": true,
+      "else": null
+    },
+    "device_type": { "const": "public_aed" },
+    "status": { "const": "unknown" },
+    "verification_status": { "const": "unverified" },
+    "confidence": { "const": 0.75 },
+    "last_verified_at": { "const": null },
+    "operator_name": { "const": null },
+    "operator_type": { "const": "unknown" },
+    "source_updated_at": { "const": "2026-09-02" }
+  },
+  "validate": {
+    "required": ["name", "lat", "lon"],
+    "require_location": "point",
+    "coords": { "bbox": [16.0, 51.76, 16.16, 51.97], "on_invalid": "review", "on_missing": "review" },
+    "enums": true,
+    "on_error": "review"
+  },
+  "drift": {
+    "baseline": {
+      "record_count": 13,
+      "generated_at": "2026-11-21",
+      "schema_fields": ["lp", "city", "name", "address", "access_text", "coords", "notes"]
+    },
+    "schema": { "on_new_field": "review", "on_missing_field": "fail", "on_type_change": "review", "on_header_order_change": "review" },
+    "volume": { "min_records": 10, "max_delta_ratio": 0.5, "on_breach": "review" },
+    "quality": {
+      "max_coord_invalid_ratio": 0.0,
+      "max_duplicate_id_ratio": 0.0,
+      "max_null_ratio": { "name": 0.0, "lat": 0.0, "lon": 0.0 },
+      "on_breach": "review"
+    },
+    "axis": { "enabled": true, "max_suspicious_ratio": 0.0, "on_breach": "review" },
+    "actions": { "warn": "log", "review": "quarantine", "fail": "disable" }
+  },
+  "publish": {
+    "enabled": false,
+    "license_id": "NOASSERTION",
+    "allowed_for_ingest": false,
+    "allowed_for_export": false,
+    "attribution": "Gmina Sława — brak deklaracji licencji; publikacja wymaga zgody wydawcy",
+    "redact": [],
+    "exports": []
+  },
+  "schedule": { "cron": "0 3 * * 1", "timezone": "Europe/Warsaw", "jitter_seconds": 300 }
+}

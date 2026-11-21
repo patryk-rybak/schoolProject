@@ -1,0 +1,2317 @@
+{
+	"durationMs": 18377,
+	"families": [
+		{
+			"blocked": 0,
+			"failed": 0,
+			"family": "file_static",
+			"manual": 0,
+			"ok": 2,
+			"total": 3,
+			"warning": 1
+		},
+		{
+			"blocked": 0,
+			"failed": 0,
+			"family": "google_my_maps_kml",
+			"manual": 0,
+			"ok": 3,
+			"total": 6,
+			"warning": 3
+		},
+		{
+			"blocked": 0,
+			"failed": 9,
+			"family": "html_list",
+			"manual": 0,
+			"ok": 12,
+			"total": 21,
+			"warning": 0
+		},
+		{
+			"blocked": 0,
+			"failed": 4,
+			"family": "html_table",
+			"manual": 0,
+			"ok": 5,
+			"total": 10,
+			"warning": 1
+		},
+		{
+			"blocked": 1,
+			"failed": 0,
+			"family": "http_json",
+			"manual": 0,
+			"ok": 1,
+			"total": 2,
+			"warning": 0
+		},
+		{
+			"blocked": 0,
+			"failed": 0,
+			"family": "manual",
+			"manual": 26,
+			"ok": 0,
+			"total": 26,
+			"warning": 0
+		},
+		{
+			"blocked": 0,
+			"failed": 0,
+			"family": "pdf_table",
+			"manual": 1,
+			"ok": 0,
+			"total": 1,
+			"warning": 0
+		}
+	],
+	"generatedAt": "2026-11-21T20:55:25.576Z",
+	"results": [
+		{
+			"bytes": 2787,
+			"contentType": "application/octet-stream",
+			"duplicateIds": 0,
+			"durationMs": 523,
+			"expectedRecords": 21,
+			"family": "file_static",
+			"finalUrl": "https://api.dane.gov.pl/media/resources/20240219/Defibrylator_jAmxQcp.csv",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 15,
+			"parser": "csv",
+			"recordsAccepted": 21,
+			"recordsRejected": 0,
+			"recordsSeen": 21,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "krosno",
+			"sourceName": "Defibrylatory w Krośnie",
+			"status": "ok",
+			"url": "https://api.dane.gov.pl/media/resources/20240219/Defibrylator_jAmxQcp.csv",
+			"registry": "active"
+		},
+		{
+			"bytes": 1008,
+			"contentType": "application/octet-stream",
+			"duplicateIds": 0,
+			"durationMs": 69,
+			"expectedRecords": 8,
+			"family": "file_static",
+			"finalUrl": "https://api.dane.gov.pl/media/resources/20250710/Defibrylator_GminaMiastoMarki_1.csv",
+			"httpStatus": 200,
+			"invalidCoordinates": 1,
+			"issues": [
+				{
+					"code": "invalid_coordinates",
+					"message": "1 rekordów ma brakujące lub niepoprawne współrzędne.",
+					"severity": "warning"
+				}
+			],
+			"metrics": {},
+			"minRecords": 6,
+			"parser": "csv",
+			"recordsAccepted": 8,
+			"recordsRejected": 0,
+			"recordsSeen": 8,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "marki",
+			"sourceName": "Defibrylatory w Markach",
+			"status": "warning",
+			"url": "https://api.dane.gov.pl/media/resources/20250710/Defibrylator_GminaMiastoMarki_1.csv",
+			"registry": "active"
+		},
+		{
+			"bytes": 7138131,
+			"contentType": "application/geo+json; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 1422,
+			"expectedRecords": 18298,
+			"family": "file_static",
+			"finalUrl": "https://openaedmap.org/api/v1/countries/PL.geojson",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 10000,
+			"parser": "geojson",
+			"recordsAccepted": 18303,
+			"recordsRejected": 0,
+			"recordsSeen": 18303,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "openaedmap",
+			"sourceName": "OpenAEDMap — eksport krajowy PL",
+			"status": "ok",
+			"url": "https://openaedmap.org/api/v1/countries/PL.geojson",
+			"registry": "active"
+		},
+		{
+			"bytes": 22746,
+			"contentType": "text/xml; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 725,
+			"expectedRecords": 32,
+			"family": "google_my_maps_kml",
+			"finalUrl": "https://www.google.com/maps/d/kml?mid=171VXaQTmWbIPbtUvHfuzwQredJE3krA&forcekml=1",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 1 z 32 rekordów. Próbka: #31: name=null",
+					"severity": "warning"
+				}
+			],
+			"metrics": {
+				"pageBytes": 22746,
+				"kmlUrl": "https://www.google.com/maps/d/kml?mid=171VXaQTmWbIPbtUvHfuzwQredJE3krA&forcekml=1",
+				"placemarks": 32,
+				"points": 32,
+				"polygons": 0,
+				"lines": 0,
+				"pointless": 0,
+				"documentName": "Wykaz defibrylatorów AED na terenie Bełchatowa",
+				"rejectedSamples": "#31: name=null"
+			},
+			"minRecords": 28,
+			"parser": "kml",
+			"recordsAccepted": 31,
+			"recordsRejected": 1,
+			"recordsSeen": 32,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "belchatow",
+			"sourceName": "Wykaz defibrylatorów AED na terenie Bełchatowa (KML)",
+			"status": "warning",
+			"url": "https://www.google.com/maps/d/kml?mid=171VXaQTmWbIPbtUvHfuzwQredJE3krA&forcekml=1",
+			"registry": "active"
+		},
+		{
+			"bytes": 59519,
+			"contentType": "text/xml; charset=utf-8",
+			"duplicateIds": 6,
+			"durationMs": 886,
+			"expectedRecords": 136,
+			"family": "google_my_maps_kml",
+			"finalUrl": "https://www.google.com/maps/d/kml?mid=1FMKFbebKJPYqD4C87pXWPqNjEHuEswE&forcekml=1",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "duplicate_ids",
+					"message": "Wykryto 6 zduplikowanych source_record_id.",
+					"severity": "warning"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 7 z 136 rekordów. Próbka: #14: name=null",
+					"severity": "warning"
+				}
+			],
+			"metrics": {
+				"pageBytes": 59519,
+				"kmlUrl": "https://www.google.com/maps/d/kml?mid=1FMKFbebKJPYqD4C87pXWPqNjEHuEswE&forcekml=1",
+				"placemarks": 136,
+				"points": 136,
+				"polygons": 0,
+				"lines": 0,
+				"pointless": 0,
+				"documentName": "defibrylatory AED",
+				"rejectedSamples": "#14: name=null; #76: name=null; #105: name=null"
+			},
+			"minRecords": 120,
+			"parser": "kml",
+			"recordsAccepted": 129,
+			"recordsRejected": 7,
+			"recordsSeen": 136,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "lodz",
+			"sourceName": "Defibrylatory AED w Łodzi (Google My Maps, KML)",
+			"status": "warning",
+			"url": "https://www.google.com/maps/d/kml?mid=1FMKFbebKJPYqD4C87pXWPqNjEHuEswE&forcekml=1",
+			"registry": "active"
+		},
+		{
+			"bytes": 13820,
+			"contentType": "text/xml; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 359,
+			"expectedRecords": 43,
+			"family": "google_my_maps_kml",
+			"finalUrl": "https://www.google.com/maps/d/kml?mid=1J5zJj9kL49uq8799g5qNgfl21NoztwzK&forcekml=1",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {
+				"pageBytes": 13820,
+				"kmlUrl": "https://www.google.com/maps/d/kml?mid=1J5zJj9kL49uq8799g5qNgfl21NoztwzK&forcekml=1",
+				"placemarks": 43,
+				"points": 43,
+				"polygons": 0,
+				"lines": 0,
+				"pointless": 0,
+				"documentName": "Mapa ogólnodostępnych defibrylatorów AED w Olsztynie"
+			},
+			"minRecords": 38,
+			"parser": "kml",
+			"recordsAccepted": 43,
+			"recordsRejected": 0,
+			"recordsSeen": 43,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "olsztyn",
+			"sourceName": "Mapa ogólnodostępnych defibrylatorów AED w Olsztynie (KML)",
+			"status": "ok",
+			"url": "https://www.google.com/maps/d/kml?mid=1J5zJj9kL49uq8799g5qNgfl21NoztwzK&forcekml=1",
+			"registry": "active"
+		},
+		{
+			"bytes": 5269,
+			"contentType": "text/xml; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 525,
+			"expectedRecords": 12,
+			"family": "google_my_maps_kml",
+			"finalUrl": "https://www.google.com/maps/d/kml?mid=1DSs_ESjkEU6AaxZjgpLgwtk5tlG11gc&forcekml=1",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {
+				"pageBytes": 5269,
+				"kmlUrl": "https://www.google.com/maps/d/kml?mid=1DSs_ESjkEU6AaxZjgpLgwtk5tlG11gc&forcekml=1",
+				"placemarks": 12,
+				"points": 12,
+				"polygons": 0,
+				"lines": 0,
+				"pointless": 0,
+				"documentName": "Defibrylatory AED - Gmina Pawłowice"
+			},
+			"minRecords": 10,
+			"parser": "kml",
+			"recordsAccepted": 12,
+			"recordsRejected": 0,
+			"recordsSeen": 12,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "pawlowice",
+			"sourceName": "Defibrylatory AED - Gmina Pawłowice (KML)",
+			"status": "ok",
+			"url": "https://www.google.com/maps/d/kml?mid=1DSs_ESjkEU6AaxZjgpLgwtk5tlG11gc&forcekml=1",
+			"registry": "active"
+		},
+		{
+			"bytes": 4836,
+			"contentType": "text/xml; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 447,
+			"expectedRecords": 13,
+			"family": "google_my_maps_kml",
+			"finalUrl": "https://www.google.com/maps/d/kml?mid=1FJwYx26MGn5rWzS6mN2GJN_OZvy-EzY&forcekml=1",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {
+				"pageBytes": 4836,
+				"kmlUrl": "https://www.google.com/maps/d/kml?mid=1FJwYx26MGn5rWzS6mN2GJN_OZvy-EzY&forcekml=1",
+				"placemarks": 13,
+				"points": 13,
+				"polygons": 0,
+				"lines": 0,
+				"pointless": 0,
+				"documentName": "AED Tczew"
+			},
+			"minRecords": 10,
+			"parser": "kml",
+			"recordsAccepted": 13,
+			"recordsRejected": 0,
+			"recordsSeen": 13,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "tczew",
+			"sourceName": "AED Tczew (Google My Maps, KML)",
+			"status": "ok",
+			"url": "https://www.google.com/maps/d/kml?mid=1FJwYx26MGn5rWzS6mN2GJN_OZvy-EzY&forcekml=1",
+			"registry": "active"
+		},
+		{
+			"bytes": 51019,
+			"contentType": "text/xml; charset=utf-8",
+			"duplicateIds": 5,
+			"durationMs": 786,
+			"expectedRecords": 165,
+			"family": "google_my_maps_kml",
+			"finalUrl": "https://www.google.com/maps/d/kml?mid=1WXrqKMAgKA_kzG5aF6bMiXpaFVA&forcekml=1",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "duplicate_ids",
+					"message": "Wykryto 5 zduplikowanych source_record_id.",
+					"severity": "warning"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 1 z 165 rekordów. Próbka: #100: name=null",
+					"severity": "warning"
+				}
+			],
+			"metrics": {
+				"pageBytes": 51019,
+				"kmlUrl": "https://www.google.com/maps/d/kml?mid=1WXrqKMAgKA_kzG5aF6bMiXpaFVA&forcekml=1",
+				"placemarks": 165,
+				"points": 165,
+				"polygons": 0,
+				"lines": 0,
+				"pointless": 0,
+				"documentName": "AED w Zielonej Górze",
+				"rejectedSamples": "#100: name=null"
+			},
+			"minRecords": 150,
+			"parser": "kml",
+			"recordsAccepted": 164,
+			"recordsRejected": 1,
+			"recordsSeen": 165,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "zielona-gora",
+			"sourceName": "AED w Zielonej Górze (Google My Maps, KML)",
+			"status": "warning",
+			"url": "https://www.google.com/maps/d/kml?mid=1WXrqKMAgKA_kzG5aF6bMiXpaFVA&forcekml=1",
+			"registry": "active"
+		},
+		{
+			"bytes": 323594,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 269,
+			"expectedRecords": 2,
+			"family": "html_list",
+			"finalUrl": "https://www.gminabiskupiec.pl/2025/07/15/zewnetrzne-defibrylatory-aed-w-gminie-biskupiec/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 2 z 2 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null; #1: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 2,
+			"recordsSeen": 2,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "biskupiec",
+			"sourceName": "Biskupiec",
+			"status": "failed",
+			"url": "https://www.gminabiskupiec.pl/2025/07/15/zewnetrzne-defibrylatory-aed-w-gminie-biskupiec/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 51230,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 561,
+			"expectedRecords": 9,
+			"family": "html_list",
+			"finalUrl": "https://www.xn--brzenica-o3b.pl/archiwum-artykulow/2754-aed-w-kazdej-miejscowosci-gminy-brzeznica",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 9 z 9 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null; #1: name=null; #2: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 9,
+			"recordsSeen": 9,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "brzeznica",
+			"sourceName": "Brzeźnica",
+			"status": "failed",
+			"url": "https://www.xn--brzenica-o3b.pl/archiwum-artykulow/2754-aed-w-kazdej-miejscowosci-gminy-brzeznica",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 187253,
+			"contentType": "text/html;charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 486,
+			"expectedRecords": 17,
+			"family": "html_list",
+			"finalUrl": "https://gora.com.pl/lokalizacje-aed.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 17 z 17 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null; #1: name=null; #2: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 17,
+			"recordsSeen": 17,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "gora",
+			"sourceName": "Góra",
+			"status": "failed",
+			"url": "https://gora.com.pl/lokalizacje-aed.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 34030,
+			"contentType": "text/html",
+			"duplicateIds": 0,
+			"durationMs": 423,
+			"expectedRecords": 13,
+			"family": "html_list",
+			"finalUrl": "https://www.ugk.pl/defibrylatory-aed",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 10,
+			"parser": "html_list",
+			"recordsAccepted": 13,
+			"recordsRejected": 0,
+			"recordsSeen": 13,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "kobierzyce",
+			"sourceName": "Defibrylatory AED w Gminie Kobierzyce",
+			"status": "ok",
+			"url": "https://www.ugk.pl/defibrylatory-aed",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 171506,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 618,
+			"expectedRecords": 10,
+			"family": "html_list",
+			"finalUrl": "https://gminakosakowo.pl/aktualnosci/informacja-o-zainstalowanych-ogolnodostepnych-defibrylatorach-aed-w-gminie-kosakowo/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 10,
+			"parser": "html_list",
+			"recordsAccepted": 10,
+			"recordsRejected": 0,
+			"recordsSeen": 10,
+			"requiredCoverage": {
+				"name": 1
+			},
+			"sourceId": "kosakowo",
+			"sourceName": "Kosakowo",
+			"status": "ok",
+			"url": "https://gminakosakowo.pl/aktualnosci/informacja-o-zainstalowanych-ogolnodostepnych-defibrylatorach-aed-w-gminie-kosakowo/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 82407,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1272,
+			"expectedRecords": 6,
+			"family": "html_list",
+			"finalUrl": "https://lubawa.pl/pomoc-na-wyciagniecie-reki/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "volume_drift",
+					"message": "Odczytano 1 rekordów, baseline 6 (delta 83.3%).",
+					"severity": "warning"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 1 z 1 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 1,
+			"recordsSeen": 1,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "lubawa",
+			"sourceName": "Lubawa",
+			"status": "failed",
+			"url": "https://lubawa.pl/pomoc-na-wyciagniecie-reki/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 68716,
+			"contentType": "text/html",
+			"duplicateIds": 0,
+			"durationMs": 1553,
+			"expectedRecords": 4,
+			"family": "html_list",
+			"finalUrl": "https://www.lubien.pl/asp/defibrylatory,1,artykul,1,3417",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 4 z 4 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null; #1: name=null; #2: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 4,
+			"recordsSeen": 4,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "lubien",
+			"sourceName": "Lubień",
+			"status": "failed",
+			"url": "https://www.lubien.pl/asp/defibrylatory,1,artykul,1,3417",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 122913,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 2527,
+			"expectedRecords": 4,
+			"family": "html_list",
+			"finalUrl": "https://ug.lubin.pl/aed-urzadzenia-ratujace-zycie/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 4 z 4 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null; #1: name=null; #2: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 4,
+			"recordsSeen": 4,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "lubin-gmina",
+			"sourceName": "Lubin (gmina wiejska)",
+			"status": "failed",
+			"url": "https://ug.lubin.pl/aed-urzadzenia-ratujace-zycie/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 156674,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1247,
+			"expectedRecords": 10,
+			"family": "html_list",
+			"finalUrl": "https://www.lwowek.com.pl/10-nowych-defibrylatorow-aed-w-gminie-lwowek/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 10,
+			"parser": "html_list",
+			"recordsAccepted": 10,
+			"recordsRejected": 0,
+			"recordsSeen": 10,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "lwowek",
+			"sourceName": "Lwówek",
+			"status": "ok",
+			"url": "https://www.lwowek.com.pl/10-nowych-defibrylatorow-aed-w-gminie-lwowek/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 73460,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 580,
+			"expectedRecords": 8,
+			"family": "html_list",
+			"finalUrl": "https://manowo.pl/strona/defibrylator-aed-na-terenie-gminy-manowo",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 6,
+			"parser": "html_list",
+			"recordsAccepted": 8,
+			"recordsRejected": 0,
+			"recordsSeen": 8,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "manowo",
+			"sourceName": "Ogólnodostępne defibrylatory AED na terenie Gminy Manowo",
+			"status": "ok",
+			"url": "https://manowo.pl/strona/defibrylator-aed-na-terenie-gminy-manowo",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 132727,
+			"contentType": "text/html;charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 893,
+			"expectedRecords": 15,
+			"family": "html_list",
+			"finalUrl": "https://www.pila.pl/346-pilskie-defibrylatory.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 15,
+			"parser": "html_list",
+			"recordsAccepted": 15,
+			"recordsRejected": 0,
+			"recordsSeen": 15,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "pila",
+			"sourceName": "Piła",
+			"status": "ok",
+			"url": "https://www.pila.pl/346-pilskie-defibrylatory.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 92971,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1223,
+			"expectedRecords": 21,
+			"family": "html_list",
+			"finalUrl": "https://polkowice.eu/defibrylator-ratuje-zycie/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 18,
+			"parser": "html_list",
+			"recordsAccepted": 21,
+			"recordsRejected": 0,
+			"recordsSeen": 21,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "polkowice",
+			"sourceName": "Defibrylatory AED w Gminie Polkowice",
+			"status": "ok",
+			"url": "https://polkowice.eu/defibrylator-ratuje-zycie/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 318033,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1035,
+			"expectedRecords": 2,
+			"family": "html_list",
+			"finalUrl": "https://powiat.krakow.pl/aktualnosci-i-ogloszenia/aktualnosci/nowe-defibrylatory-aed-w-domach-pomocy-spolecznej-w-powiecie-krakowskim",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 2 z 2 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null; #1: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 2,
+			"recordsSeen": 2,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "powiat-krakowski",
+			"sourceName": "powiat krakowski",
+			"status": "failed",
+			"url": "https://powiat.krakow.pl/aktualnosci-i-ogloszenia/aktualnosci/nowe-defibrylatory-aed-w-domach-pomocy-spolecznej-w-powiecie-krakowskim",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 132636,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1926,
+			"expectedRecords": 28,
+			"family": "html_list",
+			"finalUrl": "https://powiatstarogard.pl/wydzial-nadzoru-wlascicielskiego-i-zdrowia/siec-defibrylatorow/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 28,
+			"parser": "html_list",
+			"recordsAccepted": 28,
+			"recordsRejected": 0,
+			"recordsSeen": 28,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "powiat-starogardzki",
+			"sourceName": "powiat starogardzki",
+			"status": "ok",
+			"url": "https://powiatstarogard.pl/wydzial-nadzoru-wlascicielskiego-i-zdrowia/siec-defibrylatorow/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 196918,
+			"contentType": "text/html;charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 796,
+			"expectedRecords": 15,
+			"family": "html_list",
+			"finalUrl": "https://pruszcz-gdanski.pl/defibrylatory",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 15,
+			"parser": "html_list",
+			"recordsAccepted": 15,
+			"recordsRejected": 0,
+			"recordsSeen": 15,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "pruszcz-gdanski",
+			"sourceName": "Pruszcz Gdański",
+			"status": "ok",
+			"url": "https://pruszcz-gdanski.pl/defibrylatory",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 93419,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1002,
+			"expectedRecords": 21,
+			"family": "html_list",
+			"finalUrl": "https://www.przemet.pl/2025,02,wykaz-aed/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 21,
+			"parser": "html_list",
+			"recordsAccepted": 21,
+			"recordsRejected": 0,
+			"recordsSeen": 21,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "przemet",
+			"sourceName": "Przemęt",
+			"status": "ok",
+			"url": "https://www.przemet.pl/2025,02,wykaz-aed/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 96355,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 293,
+			"expectedRecords": 8,
+			"family": "html_list",
+			"finalUrl": "https://www.gminaradlow.pl/dla-mieszkanca/bezpieczenstwo/defibrylatory-aed",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 8 z 8 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null; #1: name=null; #2: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 8,
+			"recordsSeen": 8,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "radlow",
+			"sourceName": "Radłów",
+			"status": "failed",
+			"url": "https://www.gminaradlow.pl/dla-mieszkanca/bezpieczenstwo/defibrylatory-aed",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 37424,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 637,
+			"expectedRecords": 15,
+			"family": "html_list",
+			"finalUrl": "https://strzegom.pl/aktualnosci/n,406305,wykaz-defibrylatorow-aed-na-terenie-gminy-strzegom.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 12,
+			"parser": "html_list",
+			"recordsAccepted": 15,
+			"recordsRejected": 0,
+			"recordsSeen": 15,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "strzegom",
+			"sourceName": "Wykaz defibrylatorów AED w Gminie Strzegom",
+			"status": "ok",
+			"url": "https://strzegom.pl/aktualnosci/n,406305,wykaz-defibrylatorow-aed-na-terenie-gminy-strzegom.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 113592,
+			"contentType": "text/html",
+			"duplicateIds": 0,
+			"durationMs": 1409,
+			"expectedRecords": 6,
+			"family": "html_list",
+			"finalUrl": "https://www.swidwin.pl/asp/defibrylatory-w-swidwinie,380",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "required_fields_missing",
+					"message": "Żaden rekord nie przeszedł walidacji wymaganych pól lub lokalizacji.",
+					"severity": "error"
+				},
+				{
+					"code": "rejected_records",
+					"message": "Odrzucono 6 z 6 rekordów. Próbka: #0: name=null",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {
+				"rejectedSamples": "#0: name=null; #1: name=null; #2: name=null"
+			},
+			"minRecords": 1,
+			"parser": "html_list",
+			"recordsAccepted": 0,
+			"recordsRejected": 6,
+			"recordsSeen": 6,
+			"requiredCoverage": {
+				"name": 0
+			},
+			"sourceId": "swidwin",
+			"sourceName": "Świdwin",
+			"status": "failed",
+			"url": "https://www.swidwin.pl/asp/defibrylatory-w-swidwinie,380",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 1360538,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 4419,
+			"expectedRecords": 10,
+			"family": "html_list",
+			"finalUrl": "https://opolsar.pl/aed/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 8,
+			"parser": "html_list",
+			"recordsAccepted": 10,
+			"recordsRejected": 0,
+			"recordsSeen": 10,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "tarnow-opolski",
+			"sourceName": "AED w Gminie Tarnów Opolski",
+			"status": "ok",
+			"url": "https://opolsar.pl/aed/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 220733,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 615,
+			"expectedRecords": 46,
+			"family": "html_list",
+			"finalUrl": "https://www.torun.pl/pl/zdrowie/defibrylatory-aed-wykaz-lokalizacji",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 40,
+			"parser": "html_list",
+			"recordsAccepted": 46,
+			"recordsRejected": 0,
+			"recordsSeen": 46,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "torun",
+			"sourceName": "Defibrylatory AED. Wykaz lokalizacji — Toruń",
+			"status": "ok",
+			"url": "https://www.torun.pl/pl/zdrowie/defibrylatory-aed-wykaz-lokalizacji",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 102844,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 509,
+			"expectedRecords": 0,
+			"family": "html_table",
+			"finalUrl": "https://typo3.um.bydgoszcz.pl/bezpieczenstwo/abc-bezpieczenstwa/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "html_no_table",
+					"message": "brak tabeli w HTML",
+					"severity": "error"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 0,
+			"parser": "html_table",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {
+				"name": 0,
+				"address_text": 0
+			},
+			"sourceId": "bydgoszcz",
+			"sourceName": "Automatyczne Defibrylatory Zewnętrzne (AED) w Bydgoszczy",
+			"status": "failed",
+			"url": "https://typo3.um.bydgoszcz.pl/bezpieczenstwo/abc-bezpieczenstwa",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 57589,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 2609,
+			"expectedRecords": 0,
+			"family": "html_table",
+			"finalUrl": "https://www.gdansk.pl/budzet-obywatelski/Ogolnomiejski-Bezpieczny-Gdansk-26-defibrylatorow-do-ratowania-zycia-w-przestrzeni-miasta,a,164468",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "html_no_table",
+					"message": "brak tabeli w HTML",
+					"severity": "error"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 0,
+			"parser": "html_table",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {
+				"name": 0,
+				"address_text": 0
+			},
+			"sourceId": "gdansk",
+			"sourceName": "Bezpieczny Gdańsk — 26 defibrylatorów w przestrzeni miasta",
+			"status": "failed",
+			"url": "https://www.gdansk.pl/budzet-obywatelski/Ogolnomiejski-Bezpieczny-Gdansk-26-defibrylatorow-do-ratowania-zycia-w-przestrzeni-miasta,a,164468",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 184679,
+			"contentType": "text/html;charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 713,
+			"expectedRecords": 15,
+			"family": "html_table",
+			"finalUrl": "https://kolbaskowo.pl/gdzie-znalezc-aed-w-gminie-kolbaskowo.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 15,
+			"parser": "html_table",
+			"recordsAccepted": 15,
+			"recordsRejected": 0,
+			"recordsSeen": 15,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "kolbaskowo",
+			"sourceName": "Kołbaskowo",
+			"status": "ok",
+			"url": "https://kolbaskowo.pl/gdzie-znalezc-aed-w-gminie-kolbaskowo.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 71638,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 2462,
+			"expectedRecords": 20,
+			"family": "html_table",
+			"finalUrl": "https://krakow.pl/aed_-_impuls_zycia/3992,artykul,mapa_aed.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 18,
+			"parser": "html_table",
+			"recordsAccepted": 20,
+			"recordsRejected": 0,
+			"recordsSeen": 20,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "krakow",
+			"sourceName": "Mapa AED — Kraków",
+			"status": "ok",
+			"url": "https://krakow.pl/aed_-_impuls_zycia/3992,artykul,mapa_aed.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 38864,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 428,
+			"expectedRecords": 0,
+			"family": "html_table",
+			"finalUrl": "https://www.lomza.pl/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "html_no_table",
+					"message": "brak tabeli w HTML",
+					"severity": "error"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 0,
+			"parser": "html_table",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {
+				"name": 0,
+				"address_text": 0
+			},
+			"sourceId": "lomza",
+			"sourceName": "Defibrylatory AED w Łomży",
+			"status": "failed",
+			"url": "https://www.lomza.pl/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 0,
+			"contentType": null,
+			"duplicateIds": 0,
+			"durationMs": 3530,
+			"expectedRecords": 0,
+			"family": "html_table",
+			"finalUrl": "https://www.powiat.bochnia.pl/aktualnosci/powiat-bochenski-inwestuje-w-bezpieczenstwo-10-nowych-defibrylatorow-aed.html",
+			"httpStatus": null,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "network_error",
+					"message": "unable to verify the first certificate",
+					"severity": "error"
+				}
+			],
+			"metrics": {},
+			"minRecords": 0,
+			"parser": "html_table",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {
+				"name": 0,
+				"address_text": 0
+			},
+			"sourceId": "powiat-bochenski",
+			"sourceName": "10 nowych defibrylatorów AED w Powiecie Bocheńskim",
+			"status": "failed",
+			"url": "https://www.powiat.bochnia.pl/aktualnosci/powiat-bochenski-inwestuje-w-bezpieczenstwo-10-nowych-defibrylatorow-aed.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 128056,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 4321,
+			"expectedRecords": 13,
+			"family": "html_table",
+			"finalUrl": "https://slawa.pl/aed-w-gminie-slawa/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 10,
+			"parser": "html_table",
+			"recordsAccepted": 13,
+			"recordsRejected": 0,
+			"recordsSeen": 13,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "slawa",
+			"sourceName": "AED w Gminie Sława",
+			"status": "ok",
+			"url": "https://slawa.pl/aed-w-gminie-slawa/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 147888,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 473,
+			"expectedRecords": 25,
+			"family": "html_table",
+			"finalUrl": "https://www.slupsk.pl/mieszkaniec/zdrowie-i-sprawy-spoleczne/defibrylatory-aed",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 25,
+			"parser": "html_table",
+			"recordsAccepted": 25,
+			"recordsRejected": 0,
+			"recordsSeen": 25,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "slupsk",
+			"sourceName": "Słupsk",
+			"status": "ok",
+			"url": "https://www.slupsk.pl/mieszkaniec/zdrowie-i-sprawy-spoleczne/defibrylatory-aed",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 54002,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 581,
+			"expectedRecords": 17,
+			"family": "html_table",
+			"finalUrl": "https://smigiel.pl/lista-aed.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 17,
+			"parser": "html_table",
+			"recordsAccepted": 17,
+			"recordsRejected": 0,
+			"recordsSeen": 17,
+			"requiredCoverage": {
+				"name": 1,
+				"address_text": 1
+			},
+			"sourceId": "smigiel",
+			"sourceName": "Śmigiel",
+			"status": "ok",
+			"url": "https://smigiel.pl/lista-aed.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 121102,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 540,
+			"expectedRecords": 5,
+			"family": "html_table",
+			"finalUrl": "https://suszec.pl/pl/6556/17612/informacja-na-temat-danych-lokalizacji-urzadzen-aed-na-terenie-gminy-suszec.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "html_no_rows",
+					"message": "tabela key-value bez wymaganych kluczy",
+					"severity": "warning"
+				},
+				{
+					"code": "volume_drift",
+					"message": "Odczytano 26 rekordów, baseline 5 (delta 420.0%).",
+					"severity": "warning"
+				},
+				{
+					"code": "terms_unconfirmed",
+					"message": "Brak potwierdzenia regulaminu/robots dla źródła HTML.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 4,
+			"parser": "html_table",
+			"recordsAccepted": 5,
+			"recordsRejected": 0,
+			"recordsSeen": 26,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "suszec",
+			"sourceName": "Dane lokalizacji urządzeń AED na terenie gminy Suszec",
+			"status": "warning",
+			"url": "https://suszec.pl/pl/6556/17612/informacja-na-temat-danych-lokalizacji-urzadzen-aed-na-terenie-gminy-suszec.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 52632,
+			"contentType": "application/json; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1397,
+			"expectedRecords": 21,
+			"family": "http_json",
+			"finalUrl": "https://dane.przemysl.eu/wp-json/sod/v1/resources/15/structured",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 15,
+			"parser": "json",
+			"recordsAccepted": 21,
+			"recordsRejected": 0,
+			"recordsSeen": 21,
+			"requiredCoverage": {
+				"name": 1,
+				"lat": 1,
+				"lon": 1
+			},
+			"sourceId": "przemysl",
+			"sourceName": "Otwarte Dane Przemyśl — defibrylatory AED",
+			"status": "ok",
+			"url": "https://dane.przemysl.eu/wp-json/sod/v1/resources/15/structured",
+			"registry": "active"
+		},
+		{
+			"bytes": 0,
+			"contentType": null,
+			"duplicateIds": 0,
+			"durationMs": 0,
+			"expectedRecords": null,
+			"family": "http_json",
+			"finalUrl": "https://dane.um.warszawa.pl/api/action/get_scb_lokalizacja_defibrylatorow",
+			"httpStatus": null,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "missing_secret",
+					"message": "Brak zmiennej środowiskowej WARSZAWA_API_TOKEN.",
+					"severity": "error"
+				}
+			],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "json",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {
+				"name": 0,
+				"lat": 0,
+				"lon": 0
+			},
+			"sourceId": "warszawa",
+			"sourceName": "Lokalizacja defibrylatorów (AED) — m.st. Warszawa",
+			"status": "blocked",
+			"url": "https://dane.um.warszawa.pl/api/action/get_scb_lokalizacja_defibrylatorow",
+			"registry": "active"
+		},
+		{
+			"bytes": 29327,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 823,
+			"expectedRecords": null,
+			"family": "manual",
+			"finalUrl": "https://www.barlinek.pl/mapy-i-plany/mapa-defibrylatorow",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "barlinek",
+			"sourceName": "Barlinek",
+			"status": "manual",
+			"url": "https://www.barlinek.pl/mapy-i-plany/mapa-defibrylatorow",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 91228,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 752,
+			"expectedRecords": 5,
+			"family": "manual",
+			"finalUrl": "https://budzow.pl/?s=defibrylator",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "budzow",
+			"sourceName": "Budzów",
+			"status": "manual",
+			"url": "https://budzow.pl?s=defibrylator",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 82398,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 456,
+			"expectedRecords": 11,
+			"family": "manual",
+			"finalUrl": "https://www.czaplinek.pl/wykaz-defibrylatorow",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 11,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "czaplinek",
+			"sourceName": "Czaplinek",
+			"status": "manual",
+			"url": "https://www.czaplinek.pl/wykaz-defibrylatorow",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 62547,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 455,
+			"expectedRecords": 11,
+			"family": "manual",
+			"finalUrl": "https://dopiewo.pl/lokalizacje-defibrylatorow-aed",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "dopiewo",
+			"sourceName": "Dopiewo",
+			"status": "manual",
+			"url": "https://dopiewo.pl/lokalizacje-defibrylatorow-aed",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 44649,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 482,
+			"expectedRecords": null,
+			"family": "manual",
+			"finalUrl": "https://www.dziadowakloda.pl/main/szukaj?szukaj=defibrylator",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "dziadowa-kloda",
+			"sourceName": "Dziadowa Kłoda",
+			"status": "manual",
+			"url": "https://www.dziadowakloda.pl/main/szukaj?szukaj=defibrylator",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 33089,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 480,
+			"expectedRecords": 12,
+			"family": "manual",
+			"finalUrl": "https://www.gorzyce.pl/aktualnosci/index/Nowe-defibrylatory-AED-juz-dostepne-w-solectwach-Gminy-Gorzyce/idn:1469",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 12,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "gorzyce",
+			"sourceName": "Gorzyce",
+			"status": "manual",
+			"url": "https://www.gorzyce.pl/aktualnosci/index/Nowe-defibrylatory-AED-juz-dostepne-w-solectwach-Gminy-Gorzyce/idn:1469",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 54401,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 501,
+			"expectedRecords": 5,
+			"family": "manual",
+			"finalUrl": "https://www.imielin.pl/pl/205/6222/do-ratowania-zycia-defibrylatory-w-imielinie-.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 5,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "imielin",
+			"sourceName": "Imielin",
+			"status": "manual",
+			"url": "https://www.imielin.pl/pl/205/6222/do-ratowania-zycia-defibrylatory-w-imielinie-.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 434307,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1028,
+			"expectedRecords": 5,
+			"family": "manual",
+			"finalUrl": "https://www.gmina-jordanow.pl/wyniki-wyszukiwania?search=defibrylator",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "jordanow",
+			"sourceName": "Jordanów",
+			"status": "manual",
+			"url": "https://www.gmina-jordanow.pl/wyniki-wyszukiwania?search=defibrylator",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 172901,
+			"contentType": "text/html;charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 567,
+			"expectedRecords": 5,
+			"family": "manual",
+			"finalUrl": "https://kcynia.pl/421-kropki-zycia-aed.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "kcynia",
+			"sourceName": "Kcynia",
+			"status": "manual",
+			"url": "https://kcynia.pl/421-kropki-zycia-aed.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 171830,
+			"contentType": "text/html;charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 603,
+			"expectedRecords": 2,
+			"family": "manual",
+			"finalUrl": "https://koszecin.pl/defibrylatory-aed-w-koszecinie.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "koszecin",
+			"sourceName": "Koszęcin",
+			"status": "manual",
+			"url": "https://koszecin.pl/defibrylatory-aed-w-koszecinie.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 144269,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 692,
+			"expectedRecords": 3,
+			"family": "manual",
+			"finalUrl": "https://www.kozminwlkp.pl/index.php/defibrylatory",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "kozmin-wielkopolski",
+			"sourceName": "Koźmin Wielkopolski",
+			"status": "manual",
+			"url": "https://www.kozminwlkp.pl/index.php/defibrylatory",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 41064,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 694,
+			"expectedRecords": null,
+			"family": "manual",
+			"finalUrl": "https://lublin.eu/mieszkancy/zdrowie/aktualnosci/aed-w-lublinie,748,1345,1.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "content_type_mismatch",
+					"message": "Odpowiedź nie ma sygnatury PDF.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "lublin",
+			"sourceName": "Lublin",
+			"status": "manual",
+			"url": "https://lublin.eu/mieszkancy/zdrowie/aktualnosci/aed-w-lublinie,748,1345,1.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 128149,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 487,
+			"expectedRecords": 10,
+			"family": "manual",
+			"finalUrl": "https://www.nieporet.pl/defibrylatory-aed",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "content_type_mismatch",
+					"message": "Odpowiedź nie ma sygnatury PDF.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "nieporet",
+			"sourceName": "Nieporęt",
+			"status": "manual",
+			"url": "https://www.nieporet.pl/defibrylatory-aed",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 111890,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 2258,
+			"expectedRecords": 6,
+			"family": "manual",
+			"finalUrl": "https://nowasol.pl/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "nowa-sol",
+			"sourceName": "Nowa Sól (miasto)",
+			"status": "manual",
+			"url": "https://www.nowasol.pl/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 126641,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 556,
+			"expectedRecords": 10,
+			"family": "manual",
+			"finalUrl": "https://www.nwl.pl/dla-mieszkanca/bezpieczenstwo/automatyczne-defibrylatory/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "nowa-wies-leborska",
+			"sourceName": "Nowa Wieś Lęborska",
+			"status": "manual",
+			"url": "https://www.nwl.pl/dla-mieszkanca/bezpieczenstwo/automatyczne-defibrylatory/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 119286,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1252,
+			"expectedRecords": 6,
+			"family": "manual",
+			"finalUrl": "https://www.ostroda.pl/projekty/inpost-for-cities-puls-miasta-inicjatywa-aed/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "ostroda",
+			"sourceName": "Ostróda",
+			"status": "manual",
+			"url": "https://www.ostroda.pl/projekty/inpost-for-cities-puls-miasta-inicjatywa-aed/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 90450,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1154,
+			"expectedRecords": 8,
+			"family": "manual",
+			"finalUrl": "https://www.polczyn-zdroj.pl/news/defibrylatory-dostepne-na-terenie-miasta-i-gminy-polczyn-zdroj-0",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "polczyn-zdroj",
+			"sourceName": "Połczyn-Zdrój",
+			"status": "manual",
+			"url": "https://www.polczyn-zdroj.pl/news/defibrylatory-dostepne-na-terenie-miasta-i-gminy-polczyn-zdroj-0",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 52644,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 394,
+			"expectedRecords": 47,
+			"family": "manual",
+			"finalUrl": "https://www.powiat-szamotuly.pl/dla-mieszkanca/aktualnosci/Wykaz-defibrylatorow-AED-w-Powiecie-Szamotulskim/idn:2903",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "content_type_mismatch",
+					"message": "Odpowiedź nie ma sygnatury ZIP (DOCX/XLSX).",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "powiat-szamotulski",
+			"sourceName": "powiat szamotulski",
+			"status": "manual",
+			"url": "https://www.powiat-szamotuly.pl/dla-mieszkanca/aktualnosci/Wykaz-defibrylatorow-AED-w-Powiecie-Szamotulskim/idn:2903",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 17788,
+			"contentType": "text/html; charset=utf-8",
+			"duplicateIds": 0,
+			"durationMs": 392,
+			"expectedRecords": 13,
+			"family": "manual",
+			"finalUrl": "https://www.rzekun.pl/ug/aktualnosci/13-defibrylatorow-aed-na-terenie-gminy-rzekun",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "rzekun",
+			"sourceName": "Rzekuń",
+			"status": "manual",
+			"url": "https://www.rzekun.pl/ug/aktualnosci/13-defibrylatorow-aed-na-terenie-gminy-rzekun",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 127013,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 1310,
+			"expectedRecords": 12,
+			"family": "manual",
+			"finalUrl": "https://www.suchylas.pl/2026/10/15/nowe-aed-w-suchym-lesie/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 12,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "suchy-las",
+			"sourceName": "Suchy Las",
+			"status": "manual",
+			"url": "https://www.suchylas.pl/2026/10/15/nowe-aed-w-suchym-lesie/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 73666,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 419,
+			"expectedRecords": 8,
+			"family": "manual",
+			"finalUrl": "https://swidnica.zgora.pl/PL/3605/Defibrylatory_w_Gminie_Swidnica/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "swidnica-gmina",
+			"sourceName": "Świdnica (gmina)",
+			"status": "manual",
+			"url": "https://swidnica.zgora.pl/PL/3605/Defibrylatory_w_Gminie_Swidnica/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 109435,
+			"contentType": "text/html;charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 385,
+			"expectedRecords": 13,
+			"family": "manual",
+			"finalUrl": "https://szemud.pl/defibrylatory-aed.html",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "szemud",
+			"sourceName": "Szemud",
+			"status": "manual",
+			"url": "https://szemud.pl/defibrylatory-aed.html",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 78642,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 596,
+			"expectedRecords": 10,
+			"family": "manual",
+			"finalUrl": "https://www.lubelskie.pl/aktualnosci/defibrylatory-w-instytucjach-kultury-samorzadu-wojewodztwa-lubelskiego/",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "umwl-instytucje-kultury",
+			"sourceName": "UMWL - instytucje kultury",
+			"status": "manual",
+			"url": "https://www.lubelskie.pl/aktualnosci/defibrylatory-w-instytucjach-kultury-samorzadu-wojewodztwa-lubelskiego/",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 175437,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 633,
+			"expectedRecords": 5,
+			"family": "manual",
+			"finalUrl": "https://wierzchoslawice.pl/?s=defibrylator",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "wierzchoslawice",
+			"sourceName": "Wierzchosławice",
+			"status": "manual",
+			"url": "https://wierzchoslawice.pl?s=defibrylator",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 44762,
+			"contentType": "text/html",
+			"duplicateIds": 0,
+			"durationMs": 662,
+			"expectedRecords": 27,
+			"family": "manual",
+			"finalUrl": "https://www.zukowo.pl/Defibrylatory_AED_w_gminie_Zukowo,1007",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 27,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "zukowo",
+			"sourceName": "Żukowo",
+			"status": "manual",
+			"url": "https://www.zukowo.pl/Defibrylatory_AED_w_gminie_Zukowo,1007",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 79537,
+			"contentType": "text/html; charset=UTF-8",
+			"duplicateIds": 0,
+			"durationMs": 650,
+			"expectedRecords": 7,
+			"family": "manual",
+			"finalUrl": "https://zuromin.info/?p=36997",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [],
+			"metrics": {},
+			"minRecords": 1,
+			"parser": "manual",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "zuromin",
+			"sourceName": "Żuromin",
+			"status": "manual",
+			"url": "https://zuromin.info/?p=36997",
+			"registry": "excluded"
+		},
+		{
+			"bytes": 139560,
+			"contentType": "application/download",
+			"duplicateIds": 0,
+			"durationMs": 550,
+			"expectedRecords": 20,
+			"family": "pdf_table",
+			"finalUrl": "https://czarne.pl/files/file_add/download/35_document.pdf",
+			"httpStatus": 200,
+			"invalidCoordinates": 0,
+			"issues": [
+				{
+					"code": "pdf_not_parsed",
+					"message": "PDF jest osiągalny; ekstrakcja wierszy wymaga parsera pdf_table, więc smoke nie liczy rekordów.",
+					"severity": "info"
+				}
+			],
+			"metrics": {},
+			"minRecords": 18,
+			"parser": "pdf_table",
+			"recordsAccepted": 0,
+			"recordsRejected": 0,
+			"recordsSeen": 0,
+			"requiredCoverage": {},
+			"sourceId": "czarne",
+			"sourceName": "Lokalizacje defibrylatorów AED w gminie Czarne",
+			"status": "manual",
+			"url": "https://czarne.pl/files/file_add/download/35_document.pdf",
+			"registry": "active"
+		}
+	],
+	"totals": {
+		"blocked": 1,
+		"failed": 13,
+		"manual": 27,
+		"ok": 23,
+		"total": 69,
+		"warning": 5
+	},
+	"loader": {
+		"configDir": "backend/ingest/sources + backend/ingest/sources-excluded",
+		"errors": [],
+		"loaded": 69,
+		"totalFiles": 69
+	}
+}

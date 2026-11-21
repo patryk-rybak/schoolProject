@@ -1,0 +1,203 @@
+{
+	"connector": {
+		"family": "html_list",
+		"notes": "Lista <ol> w div.b-tresc z 8 OSP. Adresy w formacie 'miejscowość numer' lub 'ul. ...'; brak współrzędnych.",
+		"parser": "html_list"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": false,
+			"max_suspicious_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 8
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 1,
+			"max_duplicate_id_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "ignore",
+			"on_missing_field": "review",
+			"on_new_field": "review",
+			"on_type_change": "review"
+		},
+		"volume": {
+			"max_delta_ratio": 0.5,
+			"min_records": 1,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": true,
+			"last_modified": true
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 6
+		},
+		"retries": {
+			"backoff_ms": 1500,
+			"max": 2
+		},
+		"timeout_ms": 30000,
+		"url": "https://www.gminaradlow.pl/dla-mieszkanca/bezpieczenstwo/defibrylatory-aed",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"geocoding": {
+		"address_template": "{address_text}, Polska",
+		"cache_ttl_days": 365,
+		"enabled": true,
+		"geoportal": {
+			"endpoint": "https://services.gugik.gov.pl/uug/",
+			"max_results": 5,
+			"min_accuracy": 0.8,
+			"only_exact_numbers": true,
+			"output_srid": 4326,
+			"request": "GetAddress",
+			"srid": 2180
+		},
+		"min_confidence": 0.8,
+		"on_failure": "address_only",
+		"provider_order": [
+			"gugik-uug"
+		],
+		"rate_limit": {
+			"requests_per_minute": 30
+		},
+		"required_components": [
+			"address_text"
+		],
+		"strategy": "unstructured_first"
+	},
+	"map": {
+		"access_type": {
+			"const": "unknown"
+		},
+		"address_text": {
+			"field": "address_text"
+		},
+		"confidence": {
+			"const": 0.3
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"name": {
+			"field": "Nazwa"
+		},
+		"source_url": {
+			"const": "https://www.gminaradlow.pl/dla-mieszkanca/bezpieczenstwo/defibrylatory-aed"
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"verification_status": {
+			"const": "unverified"
+		}
+	},
+	"parse": {
+		"encoding": "utf-8",
+		"html_list": {
+			"collapse_whitespace": true,
+			"empty_as_null": true,
+			"fields": {
+				"address_text": {
+					"group": 1,
+					"regex": "[–-]\\s*(.+)$"
+				},
+				"name": {
+					"group": 1,
+					"regex": "^(OSP\\s.+?)\\s*[–-]\\s*"
+				}
+			},
+			"item_text_separator": " ",
+			"max_records": 10,
+			"min_records": 8,
+			"record_filter": {
+				"regex": "^OSP .+[–-]"
+			},
+			"select": "div.b-tresc ol li",
+			"trim": true
+		},
+		"trim_headers": true
+	},
+	"publish": {
+		"allowed_for_export": false,
+		"allowed_for_ingest": false,
+		"attribution": "Radłów — NOASSERTION",
+		"enabled": false,
+		"exports": [],
+		"license_id": "NOASSERTION"
+	},
+	"records": {
+		"identity": {
+			"source_record_id": {
+				"template": "radlow:{row_index}"
+			},
+			"stable": false
+		},
+		"path": "$"
+	},
+	"schedule": {
+		"cron": "0 3 * * 1",
+		"jitter_seconds": 300,
+		"timezone": "Europe/Warsaw"
+	},
+	"source": {
+		"access_type": "html",
+		"coverage": {
+			"country": "PL",
+			"notes": "małopolskie; gmina wiejska; Scaffold z inwentarza 69 źródeł (B, P3, readiness=needs_geocoding). Blockery: LICENSE_NOASSERTION, NO_COORDS, GEOCODE_REQUIRED. 3 OSP; link do OpenAEDMap.",
+			"teryt": [
+				"1216052"
+			]
+		},
+		"enabled": false,
+		"homepage_url": "https://www.gminaradlow.pl/dla-mieszkanca/bezpieczenstwo/defibrylatory-aed",
+		"id": "radlow",
+		"license": {
+			"attribution": "Radłów: brak deklaracji licencji",
+			"id": "NOASSERTION"
+		},
+		"name": "Radłów",
+		"notes": "Scaffold z inwentarza 69 źródeł (B, P3, readiness=needs_geocoding). Blockery: LICENSE_NOASSERTION, NO_COORDS, GEOCODE_REQUIRED. 3 OSP; link do OpenAEDMap.",
+		"publisher": "Radłów",
+		"reliability_tier": "official_local",
+		"update_frequency": "unknown"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				14.07,
+				49,
+				24.15,
+				54.84
+			],
+			"on_invalid": "review",
+			"on_missing": "review"
+		},
+		"enums": true,
+		"on_error": "review",
+		"require_location": "address_or_point",
+		"required": [
+			"name"
+		]
+	},
+	"version": 1
+}
