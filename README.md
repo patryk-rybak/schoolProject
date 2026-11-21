@@ -108,6 +108,7 @@ bunx --bun shadcn@latest add button
 ## AI Tooling
 
 - TanStack Agent Skills are enabled through `@tanstack/intent`. `package.json#intent.skills` permits `@tanstack/*`; run `bunx @tanstack/intent@latest list` to inspect the skills that ship with the installed packages.
+- The local `/tanstack` skill wraps `intent list` and `intent load` for version-matched Start, Router, Query, and Table guidance in Jcode.
 - The shadcn skill is installed in `.claude/skills/shadcn` and is available in Jcode as `/shadcn`. It reads `components.json` and provides project-aware component guidance.
 - The shadcn MCP server is configured in `.jcode/mcp.json` and `.mcp.json`. It runs the shadcn CLI through Bun and can search the official registry. Pass `registries: ["@shadcn"]` explicitly when a client starts outside the project directory.
 
