@@ -1,24 +1,40 @@
-import "maplibre-gl/dist/maplibre-gl.css";
-
+import { layers, namedFlavor } from "@protomaps/basemaps";
+import { CircleAlert } from "lucide-react";
+import * as maplibregl from "maplibre-gl";
+import { Protocol } from "pmtiles";
 import { useEffect, useRef, useState } from "react";
 
-import type { Map as MapLibreMap } from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
-const MAPLIBRE_WORKER_URL = "/api/maplibre-worker?v=1";
+import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 
-const POLAND_CENTER: [number, number] = [19.1451, 51.9194];
-const POLAND_ZOOM = 5.4;
-const POLAND_MAX_ZOOM = 10;
+// MapLibre v6 loads its worker from a URL. Serve the file copied into
+// public/ by scripts/copy-maplibre-worker.ts as a static asset: Nitro's dev
+// middleware bypasses server routes for Sec-Fetch-Dest: worker requests.
+// Keep ?v= in sync with the maplibre-gl version to bust caches on upgrades.
+const WORKER_URL = "/maplibre-gl-worker.mjs?v=6.19.0";
 
-let pmtilesProtocolAdded = false;
-
-function getTilesUrl(): string {
-	const configured = import.meta.env["VITE_PROTOMAPS_PMTILES_URL"];
-	if (configured) {
-		return configured;
-	}
-
-	return new URL("/api/pmtiles", globalThis.location.origin).toString();
+// Tiles come from src/routes/api/pmtiles.ts (HTTP range support).
+function createStyle(origin: string): maplibregl.StyleSpecification {
+	return {
+		version: 8,
+		glyphs:
+			"https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
+		sprite: "https://protomaps.github.io/basemaps-assets/sprites/v4/light",
+		sources: {
+			protomaps: {
+				type: "vector",
+				url: `pmtiles://${origin}/api/pmtiles`,
+				// The tile extract stops at zoom 15. Pin the source maxzoom so
+				// MapLibre overzooms (reuses z15 tiles) instead of requesting
+				// missing z16+ tiles when the map zooms further in.
+				maxzoom: 15,
+				attribution:
+					'<a href="https://protomaps.com">Protomaps</a> © <a href="https://openstreetmap.org">OpenStreetMap</a>',
+			},
+		},
+		layers: layers("protomaps", namedFlavor("light"), { lang: "pl" }),
+	};
 }
 
 export function PolandMap() {
@@ -26,93 +42,51 @@ export function PolandMap() {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		let map: MapLibreMap | undefined;
-		let cancelled = false;
-		let workerBlobUrl: string | undefined;
-
-		async function init() {
-			const [maplibregl, { Protocol }, { layers, namedFlavor }, workerResponse] =
-				await Promise.all([
-					import("maplibre-gl"),
-					import("pmtiles"),
-					import("@protomaps/basemaps"),
-					fetch(MAPLIBRE_WORKER_URL),
-				]);
-
-			if (cancelled || !containerRef.current) {
-				return;
-			}
-
-			const workerSource = await workerResponse.text();
-			// MapLibre v6 loads its worker from a URL. A Blob URL avoids
-			// bundler and browser restrictions on module worker URLs.
-			workerBlobUrl = URL.createObjectURL(
-				new Blob([workerSource], { type: "text/javascript" }),
-			);
-			maplibregl.setWorkerUrl(workerBlobUrl);
-
-			if (!pmtilesProtocolAdded) {
-				maplibregl.addProtocol("pmtiles", new Protocol().tile);
-				pmtilesProtocolAdded = true;
-			}
-
-			const style = {
-				version: 8 as const,
-				glyphs:
-					"https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
-				sprite: "https://protomaps.github.io/basemaps-assets/sprites/v4/light",
-				sources: {
-					protomaps: {
-						type: "vector" as const,
-						url: `pmtiles://${getTilesUrl()}`,
-						attribution:
-							'<a href="https://protomaps.com">Protomaps</a> © <a href="https://openstreetmap.org">OpenStreetMap</a>',
-					},
-				},
-				layers: layers("protomaps", namedFlavor("light"), { lang: "pl" }),
-			};
-
-			const mapInstance = new maplibregl.Map({
-				container: containerRef.current,
-				style,
-				center: POLAND_CENTER,
-				zoom: POLAND_ZOOM,
-				minZoom: 4,
-				maxZoom: POLAND_MAX_ZOOM,
-				attributionControl: { compact: true },
-			});
-			map = mapInstance;
-
-			mapInstance.addControl(new maplibregl.NavigationControl(), "top-right");
-			mapInstance.addControl(
-				new maplibregl.ScaleControl({ unit: "metric" }),
-				"bottom-left",
-			);
-
-			mapInstance.on("error", (event) => {
-				setError(event.error?.message ?? "Nie udało się załadować mapy.");
-			});
+		const container = containerRef.current;
+		if (!container) {
+			return;
 		}
 
-		void init();
+		maplibregl.setWorkerUrl(WORKER_URL);
+		maplibregl.addProtocol("pmtiles", new Protocol().tile);
+
+		const map = new maplibregl.Map({
+			container,
+			style: createStyle(globalThis.location.origin),
+			center: [19.1451, 51.9194], // Poland
+			zoom: 5.4,
+			minZoom: 4,
+			maxZoom: 18, // overzoom past the extract's zoom 15 tiles
+			attributionControl: { compact: true },
+		});
+
+		map.addControl(new maplibregl.NavigationControl(), "top-right");
+		map.addControl(new maplibregl.ScaleControl({ unit: "metric" }));
+		map.on("error", (event) => {
+			setError(event.error.message);
+		});
 
 		return () => {
-			cancelled = true;
-			map?.remove();
-			if (workerBlobUrl) {
-				URL.revokeObjectURL(workerBlobUrl);
-			}
+			map.remove();
 		};
 	}, []);
 
 	return (
-		<div className="relative h-[70vh] min-h-96 w-full overflow-hidden rounded-xl border bg-muted">
-			<div ref={containerRef} className="absolute inset-0" />
+		<div className="relative h-[70vh] min-h-96 overflow-hidden rounded-xl border bg-muted">
+			{/* MapLibre's CSS forces position:relative on its container, which
+			    would defeat `absolute inset-0`. Size the element directly. */}
+			<div ref={containerRef} className="h-full w-full" />
 			{error ? (
-				<div className="absolute inset-x-4 bottom-4 rounded-md border border-destructive/30 bg-background/95 p-3 text-sm text-destructive shadow-sm">
-					{error} Uruchom <code className="font-mono">bun run map:tiles</code>,
-					aby pobrać dane mapy.
-				</div>
+				<Alert
+					variant="destructive"
+					className="absolute inset-x-4 bottom-4 w-auto bg-background/95"
+				>
+					<CircleAlert />
+					<AlertTitle>Nie udało się wczytać mapy</AlertTitle>
+					<AlertDescription>
+						{error} Uruchom <code>bun run map:tiles</code>, aby pobrać dane mapy.
+					</AlertDescription>
+				</Alert>
 			) : null}
 		</div>
 	);
