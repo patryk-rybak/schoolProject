@@ -14,6 +14,12 @@ Before editing files for a substantial task:
 
 Guidance for AI coding agents working in this repository. Keep this file current when the stack, commands, or workflow change.
 
+## Repository Layout
+
+The application lives in `AED/`; all commands below run from that directory. The
+repository root keeps non-app material only: `task_description/` (challenge
+brief) and `dane.gov.pl/` (published portal sources and their run guide).
+
 ## Project Snapshot
 
 - Minimal TanStack Start (React 19) full-stack AED map with file-based routing

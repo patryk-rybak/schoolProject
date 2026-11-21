@@ -1,21 +1,4 @@
-node_modules
-*.db
-*.db-wal
-*.db-shm
-*.pmtiles
-public/maplibre-gl-worker.mjs
-.DS_Store
-dist
-dist-ssr
-*.local
-.env
-.nitro
-.tanstack
-.wrangler
-.output
-.vinxi
-__unconfig*
-todos.json
+# Local, non-app material only. Application ignores live in AED/.gitignore
 
 # dane.gov.pl sources: extracted trees are local only (see dane.gov.pl/RUNNING.md)
 /dane.gov.pl/backend/
