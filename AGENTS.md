@@ -16,13 +16,13 @@ Guidance for AI coding agents working in this repository. Keep this file current
 
 ## Project Snapshot
 
-- TanStack Start (React 19) full-stack app with file-based routing
+- Minimal TanStack Start (React 19) full-stack AED map with file-based routing
 - Bun 1.4+ for runtime, package management, scripts, and SQLite
 - Vite 8 + Nitro 3 (`bun` preset) for dev, build, and preview
 - Drizzle ORM with `bun:sqlite` (WAL enabled)
 - better-auth for authentication
-- Tailwind CSS v4 + shadcn/ui (`new-york` style)
-- MapLibre GL JS + Protomaps/PMTiles, centered on Poland with Polish labels
+- Tailwind CSS v4 + shadcn/ui (`new-york` style, Radix UI base, native components only: alert, badge, button, card)
+- MapLibre GL JS 6.19.0 + Protomaps/PMTiles, centered on Poland with Polish labels
 - Biome for linting and formatting, TypeScript strict mode
 
 ## Golden Rules
@@ -42,13 +42,13 @@ Guidance for AI coding agents working in this repository. Keep this file current
 | --- | --- |
 | Install dependencies | `bun install` |
 | Dev server | `bun run dev` (http://localhost:3000) |
-| Typecheck | `bunx tsc --noEmit` |
 | Build | `bun run build` |
 | Preview production build | `bun run preview` |
 | Lint | `bun run lint` |
 | Format | `bun run format` |
 | Lint + format + organize imports | `bun run check` |
 | Generate migrations | `bun run db:generate` |
+| Apply migrations | `bun run db:migrate` |
 | Push schema to database | `bun run db:push` |
 | Open Drizzle Studio | `bun run db:studio` |
 | Add a shadcn component | `bunx --bun shadcn@latest add <name>` |
@@ -60,7 +60,7 @@ Guidance for AI coding agents working in this repository. Keep this file current
 ## Agent Tooling
 
 - TanStack packages ship Agent Skills. `package.json#intent.skills` permits `@tanstack/*`, and the `intent-skills` block at the top of this file explains how to list and load them.
-- The local `/tanstack` skill wraps `intent list` and `intent load` so Jcode can pull version-matched Start, Router, Query, and Table guidance.
+- The local `/tanstack` skill wraps `intent list` and `intent load` so Jcode can pull version-matched Start and Router guidance.
 - The shadcn skill is installed at `.claude/skills/shadcn` and is available in Jcode as `/shadcn`. It reads `components.json` and runs the shadcn CLI for project-aware work.
 - The shadcn MCP server is configured in `.jcode/mcp.json` and `.mcp.json` with `bunx --no-install --bun shadcn mcp`.
 - The MCP server is daemon-scoped and starts outside the project directory. Pass `registries: ["@shadcn"]` to MCP search and view calls; use the `/shadcn` skill when an operation needs project configuration.
@@ -68,9 +68,11 @@ Guidance for AI coding agents working in this repository. Keep this file current
 
 ## Architecture
 
-- `src/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `api/auth/$.ts`)
-- `src/components/ui/` — shadcn/ui components
+- `src/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `api/auth/$.ts`, `api/pmtiles.ts`)
+- `src/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
+- `src/components/ui/` — the only shadcn/ui components in use (`alert`, `badge`, `button`, `card`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
 - `src/components/map/poland-map.tsx` — MapLibre + Protomaps map of Poland
+- `src/hooks/use-mobile.ts` — generated shadcn hook
 - `src/db/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`
 - `src/db/schema.ts` — Drizzle schema
 - `src/lib/auth.ts` — better-auth server config
@@ -79,7 +81,9 @@ Guidance for AI coding agents working in this repository. Keep this file current
 - `drizzle.config.ts` — Drizzle Kit config
 - `vite.config.ts` — Vite, TanStack Start, Tailwind, and Nitro plugins
 - `scripts/fetch-poland-pmtiles.sh` — downloads a Protomaps extract for Poland
-- `scripts/copy-maplibre-worker.ts` — copies the MapLibre worker into `public/`
+- `scripts/copy-maplibre-worker.ts` — copies the MapLibre worker into `public/`; no `api/maplibre-worker.ts` route exists
+
+There is no `src/integrations/` directory and no `src/env.ts` validation module. Read server configuration from `process.env` and client `VITE_` variables from `import.meta.env`. There is no TanStack Query provider or devtools integration; use route loaders and server functions.
 
 Path aliases: both `#/*` and `@/*` map to `./src/*`.
 
@@ -91,10 +95,9 @@ Path aliases: both `#/*` and `@/*` map to `./src/*`.
 - WAL mode is configured in `src/db/index.ts`. Keep it.
 - Prefer Drizzle's synchronous APIs (`db.select().from(...).all()`) in Bun-native server code.
 - Schema changes require a generated migration and a corresponding `db:push` or `db:migrate`.
-- `public/poland.pmtiles` is generated locally and ignored by git. Run `bun run map:tiles` after cloning or when the map data is stale.
-- `public/maplibre-gl-worker.mjs` is copied by `postinstall`/`predev`/`prebuild` and ignored by git.
+- `public/poland.pmtiles` is generated locally and ignored by git. Run `bun run map:tiles` after cloning or when the map data is stale. The script defaults to `POLAND_MAXZOOM=15` (about 4 GB), `PMTILES_THREADS=12`, and `PMTILES_ATTEMPTS=3`; override with `POLAND_BBOX` or `PROTOMAPS_PLANET_URL` when needed. The map pins the source `maxzoom` to 15 and overzooms those tiles up to `maxZoom: 18`.
+- `public/maplibre-gl-worker.mjs` is copied by `postinstall`/`predev`/`prebuild` and ignored by git. The map loads it as a static asset (`/maplibre-gl-worker.mjs?v=6.19.0`); keep the `?v=` query in sync with the `maplibre-gl` version so caches are invalidated. Do not serve the worker through a server route: Nitro's dev middleware routes `Sec-Fetch-Dest: worker` requests to static assets and skips API routes.
 - The PMTiles archive is served by `src/routes/api/pmtiles.ts` with HTTP byte-range support; static hosting does not provide the range responses PMTiles needs.
-- `src/routes/api/maplibre-worker.ts` serves the MapLibre worker, and the client wraps it in a Blob URL before calling `setWorkerUrl`. Keep the `?v=` query in sync when upgrading MapLibre so caches are invalidated.
 
 Environment variables live in `.env.local` (never committed):
 
@@ -105,17 +108,18 @@ Environment variables live in `.env.local` (never committed):
 ## UI Rules
 
 - Add components with `bunx --bun shadcn@latest add <component>`; do not hand-roll shadcn primitives.
+- Keep the component set to the native registry components `alert`, `badge`, `button`, and `card` unless the task explicitly needs more.
+- Keep the generated components on their Radix UI base; do not swap in another primitive library.
 - Use the generated `cn` helper (from the `cn` package) or `#/lib/utils`.
 - Use `lucide-react` for icons.
 - Preserve the `new-york` style and CSS-variable theme in `components.json` and `src/styles.css`.
-- Wrap tooltip consumers in `TooltipProvider` when required.
 
 ## Code Style
 
 - Biome formatter: tabs, double quotes, organized imports.
 - `bun run check` enables every Biome rule group (including nursery) and fails on warnings. Framework-specific nursery/style rules are skipped explicitly in the script; keep that list deliberate and documented.
 - TypeScript runs with all strict flags, including `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, and `noPropertyAccessFromIndexSignature`.
-- `src/components/**` is excluded from Biome and from the TypeScript root include because it is generated UI code.
+- `src/components/**` is excluded from Biome and the TypeScript root include. `src/components/ui/` is registry-managed shadcn code; add or update it with the shadcn CLI. Hand-written components such as `src/components/map/poland-map.tsx` live alongside it and are covered by project conventions even though the directory is excluded.
 - Avoid `any`, prefer inferred types, and keep server-only code out of client components.
 - Do not edit `src/routeTree.gen.ts`; regenerate it with `bun run dev` or `bun run build`.
 - Tests: there is no test suite yet. If you add tests, use `bun test` and place `*.test.ts` files near the code they cover.
