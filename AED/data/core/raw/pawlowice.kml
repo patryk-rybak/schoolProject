@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Defibrylatory AED - Gmina Pawłowice</name>
+    <description/>
+    <Style id="icon-1899-DB4436-normal">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+    </Style>
+    <Style id="icon-1899-DB4436-highlight">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+    </Style>
+    <StyleMap id="icon-1899-DB4436">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1899-DB4436-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1899-DB4436-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name>Defibrylatory AED</name>
+      <Placemark>
+        <name>Defibrylator AED - Urząd Gminy Pawłowice</name>
+        <description>ul. Zjednoczenia 60</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.718821,49.9622173,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - TARG</name>
+        <description>ul. Zjednoczenia 77A</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.7180295,49.9638181,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Gminny Ośrodek Sportu</name>
+        <description>ul. Sportowa 14</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.7147058,49.9622738,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Gminny Ośrodek Kultury</name>
+        <description>ul.Zjednoczenia 67</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.7169562,49.9608451,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Ochotnicza Straż Pożarna</name>
+        <description>ul.Zjednoczenia 64</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.7192211,49.9622896,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Ochotnicza Straż Pożarna Golasowice
+</name>
+        <description>ul.Kraszewskiego 2</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.6861376,49.9172281,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Ochotnicza Straż Pożarna Jarząbkowice</name>
+        <description>ul.Rolnicza 1</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.7091779,49.9022424,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Ochotnicza Straż Pożarna Pielgrzymowice
+</name>
+        <description>ul.Zebrzydowicka 14</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.6550605,49.9005312,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Ochotnicza Straż Pożarna Warszowice</name>
+        <description>ul.Cieszyńska 2</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.7117529,49.9892866,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Ochotnicza Straż Pożarna Krzyżowice</name>
+        <description>ul. Floriana 1</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.675404,49.9853515,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Parking</name>
+        <description>Parking przy ul. Pszczyńskiej (obok kościoła)</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.7122988,49.9921803,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Defibrylator AED - Przystanek</name>
+        <description>Wiata przystankowa przy ul. Rolniczej (naprzeciwko OSP)</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            18.7091663,49.9025311,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

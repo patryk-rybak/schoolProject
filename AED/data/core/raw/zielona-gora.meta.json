@@ -1,0 +1,15 @@
+{
+  "source_id": "zielona-gora",
+  "fetched_at": "2026-11-21T21:06:04Z",
+  "final_url": "https://www.google.com/maps/d/kml?mid=1WXrqKMAgKA_kzG5aF6bMiXpaFVA&forcekml=1",
+  "http_status": 200,
+  "content_type": "text/xml; charset=utf-8",
+  "bytes": 51019,
+  "sha256": "554197a3dc55090764029dadadd15182cc12a2f97fc11b7a7879d3102cd1cc9b",
+  "raw_file": "data/core/raw/zielona-gora.kml",
+  "config_path": "backend/ingest/sources/zielona-gora.json",
+  "license_id": "NOASSERTION",
+  "placemark_count": 165,
+  "point_count": 165,
+  "parse_notes": "XML parsed; Document name='AED w Zielonej Górze'. Document name matches config. Placemark=165; geometry counts={'Point': 165}. Placemarks with non-empty description=93; with ExtendedData=0. point_only holds: only Point geometries present. Config parser=kml; encoding expected=utf-8."
+}
