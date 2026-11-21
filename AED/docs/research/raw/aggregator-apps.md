@@ -300,7 +300,7 @@ Zewnętrzny plik `aed.geojson.gz` to warstwa OSM:
 
 ### 6.4 Ocena
 
-**Wysoka dla warstwy OSM, średnia dla danych własnych.** Duży, kompletny snapshot OSM (16 214 punktów) jest bardzo użyteczny, ale pochodzi z OSM, więc legalniej jest pobrać go z OSM/OpenAEDMap. Własna baza jest mała i bez ram prawnych.
+**Wysoka dla warstwy OSM, średnia dla danych własnych.** Duży snapshot OSM (16 214 punktów) jest użyteczny, ale jest starszy niż obecny eksport OpenAEDMap (18 298 punktów), więc do importu lepiej wybrać OpenAEDMap. Własna baza jest mała i bez ram prawnych.
 
 ### 6.5 Mapowanie
 
@@ -719,7 +719,7 @@ Brak pól AED.
 
 ### 13.5 Ocena
 
-**Brak.** To nie jest agregator AED.
+**Brak.** To nie jest agregator AED. W obecnych materiałach nie ma potwierdzenia produkcyjnej mapy AED. Gdyby taka funkcja powstała, najbardziej prawdopodobnym zapleczem byłaby warstwa OpenAEDMap/OSM, ale to wymaga odrębnego potwierdzenia u wydawcy.
 
 ### 13.6 Mapowanie
 
