@@ -153,6 +153,66 @@ describe("fetchSource", () => {
 		expect(headers.get("Content-Type")).toBe("application/json");
 	});
 
+	test("uses the inline JSON token when the env variable is missing", async () => {
+		const rawDir = tempDir();
+		const captured: Record<string, unknown> = {};
+		const result = await fetchSource(
+			config({
+				fetch: {
+					auth: {
+						env: "TEST_API_TOKEN",
+						header: "Authorization",
+						token: "inline-secret",
+						type: "header",
+					},
+					pagination: { type: "none" },
+					url: "https://example.com/data.json",
+				},
+			}),
+			{
+				env: {},
+				fetchImpl: async (_input, init) => {
+					captured["headers"] = new Headers(init?.headers);
+					return json({ rows: [] });
+				},
+				rawDir,
+			},
+		);
+
+		expect(result.ok).toBe(true);
+		const headers = captured["headers"] as Headers;
+		expect(headers.get("Authorization")).toBe("inline-secret");
+	});
+
+	test("env variable takes precedence over the inline token", async () => {
+		const rawDir = tempDir();
+		const captured: Record<string, unknown> = {};
+		await fetchSource(
+			config({
+				fetch: {
+					auth: {
+						env: "TEST_API_TOKEN",
+						token: "inline-secret",
+						type: "bearer",
+					},
+					pagination: { type: "none" },
+					url: "https://example.com/data.json",
+				},
+			}),
+			{
+				env: { TEST_API_TOKEN: "env-secret" },
+				fetchImpl: async (_input, init) => {
+					captured["headers"] = new Headers(init?.headers);
+					return json({ rows: [] });
+				},
+				rawDir,
+			},
+		);
+
+		const headers = captured["headers"] as Headers;
+		expect(headers.get("Authorization")).toBe("Bearer env-secret");
+	});
+
 	test("follows redirects up to max_redirects", async () => {
 		const rawDir = tempDir();
 		const urls: string[] = [];

@@ -305,6 +305,50 @@ describe("fetch contract", () => {
 		expect(sourceConfigSchema.safeParse(config).success).toBe(true);
 	});
 
+	test("accepts an inline token instead of an env variable", () => {
+		const config = slimSource({
+			connector: { family: "http_json_api", parser: "json" },
+			fetch: {
+				url: "https://api.example.org/aed",
+				method: "POST",
+				auth: {
+					type: "header",
+					header: "Authorization",
+					token: "inline-secret",
+				},
+			},
+			parse: { encoding: "utf-8", json: { unwrap_string: false } },
+			records: { path: "/result" },
+		});
+		expect(sourceConfigSchema.safeParse(config).success).toBe(true);
+	});
+
+	test("treats an empty token slot as absent (env still required)", () => {
+		const base = {
+			connector: { family: "http_json_api", parser: "json" },
+			fetch: {
+				url: "https://api.example.org/aed",
+				auth: {
+					type: "header",
+					header: "Authorization",
+					env: "WARSZAWA_API_TOKEN",
+					token: "",
+				},
+			},
+			parse: { encoding: "utf-8", json: { unwrap_string: false } },
+			records: { path: "/result" },
+		};
+		expect(sourceConfigSchema.safeParse(slimSource(base)).success).toBe(true);
+		const noEnv = structuredClone(base);
+		(
+			(noEnv.fetch as Record<string, unknown>)["auth"] as Record<
+				string,
+				unknown
+			>
+		)["env"] = undefined;
+		expect(sourceConfigSchema.safeParse(slimSource(noEnv)).success).toBe(false);
+	});
+
 	test("supports the przemysl page pagination shape", () => {
 		const config = slimSource({
 			connector: { family: "ckan_datastore", parser: "json" },
