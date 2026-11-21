@@ -6,6 +6,9 @@ import { defineConfig } from "vite";
 
 // biome-ignore lint/style/noDefaultExport: Vite requires a default export.
 export default defineConfig({
+	server: {
+		watch: { usePolling: true, interval: 300 },
+	},
 	resolve: { tsconfigPaths: true },
 	publicDir: "frontend/public",
 	ssr: { noExternal: ["maplibre-gl"] },

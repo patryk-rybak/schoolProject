@@ -75,6 +75,42 @@ export function PolandMap() {
 			setError(event.error.message);
 		});
 
+		// AED points from the dev store via /data/aed.geojson (gov-api module).
+		map.on("load", () => {
+			map.addSource("aed", {
+				type: "geojson",
+				data: `${globalThis.location.origin}/data/aed.geojson`,
+			});
+			map.addLayer({
+				id: "aed-points",
+				type: "circle",
+				source: "aed",
+				paint: {
+					"circle-radius": 5,
+					"circle-color": "#16a34a",
+					"circle-stroke-width": 1,
+					"circle-stroke-color": "#ffffff",
+				},
+			});
+			map.on("click", "aed-points", (event) => {
+				const feature = event.features?.[0];
+				if (!feature || feature.geometry.type !== "Point") return;
+				const props = feature.properties ?? {};
+				new maplibregl.Popup()
+					.setLngLat(feature.geometry.coordinates as [number, number])
+					.setHTML(
+						`<strong>${String(props["name"] ?? "AED")}</strong><br/>${String(props["city"] ?? "")}`,
+					)
+					.addTo(map);
+			});
+			map.on("mouseenter", "aed-points", () => {
+				map.getCanvas().style.cursor = "pointer";
+			});
+			map.on("mouseleave", "aed-points", () => {
+				map.getCanvas().style.cursor = "";
+			});
+		});
+
 		return () => {
 			map.remove();
 		};
