@@ -43,14 +43,14 @@
       "fields": {
         "device_id": { "regex": "GM#(\\d+)", "group": 1 },
         "place": { "regex": "Defibrylator AED GM#\\d+\\s*-\\s*(.*?)\\s*[–-]\\s*", "group": 1 },
-        "facility": { "regex": "[–-]\\s*(.*?)\\s*\\(", "group": 1 },
+        "facility": { "regex": "^Defibrylator AED GM#\\d+\\s*-.*?[–-]\\s*(.*?)\\s*\\(", "group": 1 },
         "entrance": { "regex": "\\(([^()]*)\\)\\s*\\(", "group": 1 },
         "coords": { "regex": "\\(([\\d.]+),\\s*([\\d.]+)\\)\\s*$", "group": 0 },
         "lat": { "regex": "\\(([\\d.]+),\\s*[\\d.]+\\),?\\s*$", "group": 1 },
         "lon": { "regex": "\\([\\d.]+,\\s*([\\d.]+)\\)\\s*$", "group": 1 },
-        "city": { "regex": "^([^\\s]+)", "group": 1 }
+        "city": { "regex": "^Defibrylator AED GM#\\d+\\s*-\\s*([^\\s]+)", "group": 1 }
       },
-      "item_text_separator": " ",
+      "item_text_separator": "",
       "trim": true,
       "collapse_whitespace": true,
       "empty_as_null": true,

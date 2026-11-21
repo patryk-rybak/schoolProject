@@ -75,13 +75,7 @@
     "name": { "field": "name" },
     "label": { "template": "czarne:{lp}" },
     "description": { "field": "placement" },
-    "note": {
-      "template": "{placement}; {availability}",
-      "vars": {
-        "placement": { "field": "placement" },
-        "availability": { "field": "availability" }
-      }
-    },
+    "note": { "field": "placement" },
     "facility_type": {
       "when": { "op": "regex", "left": { "field": "name" }, "right": "(?i)Ochotnicza Straż Pożarna" },
       "then": "osp_fire_station",
