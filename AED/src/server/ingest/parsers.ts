@@ -1,9 +1,8 @@
 /**
- * Dependency-free parsing and mapping helpers used by the live smoke harness.
+ * Dependency-free parsing and mapping helpers for ingest.
  *
- * The production connectors do not exist yet. These helpers implement just
- * enough of the documented parser contract to answer one question per source:
- * can the current configuration still fetch and shape the live payload?
+ * These helpers implement the parser contract used by the ingest pipeline:
+ * fetch shaping, field extraction and mapping of live source payloads.
  *
  * They are deliberately pure: no network, no filesystem, no environment.
  */
@@ -488,7 +487,7 @@ function shouldAutoClose(openTag: string, newTag: string): boolean {
 /**
  * Builds a tiny forgiving HTML tree. It is not a browser parser, but it handles
  * unclosed <p>, <li>, <tr> and <td> elements, comments, void tags and common
- * malformed municipal pages well enough for selector-based smoke tests.
+ * malformed municipal pages well enough for selector-based extraction.
  */
 export function parseHtmlDocument(html: string): HtmlElement {
 	const cleaned = html

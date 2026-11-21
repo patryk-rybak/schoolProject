@@ -28,28 +28,19 @@ afterEach(() => {
 function config(overrides: Record<string, unknown> = {}): SourceConfig {
 	return sourceConfigSchema.parse({
 		connector: { family: "http_json", parser: "json" },
-		drift: {},
 		fetch: {
 			pagination: { type: "none" },
 			url: "https://example.com/data.json",
 		},
 		map: { name: { field: "name" } },
 		parse: { json: {} },
-		records: {
-			identity: { source_record_id: { field: "id" } },
-			path: "/rows",
-		},
+		records: { path: "/rows" },
 		source: {
-			access_type: "api",
 			enabled: true,
 			id: "test",
-			license: { id: "CC0-1.0" },
 			name: "Test source",
-			publisher: "Test",
-			reliability_tier: "official_local",
 		},
 		validate: {},
-		version: 1,
 		...overrides,
 	});
 }
@@ -66,7 +57,7 @@ describe("fetchSource", () => {
 		const rawDir = tempDir();
 		const calls: string[] = [];
 		const result = await fetchSource(config(), {
-			configPath: "/repo/backend/ingest/datasources-config.json",
+			configSha256: "a".repeat(64),
 			env: {},
 			fetchImpl: async (input) => {
 				calls.push(String(input));
@@ -92,10 +83,7 @@ describe("fetchSource", () => {
 		expect(meta["sha256"]).toBe(
 			new Bun.CryptoHasher("sha256").update(body).digest("hex"),
 		);
-		expect(meta["config_path"]).toBe(
-			"/repo/backend/ingest/datasources-config.json",
-		);
-		expect(meta["license_id"]).toBe("CC0-1.0");
+		expect(meta["config_sha256"]).toBe("a".repeat(64));
 		expect(meta["raw_file"]).toBe("test.json");
 		expect(meta["record_count"]).toBe(2);
 		expect(meta["blocked"]).toBe(false);
@@ -329,13 +317,9 @@ describe("fetchSource", () => {
 		const rawDir = tempDir();
 		const disabled = config({
 			source: {
-				access_type: "api",
 				enabled: false,
 				id: "test",
-				license: { id: "CC0-1.0" },
 				name: "Test source",
-				publisher: "Test",
-				reliability_tier: "official_local",
 			},
 		});
 		let calls = 0;

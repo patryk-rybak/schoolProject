@@ -33,7 +33,6 @@
     "db:studio": "bunx --bun drizzle-kit studio",
     "config:schema": "bun scripts/generate-source-config-schema.ts",
     "config:schema:check": "bun scripts/generate-source-config-schema.ts --check",
-    "config:smoke": "bun scripts/smoke-source-configs.ts",
     "config:verify": "bun run config:schema:check && bun test src/server/ingest/config src/server/ingest/canonical.test.ts src/server/ingest/fetch src/server/ingest/core",
     "core:build": "bun scripts/build-core-dataset.ts",
     "ingest:run": "bun scripts/ingest-run.ts",

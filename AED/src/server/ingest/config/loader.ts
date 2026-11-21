@@ -30,8 +30,6 @@ export type SourceConfigFileError = {
 export type SourceConfigSummary = {
 	total: number;
 	enabled: number;
-	publishable: number;
-	addressOnly: number;
 	withCoordinates: number;
 	byParser: Record<string, number>;
 	byFamily: Record<string, number>;
@@ -211,8 +209,6 @@ function summarize(configs: readonly SourceConfig[]): SourceConfigSummary {
 	const byParser: Record<string, number> = {};
 	const byFamily: Record<string, number> = {};
 	let enabled = 0;
-	let publishable = 0;
-	let addressOnly = 0;
 	let withCoordinates = 0;
 
 	for (const config of configs) {
@@ -221,19 +217,6 @@ function summarize(configs: readonly SourceConfig[]): SourceConfigSummary {
 		byFamily[config.connector.family] =
 			(byFamily[config.connector.family] ?? 0) + 1;
 		if (config.source.enabled !== false) enabled += 1;
-		if (
-			config.publish?.enabled === true &&
-			config.publish.allowed_for_export === true
-		) {
-			publishable += 1;
-		}
-		const requireLocation = config.validate.require_location;
-		if (
-			requireLocation === "address" ||
-			requireLocation === "address_or_point"
-		) {
-			addressOnly += 1;
-		}
 		if (config.map.lat !== undefined && config.map.lon !== undefined) {
 			withCoordinates += 1;
 		}
@@ -242,8 +225,6 @@ function summarize(configs: readonly SourceConfig[]): SourceConfigSummary {
 	return {
 		total: configs.length,
 		enabled,
-		publishable,
-		addressOnly,
 		withCoordinates,
 		byParser: Object.fromEntries(
 			Object.entries(byParser).sort(([left], [right]) =>

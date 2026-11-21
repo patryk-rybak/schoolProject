@@ -45,7 +45,7 @@ describe("canonical AED record", () => {
 		const record = parseCanonicalAedRecord(pointRecord());
 		expect(record.location_status).toBe("point");
 		expect(record.address_kind).toBe("building");
-		expect(record.publish_state).toBe("quarantined");
+		expect(record.claim_status).toBe("unclaimed");
 		expect(isMappable(record)).toBe(true);
 	});
 

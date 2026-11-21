@@ -7,9 +7,8 @@ import {
 import {
 	type RecordValue,
 	evaluateCoordinate,
-	evaluateExpression,
 	evaluateFieldSpec,
-} from "../smoke/parsers";
+} from "../parsers";
 
 const NUMBER_FIELDS = new Set([
 	"confidence",
@@ -57,7 +56,6 @@ const BASE_KEYS = new Set([
 	"coord_precision_m",
 	"location_status",
 	"geom_source",
-	"publish_state",
 	"address_text",
 ]);
 
@@ -128,6 +126,18 @@ export type MappedRecord = {
 	index: number;
 };
 
+/** Plain attribution string, when the (slim) config trivially provides one. */
+export function sourceAttribution(config: SourceConfig): string | null {
+	const source = config.source as { attribution?: unknown; name?: unknown };
+	if (typeof source.attribution === "string" && source.attribution.trim()) {
+		return source.attribution.trim();
+	}
+	if (typeof source.name === "string" && source.name.trim()) {
+		return source.name.trim();
+	}
+	return null;
+}
+
 export function mapSourceRecord(
 	config: SourceConfig,
 	row: RecordValue,
@@ -157,14 +167,10 @@ export function mapSourceRecord(
 		}
 	}
 
+	// Slim configs have no records.identity: use the mapped source_record_id
+	// column when present, otherwise fall back to the row index.
 	const sourceRecordId =
-		toText(
-			evaluateExpression(
-				config.records.identity.source_record_id,
-				row,
-				variables,
-			),
-		) ?? `${config.source.id}:${index}`;
+		toText(values["source_record_id"]) ?? `${config.source.id}:${index}`;
 	const name =
 		toText(values["name"]) ??
 		toText(row["Nazwa"]) ??
@@ -178,15 +184,8 @@ export function mapSourceRecord(
 			: addressText !== null
 				? "address_only"
 				: "unresolved";
-	const publishState =
-		config.publish?.enabled === true &&
-		config.publish.allowed_for_export === true
-			? "published"
-			: "quarantined";
 	const sourceUrl =
-		toText(values["source_url"]) ??
-		config.source.homepage_url ??
-		config.fetch.url;
+		toText(values["source_url"]) ?? config.fetch.url;
 
 	const attributes: Record<string, unknown> = {};
 	for (const field of CANONICAL_FIELDS) {
@@ -240,7 +239,6 @@ export function mapSourceRecord(
 		geocoded_at: null,
 		geocode_input_sha256: null,
 		geocode_note: null,
-		publish_state: publishState,
 		claim_status: "unclaimed",
 		claimed_by: null,
 		claimed_at: null,

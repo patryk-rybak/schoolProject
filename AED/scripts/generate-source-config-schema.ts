@@ -7,41 +7,28 @@ const args = process.argv.slice(2);
 const check = args.includes("--check");
 const repoRoot = resolve(import.meta.dir, "..");
 
-const outputPaths = [
-	resolve(
-		repoRoot,
-		"src/server/ingest/config/datasources-config.generated.schema.json",
-	),
-	resolve(repoRoot, "backend/ingest/datasources-config.schema.json"),
-];
+const outputPath = resolve(
+	repoRoot,
+	"backend/ingest/datasources-config.schema.json",
+);
 
 const schema = buildDatasourcesConfigJsonSchema();
 const text = `${JSON.stringify(schema, null, 2)}\n`;
 
 if (check) {
-	let failed = false;
-	for (const outputPath of outputPaths) {
-		if (!existsSync(outputPath)) {
-			console.error(`Brak wygenerowanego schematu: ${outputPath}`);
-			failed = true;
-			continue;
-		}
-		const current = readFileSync(outputPath, "utf8");
-		if (current !== text) {
-			console.error(
-				`Schemat jest nieaktualny: ${outputPath}. Uruchom: bun scripts/generate-source-config-schema.ts`,
-			);
-			failed = true;
-			continue;
-		}
-		console.log(`OK ${outputPath}`);
-	}
-	if (failed) {
+	if (!existsSync(outputPath)) {
+		console.error(`Brak wygenerowanego schematu: ${outputPath}`);
 		process.exit(1);
 	}
-} else {
-	for (const outputPath of outputPaths) {
-		writeFileSync(outputPath, text);
-		console.log(`Zapisano ${outputPath}`);
+	const current = readFileSync(outputPath, "utf8");
+	if (current !== text) {
+		console.error(
+			`Schemat jest nieaktualny: ${outputPath}. Uruchom: bun scripts/generate-source-config-schema.ts`,
+		);
+		process.exit(1);
 	}
+	console.log(`OK ${outputPath}`);
+} else {
+	writeFileSync(outputPath, text);
+	console.log(`Zapisano ${outputPath}`);
 }

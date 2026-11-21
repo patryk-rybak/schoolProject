@@ -57,7 +57,7 @@ Aliasy ścieżek: `#/*` → `frontend/*`, `#backend/*` → `backend/*`
 | frontend | [`map/`](./frontend/map/README.md) | działa (mapa bazowa) |
 | frontend | [`social-media/`](./frontend/social-media/README.md) | planowane |
 | backend | [`auth/`](./backend/auth/README.md) | częściowo istnieje |
-| backend | [`ingest/`](./backend/ingest/README.md) | działa (dev) |
+| backend | `backend/ingest/` | działa (dev) |
 | backend | [`normalize/`](./backend/normalize/README.md) | planowane |
 | backend | [`store/`](./backend/store/README.md) | działa (dev) |
 | backend | [`gov-api/`](./backend/gov-api/README.md) | planowane |
@@ -107,6 +107,8 @@ Aplikacja działa pod http://localhost:3000.
 
 ## Dane AED (ingest)
 
+Pełna lista 79 znalezionych źródeł danych: [`SOURCES.md`](./SOURCES.md).
+
 Rejestr źródeł to jeden plik `backend/ingest/datasources-config.json`.
 `source.enabled=false` wyłącza źródło w zwykłym przebiegu; `--all` (lub jawne
 `--source <id>`) pobiera je mimo bramki. Pełny przebieg:
@@ -119,8 +121,7 @@ Skrypt najpierw zapisuje **surowe snapshoty** do `.data/core/raw/`
 (`<source-id>.<ext>` + `.meta.json` z `sha256`, HTTP, licencją i liczbą
 rekordów), a potem buduje wspólny zbiór kanoniczny w `.data/core/`. Katalog
 `.data/` jest ignorowany przez git. Opcje `--no-fetch`, `--no-write`,
-`--out-dir` i `--raw-dir` pozwalają sterować przebiegiem. Szczegóły:
-[`backend/ingest/README.md`](./backend/ingest/README.md).
+`--out-dir` i `--raw-dir` pozwalają sterować przebiegiem.
 
 ## Mapa
 

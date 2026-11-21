@@ -53,7 +53,7 @@ try {
 	if (args.write) writeCoreDataset(args.outDir, dataset);
 	const { manifest } = dataset;
 	console.log(
-		`Core: ${manifest.record_count} rekordów, ${manifest.public_count} publicznych, ${manifest.internal_count} wewnętrznych, ${manifest.mappable_count} na mapie.`,
+		`Core: ${manifest.record_count} rekordów, ${manifest.mappable_count} na mapie.`,
 	);
 	for (const source of manifest.sources) {
 		const status = source.error ? `ERROR ${source.error}` : `${source.records_accepted} ok`;
