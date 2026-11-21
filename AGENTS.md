@@ -80,8 +80,29 @@ Guidance for AI coding agents working in this repository. Keep this file current
 - `vite.config.ts` — Vite, TanStack Start, Tailwind, and Nitro plugins
 - `scripts/fetch-poland-pmtiles.sh` — downloads a Protomaps extract for Poland
 - `scripts/copy-maplibre-worker.ts` — copies the MapLibre worker into `public/`
+- `src/blocks/` — independently owned feature blocks behind shared contracts
 
 Path aliases: both `#/*` and `@/*` map to `./src/*`.
+
+## Blocks
+
+Work is split into seven blocks plus a shared contract (`src/blocks/contracts/`).
+Read `docs/BLOCKS.md` before changing anything under `src/blocks/`:
+
+- Import another block only through its `index.ts`; never reach into its folder.
+- Frontend blocks must not import backend blocks directly.
+- Contract changes (`src/blocks/contracts/**`) get their own PR reviewed by every
+  affected block owner.
+- A block that is not finished must not be wired into a route; the stubs throw
+  `not implemented` on purpose.
+- Shared infrastructure (`src/db/index.ts`, `/api/pmtiles`,
+  `/api/maplibre-worker`, `/api/auth/$`, `src/components/ui/**`) is extended,
+  not rewritten.
+
+Status and acceptance criteria live in `docs/BLOCKS-CHECKLIST.md`. The
+dane.gov.pl harvester wire protocol is documented in
+`docs/dane-gov-pl-harvester.md`.
+
 
 ## Runtime and Data Rules
 
