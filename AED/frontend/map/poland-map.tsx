@@ -46,6 +46,45 @@ function createStyle(origin: string): maplibregl.StyleSpecification {
 	};
 }
 
+function addAedPoints(map: maplibregl.Map): void {
+	map.addSource("aed", {
+		type: "geojson",
+		data: `${globalThis.location.origin}/data/aed.geojson`,
+	});
+	map.addLayer({
+		id: "aed-points",
+		type: "circle",
+		source: "aed",
+		paint: {
+			"circle-radius": 5,
+			"circle-color": "#16a34a",
+			"circle-stroke-width": 1,
+			"circle-stroke-color": "#ffffff",
+		},
+	});
+	map.on("click", "aed-points", (event) => {
+		const feature = event.features?.[0];
+		if (!feature || feature.geometry.type !== "Point") {
+			return;
+		}
+		const props = feature.properties ?? {};
+		// biome-ignore lint/complexity/useLiteralKeys: GeoJSON properties use an index signature.
+		const name = props["name"] ?? "AED";
+		// biome-ignore lint/complexity/useLiteralKeys: GeoJSON properties use an index signature.
+		const city = props["city"] ?? "";
+		new maplibregl.Popup()
+			.setLngLat(feature.geometry.coordinates as [number, number])
+			.setHTML(`<strong>${String(name)}</strong><br/>${String(city)}`)
+			.addTo(map);
+	});
+	map.on("mouseenter", "aed-points", () => {
+		map.getCanvas().style.cursor = "pointer";
+	});
+	map.on("mouseleave", "aed-points", () => {
+		map.getCanvas().style.cursor = "";
+	});
+}
+
 export function PolandMap() {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -77,38 +116,7 @@ export function PolandMap() {
 
 		// AED points from the dev store via /data/aed.geojson (gov-api module).
 		map.on("load", () => {
-			map.addSource("aed", {
-				type: "geojson",
-				data: `${globalThis.location.origin}/data/aed.geojson`,
-			});
-			map.addLayer({
-				id: "aed-points",
-				type: "circle",
-				source: "aed",
-				paint: {
-					"circle-radius": 5,
-					"circle-color": "#16a34a",
-					"circle-stroke-width": 1,
-					"circle-stroke-color": "#ffffff",
-				},
-			});
-			map.on("click", "aed-points", (event) => {
-				const feature = event.features?.[0];
-				if (!feature || feature.geometry.type !== "Point") return;
-				const props = feature.properties ?? {};
-				new maplibregl.Popup()
-					.setLngLat(feature.geometry.coordinates as [number, number])
-					.setHTML(
-						`<strong>${String(props["name"] ?? "AED")}</strong><br/>${String(props["city"] ?? "")}`,
-					)
-					.addTo(map);
-			});
-			map.on("mouseenter", "aed-points", () => {
-				map.getCanvas().style.cursor = "pointer";
-			});
-			map.on("mouseleave", "aed-points", () => {
-				map.getCanvas().style.cursor = "";
-			});
+			addAedPoints(map);
 		});
 
 		return () => {
