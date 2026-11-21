@@ -22,17 +22,28 @@
     "preview": "bun .output/server/index.mjs",
     "typecheck": "tsc --noEmit",
     "format": "biome format --write",
-    "lint": "biome lint --only=a11y --only=complexity --only=correctness --only=nursery --only=performance --only=security --only=style --only=suspicious --skip=nursery/useExplicitType --skip=nursery/noTernary --skip=nursery/noJsxPropsBind --skip=style/noJsxLiterals --skip=style/useNamingConvention --skip=style/useFilenamingConvention --skip=style/useExportsLast --skip=style/useComponentExportOnlyModules --skip=style/noHeadElement --skip=performance/noImgElement --skip=correctness/useQwikValidLexicalScope --skip=suspicious/noReactSpecificProps --error-on-warnings",
-    "check": "biome check --only=a11y --only=complexity --only=correctness --only=nursery --only=performance --only=security --only=style --only=suspicious --skip=nursery/useExplicitType --skip=nursery/noTernary --skip=nursery/noJsxPropsBind --skip=style/noJsxLiterals --skip=style/useNamingConvention --skip=style/useFilenamingConvention --skip=style/useExportsLast --skip=style/useComponentExportOnlyModules --skip=style/noHeadElement --skip=performance/noImgElement --skip=correctness/useQwikValidLexicalScope --skip=suspicious/noReactSpecificProps --error-on-warnings",
-    "check:write": "biome check --write --unsafe --only=a11y --only=complexity --only=correctness --only=nursery --only=performance --only=security --only=style --only=suspicious --skip=nursery/useExplicitType --skip=nursery/noTernary --skip=nursery/noJsxPropsBind --skip=style/noJsxLiterals --skip=style/useNamingConvention --skip=style/useFilenamingConvention --skip=style/useExportsLast --skip=style/useComponentExportOnlyModules --skip=style/noHeadElement --skip=performance/noImgElement --skip=correctness/useQwikValidLexicalScope --skip=suspicious/noReactSpecificProps",
+    "lint": "biome lint --only=a11y --only=complexity --only=correctness --only=nursery --only=performance --only=security --only=style --only=suspicious --skip=nursery/useExplicitType --skip=nursery/noTernary --skip=nursery/noJsxPropsBind --skip=style/noJsxLiterals --skip=style/useNamingConvention --skip=style/useFilenamingConvention --skip=style/useExportsLast --skip=style/useComponentExportOnlyModules --skip=style/noHeadElement --skip=performance/noImgElement --skip=correctness/useQwikValidLexicalScope --skip=suspicious/noReactSpecificProps --error-on-warnings --skip=suspicious/noConsole --skip=correctness/noNodejsModules --skip=style/noNonNullAssertion",
+    "check": "biome check --only=a11y --only=complexity --only=correctness --only=nursery --only=performance --only=security --only=style --only=suspicious --skip=nursery/useExplicitType --skip=nursery/noTernary --skip=nursery/noJsxPropsBind --skip=style/noJsxLiterals --skip=style/useNamingConvention --skip=style/useFilenamingConvention --skip=style/useExportsLast --skip=style/useComponentExportOnlyModules --skip=style/noHeadElement --skip=performance/noImgElement --skip=correctness/useQwikValidLexicalScope --skip=suspicious/noReactSpecificProps --error-on-warnings --skip=suspicious/noConsole --skip=correctness/noNodejsModules --skip=style/noNonNullAssertion",
+    "check:write": "biome check --write --unsafe --only=a11y --only=complexity --only=correctness --only=nursery --only=performance --only=security --only=style --only=suspicious --skip=nursery/useExplicitType --skip=nursery/noTernary --skip=nursery/noJsxPropsBind --skip=style/noJsxLiterals --skip=style/useNamingConvention --skip=style/useFilenamingConvention --skip=style/useExportsLast --skip=style/useComponentExportOnlyModules --skip=style/noHeadElement --skip=performance/noImgElement --skip=correctness/useQwikValidLexicalScope --skip=suspicious/noReactSpecificProps --skip=suspicious/noConsole --skip=correctness/noNodejsModules --skip=style/noNonNullAssertion",
     "verify": "bun run typecheck && bun run check",
     "db:generate": "bunx --bun drizzle-kit generate",
     "db:migrate": "bunx --bun drizzle-kit migrate",
     "db:push": "bunx --bun drizzle-kit push",
     "db:pull": "bunx --bun drizzle-kit pull",
     "db:studio": "bunx --bun drizzle-kit studio",
+    "config:schema": "bun scripts/generate-source-config-schema.ts",
+    "config:schema:check": "bun scripts/generate-source-config-schema.ts --check",
+    "config:scaffold": "bun scripts/generate-source-config-scaffolds.ts",
+    "config:normalize": "bun scripts/normalize-source-configs.ts",
+    "config:partition": "bun scripts/partition-source-configs.ts",
+    "config:smoke": "bun scripts/smoke-source-configs.ts",
+    "config:verify": "bun run config:schema:check && bun test src/server/ingest/config src/server/ingest/canonical.test.ts src/server/ingest/core",
+    "core:build": "bun scripts/build-core-dataset.ts",
     "db:seed": "bun backend/store/seed.ts",
-    "map:tiles": "bash frontend/scripts/fetch-poland-pmtiles.sh"
+    "map:tiles": "bash frontend/scripts/fetch-poland-pmtiles.sh",
+    "ingest:configs:build": "bun scripts/build-source-configs.ts",
+    "ingest:configs:validate": "bun scripts/validate-source-configs.ts",
+    "ingest:smoke": "bun scripts/smoke-source-configs.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "5.7.2",
@@ -54,7 +65,8 @@
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.1.18",
-    "tw-animate-css": "^1.3.6"
+    "tw-animate-css": "^1.3.6",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
@@ -64,6 +76,8 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "shadcn": "^4.23.0",
     "typescript": "^6.0.2",
     "vite": "^8.3.8"

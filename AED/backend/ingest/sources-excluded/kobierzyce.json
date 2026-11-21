@@ -1,0 +1,260 @@
+{
+	"connector": {
+		"family": "html_list",
+		"notes": "Selektor div.srodkowa p + filtr numeru listy. Miasto i obiekt wyciągane z formatu 'N. Miasto – obiekt, ulica'.",
+		"parser": "html_list"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": false,
+			"max_suspicious_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 13,
+			"schema_fields": [
+				"text",
+				"lp",
+				"city",
+				"facility",
+				"street"
+			]
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 1,
+			"max_duplicate_id_ratio": 0,
+			"max_null_ratio": {
+				"address_text": 0,
+				"name": 0
+			},
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "ignore",
+			"on_missing_field": "fail",
+			"on_new_field": "review",
+			"on_type_change": "review"
+		},
+		"volume": {
+			"max_delta_ratio": 0.5,
+			"min_records": 10,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": true,
+			"last_modified": true
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 6
+		},
+		"retries": {
+			"backoff_ms": 1500,
+			"max": 2
+		},
+		"timeout_ms": 30000,
+		"url": "https://www.ugk.pl/defibrylatory-aed",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"geocoding": {
+		"address_template": "{address_text}",
+		"cache_ttl_days": 365,
+		"enabled": true,
+		"geoportal": {
+			"endpoint": "https://services.gugik.gov.pl/uug/",
+			"max_results": 5,
+			"min_accuracy": 0.8,
+			"only_exact_numbers": false,
+			"output_srid": 4326,
+			"request": "GetAddress",
+			"srid": 2180
+		},
+		"min_confidence": 0.8,
+		"on_failure": "address_only",
+		"provider_order": [
+			"gugik-uug"
+		],
+		"rate_limit": {
+			"requests_per_minute": 30
+		},
+		"required_components": [
+			"city"
+		],
+		"strategy": "structured_first"
+	},
+	"map": {
+		"access_type": {
+			"const": "unknown"
+		},
+		"address_text": {
+			"template": "{city}, {street}"
+		},
+		"city": {
+			"field": "city"
+		},
+		"confidence": {
+			"const": 0.5
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"device_type": {
+			"const": "public_aed"
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"is_24_7": {
+			"const": null
+		},
+		"label": {
+			"template": "kobierzyce:{lp}"
+		},
+		"last_verified_at": {
+			"const": null
+		},
+		"name": {
+			"template": "{city} – {facility}"
+		},
+		"operator_name": {
+			"const": "Gmina Kobierzyce"
+		},
+		"operator_type": {
+			"const": "municipality"
+		},
+		"source_updated_at": {
+			"const": "2025-12-03"
+		},
+		"source_url": {
+			"const": "https://www.ugk.pl/defibrylatory-aed"
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"verification_status": {
+			"const": "unverified"
+		}
+	},
+	"parse": {
+		"encoding": "utf-8",
+		"html_list": {
+			"collapse_whitespace": true,
+			"empty_as_null": true,
+			"fields": {
+				"city": {
+					"group": 1,
+					"regex": "^\\d+\\.\\s*([^–-]+?)\\s*[–-]"
+				},
+				"facility": {
+					"group": 1,
+					"regex": "^\\d+\\.\\s*[^–-]+?\\s*[–-]\\s*([^,]+)"
+				},
+				"lp": {
+					"group": 1,
+					"regex": "^(\\d+)\\."
+				},
+				"street": {
+					"group": 1,
+					"regex": ",\\s*(.+)$"
+				}
+			},
+			"item_text_separator": " ",
+			"max_records": 15,
+			"min_records": 13,
+			"record_filter": {
+				"regex": "^\\d+\\.\\s"
+			},
+			"select": "div.srodkowa p",
+			"trim": true
+		},
+		"trim_headers": false
+	},
+	"publish": {
+		"allowed_for_export": false,
+		"allowed_for_ingest": false,
+		"attribution": "Gmina Kobierzyce — brak deklaracji licencji; publikacja wymaga zgody wydawcy",
+		"enabled": false,
+		"exports": [],
+		"license_id": "NOASSERTION",
+		"redact": []
+	},
+	"records": {
+		"dedupe": {
+			"keep": "last",
+			"key": [
+				{
+					"field": "lp"
+				}
+			],
+			"on_duplicate": "reject"
+		},
+		"identity": {
+			"dataset_id": {
+				"const": "kobierzyce:html:aed"
+			},
+			"source_record_id": {
+				"template": "kobierzyce:{lp}"
+			},
+			"stable": true
+		},
+		"path": "$"
+	},
+	"schedule": {
+		"cron": "0 3 * * 1",
+		"jitter_seconds": 300,
+		"timezone": "Europe/Warsaw"
+	},
+	"source": {
+		"access_type": "html",
+		"coverage": {
+			"country": "PL",
+			"notes": "Gmina wiejska Kobierzyce, dolnośląskie. 13 lokalizacji w treści artykułu, bez współrzędnych.",
+			"teryt": [
+				"0223052"
+			]
+		},
+		"enabled": false,
+		"homepage_url": "https://www.ugk.pl/defibrylatory-aed",
+		"id": "kobierzyce",
+		"license": {
+			"attribution": "Gmina Kobierzyce — https://www.ugk.pl/defibrylatory-aed (brak deklaracji licencji)",
+			"id": "NOASSERTION"
+		},
+		"name": "Defibrylatory AED w Gminie Kobierzyce",
+		"notes": "Lista to 13 akapitów <p> w div.srodkowa, numerowanych od 1. do 13.; sprawdzone live 2026-11-21. Adresy częściowo bez numeru (Tyniec nad Ślęzą, ul. Szkolna), więc geokodowanie może zwrócić przybliżenie.",
+		"publisher": "Gmina Kobierzyce",
+		"reliability_tier": "official_local",
+		"update_frequency": "unknown"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				16.85,
+				50.93,
+				17.05,
+				51.03
+			],
+			"on_invalid": "review",
+			"on_missing": "review"
+		},
+		"enums": true,
+		"on_error": "review",
+		"require_location": "address_or_point",
+		"required": [
+			"name",
+			"address_text"
+		]
+	},
+	"version": 1
+}

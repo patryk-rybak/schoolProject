@@ -1,0 +1,871 @@
+{
+  "version": "1.0",
+  "suite": "merge",
+  "description": "Field survivorship, disputed values, license union, hard serial conflicts and structural grouping of multiple devices in one facility.",
+  "cases": [
+    {
+      "id": "merge-address-survivorship",
+      "tags": ["merge", "address", "official", "auto"],
+      "split": "dev",
+      "as_of": "2026-11-21T00:00:00Z",
+      "records": [
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2001",
+          "observed_at": "2024-01-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Rynek 12",
+            "lat": 49.783,
+            "lon": 22.768,
+            "coord_precision_m": 15,
+            "facility_type": "municipal_office",
+            "address": {
+              "city": "Przemyśl",
+              "street": "Rynek",
+              "house_number": "12",
+              "teryt_commune": "1262011"
+            },
+            "operator": {
+              "name": "Miasto Przemyśl",
+              "operator_type": "municipality",
+              "phone": "+48167800000"
+            },
+            "device": {
+              "label": "AED-12",
+              "manufacturer": "Physio-Control",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "community",
+            "license_id": "ODbL-1.0"
+          }
+        },
+        {
+          "source_id": "przemysl",
+          "source_record_id": "15:801",
+          "observed_at": "2026-09-01T00:00:00Z",
+          "source_tier": "official_local",
+          "fields": {
+            "name": "AED Rynek 12",
+            "lat": 49.78312,
+            "lon": 22.76818,
+            "coord_precision_m": 5,
+            "facility_type": "municipal_office",
+            "address": {
+              "city": "Przemyśl",
+              "street": "Rynek",
+              "house_number": "12",
+              "postcode": "37-700",
+              "teryt_commune": "1262011",
+              "address_text": "Rynek 12, 37-700 Przemyśl"
+            },
+            "operator": {
+              "name": "Miasto Przemyśl",
+              "operator_type": "municipality",
+              "phone": "+48167800000",
+              "email": "sekretariat@przemysl.pl"
+            },
+            "device": {
+              "label": "AED-12",
+              "manufacturer": "Physio-Control",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "official_register",
+            "license_id": "CC-BY-4.0"
+          }
+        }
+      ],
+      "expected": {
+        "clusters": [["osm:node/2001", "przemysl:15:801"]],
+        "pair_decisions": [
+          {
+            "a": "osm:node/2001",
+            "b": "przemysl:15:801",
+            "decision": "auto_merge",
+            "score": { "min": 0.8, "max": 1.0 },
+            "hard_conflict": false
+          }
+        ],
+        "review_items": [],
+        "canonical": [
+          {
+            "cluster": 0,
+            "fields": {
+              "address_text": "Rynek 12, 37-700 Przemyśl",
+              "postcode": "37-700",
+              "status": "active",
+              "access_type": "public"
+            },
+            "provenance": {
+              "address_text": "przemysl:15:801",
+              "postcode": "przemysl:15:801",
+              "status": "przemysl:15:801",
+              "access_type": "przemysl:15:801"
+            },
+            "license_ids": ["CC-BY-4.0", "ODbL-1.0"]
+          }
+        ],
+        "validation_issues": []
+      }
+    },
+    {
+      "id": "merge-status-conflict",
+      "tags": ["merge", "status", "conflict", "disputed"],
+      "split": "holdout",
+      "as_of": "2026-11-21T00:00:00Z",
+      "records": [
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2002",
+          "observed_at": "2026-01-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Urząd Miasta",
+            "lat": 52.2297,
+            "lon": 21.0122,
+            "coord_precision_m": 15,
+            "facility_type": "municipal_office",
+            "address": {
+              "city": "Warszawa",
+              "street": "Rynek",
+              "house_number": "1",
+              "postcode": "00-001",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Miasto Warszawa",
+              "operator_type": "municipality",
+              "phone": "+48226565000"
+            },
+            "device": {
+              "label": "AED-202",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "community"
+          }
+        },
+        {
+          "source_id": "przemysl",
+          "source_record_id": "15:802",
+          "observed_at": "2026-06-01T00:00:00Z",
+          "source_tier": "official_local",
+          "fields": {
+            "name": "AED Urząd Miasta",
+            "lat": 52.22972,
+            "lon": 21.01221,
+            "coord_precision_m": 5,
+            "facility_type": "municipal_office",
+            "address": {
+              "city": "Warszawa",
+              "street": "Rynek",
+              "house_number": "1",
+              "postcode": "00-001",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Miasto Warszawa",
+              "operator_type": "municipality",
+              "phone": "+48226565000"
+            },
+            "device": {
+              "label": "AED-202",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "removed",
+            "verification_method": "official_register"
+          }
+        }
+      ],
+      "expected": {
+        "clusters": [["osm:node/2002", "przemysl:15:802"]],
+        "pair_decisions": [
+          {
+            "a": "osm:node/2002",
+            "b": "przemysl:15:802",
+            "decision": "auto_merge",
+            "score": { "min": 0.8, "max": 1.0 },
+            "hard_conflict": false
+          }
+        ],
+        "review_items": [
+          {
+            "kind": "field_conflict",
+            "field_name": "status",
+            "severity": "warning",
+            "record_refs": ["osm:node/2002", "przemysl:15:802"]
+          }
+        ],
+        "canonical": [
+          {
+            "cluster": 0,
+            "fields": { "status": "removed", "access_type": "public" },
+            "provenance": {
+              "status": "przemysl:15:802",
+              "access_type": "przemysl:15:802"
+            },
+            "disputed": ["status"]
+          }
+        ],
+        "validation_issues": []
+      }
+    },
+    {
+      "id": "merge-access-conflict",
+      "tags": ["merge", "access", "conflict", "safety"],
+      "split": "holdout",
+      "as_of": "2026-11-21T00:00:00Z",
+      "records": [
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2003",
+          "observed_at": "2026-05-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Szpital Miejski",
+            "lat": 52.2301,
+            "lon": 21.0141,
+            "coord_precision_m": 15,
+            "facility_type": "hospital",
+            "address": {
+              "city": "Warszawa",
+              "street": "Szpitalna",
+              "house_number": "4",
+              "postcode": "00-005",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Szpital Miejski",
+              "operator_type": "nfz_provider",
+              "phone": "+48221112233"
+            },
+            "device": {
+              "label": "AED-303",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "community"
+          }
+        },
+        {
+          "source_id": "przemysl",
+          "source_record_id": "15:803",
+          "observed_at": "2026-09-01T00:00:00Z",
+          "source_tier": "official_local",
+          "fields": {
+            "name": "AED Szpital Miejski",
+            "lat": 52.23012,
+            "lon": 21.01412,
+            "coord_precision_m": 5,
+            "facility_type": "hospital",
+            "address": {
+              "city": "Warszawa",
+              "street": "Szpitalna",
+              "house_number": "4",
+              "postcode": "00-005",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Szpital Miejski",
+              "operator_type": "nfz_provider",
+              "phone": "+48221112233"
+            },
+            "device": {
+              "label": "AED-303",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "private",
+            "status": "active",
+            "verification_method": "official_register"
+          }
+        }
+      ],
+      "expected": {
+        "clusters": [["osm:node/2003", "przemysl:15:803"]],
+        "pair_decisions": [
+          {
+            "a": "osm:node/2003",
+            "b": "przemysl:15:803",
+            "decision": "auto_merge",
+            "score": { "min": 0.8, "max": 1.0 },
+            "hard_conflict": false
+          }
+        ],
+        "review_items": [
+          {
+            "kind": "field_conflict",
+            "field_name": "access_type",
+            "severity": "warning",
+            "record_refs": ["osm:node/2003", "przemysl:15:803"]
+          }
+        ],
+        "canonical": [
+          {
+            "cluster": 0,
+            "fields": { "access_type": "private", "status": "active" },
+            "provenance": {
+              "access_type": "przemysl:15:803",
+              "status": "przemysl:15:803"
+            },
+            "disputed": ["access_type"]
+          }
+        ],
+        "validation_issues": []
+      }
+    },
+    {
+      "id": "merge-null-vs-unknown",
+      "tags": ["merge", "null", "unknown", "negative"],
+      "split": "dev",
+      "as_of": "2026-11-21T00:00:00Z",
+      "records": [
+        {
+          "source_id": "przemysl",
+          "source_record_id": "15:804",
+          "observed_at": "2025-06-01T00:00:00Z",
+          "source_tier": "official_local",
+          "fields": {
+            "name": "AED Rynek 8",
+            "lat": 49.7832,
+            "lon": 22.7682,
+            "coord_precision_m": 5,
+            "facility_type": "municipal_office",
+            "address": {
+              "city": "Przemyśl",
+              "street": "Rynek",
+              "house_number": "8",
+              "postcode": "37-700",
+              "teryt_commune": "1262011"
+            },
+            "operator": {
+              "name": "Miasto Przemyśl",
+              "operator_type": "municipality",
+              "phone": "+48167800000"
+            },
+            "device": {
+              "label": "AED-8",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "removed",
+            "verification_method": "official_register"
+          }
+        },
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2004",
+          "observed_at": "2026-10-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Rynek 8",
+            "lat": 49.78321,
+            "lon": 22.76821,
+            "coord_precision_m": 15,
+            "facility_type": "municipal_office",
+            "address": {
+              "city": "Przemyśl",
+              "street": "Rynek",
+              "house_number": "8",
+              "postcode": "37-700",
+              "teryt_commune": "1262011"
+            },
+            "operator": {
+              "name": "Miasto Przemyśl",
+              "operator_type": "municipality",
+              "phone": "+48167800000"
+            },
+            "device": {
+              "label": "AED-8",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "unknown",
+            "status": "unknown",
+            "verification_method": "community"
+          }
+        }
+      ],
+      "expected": {
+        "clusters": [["osm:node/2004", "przemysl:15:804"]],
+        "pair_decisions": [
+          {
+            "a": "osm:node/2004",
+            "b": "przemysl:15:804",
+            "decision": "auto_merge",
+            "score": { "min": 0.8, "max": 1.0 },
+            "hard_conflict": false
+          }
+        ],
+        "review_items": [],
+        "canonical": [
+          {
+            "cluster": 0,
+            "fields": { "status": "removed", "access_type": "public" },
+            "provenance": {
+              "status": "przemysl:15:804",
+              "access_type": "przemysl:15:804"
+            }
+          }
+        ],
+        "validation_issues": []
+      }
+    },
+    {
+      "id": "merge-license-union",
+      "tags": ["merge", "license", "provenance"],
+      "split": "dev",
+      "as_of": "2026-11-21T00:00:00Z",
+      "records": [
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2005",
+          "observed_at": "2026-02-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Dworzec",
+            "lat": 52.2286,
+            "lon": 21.0031,
+            "coord_precision_m": 15,
+            "facility_type": "transport_station",
+            "address": {
+              "city": "Warszawa",
+              "street": "Aleje Jerozolimskie",
+              "house_number": "54",
+              "postcode": "00-024",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "PKP S.A.",
+              "operator_type": "transport_authority",
+              "phone": "+48221234567"
+            },
+            "device": {
+              "label": "AED-505",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "community",
+            "license_id": "ODbL-1.0"
+          }
+        },
+        {
+          "source_id": "przemysl",
+          "source_record_id": "15:805",
+          "observed_at": "2026-07-01T00:00:00Z",
+          "source_tier": "official_local",
+          "fields": {
+            "name": "AED Dworzec",
+            "lat": 52.22862,
+            "lon": 21.00312,
+            "coord_precision_m": 5,
+            "facility_type": "transport_station",
+            "address": {
+              "city": "Warszawa",
+              "street": "Aleje Jerozolimskie",
+              "house_number": "54",
+              "postcode": "00-024",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "PKP S.A.",
+              "operator_type": "transport_authority",
+              "phone": "+48221234567"
+            },
+            "device": {
+              "label": "AED-505",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "official_register",
+            "license_id": "CC-BY-4.0"
+          }
+        }
+      ],
+      "expected": {
+        "clusters": [["osm:node/2005", "przemysl:15:805"]],
+        "pair_decisions": [
+          {
+            "a": "osm:node/2005",
+            "b": "przemysl:15:805",
+            "decision": "auto_merge",
+            "score": { "min": 0.8, "max": 1.0 },
+            "hard_conflict": false
+          }
+        ],
+        "review_items": [],
+        "canonical": [
+          {
+            "cluster": 0,
+            "fields": { "status": "active", "access_type": "public" },
+            "license_ids": ["CC-BY-4.0", "ODbL-1.0"]
+          }
+        ],
+        "validation_issues": []
+      }
+    },
+    {
+      "id": "merge-serial-conflict",
+      "tags": ["merge", "serial", "identity", "hard-conflict"],
+      "split": "holdout",
+      "as_of": "2026-11-21T00:00:00Z",
+      "records": [
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2006",
+          "observed_at": "2026-03-01T00:00:00Z",
+          "source_tier": "community",
+          "external_ids": { "aed_pl": "PL-AED-999" },
+          "fields": {
+            "name": "AED Urząd Miasta",
+            "lat": 52.2297,
+            "lon": 21.0122,
+            "coord_precision_m": 15,
+            "facility_type": "municipal_office",
+            "address": {
+              "city": "Warszawa",
+              "street": "Rynek",
+              "house_number": "1",
+              "postcode": "00-001",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Miasto Warszawa",
+              "operator_type": "municipality",
+              "phone": "+48226565000"
+            },
+            "device": {
+              "label": "AED-606",
+              "serial_number": "SN-A-606",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "community"
+          }
+        },
+        {
+          "source_id": "przemysl",
+          "source_record_id": "15:806",
+          "observed_at": "2026-08-01T00:00:00Z",
+          "source_tier": "official_local",
+          "external_ids": { "aed_pl": "PL-AED-999" },
+          "fields": {
+            "name": "AED Urząd Miasta",
+            "lat": 52.22972,
+            "lon": 21.01221,
+            "coord_precision_m": 5,
+            "facility_type": "municipal_office",
+            "address": {
+              "city": "Warszawa",
+              "street": "Rynek",
+              "house_number": "1",
+              "postcode": "00-001",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Miasto Warszawa",
+              "operator_type": "municipality",
+              "phone": "+48226565000"
+            },
+            "device": {
+              "label": "AED-606",
+              "serial_number": "SN-B-606",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "official_register"
+          }
+        }
+      ],
+      "expected": {
+        "clusters": [["osm:node/2006", "przemysl:15:806"]],
+        "pair_decisions": [
+          {
+            "a": "osm:node/2006",
+            "b": "przemysl:15:806",
+            "decision": "same_entity",
+            "hard_conflict": true
+          }
+        ],
+        "review_items": [
+          {
+            "kind": "identity_conflict",
+            "field_name": "serial_number",
+            "severity": "blocking",
+            "record_refs": ["osm:node/2006", "przemysl:15:806"]
+          }
+        ],
+        "canonical": [
+          {
+            "cluster": 0,
+            "fields": {},
+            "disputed": ["serial_number"]
+          }
+        ],
+        "validation_issues": []
+      }
+    },
+    {
+      "id": "merge-recency-opening-hours",
+      "tags": ["merge", "opening-hours", "recency", "conflict"],
+      "split": "dev",
+      "as_of": "2026-11-21T00:00:00Z",
+      "records": [
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2007",
+          "observed_at": "2021-01-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Przychodnia",
+            "lat": 52.2401,
+            "lon": 21.0211,
+            "coord_precision_m": 15,
+            "facility_type": "clinic",
+            "address": {
+              "city": "Warszawa",
+              "street": "Kliniczna",
+              "house_number": "2",
+              "postcode": "00-010",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Przychodnia Kliniczna",
+              "operator_type": "nfz_provider",
+              "phone": "+48223456789"
+            },
+            "device": {
+              "label": "AED-707",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "customers",
+            "opening_hours": "Mo-Fr 08:00-16:00",
+            "status": "active",
+            "verification_method": "community"
+          }
+        },
+        {
+          "source_id": "sosdae",
+          "source_record_id": "1",
+          "observed_at": "2026-09-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Przychodnia",
+            "lat": 52.24011,
+            "lon": 21.02111,
+            "coord_precision_m": 15,
+            "facility_type": "clinic",
+            "address": {
+              "city": "Warszawa",
+              "street": "Kliniczna",
+              "house_number": "2",
+              "postcode": "00-010",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Przychodnia Kliniczna",
+              "operator_type": "nfz_provider",
+              "phone": "+48223456789"
+            },
+            "device": {
+              "label": "AED-707",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "customers",
+            "opening_hours": "24/7",
+            "is_24_7": true,
+            "status": "active",
+            "verification_method": "community"
+          }
+        }
+      ],
+      "expected": {
+        "clusters": [["osm:node/2007", "sosdae:1"]],
+        "pair_decisions": [
+          {
+            "a": "osm:node/2007",
+            "b": "sosdae:1",
+            "decision": "auto_merge",
+            "score": { "min": 0.8, "max": 1.0 },
+            "hard_conflict": false
+          }
+        ],
+        "review_items": [
+          {
+            "kind": "field_conflict",
+            "field_name": "opening_hours",
+            "severity": "warning",
+            "record_refs": ["osm:node/2007", "sosdae:1"]
+          }
+        ],
+        "canonical": [
+          {
+            "cluster": 0,
+            "fields": { "opening_hours": "24/7", "is_24_7": true },
+            "provenance": {
+              "opening_hours": "sosdae:1",
+              "is_24_7": "sosdae:1"
+            },
+            "disputed": ["opening_hours"]
+          }
+        ],
+        "validation_issues": []
+      }
+    },
+    {
+      "id": "merge-multiple-devices-facility",
+      "tags": ["merge", "facility", "structural", "multi-device"],
+      "split": "holdout",
+      "as_of": "2026-11-21T00:00:00Z",
+      "records": [
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2008",
+          "observed_at": "2026-04-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Szkoła nr 1, parter",
+            "lat": 52.2302,
+            "lon": 21.0131,
+            "coord_precision_m": 5,
+            "facility_type": "school",
+            "address": {
+              "city": "Warszawa",
+              "street": "Szkolna",
+              "house_number": "1",
+              "postcode": "00-002",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Szkoła Podstawowa nr 1",
+              "operator_type": "school",
+              "phone": "+48221234567"
+            },
+            "device": {
+              "label": "AED-A",
+              "serial_number": "SN-A-001",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "community"
+          }
+        },
+        {
+          "source_id": "osm",
+          "source_record_id": "node/2009",
+          "observed_at": "2026-04-01T00:00:00Z",
+          "source_tier": "community",
+          "fields": {
+            "name": "AED Szkoła nr 1, piętro",
+            "lat": 52.23024,
+            "lon": 21.01314,
+            "coord_precision_m": 5,
+            "facility_type": "school",
+            "address": {
+              "city": "Warszawa",
+              "street": "Szkolna",
+              "house_number": "1",
+              "postcode": "00-002",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Szkoła Podstawowa nr 1",
+              "operator_type": "school",
+              "phone": "+48221234567"
+            },
+            "device": {
+              "label": "AED-B",
+              "serial_number": "SN-B-002",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "community"
+          }
+        },
+        {
+          "source_id": "przemysl",
+          "source_record_id": "15:809",
+          "observed_at": "2026-08-01T00:00:00Z",
+          "source_tier": "official_local",
+          "fields": {
+            "name": "AED Szkoła nr 1, wejście",
+            "lat": 52.23021,
+            "lon": 21.01311,
+            "coord_precision_m": 5,
+            "facility_type": "school",
+            "address": {
+              "city": "Warszawa",
+              "street": "Szkolna",
+              "house_number": "1",
+              "postcode": "00-002",
+              "teryt_commune": "1465011"
+            },
+            "operator": {
+              "name": "Szkoła Podstawowa nr 1",
+              "operator_type": "school",
+              "phone": "+48221234567"
+            },
+            "device": {
+              "label": "AED-A",
+              "manufacturer": "Zoll",
+              "device_type": "public_aed"
+            },
+            "access_type": "public",
+            "status": "active",
+            "verification_method": "official_register"
+          }
+        }
+      ],
+      "expected": {
+        "clusters": [["osm:node/2008", "przemysl:15:809"], ["osm:node/2009"]],
+        "facility_groups": [["osm:node/2008", "osm:node/2009", "przemysl:15:809"]],
+        "pair_decisions": [
+          {
+            "a": "osm:node/2008",
+            "b": "przemysl:15:809",
+            "decision": "auto_merge",
+            "score": { "min": 0.8, "max": 1.0 },
+            "hard_conflict": false
+          }
+        ],
+        "review_items": [],
+        "canonical": [
+          {
+            "cluster": 0,
+            "fields": { "device_label": "AED-A", "status": "active" }
+          },
+          {
+            "cluster": 1,
+            "fields": { "device_label": "AED-B", "status": "active" }
+          }
+        ],
+        "validation_issues": []
+      }
+    }
+  ]
+}

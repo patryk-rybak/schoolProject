@@ -1,0 +1,1739 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>AED w Zielonej Górze</name>
+    <description>Wykaz automatycznych defibrylatorów na terenie Zielonej Góry</description>
+    <Style id="icon-1704-C2185B-nodesc-normal">
+      <IconStyle>
+        <color>ff5b18c2</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="icon-1704-C2185B-nodesc-highlight">
+      <IconStyle>
+        <color>ff5b18c2</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="icon-1704-C2185B-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1704-C2185B-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1704-C2185B-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Style id="icon-1899-DB4436-normal">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+    </Style>
+    <Style id="icon-1899-DB4436-highlight">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+    </Style>
+    <StyleMap id="icon-1899-DB4436">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1899-DB4436-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1899-DB4436-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Style id="icon-1899-DB4436-nodesc-normal">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="icon-1899-DB4436-nodesc-highlight">
+      <IconStyle>
+        <color>ff3644db</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="icon-1899-DB4436-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1899-DB4436-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1899-DB4436-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name>AED</name>
+      <Placemark>
+        <name>ul. Drzonków – Szkolna 2</name>
+        <description>Publiczna Szkoła Podstawowa</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.571323,51.901948,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Racula - Głogowska 72</name>
+        <description>Ochotnicza Straż Pożarna</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5676806,51.9124747,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ochla - Szkolna 1 </name>
+        <description>Publiczna Szkoła Podstawowa</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.473761,51.8786634,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przylep - 9 Maja 6</name>
+        <description>Publiczna Szkoła Podstawowa</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4575652,51.96522,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przylep - Strażacka 19</name>
+        <description>Ochotnicza Straż Pożarna</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4501971,51.9719754,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zawada - Szkolna 24</name>
+        <description>Publiczna Szkoła Podstawowa</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5568123,51.9930034,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Stefana Batorego 128</name>
+        <description>CH AUCHAN</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4903901,51.9639127,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Stefana Batorego 172</name>
+        <description>Leroy Merlin</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4889417,51.9655885,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Al. Wojska Polskiego 9</name>
+        <description>Wojewódzka i Miejska Biblioteka Publiczna</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5004483,51.9401246,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Boh. Westerplatte 15</name>
+        <description>PGNiG SA</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5059013,51.9427289,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Boh. Westerplatte 31</name>
+        <description>Generalna Dyrekcja Dróg Krajowych i Autostrad</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5111665,51.9448006,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Bolesława Chrobrego 2</name>
+        <description>Wojewódzka Stacja Pogotowia Ratunkowego</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5137132,51.9446617,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zyty 26</name>
+        <description>Szpital Wojewódzki</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5178612,51.9415069,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Podgórna 50e</name>
+        <description>Uniwersytet Zielonogórski A-6</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5290367,51.941216,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sienkiewicza 4/3</name>
+        <description>SENSUS Ratownictwo Medyczne</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5090609,51.9320823,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Podgórna 9a</name>
+        <description>Delegatura NIK w Zielonej Górze</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.514774,51.9394169,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Energetyków 7</name>
+        <description>Oddział RespiVent</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.497278,51.9534717,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Działkowa 19</name>
+        <description>Oddział Sani System</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4863963,51.9445327,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Spawaczy 3d</name>
+        <description>Szkoła Podstawowa Nr 11</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5021891,51.9596834,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sulechowska 41</name>
+        <description>CRS Zielona Góra</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5246285,51.9564553,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Jarogniewice 13A </name>
+        <description>Ochotnicza Straż Pożarna</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4945448,51.8331754,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Jana Kasprowicza 3/5 </name>
+        <description>Komenda Miejska Państwowej Straży Pożarnej</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5028308,51.9387567,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kożuchowska 4</name>
+        <description>Jednostka Ratowniczo Gaśnicza Nr 1</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5077426,51.9286418,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sulechowska 42</name>
+        <description>Jednostka Ratowniczo Gaśnicza Nr 2</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5231063,51.9580487,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Stary Kisielin - Szkolna 14 </name>
+        <description>Publiczna Szkoła Podstawowa</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5826688,51.9355358,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Fabryczna 17</name>
+        <description>Medline Sp. z o.o.</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5031862,51.9328761,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Miodowa 11</name>
+        <description>Wojewódzki Fundusz Ochrony Środowiska i Gospodarki Wodnej</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4903311,51.935769,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Licealna 9</name>
+        <description>Uniwersytet Zielonogórski - Rektorat A-18</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5070633,51.9364949,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Podgórna 50</name>
+        <description>Uniwersytet Zielonogórski – budynek A-0</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5289904,51.9399605,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Szafrana 4 </name>
+        <description>Uniwersytet Zielonogórski – budynek A-10</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5302021,51.9416897,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Energetyków 2</name>
+        <description>Uniwersytet Zielonogórski – budynek A-22</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4941639,51.9512102,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Szafrana 1</name>
+        <description>Uniwersytet Zielonogórski – budynek A-8</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.527076,51.9402263,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>al. Wojska Polskiego 71</name>
+        <description>Uniwersytet Zielonogórski – Biblioteka A-23</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4720759,51.9401444,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Szafrana 4a</name>
+        <description>Uniwersytet Zielonogórski – budynek A-29</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5302691,51.9422196,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Podgórna 50</name>
+        <description>Uniwersytet Zielonogórski – Aula</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5286518,51.9397939,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Trasa Północna 1</name>
+        <description>Anneberg Transpol Int Sp. z o.o.</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.491581,51.9612585,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Podgórna 22 </name>
+        <description>Urząd Miasta Zielona Góra</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.514259,51.9403363,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Elektronowa 16 </name>
+        <description>SENSUS Ratownictwo Medyczne</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.489116,51.9558255,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kożuchowska 4 </name>
+        <description>Sztab Ratownictwa Zielona Góra</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5077305,51.9288957,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kostrzyńska 14 </name>
+        <description>Urząd Celny Zielona Góra</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5385759,51.9583942,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zjednoczenia 103 </name>
+        <description>Elektrociepłownia S.A.</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4890476,51.9516508,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Truskawkowa 12 </name>
+        <description>Zespół Edukacyjny Nr 1</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5321259,51.9653881,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Os. Pomorskie 13 </name>
+        <description>Zespół Edukacyjny Nr 3</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5550112,51.9363957,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Stary Rynek 1 </name>
+        <description>Ratusz Urząd Miasta Zielona Góra</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5052046,51.9382879,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Partyzantów 40</name>
+        <description>Komenda Miejska Policji</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5203041,51.9318379,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>al. Wojska Polskiego 71a
+</name>
+        <description>Uniwersytet Zielonogórski budynek A-20</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4704881,51.9399593,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Wojska Polskiego 67</name>
+        <description>Uniwersytet Zielonogórski budynek C-9</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4745382,51.9411432,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Wojska Polskiego 69</name>
+        <description>Uniwersytet Zielonogórski budynek A-16</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4729449,51.9399461,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Wiśniowa 10</name>
+        <description>Uniwersytet Zielonogórski budynek A-24</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4963982,51.9315188,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Stajenna 20</name>
+        <description>Uniwersytet Zielonogórski budynek C-5</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5501872,51.9275989,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>H. Siemiradzkiego 19</name>
+        <description>Wojewódzki Inspektorat Ochrony Środowiska</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5253661,51.9369017,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Szafrana 15</name>
+        <description>Uniwersytet Zielonogórski budynek A-12</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5292016,51.9434382,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Podgórna 50c, Piast</name>
+        <description>Uniwersytet Zielonogórski budynek C-2</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.530414,51.9397145,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Foluszowa 112
+</name>
+        <description>Firma FAST</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4610145,51.9551296,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>OSP Ochla
+</name>
+        <description>Ochotnicza Straż Pożarna Ochla w Zielonej Górze ul. Ochla-Żagańska</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4644182,51.8768337,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Dekoracyjna 3
+</name>
+        <description>Novita S.A.</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4858571,51.9578603,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zjednoczenia 110a
+</name>
+        <description>Zakład Wodociągów i Kanalizacji</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4819196,51.9533411,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Rzeźniczaka 1
+</name>
+        <description>Akademia Talentów</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5081383,51.9597016,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Francuska 25a</name>
+        <description>Zespół Szkół Ekologicznych</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4772204,51.9339234,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Długa 10
+</name>
+        <description>Urząd Miasta Zielona Góra</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4970902,51.9362122,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zachodnia 63a
+</name>
+        <description>Urząd Miasta Zielona Góra</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4837811,51.9298483,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Os. Pomorskie 8
+</name>
+        <description>Spółdzielnia Mieszkaniowa Kisielin</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5616644,51.9375004,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Pl. Słowiański 2</name>
+        <description>Budynek sądu rejonowego</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5030662,51.9372573,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Pl. Słowiański 2</name>
+        <description>Budynek sądu rejonowego</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5044448,51.9363015,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kożuchowska 8</name>
+        <description>Krajowy Rejestr Sądowy</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5084628,51.9262261,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zakład Uzdatniania Wody w Zawadzie
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5733067,51.9831829,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>OSP Zawada
+</name>
+        <description>ul. Strażacka</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5601122,51.9846572,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Oczyszczalnia ścieków</name>
+        <description>Łężyca, ul. Sportowa</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4623974,52.0000782,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>OSP Sucha
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5936485,51.8821414,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sienkiewicza 8
+</name>
+        <description>Wydz. Komunikacji Urzędu Miasta Zielona Góra</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5095963,51.9323275,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Długa 5
+</name>
+        <description>Zespół Szkół Ekonomicznych</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4986153,51.9362122,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Boh. Westerplatte 23
+</name>
+        <description>Centrum Biznesu</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5090764,51.943976,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Podgórna 7
+</name>
+        <description>Urząd Marszałkowski Województwa Lubuskiego</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5133519,51.9393463,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zarządzanie Kryzysowe MOBILNY
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5024878,51.9387719,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>OSP Stary Kisielin
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5856973,51.9343295,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Fokus MAIL
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.511294,51.9364724,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Naftowa 3
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4702028,51.9554742,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Niepodległości 10</name>
+        <description>Urząd Miasta</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5071825,51.9411191,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Strzelecka 9  LO3
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5091376,51.9296809,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Piastowska 9
+</name>
+        <description>Szkoła Podstawowa</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4973013,51.9305694,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>St. Wyszyńskiego 19a</name>
+        <description>Dom Harcerza</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4897237,51.9317716,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Chopina 16a</name>
+        <description>Szkoła Podstawowa 13</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5074628,51.9450597,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Szosa Kisielińska 18</name>
+        <description>IV Liceum Ogólnokształcące</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5367791,51.9393312,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Straż Miejska - samochód patrolowy nr 1
+</name>
+        <styleUrl>#icon-1704-C2185B-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5086408,51.9439437,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Straż Miejska - samochód patrolowy nr 2
+</name>
+        <styleUrl>#icon-1704-C2185B-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.508791,51.9438379,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Straż Miejska - samochód patrolowy nr 3
+</name>
+        <styleUrl>#icon-1704-C2185B-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5089305,51.9437321,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Starostwo Powiatowe w Zielonej Górze</name>
+        <description>ul. Podgórna 5,  na II piętrze naprzeciw salki konferencyjnej</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5119901,51.9392041,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przy pomniku Św. Urbana</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5041945,51.9393207,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Plac Teatralny</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5081682,51.940526,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Urząd Statystyczny ul. Spokojna 1</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5165881,51.9411008,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Dąbrowskiego 14</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5010741,51.9436936,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sikorskiego 10
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5061666,51.9360449,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>WOSiR ul. Olimpijska 20</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5692759,51.8975013,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>WOSIR ul. Olimpijska 20</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5662503,51.898683,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Muzeum Archeologiczne w Świdnicy, ul. Długa 27</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.3980973,51.8906604,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Lubuskiemu Muzeum Wojskowemu Drzonów 54
+</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.3184245,51.9445713,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Wazów 42</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.52038,51.9420892,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ekoenergetyka - Polska SA</name>
+        <description>ul. Nowy Kisielin-Rozwojowa 9</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.618215,51.9265374,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ekoenergetyka - Polska SA</name>
+        <description>Nowy Kisielin-Rozwojowa 7</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.6182794,51.9258361,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Centrum Wytchnieniowe GRUPA ALIVIO</name>
+        <description>Gen. Sowińskiego 2</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.508206,51.9375427,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[Żłobek/Przedszkole "Ekolucky"]]></name>
+        <description>Nowy Kisielin-Rozwojowa 10</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.615201,51.9254075,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Elektronik ul. Staszica 2</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5191387,51.9462423,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Budowlanka ul. Botaniczna 50</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5006624,51.9214496,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ogród Botaniczny ul. Botaniczna 50a</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5000075,51.9206916,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>LO VI ul. Św. Cyryla i Metodego 9</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4878713,51.9275817,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Nowy Kisielin-Rozwojowa 7A</name>
+        <description>Ekoenergetyka-Polska S.A</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.6139288,51.9254334,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Park Sowińskiego</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5073904,51.9347211,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kolei Szprotawskiej ul. Jaskółczej</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4999241,51.9318526,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Państwowa Inspekcja Pracy</name>
+        <description>II piętro , Pomieszczenie sekretariatu. Urządzenie dostępne w w godzinach  7.30-15.30 od poniedziałku do piątku</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4868593,51.9573276,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Państwowa Inspekcja Pracy Gorzów Wlkp.</name>
+        <description>Pomieszczenie sekretariatu. Urządzenie dostępne w w godzinach 7.30-15.30 od poniedziałku do piątku</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.2261115,52.7398778,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Castorama</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4947841,51.9406775,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>ALDEMED</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5146646,51.9481111,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>RDLP Zielona Góra</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5127823,51.9447001,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Nadleśnictwo Zielona Góra</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4567542,51.9265156,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przychodnia</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4831149,51.9377584,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Miejski Zakład Komunikacji</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4847478,51.9508312,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Centrum Przesiadkowe</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5166577,51.947171,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Pływalnia Sportowa MOSIR</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5206005,51.9453192,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Szafrana 2</name>
+        <description>Uniwersytet Zielonogórski A-2</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5296246,51.94129,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Szafrana 8, Ziemowit</name>
+        <description>Uniwersytet Zielonogórski C-3</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.529984,51.9406352,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Szafrana 6, Hala Sportowa</name>
+        <description>Uniwersytet Zielonogórski A-13</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5292008,51.9428707,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Plac Słowiański 9</name>
+        <description>Uniwersytet Zielonogórski A41</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5035572,51.9365398,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Prosta 39, Hala Sportowa</name>
+        <description>Uniwersytet Zielonogórski A-21</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4728712,51.9428936,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Radio INDEX</name>
+        <description>Al. Niepodległości 13</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5079486,51.9412279,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Centrum Wytchnieniowe GRUPA ALIVIO</name>
+        <description>Cisowa 3a</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4542487,51.9452136,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Administracja GRUPA ALIVIO</name>
+        <description>Okulickiego 37</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.4903665,51.9329843,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Boisko Czarkowo</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4900212,51.9731627,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>KS Gwardia</name>
+        <description>W holu na parterze</description>
+        <styleUrl>#icon-1899-DB4436</styleUrl>
+        <Point>
+          <coordinates>
+            15.5103716,51.9296899,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>AED zewnętrzne Projekt  Obywatelski</name>
+      <Placemark>
+        <name>Krępa - świetlica</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5392043,52.0018178,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Krępa - stadion</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5363782,51.9962317,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zawada - biblioteka publiczna</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5631338,51.9917114,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zawada - stadion</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5521792,51.9954742,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Jany - biblioteka</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.6083558,51.9728126,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Stożne - park rekreacyjny</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.6110394,51.9989917,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Nowy Kisielin - Biblioteka</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.6092447,51.9330254,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Nowy Kisielin - ul. Dębowa</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.6214873,51.9310595,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>St. Kisielin - budynek ZOK</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5906937,51.9354151,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>St. Kisielin - przychodnia</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5845339,51.9330691,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>St. Kisielin - budynek OSP</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5858008,51.9342561,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Racula - budynek OSP</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5677834,51.912487,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Racula - boisko ORLIK</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5668343,51.9104284,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Drzonków - przystanek MZK</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5711914,51.8986713,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Drzonków - świetlica</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5681636,51.8922507,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Drzonków - Rajtanowa</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5710597,51.889455,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sucha - świetlica</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5945693,51.8828717,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zatonie - informacja turystyczna</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.565362,51.8616587,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zatonie - świetlica</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5607378,51.8599441,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zatonie - boisko</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5588951,51.8526955,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Barcikowice - świetlica</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5627354,51.8472143,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kiełpin - plac zabaw</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5084042,51.8650815,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kiełpin - park</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5064525,51.8678046,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Jeleniów - Centrum Kulturalno - Rekreacyjne</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4611046,51.8498824,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ochla - skansen</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4703155,51.89204,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ochla - punkt apteczny</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4698641,51.8780434,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przylep - przystanek MZK</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.455997,51.9642855,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przylep - sygnalizacja świetlna</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4615602,51.9610853,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przylep - park</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4475088,51.9681495,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Przylep - szafka elektryczna</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4447784,51.9723109,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Łężyca - przystanek MZK</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.487033,51.9777546,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Łężyca - świetlica</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4775438,51.9933396,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Łężyca - Inwestycyjna</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4831422,51.9784934,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Jarogniewice - budynek OSP</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4944648,51.8332629,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ługowo - boisko</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.6223327,51.8995762,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ochla - boisko</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.4746783,51.8837742,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Kampania Bezpieczna Autostrada</name>
+      <Placemark>
+        <name>SP14, Jaskółcza 66</name>
+        <styleUrl>#icon-1899-DB4436-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            15.5021801,51.925921,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

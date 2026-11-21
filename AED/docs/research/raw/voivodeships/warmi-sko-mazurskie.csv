@@ -1,0 +1,47 @@
+jednostka,typ,score,registry_hint,klasa,najlepszy_url,liczba_punktow,pola,licencja,format,uwagi
+Ostróda,gmina miejska,6,true,B,https://www.ostroda.pl/projekty/inpost-for-cities-puls-miasta-inicjatywa-aed/,"6 (4 InPost + 2 ratusz)","nazwa, adres/lokalizacja, dostęp (częściowo)",brak otwartej licencji (serwis gminy),HTML (2 artykuły),"3 szkoły + wypożyczalnia przy wyciągu nart wodnych + UM/Straż Miejska; brak współrzędnych; osobny artykuł o 2 AED w ratuszu"
+powiat iławski,powiat,6,true,C,https://powiat-ilawski.pl/?s=defibrylator,"0 (wzmianki o sprzęcie)",-,-,HTML,"Wzmianki o defibrylatorach w karetkach/WOPR; brak listy lub mapy"
+Gmina Biskupiec,gmina wiejska,4,true,B,https://www.gminabiskupiec.pl/2025/07/15/zewnetrzne-defibrylatory-aed-w-gminie-biskupiec/,2,"nazwa obiektu, adres, dostęp (zewn./wewn.)",brak otwartej licencji (serwis gminy),HTML,"GOPS (zewnątrz, główne wejście), Biblioteka-Ośrodek Kultury (hall); brak współrzędnych"
+Działdowo,gmina miejska,2,false,C,https://www.dzialdowo.pl/automatyczny-defibrylator-zewnetrzny-w-mbp-w-dzialdowie/,"2 (2 osobne artykuły)","nazwa, adres",-,HTML,"MBP i MOSiR; brak wspólnej listy/mapy"
+Lubawa,gmina miejska,2,false,B,https://lubawa.pl/pomoc-na-wyciagniecie-reki/,5,"nazwa obiektu, adres, dostęp 24/7",brak otwartej licencji (serwis gminy),HTML,"MBP Kupnera 17, OSiR Łąkowa 8, SP Rzepnikowskiego 7, SP Św. Barbary 45, OSP Strażacka 1; brak współrzędnych"
+Bartoszyce,gmina miejska,0,false,D,http://www.bartoszyce.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+Górowo Iławeckie,gmina miejska,0,false,D,http://www.gorowoilaweckie.pl/,0,-,-,HTML,Wyszukiwarka: brak wyników
+Szczytno,gmina miejska,0,false,D,https://miastoszczytno.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Dobre Miasto,gmina miejsko-wiejska,0,false,C,https://dobremiasto.com.pl/wyniki-wyszukiwania?q=defibrylator,"2 (2 newsy)",-,-,HTML,"Plaża Miejska i elewacja UM; brak listy/mapy"
+powiat elbląski,powiat,0,false,D,http://www.powiat.elblag.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+powiat kętrzyński,powiat,0,false,D,http://www.starostwo.ketrzyn.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+powiat nidzicki,powiat,0,false,D,http://www.powiatnidzicki.pl,0,-,-,HTML,Brak wyników o AED
+powiat olsztyński,powiat,0,false,D,http://www.powiat-olsztynski.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+powiat ostródzki,powiat,0,false,D,http://www.powiat.ostroda.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+powiat piski,powiat,0,false,D,http://www.powiat.pisz.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+powiat węgorzewski,powiat,0,false,D,http://www.powiatwegorzewski.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+Biała Piska,gmina miejsko-wiejska,-1,false,D,http://bip.bialapiska.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Frombork,gmina miejsko-wiejska,-1,false,D,http://www.frombork.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Miłakowo,gmina miejsko-wiejska,-1,false,D,http://www.milakowo.ug.net.pl/,0,-,-,HTML,"Domena wygasła, przekierowanie na aftermarket.pl; brak danych AED"
+Morąg,gmina miejsko-wiejska,-1,false,D,http://www.morag.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Młynary,gmina miejsko-wiejska,-1,false,D,http://www.mlynary.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Nidzica,gmina miejsko-wiejska,-1,false,D,http://www.nidzica.pl,0,-,-,HTML,Brak wyników o AED
+Pisz,gmina miejsko-wiejska,-1,false,D,http://www.pisz.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Ryn,gmina miejsko-wiejska,-1,false,D,http://www.ryn.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Zalewo,gmina miejsko-wiejska,-1,false,D,http://www.zalewo.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+Iława,gmina wiejska,-1,false,C,http://www.gmina-ilawa.pl/pl/wyszukaj?search=defibrylator,"0 (kilka newsów)",-,-,HTML,"Przekazania AED (Policja, Stradomno); brak rejestru"
+powiat działdowski,powiat,-1,false,C,https://powiatdzialdowski.pl/minuty-wage-zycia/,"0 (wzmianka)",-,-,HTML,Wzmianka o ćwiczeniach resuscytacji; brak danych o lokalizacjach
+Braniewo,gmina wiejska,-2,false,D,http://gminabraniewo.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Budry,gmina wiejska,-2,false,C,https://budry.pl/?s=defibrylator,"0 (wzmianki)",-,-,HTML,Artykuł o przygotowaniu na kryzysy i systemie Pierwszy Ratownik; brak lokalizacji
+Gietrzwałd,gmina wiejska,-2,false,D,http://www.gietrzwald.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Janowiec Kościelny,gmina wiejska,-2,false,C,https://janowiec.com.pl/?s=defibrylator,"0 (wzmianka)",-,-,HTML,Artykuł o systemie Pierwszy Ratownik; brak lokalizacji
+Kolno,gmina wiejska,-2,false,D,http://bip-kolno.sprint.com.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Kozłowo,gmina wiejska,-2,false,D,http://www.kozlowo.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+Lelkowo,gmina wiejska,-2,false,D,http://www.uglelkowo.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+Lubawa,gmina wiejska,-2,false,D,http://www.gminalubawa.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Rozogi,gmina wiejska,-2,false,D,http://www.rozogi.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+Sorkwity,gmina wiejska,-2,false,D,http://www.gminasorkwity.pl,0,-,-,HTML,Wyszukiwarka: brak wyników
+Wieliczki,gmina wiejska,-2,false,D,http://www.mazury.com.pl/gminy/wieliczki/,0,-,-,HTML,Kandydat wskazał portal komercyjny mazury.com.pl; oficjalna strona ug.wieliczki.pl bez wyników
+Wydminy,gmina wiejska,-2,false,D,http://www.wydminy.net,0,-,-,HTML,"Domena kandydata przejęta (nohu90c.cheap, spam); brak wyników o AED"
+Braniewo,gmina miejska,-3,false,D,http://www.braniewo.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Jonkowo,gmina wiejska,-3,false,D,http://www.jonkowo.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+Kisielice,gmina miejsko-wiejska,-4,false,D,http://kisielice.warmia.mazury.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Reszel,gmina miejsko-wiejska,-4,false,D,http://www.reszel.pl/,0,-,-,HTML,Brak wyników lub brak treści o AED
+Markusy,gmina wiejska,-5,false,D,http://www.markusy.pl,0,-,-,HTML,Brak wyników lub brak treści o AED
+Olsztyn,miasto (poza listą kandydatów),-,-,B,https://olsztyn.eu/urzad-miasta/zdrowie/defibrylatory-na-terenie-olsztyna.html,"54 (lista) / 43 (mapa KML)","nazwa, adres, lat/lon (KML), typ obiektu (z nazwy)",brak otwartej licencji; Google My Maps ToS,HTML + Google My Maps (KML),"Lista adresowa + mapa; KML 43 punktów; brak telefonów/godzin/operatora"
+Urząd Marszałkowski Województwa Warmińsko-Mazurskiego,urząd marszałkowski,-,-,D,https://warmia.mazury.pl/szukaj?q=defibrylator,0,-,-,HTML,"6 wyników, wyłącznie newsy; brak rejestru/mapy; budynek UMWM (ul. Emilii Plater 1) jest na liście Olsztyna"

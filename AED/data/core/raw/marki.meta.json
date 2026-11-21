@@ -1,0 +1,21 @@
+{
+  "source_id": "marki",
+  "fetched_at": "2026-11-21T21:05:27Z",
+  "final_url": "https://api.dane.gov.pl/media/resources/20250710/Defibrylator_GminaMiastoMarki_1.csv",
+  "http_status": 200,
+  "content_type": "application/octet-stream",
+  "bytes": 1008,
+  "sha256": "d42a91e47d3a89f9e2937aaaafe31c7736306c456967ae525d994a1c3743be05",
+  "config_path": "backend/ingest/sources/marki.json",
+  "license_id": "CC-BY-4.0",
+  "raw_file": "data/core/raw/marki.csv",
+  "method": "GET",
+  "user_agent": "AED-PL-core/0.1",
+  "timeout_ms": 30000,
+  "pagination": {
+    "type": "none",
+    "pages_fetched": 1
+  },
+  "record_count": 8,
+  "parse_notes": "Parsed as UTF-8 with BOM (utf-8-sig). Each line is wrapped in outer quotes and internal quotes are doubled; after unwrapping outer quotes and repairing doubled quotes per config (unwrap_outer_quotes=true, repair_double_quotes=true), the header has 6 fields and there are 8 data rows. Raw body stored unmodified; no normalization applied. Known quirk preserved as-is: row Numer Id=7 contains Krosno coordinates (21.72034402175176, 49.718809346153336)."
+}

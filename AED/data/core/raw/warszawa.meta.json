@@ -1,0 +1,23 @@
+{
+  "source_id": "warszawa",
+  "fetched_at": "2026-11-21T21:05:27Z",
+  "final_url": null,
+  "http_status": null,
+  "content_type": null,
+  "bytes": 0,
+  "sha256": null,
+  "config_path": "backend/ingest/sources/warszawa.json",
+  "license_id": "CC-BY-4.0",
+  "raw_file": null,
+  "method": "POST",
+  "user_agent": "AED-PL-core/0.1",
+  "timeout_ms": 30000,
+  "pagination": {
+    "type": "none",
+    "pages_fetched": 0
+  },
+  "record_count": null,
+  "status": "blocked",
+  "blocked_reason": "WARSZAWA_API_TOKEN is not set in the environment or .env.local; config fetch.auth requires env WARSZAWA_API_TOKEN sent as the Authorization header. No HTTP request was made, so no raw body exists.",
+  "parse_notes": "No parse attempted because the source was not fetched. This meta records the operational block only; no records were normalized or invented."
+}

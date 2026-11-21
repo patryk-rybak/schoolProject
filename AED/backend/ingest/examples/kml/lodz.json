@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "source": {
+    "id": "kml-lodz",
+    "name": "Defibrylatory AED w Łodzi (Google My Maps, KML)",
+    "publisher": "Miasto Łódź",
+    "homepage_url": "https://www.lodz.pl/artykul/defibrylatory-na-ulicach-lodzi-jak-ich-uzywac-gdzie-je-znajdziesz-mapa-58563/",
+    "access_type": "kml",
+    "reliability_tier": "official_local",
+    "license": {
+      "id": "NOASSERTION",
+      "url": "https://www.google.com/intl/pl/maps/terms.html",
+      "attribution": "Mapa Google My Maps Miasta Łódź; brak deklaracji licencji",
+      "share_alike": false
+    },
+    "coverage": {
+      "country": "PL",
+      "teryt": ["106101"],
+      "notes": "136 punktów w probie 2026-11-21; 135/136 z opisem. Artykuł z 2023 r. podaje 87 AED, mapa 136."
+    },
+    "update_frequency": "unknown",
+    "enabled": false,
+    "notes": "Brak licencji i daty; endpoint nieudokumentowany. Nazwa placemarku ma prefiks 'defibrylator - '. Opis zawiera piętro/obiekt i informację 'wewnątrz'. Włącznik enabled=false do decyzji licencyjnej."
+  },
+  "connector": {
+    "family": "google_my_maps_kml",
+    "parser": "kml",
+    "notes": "Punktowy KML; normalizacja prefiksu nazwy i opisu HTML."
+  },
+  "fetch": {
+    "url": "https://www.google.com/maps/d/kml?mid=1FMKFbebKJPYqD4C87pXWPqNjEHuEswE&forcekml=1",
+    "method": "GET",
+    "timeout_ms": 30000,
+    "retries": { "max": 2, "backoff_ms": 2000 },
+    "rate_limit": { "requests_per_minute": 6 },
+    "conditional": { "etag": false, "last_modified": false },
+    "pagination": { "type": "none" },
+    "user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+  },
+  "parse": {
+    "encoding": "utf-8",
+    "kml": {
+      "point_only": true,
+      "document_name_must_match": "defibrylatory AED",
+      "placemark_name_pattern": "(?i)^defibrylator\\s*-\\s*",
+      "require_coordinates": true,
+      "on_missing_geometry": "reject",
+      "on_non_point_geometry": "reject",
+      "min_point_ratio": 1.0,
+      "on_low_point_ratio": "review",
+      "extended_data_as_object": true,
+      "strip_cdata": true,
+      "description_format": "html"
+    }
+  },
+  "records": {
+    "path": "//Placemark",
+    "identity": {
+      "source_record_id": {
+        "template": "{source_id}:kml:{digest}",
+        "vars": {
+          "source_id": { "builtin": "source_id" },
+          "digest": {
+            "func": "stable_hash",
+            "args": [
+              { "field": "name" },
+              { "const": "|" },
+              { "coord": { "from": "coordinates", "format": "kml", "pick": "lon" } },
+              { "const": "|" },
+              { "coord": { "from": "coordinates", "format": "kml", "pick": "lat" } }
+            ]
+          }
+        }
+      },
+      "dataset_id": { "const": "google-my-maps:1FMKFbebKJPYqD4C87pXWPqNjEHuEswE" },
+      "stable": false
+    },
+    "dedupe": {
+      "key": [{ "field": "name" }, { "field": "coordinates" }],
+      "keep": "first",
+      "on_duplicate": "warn"
+    }
+  },
+  "map": {
+    "name": {
+      "func": "trim",
+      "args": [{ "func": "strip_prefix", "args": [{ "field": "name" }, { "const": "defibrylator - " }] }]
+    },
+    "description": { "func": "strip_html", "args": [{ "field": "description" }] },
+    "entrance_description": { "func": "strip_html", "args": [{ "field": "description" }] },
+    "indoor": {
+      "when": { "op": "regex", "left": { "field": "description" }, "right": "(?i)wewnątrz" },
+      "then": true,
+      "else": null
+    },
+    "facility_type": { "const": "unknown" },
+    "device_type": { "const": "public_aed" },
+    "lat": { "coord": { "from": "coordinates", "format": "kml", "pick": "lat", "precision_m": 15, "on_invalid": "reject" } },
+    "lon": { "coord": { "from": "coordinates", "format": "kml", "pick": "lon", "precision_m": 15, "on_invalid": "reject" } },
+    "coord_precision_m": { "const": 15 },
+    "country_code": { "const": "PL" },
+    "city": { "const": "Łódź" },
+    "access_type": { "const": "unknown" },
+    "status": { "const": "unknown" },
+    "verification_status": { "const": "unverified" },
+    "confidence": { "const": 0.55 },
+    "source_url": { "const": "https://www.lodz.pl/artykul/defibrylatory-na-ulicach-lodzi-jak-ich-uzywac-gdzie-je-znajdziesz-mapa-58563/" }
+  },
+  "validate": {
+    "required": ["name", "lat", "lon"],
+    "coords": { "bbox": [14.1, 49.0, 24.2, 54.9], "on_invalid": "reject" },
+    "enums": true,
+    "on_error": "reject"
+  },
+  "drift": {
+    "baseline": { "record_count": 136, "generated_at": "2026-11-21" },
+    "schema": { "on_new_field": "review", "on_missing_field": "warn", "on_type_change": "fail", "on_header_order_change": "ignore" },
+    "volume": { "min_records": 120, "max_delta_ratio": 0.2, "on_breach": "review" },
+    "quality": {
+      "max_coord_invalid_ratio": 0.0,
+      "max_duplicate_id_ratio": 0.0,
+      "max_null_ratio": { "name": 0.0, "lat": 0.0, "lon": 0.0 },
+      "on_breach": "review"
+    },
+    "axis": { "enabled": false },
+    "golden_sample": { "size": 10, "required_match_ratio": 0.95 },
+    "actions": { "warn": "log", "review": "quarantine", "fail": "disable" }
+  },
+  "publish": {
+    "enabled": false,
+    "license_id": "NOASSERTION",
+    "attribution": "Mapa Google My Maps Miasta Łódź; brak licencji",
+    "redact": ["serial_number"],
+    "exports": []
+  }
+}

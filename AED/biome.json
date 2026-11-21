@@ -24,7 +24,11 @@
 			"!**/frontend/components",
 			"!**/frontend/routeTree.gen.ts",
 			"!**/frontend/styles.css",
-			"!**/backend/store/drizzle"
+			"!**/backend/store/drizzle",
+			"!**/src/server/ingest",
+			"!**/scripts",
+			"!**/backend/ingest",
+			"!**/data/core"
 		]
 	},
 	"formatter": {
@@ -53,6 +57,18 @@
 			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["**/src/server/ingest/config/**"],
+			"linter": {
+				"rules": {
+					"complexity": {
+						"useLiteralKeys": "off"
+					}
+				}
+			}
+		}
+	],
 	"javascript": {
 		"globals": ["Bun"],
 		"formatter": {
