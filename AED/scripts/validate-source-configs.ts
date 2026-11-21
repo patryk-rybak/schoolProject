@@ -126,7 +126,10 @@ const checkCommon = (config: SourceConfig, label: string): void => {
 		config.connector.family.length > 0 && config.connector.parser.length > 0,
 		`${label}: connector family/parser is missing`,
 	);
-	expect(text(config.fetch.url).startsWith("https://"), `${label}: fetch.url must be https`);
+	expect(
+		text(config.fetch.url).startsWith("https://"),
+		`${label}: fetch.url must be https`,
+	);
 	expect(config.records.path.length > 0, `${label}: records.path is missing`);
 	expect(
 		config.records.identity.source_record_id !== undefined,
@@ -264,12 +267,10 @@ const checkIdentity = (
 
 const checkOpenAedMap = (config: SourceConfig): void => {
 	const label = "openaedmap";
-	checkIdentity(
-		config,
-		label,
-		{ template: "{@osm_type}/{@osm_id}" },
-		[{ field: "@osm_type" }, { field: "@osm_id" }],
-	);
+	checkIdentity(config, label, { template: "{@osm_type}/{@osm_id}" }, [
+		{ field: "@osm_type" },
+		{ field: "@osm_id" },
+	]);
 	expect(
 		config.connector.family === "file_static" &&
 			config.connector.parser === "geojson",
@@ -304,12 +305,9 @@ const checkOpenAedMap = (config: SourceConfig): void => {
 
 const checkPrzemysl = (config: SourceConfig): void => {
 	const label = "przemysl";
-	checkIdentity(
-		config,
-		label,
-		{ template: "przemysl:15:{id}" },
-		[{ field: "id" }],
-	);
+	checkIdentity(config, label, { template: "przemysl:15:{id}" }, [
+		{ field: "id" },
+	]);
 	expect(
 		config.connector.family === "http_json" &&
 			config.connector.parser === "json",
@@ -345,12 +343,9 @@ const checkPrzemysl = (config: SourceConfig): void => {
 
 const checkKrosno = (config: SourceConfig): void => {
 	const label = "krosno";
-	checkIdentity(
-		config,
-		label,
-		{ template: "krosno:{Numer Id}" },
-		[{ field: "Numer Id" }],
-	);
+	checkIdentity(config, label, { template: "krosno:{Numer Id}" }, [
+		{ field: "Numer Id" },
+	]);
 	expect(
 		readPath(config.parse, ["encoding"]) === "utf-8-sig",
 		`${label}: UTF-8 BOM requires utf-8-sig`,
@@ -387,12 +382,9 @@ const checkKrosno = (config: SourceConfig): void => {
 
 const checkMarki = (config: SourceConfig): void => {
 	const label = "marki";
-	checkIdentity(
-		config,
-		label,
-		{ template: "marki:{Numer Id}" },
-		[{ field: "Numer Id" }],
-	);
+	checkIdentity(config, label, { template: "marki:{Numer Id}" }, [
+		{ field: "Numer Id" },
+	]);
 	expect(
 		readPath(config.parse, ["csv", "unwrap_outer_quotes"]) === true &&
 			readPath(config.parse, ["csv", "repair_double_quotes"]) === true,
@@ -414,7 +406,10 @@ const checkMarki = (config: SourceConfig): void => {
 	);
 	const bbox = config.validate.coords?.bbox ?? [];
 	expect(
-		bbox[0] === 21.05 && bbox[1] === 52.28 && bbox[2] === 21.18 && bbox[3] === 52.38,
+		bbox[0] === 21.05 &&
+			bbox[1] === 52.28 &&
+			bbox[2] === 21.18 &&
+			bbox[3] === 52.38,
 		`${label}: expected narrow Marki bbox`,
 	);
 	expect(
@@ -456,14 +451,18 @@ const checkWarszawa = (config: SourceConfig): void => {
 		readPath(lat, ["coord", "unwrap_single"]) === true,
 		`${label}: geometry.coordinates is sometimes [[lon, lat]]`,
 	);
-	const accessCases = asRecord(readPath(config.map["access_type"], ["map", "cases"]));
+	const accessCases = asRecord(
+		readPath(config.map["access_type"], ["map", "cases"]),
+	);
 	expect(
 		accessCases?.["publiczny"] === "public" &&
 			accessCases?.["prywatny"] === "private",
 		`${label}: access map must handle Polish values such as Publiczny/Prywatny`,
 	);
 	expect(
-		text(readPath(config.map["is_24_7"], ["when", "right"])).includes("całodob"),
+		text(readPath(config.map["is_24_7"], ["when", "right"])).includes(
+			"całodob",
+		),
 		`${label}: 24/7 must be parsed from the prose access description`,
 	);
 	expect(
@@ -533,7 +532,9 @@ for (const expected of expectedSources) {
 }
 
 if (errors.length > 0) {
-	console.error(`Source config validation failed with ${errors.length} error(s):`);
+	console.error(
+		`Source config validation failed with ${errors.length} error(s):`,
+	);
 	for (const error of errors) console.error(`- ${error}`);
 	process.exit(1);
 }

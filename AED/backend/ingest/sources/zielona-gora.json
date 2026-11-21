@@ -1,0 +1,236 @@
+{
+	"connector": {
+		"family": "google_my_maps_kml",
+		"notes": "Pojedynczy dokument KML; guard nazwy dokumentu, wyłącznie geometria Point.",
+		"parser": "kml"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": false
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 165
+		},
+		"golden_sample": {
+			"required_match_ratio": 0.95,
+			"size": 10
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 0,
+			"max_duplicate_id_ratio": 0,
+			"max_null_ratio": {
+				"lat": 0,
+				"lon": 0,
+				"name": 0
+			},
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "ignore",
+			"on_missing_field": "warn",
+			"on_new_field": "review",
+			"on_type_change": "fail"
+		},
+		"volume": {
+			"max_delta_ratio": 0.2,
+			"min_records": 150,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": false,
+			"last_modified": false
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 6
+		},
+		"retries": {
+			"backoff_ms": 2000,
+			"max": 2
+		},
+		"timeout_ms": 30000,
+		"url": "https://www.google.com/maps/d/kml?mid=1WXrqKMAgKA_kzG5aF6bMiXpaFVA&forcekml=1",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"map": {
+		"access_type": {
+			"const": "unknown"
+		},
+		"confidence": {
+			"const": 0.55
+		},
+		"coord_precision_m": {
+			"const": 15
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"description": {
+			"field": "description"
+		},
+		"device_type": {
+			"const": "public_aed"
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"lat": {
+			"coord": {
+				"format": "kml",
+				"from": "coordinates",
+				"on_invalid": "reject",
+				"pick": "lat",
+				"precision_m": 15
+			}
+		},
+		"lon": {
+			"coord": {
+				"format": "kml",
+				"from": "coordinates",
+				"on_invalid": "reject",
+				"pick": "lon",
+				"precision_m": 15
+			}
+		},
+		"name": {
+			"field": "name"
+		},
+		"source_url": {
+			"const": "https://www.zielona-gora.pl/mapa-lokalizacji-automatycznych-defibrylatorow-w-zielonej-gorze/"
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"verification_status": {
+			"const": "unverified"
+		}
+	},
+	"parse": {
+		"encoding": "utf-8",
+		"kml": {
+			"document_name_must_match": "AED w Zielonej Górze",
+			"point_only": true
+		}
+	},
+	"publish": {
+		"attribution": "Mapa Google My Maps Miasta Zielona Góra; brak licencji",
+		"enabled": false,
+		"exports": [],
+		"license_id": "NOASSERTION",
+		"redact": [
+			"serial_number"
+		]
+	},
+	"records": {
+		"dedupe": {
+			"keep": "first",
+			"key": [
+				{
+					"field": "name"
+				},
+				{
+					"field": "coordinates"
+				}
+			],
+			"on_duplicate": "warn"
+		},
+		"identity": {
+			"dataset_id": {
+				"const": "google-my-maps:1WXrqKMAgKA_kzG5aF6bMiXpaFVA"
+			},
+			"source_record_id": {
+				"template": "{source_id}:kml:{digest}",
+				"vars": {
+					"digest": {
+						"args": [
+							{
+								"field": "name"
+							},
+							{
+								"const": "|"
+							},
+							{
+								"coord": {
+									"format": "kml",
+									"from": "coordinates",
+									"pick": "lon"
+								}
+							},
+							{
+								"const": "|"
+							},
+							{
+								"coord": {
+									"format": "kml",
+									"from": "coordinates",
+									"pick": "lat"
+								}
+							}
+						],
+						"func": "stable_hash"
+					},
+					"source_id": {
+						"builtin": "source_id"
+					}
+				}
+			},
+			"stable": false
+		},
+		"path": "//Placemark"
+	},
+	"source": {
+		"access_type": "kml",
+		"coverage": {
+			"country": "PL",
+			"notes": "165 punktów w probie 2026-11-21 (licznik stabilny w dwóch pobraniach); 93/165 z opisem. Strona źródłowa z 2017 r., brak daty modyfikacji KML.",
+			"teryt": [
+				"086201"
+			]
+		},
+		"enabled": false,
+		"homepage_url": "https://www.zielona-gora.pl/mapa-lokalizacji-automatycznych-defibrylatorow-w-zielonej-gorze/",
+		"id": "zielona-gora",
+		"license": {
+			"attribution": "Mapa Google My Maps Miasta Zielona Góra; brak deklaracji licencji",
+			"id": "NOASSERTION",
+			"share_alike": false,
+			"url": "https://www.google.com/intl/pl/maps/terms.html"
+		},
+		"name": "AED w Zielonej Górze (Google My Maps, KML)",
+		"notes": "Eksport nieudokumentowanego endpointu Google My Maps. Brak licencji i daty; źródło jest użyteczne do seedowania i weryfikacji, ale wymaga zgody wydawcy przed ingestią i eksportem. Włącznik enabled=false do czasu decyzji licencyjnej (G2).",
+		"publisher": "Miasto Zielona Góra",
+		"reliability_tier": "official_local",
+		"update_frequency": "unknown"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				14.1,
+				49,
+				24.2,
+				54.9
+			],
+			"on_invalid": "reject"
+		},
+		"enums": true,
+		"on_error": "reject",
+		"require_location": "point",
+		"required": [
+			"name",
+			"lat",
+			"lon"
+		]
+	},
+	"version": 1
+}

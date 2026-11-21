@@ -218,6 +218,7 @@
 		},
 		"enums": true,
 		"on_error": "review",
+		"require_location": "point",
 		"required": [
 			"name",
 			"lat",

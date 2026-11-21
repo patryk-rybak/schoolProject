@@ -10,6 +10,9 @@ lanes.
 
 The normalized 69-source inventory that feeds connector configuration lives in
 [`../research/source-inventory/README.md`](../research/source-inventory/README.md).
+The runtime registry keeps the 12 machine-readable/tabular sources in
+`backend/ingest/sources/`; the other 57 source configs are preserved in
+`backend/ingest/sources-excluded/` with an exclusion reason.
 
 | Document | Covers |
 | --- | --- |

@@ -1,9 +1,9 @@
 # Live smoke 69 konfiguracji źródeł AED
 
-- Data: 2026-11-21T20:38:34.574Z
-- Czas: 13.0 s · konfiguracje: 69
+- Data: 2026-11-21T20:55:25.576Z
+- Czas: 18.4 s · konfiguracje: 69
 - Katalog konfiguracji: `backend/ingest/sources + backend/ingest/sources-excluded`
-- Polecenie: `bun scripts/smoke-source-configs.ts --concurrency 5 --timeout-ms 30000`
+- Polecenie: `bun scripts/smoke-source-configs.ts --concurrency 4 --timeout-ms 20000`
 - Pliki: 69 · załadowane: 69 · odrzucone przez loader: 0
 - Rejestr: 12 aktywne · 57 wyłączone (testowane na żywo, poza rejestrem tabularnym)
 

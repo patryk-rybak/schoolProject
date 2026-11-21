@@ -1,0 +1,187 @@
+{
+	"connector": {
+		"family": "manual",
+		"notes": "Live check 2026-11-21: strona główna HTTP 200 text/html; właściwy artykuł AED jest pod /aktualnosci/zdrowie/aed-w-nowej-soli/27-01-2022 (HTTP 200). Artykuł podaje 6 nazw, bez adresów i współrzędnych. Blockery: LICENSE_NOASSERTION, NO_ADDRESS, NO_COORDS, PARTIAL_LIST.",
+		"parser": "manual"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": false,
+			"max_suspicious_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 6
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 1,
+			"max_duplicate_id_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "ignore",
+			"on_missing_field": "review",
+			"on_new_field": "review",
+			"on_type_change": "review"
+		},
+		"volume": {
+			"max_delta_ratio": 0.5,
+			"min_records": 1,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": true,
+			"last_modified": true
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 6
+		},
+		"retries": {
+			"backoff_ms": 1500,
+			"max": 2
+		},
+		"timeout_ms": 30000,
+		"url": "https://www.nowasol.pl/",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"geocoding": {
+		"address_template": "{address_text}, {city}",
+		"cache_ttl_days": 365,
+		"enabled": true,
+		"geoportal": {
+			"endpoint": "https://services.gugik.gov.pl/uug/",
+			"max_results": 5,
+			"min_accuracy": 0.8,
+			"only_exact_numbers": true,
+			"output_srid": 4326,
+			"request": "GetAddress",
+			"srid": 2180
+		},
+		"min_confidence": 0.8,
+		"on_failure": "address_only",
+		"provider_order": [
+			"gugik-uug"
+		],
+		"rate_limit": {
+			"requests_per_minute": 30
+		},
+		"required_components": [
+			"city"
+		],
+		"strategy": "structured_first"
+	},
+	"map": {
+		"access_type": {
+			"const": "unknown"
+		},
+		"address_text": {
+			"field": "Adres"
+		},
+		"city": {
+			"const": "Nowa Sól (miasto)"
+		},
+		"confidence": {
+			"const": 0.3
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"name": {
+			"field": "Nazwa"
+		},
+		"source_url": {
+			"const": "https://www.nowasol.pl/"
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"verification_status": {
+			"const": "unverified"
+		}
+	},
+	"parse": {
+		"manual": {
+			"document_url": "https://nowasol.pl/aktualnosci/zdrowie/aed-w-nowej-soli/27-01-2022",
+			"format": "html",
+			"instructions": "Ręczna transkrypcja artykułu AED w Nowej Soli (6 nazw obiektów). Przepisz nazwy i ustal adresy z BIP lub rejestru miejskiego, następnie geokoduj przez GUGiK. Artykuł nie podaje adresów ani współrzędnych. Włącz po dodaniu transkrypcji i zgody wydawcy."
+		}
+	},
+	"publish": {
+		"allowed_for_export": false,
+		"allowed_for_ingest": false,
+		"attribution": "Nowa Sól (miasto) — NOASSERTION",
+		"enabled": false,
+		"exports": [],
+		"license_id": "NOASSERTION"
+	},
+	"records": {
+		"identity": {
+			"source_record_id": {
+				"template": "nowa-sol:{row_index}"
+			},
+			"stable": false
+		},
+		"path": "$"
+	},
+	"schedule": {
+		"cron": "0 3 * * 1",
+		"jitter_seconds": 300,
+		"timezone": "Europe/Warsaw"
+	},
+	"source": {
+		"access_type": "manual",
+		"coverage": {
+			"country": "PL",
+			"notes": "lubuskie; miasto; Live check 2026-11-21: strona główna HTTP 200 text/html; właściwy artykuł AED jest pod /aktualnosci/zdrowie/aed-w-nowej-soli/27-01-2022 (HTTP 200). Artykuł podaje 6 nazw, bez adresów i współrzędnych. Blockery: LICENSE_NOASSERTION, NO_ADDRESS, NO_COORDS, PARTIAL_LIST.",
+			"teryt": [
+				"0804011"
+			]
+		},
+		"enabled": false,
+		"homepage_url": "https://www.nowasol.pl/",
+		"id": "nowa-sol",
+		"license": {
+			"attribution": "Nowa Sól (miasto): brak deklaracji licencji",
+			"id": "NOASSERTION"
+		},
+		"name": "Nowa Sól (miasto)",
+		"notes": "Live check 2026-11-21: strona główna HTTP 200 text/html; właściwy artykuł AED jest pod /aktualnosci/zdrowie/aed-w-nowej-soli/27-01-2022 (HTTP 200). Artykuł podaje 6 nazw, bez adresów i współrzędnych. Blockery: LICENSE_NOASSERTION, NO_ADDRESS, NO_COORDS, PARTIAL_LIST.",
+		"publisher": "Nowa Sól (miasto)",
+		"reliability_tier": "official_local",
+		"update_frequency": "unknown"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				14.07,
+				49,
+				24.15,
+				54.84
+			],
+			"on_invalid": "review",
+			"on_missing": "review"
+		},
+		"enums": true,
+		"on_error": "review",
+		"require_location": "address_or_point",
+		"required": [
+			"name"
+		]
+	},
+	"version": 1
+}

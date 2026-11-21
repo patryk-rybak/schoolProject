@@ -1,5 +1,5 @@
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 // biome-ignore lint/nursery/useExplicitType: Drizzle infers the table type from the column builders.
 export const todos = sqliteTable("todos", {

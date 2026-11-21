@@ -1,0 +1,407 @@
+{
+	"active_count": 12,
+	"excluded": [
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "barlinek",
+			"source_name": "Barlinek"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "biskupiec",
+			"source_name": "Biskupiec"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "brzeznica",
+			"source_name": "Brzeźnica"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "budzow",
+			"source_name": "Budzów"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "bydgoszcz",
+			"source_name": "Automatyczne Defibrylatory Zewnętrzne (AED) w Bydgoszczy"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "czaplinek",
+			"source_name": "Czaplinek"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "dopiewo",
+			"source_name": "Dopiewo"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "dziadowa-kloda",
+			"source_name": "Dziadowa Kłoda"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "gdansk",
+			"source_name": "Bezpieczny Gdańsk — 26 defibrylatorów w przestrzeni miasta"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "gora",
+			"source_name": "Góra"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "gorzyce",
+			"source_name": "Gorzyce"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "imielin",
+			"source_name": "Imielin"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "jordanow",
+			"source_name": "Jordanów"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "kcynia",
+			"source_name": "Kcynia"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "kobierzyce",
+			"source_name": "Defibrylatory AED w Gminie Kobierzyce"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "kolbaskowo",
+			"source_name": "Kołbaskowo"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "kosakowo",
+			"source_name": "Kosakowo"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "koszecin",
+			"source_name": "Koszęcin"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "kozmin-wielkopolski",
+			"source_name": "Koźmin Wielkopolski"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "krakow",
+			"source_name": "Mapa AED — Kraków"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "lomza",
+			"source_name": "Defibrylatory AED w Łomży"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "lubawa",
+			"source_name": "Lubawa"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "lubien",
+			"source_name": "Lubień"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "lubin-gmina",
+			"source_name": "Lubin (gmina wiejska)"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "lublin",
+			"source_name": "Lublin"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "lwowek",
+			"source_name": "Lwówek"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "manowo",
+			"source_name": "Ogólnodostępne defibrylatory AED na terenie Gminy Manowo"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "nieporet",
+			"source_name": "Nieporęt"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "nowa-sol",
+			"source_name": "Nowa Sól (miasto)"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "nowa-wies-leborska",
+			"source_name": "Nowa Wieś Lęborska"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "ostroda",
+			"source_name": "Ostróda"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "pila",
+			"source_name": "Piła"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "polczyn-zdroj",
+			"source_name": "Połczyn-Zdrój"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "polkowice",
+			"source_name": "Defibrylatory AED w Gminie Polkowice"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "powiat-bochenski",
+			"source_name": "10 nowych defibrylatorów AED w Powiecie Bocheńskim"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "powiat-krakowski",
+			"source_name": "powiat krakowski"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "powiat-starogardzki",
+			"source_name": "powiat starogardzki"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "powiat-szamotulski",
+			"source_name": "powiat szamotulski"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "pruszcz-gdanski",
+			"source_name": "Pruszcz Gdański"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "przemet",
+			"source_name": "Przemęt"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "radlow",
+			"source_name": "Radłów"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "rzekun",
+			"source_name": "Rzekuń"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "slawa",
+			"source_name": "AED w Gminie Sława"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "slupsk",
+			"source_name": "Słupsk"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "smigiel",
+			"source_name": "Śmigiel"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "strzegom",
+			"source_name": "Wykaz defibrylatorów AED w Gminie Strzegom"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "suchy-las",
+			"source_name": "Suchy Las"
+		},
+		{
+			"family": "html_table",
+			"parser": "html_table",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "suszec",
+			"source_name": "Dane lokalizacji urządzeń AED na terenie gminy Suszec"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "swidnica-gmina",
+			"source_name": "Świdnica (gmina)"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "swidwin",
+			"source_name": "Świdwin"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "szemud",
+			"source_name": "Szemud"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "tarnow-opolski",
+			"source_name": "AED w Gminie Tarnów Opolski"
+		},
+		{
+			"family": "html_list",
+			"parser": "html_list",
+			"reason": "HTML source: registry keeps only machine-readable/tabular formats",
+			"source_id": "torun",
+			"source_name": "Defibrylatory AED. Wykaz lokalizacji — Toruń"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "umwl-instytucje-kultury",
+			"source_name": "UMWL - instytucje kultury"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "wierzchoslawice",
+			"source_name": "Wierzchosławice"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "zukowo",
+			"source_name": "Żukowo"
+		},
+		{
+			"family": "manual",
+			"parser": "manual",
+			"reason": "manual transcription only (JPG/PNG/DOCX/PDF prose/e-mapa)",
+			"source_id": "zuromin",
+			"source_name": "Żuromin"
+		}
+	],
+	"excluded_count": 57,
+	"generated_at": "2026-11-21T20:36:38.146Z",
+	"policy": "Only machine-readable/tabular sources (CSV, JSON, GeoJSON, KML, PDF table) stay in backend/ingest/sources. All HTML sources, JPG/PNG maps, DOCX/PDF prose and e-mapa JavaScript pages are moved here."
+}

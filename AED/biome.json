@@ -22,6 +22,9 @@
 			"!**/dane.gov.pl",
 			"!**/src/components",
 			"!**/src/routeTree.gen.ts",
+			"!**/src/server/ingest",
+			"!**/scripts",
+			"!**/src/server/ingest/config/source-config.generated.schema.json",
 			"!**/src/styles.css"
 		]
 	},
@@ -51,6 +54,18 @@
 			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["**/src/server/ingest/config/**"],
+			"linter": {
+				"rules": {
+					"complexity": {
+						"useLiteralKeys": "off"
+					}
+				}
+			}
+		}
+	],
 	"javascript": {
 		"globals": ["Bun"],
 		"formatter": {

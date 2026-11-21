@@ -1,4 +1,40 @@
-# Kanoniczne konfiguracje pięciu źródeł klasy A (bez KML)
+# Kanoniczne konfiguracje 12 źródeł tabularnych AED
+
+Ten katalog zawiera wyłącznie źródła, które dają rekordy wierszowe albo
+punktowe bez ręcznej transkrypcji. Wszystkie pliki są ładowane przez
+`src/server/ingest/config/loader.ts` i walidowane tym samym schematem Zod.
+Rejestr jest pamięciowy; po edycji pliku użyj
+`loadSourceConfigs({ force: true })`.
+
+Rozkład aktywnych rodzin:
+
+| Rodzina / parser | Liczba |
+| --- | ---: |
+| `google_my_maps_kml` / `kml` | 6 |
+| `file_static` / `csv` | 2 |
+| `http_json` / `json` | 2 |
+| `file_static` / `geojson` | 1 |
+| `pdf_table` / `pdf_table` | 1 |
+
+Wszystkie 12 źródeł ma współrzędne (`withCoordinates=12`), więc rejestr nie
+potrzebuje geokodowania adresowego. GUGiK UUG pozostaje skonfigurowany w
+schematach źródeł wyłączonych, które można przywrócić po uzupełnieniu danych.
+
+`source.enabled=true` mają tylko cztery źródła z otwartą licencją:
+OpenAEDMap, Przemyśl, Krosno i Marki. Warszawa ma otwartą licencję, ale
+pozostaje wyłączona do potwierdzenia tokena i trybu listowania. Pozostałe
+źródła KML są wyłączone do decyzji licencyjnej.
+
+## Źródła wyłączone
+
+57 źródeł, których dane są tylko w JPG/PNG, DOCX/PDF prose, HTML,
+JavaScriptowej e-mapie albo w prozie bez stabilnych wierszy, przeniesiono do
+`backend/ingest/sources-excluded/`. Pliki nie zostały usunięte. Manifest
+`backend/ingest/sources-excluded/excluded.json` zawiera powód wyłączenia, a
+`README.md` w tym katalogu zawiera tabelę. Aby przywrócić źródło, przenieś
+JSON z powrotem do `backend/ingest/sources/` i uruchom `bun run config:normalize`.
+
+## Pięć źródeł referencyjnych
 
 Ten katalog zawiera pełne, kanoniczne konfiguracje JSON dla pięciu źródeł
 klasy A, które nie są mapami KML:
