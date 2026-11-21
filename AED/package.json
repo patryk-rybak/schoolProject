@@ -33,17 +33,12 @@
     "db:studio": "bunx --bun drizzle-kit studio",
     "config:schema": "bun scripts/generate-source-config-schema.ts",
     "config:schema:check": "bun scripts/generate-source-config-schema.ts --check",
-    "config:scaffold": "bun scripts/generate-source-config-scaffolds.ts",
-    "config:normalize": "bun scripts/normalize-source-configs.ts",
-    "config:partition": "bun scripts/partition-source-configs.ts",
     "config:smoke": "bun scripts/smoke-source-configs.ts",
-    "config:verify": "bun run config:schema:check && bun test src/server/ingest/config src/server/ingest/canonical.test.ts src/server/ingest/core",
+    "config:verify": "bun run config:schema:check && bun test src/server/ingest/config src/server/ingest/canonical.test.ts src/server/ingest/fetch src/server/ingest/core",
     "core:build": "bun scripts/build-core-dataset.ts",
+    "ingest:run": "bun scripts/ingest-run.ts",
     "db:seed": "bun backend/store/seed.ts",
-    "map:tiles": "bash frontend/scripts/fetch-poland-pmtiles.sh",
-    "ingest:configs:build": "bun scripts/build-source-configs.ts",
-    "ingest:configs:validate": "bun scripts/validate-source-configs.ts",
-    "ingest:smoke": "bun scripts/smoke-source-configs.ts"
+    "map:tiles": "bash frontend/scripts/fetch-poland-pmtiles.sh"
   },
   "dependencies": {
     "@protomaps/basemaps": "5.7.2",

@@ -82,7 +82,7 @@ CLI framework dependency for this surface.
 | `backfill --source <id> --file <path>` | import a local snapshot through the normal path |
 | `status [--source <id>]` | recent runs and current source health |
 | `errors --run <id>` | bounded errors for a run, grouped by reason code |
-| `config validate [--source <id>]` | parse every YAML, validate JSON Schema, family/parser matrix, canonical keys |
+| `config validate [--source <id>]` | parse the JSON registry, validate JSON Schema, family/parser matrix, canonical keys |
 | `config show --source <id>` | print the active config and `config_sha256` |
 | `drift list [--source <id>]` | open `drift_event` rows, grouped by severity |
 | `drift accept-baseline --run <id>` | operator approval after a review; requires explicit `--yes` |
@@ -131,7 +131,7 @@ Rules:
   many sources do not start on the same minute. Scheduled runs pass the original
   slot to the run key, so jitter does not change idempotency.
 - Disabled sources are not scheduled but remain queryable and retain data.
-- A source whose YAML fails validation is not scheduled; the run reports
+- A source whose config entry fails validation is not scheduled; the run reports
   `failed` with `CONFIG_INVALID` and does not fetch.
 - `enabled` is checked at run start and again before merge; an operator can
   disable a source while a long fetch is in progress.
@@ -168,7 +168,7 @@ containers and are not durable. The database row is the source of truth.
 ### Storage
 
 - Secret **values** exist only in the process environment.
-- `source.secret_env` is derived from `fetch.auth.env` in the YAML and stores
+- `source.secret_env` is derived from `fetch.auth.env` in the config and stores
   the environment variable **name**, for example `AED_WARSZAWA_TOKEN`.
 - `.env.local` is loaded by Bun automatically in development. It is ignored by
   git and must never appear in a build artifact.
@@ -368,7 +368,7 @@ Backups:
    value, and baseline.
 2. Inspect the stored document and the golden sample; do not edit the database
    to force `ok`.
-3. If the change is legitimate, update the source YAML or explicitly run
+3. If the change is legitimate, update the registry entry or explicitly run
    `drift accept-baseline --run <id> --yes`; this writes an audit entry.
 4. If the source is wrong, keep `enabled = false` and contact the publisher.
 5. The previous published projection stays live until a later `ok` run.
@@ -376,7 +376,7 @@ Backups:
 ### A config change was rejected
 
 1. `config validate --source <id>` prints the failing path and key.
-2. Fix the YAML; never edit `source_config` rows by hand.
+2. Fix the config entry; never edit `source_config` rows by hand.
 3. `config show` confirms the new `config_sha256`; the first run compares
    against a golden sample and does not reuse the old incremental cursor.
 

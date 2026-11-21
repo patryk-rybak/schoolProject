@@ -10,15 +10,16 @@ lanes.
 
 The normalized 69-source inventory that feeds connector configuration lives in
 [`../research/source-inventory/README.md`](../research/source-inventory/README.md).
-The runtime registry keeps the 11 machine-readable/tabular sources in
-`backend/ingest/sources/`; the other 58 source configs are preserved in
-`backend/ingest/sources-excluded/` with an exclusion reason.
+The runtime registry is the single, versioned JSON document
+`backend/ingest/datasources-config.json`, validated against
+`backend/ingest/datasources-config.schema.json`; every source config lives in
+that one file instead of in per-source files or a separate excluded-source
+directory.
 
 | Document | Covers |
 | --- | --- |
 | [persistence.md](./persistence.md) | tables, keys, indexes, Drizzle mapping, migrations, retention |
 | [ingestion.md](./ingestion.md) | stage graph, cross-lane types, idempotency, absence, replay |
-| [dedup.md](./dedup.md) | identity, blocking, scoring, merge survivorship, overrides, review queue, fixtures |
 | [operations.md](./operations.md) | scheduling, CLI commands, secrets, retries, locks, runbook |
 | [modules.md](./modules.md) | directory layout, dependency rules, per-lane hand-offs, test plan |
 
@@ -46,10 +47,10 @@ The runtime registry keeps the 11 machine-readable/tabular sources in
 8. **Every stage is replayable.** Stored documents plus connector and
    normalizer versions reproduce candidates. Replaying an unchanged document
    must produce zero new canonical rows and observations.
-9. **Sources are config, not code.** One validated YAML per source selects a
-   generic connector family (`file_static`, `http_json`, ...) and a whitelisted
-   mapping DSL. The exact YAML and hash are stored in `source_config` for every
-   historical run.
+9. **Sources are config, not code.** One validated entry per source in the
+   single `datasources-config.json` registry selects a generic connector family
+   (`file_static`, `http_json`, ...) and a whitelisted mapping DSL. The exact
+   config and hash are stored in `source_config` for every historical run.
 10. **Drift quarantines, it does not publish.** Schema/volume/quality review
     signals store the new snapshot but leave the previous public projection
     live until an operator accepts the baseline.
@@ -58,7 +59,7 @@ The runtime registry keeps the 11 machine-readable/tabular sources in
 
 | Lane | Must provide | Must consume |
 | --- | --- | --- |
-| connector-config | YAML per source, JSON Schema, generic `Connector` families, stable ids | `SourceConfig`/`ConnectorResult`, `source` + `source_config`, snapshot writer |
+| connector-config | single JSON registry, JSON Schema, generic `Connector` families, stable ids | `SourceConfig`/`ConnectorResult`, `source` + `source_config`, snapshot writer |
 | dedup-merge | `matchCandidate`, scoring, precedence | `MatchInput`/`MatchDecision`, `aed_alias`, merge helper |
 | lifecycle-cleansing | validation reason codes, status transitions, confidence | `ValidationResult`, `record_candidate`, `missing_streak` |
 | ops-ui-api | auth guard, routes, pagination, UI | `AedListItem`, `AedDetail`, `IngestStatus` queries |

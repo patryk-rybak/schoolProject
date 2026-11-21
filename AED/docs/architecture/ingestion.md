@@ -242,18 +242,19 @@ Boundary rules:
 
 ## 3. Source registry and configuration
 
-Sources are declared as one YAML file per source under
-`backend/ingest/sources/*.yaml` (examples in `backend/ingest/examples/`) and
-validated against `backend/ingest/source-config.schema.json`. The config is
-data, not code: no `eval`, no JS, no network access in the mapping DSL. The
-registry loader reads every file, validates the family/parser matrix, and
+Sources are declared as entries in the single JSON registry
+`backend/ingest/datasources-config.json` and validated against
+`backend/ingest/datasources-config.schema.json` (the generated artifact lives at
+`src/server/ingest/config/datasources-config.generated.schema.json`). The config
+is data, not code: no `eval`, no JS, no network access in the mapping DSL. The
+registry loader reads the registry once, validates the family/parser matrix, and
 upserts `source` plus an immutable `source_config` row.
 
 ```ts
-// SourceConfig is the parsed YAML; config_sha256 is over the exact file bytes.
+// SourceConfig is one parsed registry entry; config_sha256 is over its exact bytes.
 type LoadedSource = {
 	config: SourceConfig;
-	configYaml: string;
+	configJson: string;
 	configSha256: string;
 	connector: Connector;
 	scheduleCron: string | null;
@@ -264,13 +265,13 @@ type LoadedSource = {
 };
 ```
 
-Use `Bun.YAML.parse` for the file and the JSON Schema validator for the shape.
+Parse the JSON registry and use the JSON Schema validator for the shape.
 The runtime must validate, not only CI: an invalid config fails the source
 before any fetch. Validate that `parser` is allowed for `connector.family`
 (the matrix in `docs/ingest-source-config.md` §4.3).
 
 The registry loader performs an idempotent `source` upsert before each run and
-stores the exact YAML and hash in `source_config`. If `config_sha256` or the
+stores the exact per-source config and hash in `source_config`. If `config_sha256` or the
 connector version changed, the loader forces a full refresh and starts a new
 candidate version; it does not reuse incremental cursors across incompatible
 config. Historical runs keep their `config_sha256`.

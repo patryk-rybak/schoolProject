@@ -17,7 +17,7 @@ i założyć konto, zanim dopuszczone zostanie dodawanie lub edycja rekordów.
 
 ## Zależności
 
-- backend: [`../backend/auth/`](../backend/auth/README.md) — sesje i role,
+- backend: [`../../backend/auth/`](../../backend/auth/README.md) — sesje i role,
 - `frontend/lib/auth-client.ts` — klient better-auth,
 - `frontend/components/ui/` — pola i przyciski shadcn.
 

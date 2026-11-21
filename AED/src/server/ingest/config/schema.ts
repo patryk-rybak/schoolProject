@@ -4,12 +4,13 @@ import { z } from "zod";
  * Runtime contract for a declarative AED source configuration.
  *
  * This module is the single source of truth for the shape of a source config.
- * It mirrors `backend/ingest/source-config.schema.json`, but adds parser-specific
- * unions and semantic refinements that JSON Schema alone cannot express (URL
- * policy, parser/family matrix, license mirroring, lookup paths).
+ * The generated `datasources-config.schema.json` mirrors the structural shape,
+ * but the Zod schema adds parser-specific unions and semantic refinements that
+ * JSON Schema alone cannot express (URL policy, parser/family matrix, license
+ * mirroring, lookup paths, duplicate ids).
  *
- * The JSON Schema artifact is generated with `buildSourceConfigJsonSchema()` and
- * checked in by `scripts/generate-source-config-schema.ts`.
+ * The JSON Schema artifact is generated with `buildDatasourcesConfigJsonSchema()`
+ * and checked in by `scripts/generate-source-config-schema.ts`.
  */
 
 export const CONNECTOR_FAMILIES = [
@@ -1370,6 +1371,70 @@ export function safeParseSourceConfig(
 }
 
 // ---------------------------------------------------------------------------
+// Datasources registry
+// ---------------------------------------------------------------------------
+
+/** Structural registry schema used for JSON Schema generation. */
+export const datasourcesConfigBaseSchema = z.strictObject({
+	version: z.literal(1),
+	sources: z.array(sourceConfigBaseSchema),
+});
+
+export type DatasourcesConfigBase = z.infer<typeof datasourcesConfigBaseSchema>;
+
+type DatasourcesRegistryShape = {
+	version: 1;
+	sources: readonly { source: { id: string } }[];
+};
+
+function refineDatasourcesConfig(
+	value: DatasourcesRegistryShape,
+	ctx: z.RefinementCtx,
+): void {
+	const firstIndexById = new Map<string, number>();
+
+	value.sources.forEach((config, index) => {
+		const id = config.source.id;
+		const firstIndex = firstIndexById.get(id);
+		if (firstIndex === undefined) {
+			firstIndexById.set(id, index);
+			return;
+		}
+		ctx.addIssue({
+			code: "custom",
+			path: ["sources", index, "source", "id"],
+			message: `Zduplikowany identyfikator źródła: ${id}. Pierwsze wystąpienie: sources.${firstIndex}.`,
+		});
+	});
+}
+
+/**
+ * Canonical registry of all source configs. The file on disk lives at
+ * `backend/ingest/datasources-config.json` and has the shape
+ * `{ "version": 1, "sources": SourceConfig[] }`.
+ */
+export const datasourcesConfigSchema = z
+	.strictObject({
+		version: z.literal(1),
+		sources: z.array(sourceConfigSchema),
+	})
+	.superRefine(refineDatasourcesConfig);
+
+export type DatasourcesConfig = z.infer<typeof datasourcesConfigSchema>;
+export type DatasourcesConfigInput = z.input<typeof datasourcesConfigSchema>;
+export type DatasourcesConfigOutput = z.output<typeof datasourcesConfigSchema>;
+
+export function parseDatasourcesConfig(input: unknown): DatasourcesConfig {
+	return datasourcesConfigSchema.parse(input);
+}
+
+export function safeParseDatasourcesConfig(
+	input: unknown,
+): z.ZodSafeParseResult<DatasourcesConfig> {
+	return datasourcesConfigSchema.safeParse(input);
+}
+
+// ---------------------------------------------------------------------------
 // JSON Schema generation
 // ---------------------------------------------------------------------------
 
@@ -1418,8 +1483,8 @@ function expandTypeArrays(value: unknown): unknown {
 
 export type GeneratedJsonSchema = Record<string, unknown>;
 
-export function buildSourceConfigJsonSchema(): GeneratedJsonSchema {
-	const generated = z.toJSONSchema(sourceConfigBaseSchema, {
+export function buildDatasourcesConfigJsonSchema(): GeneratedJsonSchema {
+	const generated = z.toJSONSchema(datasourcesConfigBaseSchema, {
 		target: "draft-2020-12",
 		io: "input",
 		unrepresentable: "any",
@@ -1437,12 +1502,12 @@ export function buildSourceConfigJsonSchema(): GeneratedJsonSchema {
 
 	return {
 		$schema: "https://json-schema.org/draft/2020-12/schema",
-		$id: "https://aed.local/schemas/source-config.schema.json",
-		title: "AED source connector configuration",
+		$id: "https://aed.local/schemas/datasources-config.schema.json",
+		title: "AED datasources registry",
 		description:
-			"Deklaratywna konfiguracja źródła AED: pobranie, parsowanie, mapowanie i dryf. Brak kodu wykonywalnego. Schemat generowany z src/server/ingest/config/schema.ts.",
+			"Rejestr źródeł AED: wersja rejestru i lista deklaratywnych konfiguracji źródeł. Schemat generowany z src/server/ingest/config/schema.ts.",
 		...cleaned,
 	};
 }
 
-export const sourceConfigJsonSchema = buildSourceConfigJsonSchema();
+export const datasourcesConfigJsonSchema = buildDatasourcesConfigJsonSchema();

@@ -1,15 +1,19 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
-import { type SourceConfig, sourceConfigSchema } from "./schema";
+import { readFileSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
+import {
+	type DatasourcesConfig,
+	datasourcesConfigSchema,
+	type SourceConfig,
+} from "./schema";
 
 /**
- * Loads the JSON source configurations from disk into one validated,
+ * Loads the single canonical datasources registry from disk into one validated,
  * in-memory registry. The registry is the runtime boundary between the
- * declarative config files and the ingestion code: nothing downstream should
- * read `backend/ingest/sources/*.json` directly.
+ * declarative config file and the ingestion code: nothing downstream should
+ * read `backend/ingest/datasources-config.json` directly.
  */
 
-export const SOURCE_CONFIG_DIR_ENV = "AED_SOURCE_CONFIG_DIR";
+export const DATASOURCES_CONFIG_ENV = "AED_DATASOURCES_CONFIG";
 
 export type SourceConfigIssue = {
 	path: string;
@@ -34,7 +38,10 @@ export type SourceConfigSummary = {
 };
 
 export type SourceConfigRegistry = {
+	/** Directory containing the registry file. Kept for backwards compatibility. */
 	configDir: string;
+	/** Resolved path of the registry file. */
+	configPath: string;
 	loadedAt: string;
 	configs: readonly SourceConfig[];
 	byId: ReadonlyMap<string, SourceConfig>;
@@ -53,9 +60,9 @@ export class SourceConfigRegistryError extends Error {
 }
 
 export type LoadSourceConfigsOptions = {
-	/** Override the config directory. Defaults to AED_SOURCE_CONFIG_DIR or backend/ingest/sources. */
-	dir?: string;
-	/** Read every file again instead of returning the cached registry. */
+	/** Override the registry file path. Defaults to AED_DATASOURCES_CONFIG or backend/ingest/datasources-config.json. */
+	path?: string;
+	/** Read the file again instead of returning the cached registry. */
 	force?: boolean;
 	/** Keep disabled configs in the registry. Defaults to true. */
 	includeDisabled?: boolean;
@@ -63,10 +70,10 @@ export type LoadSourceConfigsOptions = {
 
 let cachedRegistry: SourceConfigRegistry | undefined;
 
-export function defaultSourceConfigDir(): string {
+export function defaultDatasourcesConfigPath(): string {
 	return resolve(
-		process.env[SOURCE_CONFIG_DIR_ENV]?.trim() ||
-			join(process.cwd(), "backend", "ingest", "sources"),
+		process.env[DATASOURCES_CONFIG_ENV]?.trim() ||
+			join(process.cwd(), "backend", "ingest", "datasources-config.json"),
 	);
 }
 
@@ -84,32 +91,79 @@ function zodIssues(error: {
 	}));
 }
 
-function listJsonFiles(dir: string): string[] {
-	return readdirSync(dir)
-		.filter((name) => name.endsWith(".json"))
-		.sort((left, right) => left.localeCompare(right, "pl"));
+function readSourceId(entry: unknown): string | undefined {
+	if (entry === null || typeof entry !== "object" || !("source" in entry)) {
+		return undefined;
+	}
+	const source = entry.source;
+	if (source === null || typeof source !== "object" || !("id" in source)) {
+		return undefined;
+	}
+	return typeof source.id === "string" ? source.id : undefined;
 }
 
-function parseFile(
-	dir: string,
+function duplicateIdErrors(
 	file: string,
-): { config?: SourceConfig; error?: SourceConfigFileError } {
-	const path = join(dir, file);
+	value: unknown,
+): SourceConfigFileError[] {
+	if (
+		value === null ||
+		typeof value !== "object" ||
+		!("sources" in value) ||
+		!Array.isArray(value.sources)
+	) {
+		return [];
+	}
+
+	const firstIndexById = new Map<string, number>();
+	const errors: SourceConfigFileError[] = [];
+
+	value.sources.forEach((entry, index) => {
+		const sourceId = readSourceId(entry);
+		if (sourceId === undefined) return;
+		const firstIndex = firstIndexById.get(sourceId);
+		if (firstIndex === undefined) {
+			firstIndexById.set(sourceId, index);
+			return;
+		}
+		errors.push({
+			file,
+			sourceId,
+			issues: [
+				{
+					path: `sources.${index}.source.id`,
+					code: "duplicate_id",
+					message: `Identyfikator ${sourceId} już występuje w rejestrze (pierwsze wystąpienie: sources.${firstIndex}).`,
+				},
+			],
+		});
+	});
+
+	return errors;
+}
+
+function parseRegistryFile(configPath: string): {
+	config?: DatasourcesConfig;
+	errors?: SourceConfigFileError[];
+} {
+	const file = basename(configPath);
 	let text: string;
 	try {
-		text = readFileSync(path, "utf8");
+		text = readFileSync(configPath, "utf8");
 	} catch (cause) {
 		return {
-			error: {
-				file,
-				issues: [
-					{
-						path: "",
-						code: "file_read",
-						message: cause instanceof Error ? cause.message : String(cause),
-					},
-				],
-			},
+			errors: [
+				{
+					file,
+					issues: [
+						{
+							path: "",
+							code: "file_read",
+							message: cause instanceof Error ? cause.message : String(cause),
+						},
+					],
+				},
+			],
 		};
 	}
 
@@ -118,37 +172,35 @@ function parseFile(
 		value = JSON.parse(text);
 	} catch (cause) {
 		return {
-			error: {
-				file,
-				issues: [
-					{
-						path: "",
-						code: "json_parse",
-						message: cause instanceof Error ? cause.message : String(cause),
-					},
-				],
-			},
+			errors: [
+				{
+					file,
+					issues: [
+						{
+							path: "",
+							code: "json_parse",
+							message: cause instanceof Error ? cause.message : String(cause),
+						},
+					],
+				},
+			],
 		};
 	}
 
-	const parsed = sourceConfigSchema.safeParse(value);
+	const duplicates = duplicateIdErrors(file, value);
+	if (duplicates.length > 0) {
+		return { errors: duplicates };
+	}
+
+	const parsed = datasourcesConfigSchema.safeParse(value);
 	if (!parsed.success) {
-		const sourceId =
-			value !== null &&
-			typeof value === "object" &&
-			"source" in value &&
-			value.source !== null &&
-			typeof value.source === "object" &&
-			"id" in value.source &&
-			typeof value.source.id === "string"
-				? value.source.id
-				: undefined;
 		return {
-			error: {
-				file,
-				...(sourceId ? { sourceId } : {}),
-				issues: zodIssues(parsed.error),
-			},
+			errors: [
+				{
+					file,
+					issues: zodIssues(parsed.error),
+				},
+			],
 		};
 	}
 
@@ -213,52 +265,19 @@ export function loadSourceConfigs(
 		return cachedRegistry;
 	}
 
-	const dir = resolve(options.dir ?? defaultSourceConfigDir());
+	const configPath = resolve(options.path ?? defaultDatasourcesConfigPath());
 	const includeDisabled = options.includeDisabled ?? true;
 	const configs: SourceConfig[] = [];
-	const errors: SourceConfigFileError[] = [];
 	const byId = new Map<string, SourceConfig>();
 
-	for (const file of listJsonFiles(dir)) {
-		const result = parseFile(dir, file);
-		if (result.error) {
-			errors.push(result.error);
-			continue;
-		}
-		if (!result.config) continue;
-		if (!includeDisabled && result.config.source.enabled === false) continue;
+	const result = parseRegistryFile(configPath);
+	const errors = result.errors ?? [];
 
-		const existing = byId.get(result.config.source.id);
-		if (existing) {
-			errors.push({
-				file,
-				sourceId: result.config.source.id,
-				issues: [
-					{
-						path: "source.id",
-						code: "duplicate_id",
-						message: `Identyfikator ${result.config.source.id} już występuje w rejestrze.`,
-					},
-				],
-			});
-			continue;
-		}
-
-		byId.set(result.config.source.id, result.config);
-		configs.push(result.config);
-		const expectedFile = `${result.config.source.id}.json`;
-		if (file !== expectedFile) {
-			errors.push({
-				file,
-				sourceId: result.config.source.id,
-				issues: [
-					{
-						path: "source.id",
-						code: "filename_mismatch",
-						message: `Plik powinien nazywać się ${expectedFile}, a nazywa się ${file}.`,
-					},
-				],
-			});
+	if (result.config) {
+		for (const config of result.config.sources) {
+			if (!includeDisabled && config.source.enabled === false) continue;
+			byId.set(config.source.id, config);
+			configs.push(config);
 		}
 	}
 
@@ -267,7 +286,8 @@ export function loadSourceConfigs(
 	);
 
 	const registry: SourceConfigRegistry = {
-		configDir: dir,
+		configDir: dirname(configPath),
+		configPath,
 		loadedAt: new Date().toISOString(),
 		configs,
 		byId,
@@ -279,7 +299,7 @@ export function loadSourceConfigs(
 	return registry;
 }
 
-/** Loads the registry and throws one aggregated error when any file is invalid. */
+/** Loads the registry and throws one aggregated error when it is invalid. */
 export function loadSourceConfigsOrThrow(
 	options: LoadSourceConfigsOptions = {},
 ): SourceConfigRegistry {
@@ -294,7 +314,7 @@ export function loadSourceConfigsOrThrow(
 			})
 			.join("\n");
 		throw new SourceConfigRegistryError(
-			`Nie można załadować ${registry.errors.length} konfiguracji źródeł.\n${details}`,
+			`Nie można załadować rejestru konfiguracji źródeł (${registry.configPath}).\n${details}`,
 			registry.errors,
 		);
 	}
@@ -321,7 +341,7 @@ export function clearSourceConfigCache(): void {
 	cachedRegistry = undefined;
 }
 
-/** Reloads all files from disk and returns the fresh registry. */
+/** Reloads the registry file from disk and returns the fresh registry. */
 export function reloadSourceConfigs(
 	options: Omit<LoadSourceConfigsOptions, "force"> = {},
 ): SourceConfigRegistry {

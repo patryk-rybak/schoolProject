@@ -2,7 +2,7 @@
 /**
  * Live smoke harness for the declarative AED source configs.
  *
- * Loads every JSON config through the Zod loader, then performs one bounded
+ * Loads the single datasources registry through the Zod loader, then performs one bounded
  * live fetch per source and runs the family-specific parser. The result is a
  * machine-readable JSON report and a Markdown summary. Individual source
  * failures are findings, not fatal errors.
@@ -15,13 +15,11 @@
  *   bun scripts/smoke-source-configs.ts --out /tmp/smoke.json --md /tmp/smoke.md
  */
 
-import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import {
-	defaultSourceConfigDir,
+	defaultDatasourcesConfigPath,
 	loadSourceConfigs,
-	type SourceConfigRegistry,
 } from "../src/server/ingest/config/loader";
 import type { SourceConfig } from "../src/server/ingest/config/schema";
 import {
@@ -47,7 +45,6 @@ type CliOptions = {
 	onlyEnabled: boolean;
 	onlyDisabled: boolean;
 	respectRobots: boolean;
-	includeExcluded: boolean;
 	noWrite: boolean;
 	quiet: boolean;
 	failOn: "none" | "failed" | "warning" | "blocked";
@@ -108,7 +105,6 @@ const options: CliOptions = {
 	),
 	quiet: readFlag("quiet"),
 	respectRobots: !readFlag("ignore-robots"),
-	includeExcluded: !readFlag("active-only"),
 	sources: parseList(readArg("source")),
 	timeoutMs: parsePositiveInt(readArg("timeout-ms"), 30_000),
 };
@@ -153,52 +149,21 @@ function failExitCode(totals: Record<SmokeStatus, number>): boolean {
 }
 
 async function main(): Promise<void> {
-	const activeDir = defaultSourceConfigDir();
-	const excludedDir = resolve(ROOT, "backend", "ingest", "sources-excluded");
-	const registries: Array<{
-		registry: SourceConfigRegistry;
-		label: "active" | "excluded";
-	}> = [
-		{
-			label: "active",
-			registry: loadSourceConfigs({ dir: activeDir, force: true }),
-		},
-	];
-	if (options.includeExcluded && existsSync(excludedDir)) {
-		registries.push({
-			label: "excluded",
-			registry: loadSourceConfigs({ dir: excludedDir, force: true }),
-		});
-	}
-	const allConfigs = registries.flatMap((entry) => [...entry.registry.configs]);
-	const allErrors = registries
-		.flatMap((entry) =>
-			entry.registry.errors.map((error) => ({
-				...error,
-				registry: entry.label,
-			})),
-		)
-		.filter(
-			(error) =>
-				!(error.registry === "excluded" && error.file === "excluded.json"),
-		);
-	const registryBySource = new Map<string, "active" | "excluded">();
-	for (const entry of registries) {
-		for (const config of entry.registry.configs) {
-			registryBySource.set(config.source.id, entry.label);
-		}
-	}
-	const configDirLabel = registries
-		.map((entry) => relative(ROOT, entry.registry.configDir))
-		.join(" + ");
+	const registry = loadSourceConfigs({
+		path: defaultDatasourcesConfigPath(),
+		force: true,
+	});
+	const allConfigs = [...registry.configs];
+	const allErrors = registry.errors;
+	const configDirLabel = relative(ROOT, registry.configPath);
 
 	if (allErrors.length > 0) {
 		console.error(
-			`Uwaga: ${allErrors.length} plik(ów) nie przeszło walidacji Zod; smoke obejmie ${allConfigs.length} poprawnych konfiguracji.`,
+			`Uwaga: rejestr ma ${allErrors.length} problem(ów) walidacji Zod; smoke obejmie ${allConfigs.length} poprawnych konfiguracji.`,
 		);
 		for (const error of allErrors) {
 			console.error(
-				`- ${error.registry}/${error.file}: ${error.issues.length} problem(ów)`,
+				`- ${error.file}: ${error.issues.length} problem(ów)`,
 			);
 			for (const entry of error.issues.slice(0, 5)) {
 				console.error(`  ${entry.path || "(root)"}: ${entry.message}`);
@@ -233,7 +198,7 @@ async function main(): Promise<void> {
 	});
 	report.results = report.results.map((result) => ({
 		...result,
-		registry: registryBySource.get(result.sourceId) ?? "active",
+		registry: "active",
 	}));
 	report.loader = {
 		configDir: configDirLabel,
@@ -247,7 +212,7 @@ async function main(): Promise<void> {
 			sourceId: error.sourceId ?? null,
 		})),
 		loaded: allConfigs.length,
-		totalFiles: allConfigs.length + allErrors.length,
+		totalFiles: 1,
 	};
 
 	if (!options.quiet) {
