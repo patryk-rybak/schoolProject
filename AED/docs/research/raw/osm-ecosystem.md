@@ -1,345 +1,337 @@
-# OSM / OpenAEDMap / Geoportal / CloudFerro: schemat danych AED
+# Ekosystem OSM i źródła pochodne dla mapy AED
 
-**Data badania:** 2026-11-21, ok. 19:00-19:15 CET
-**Zakres:** dokładny schemat rekordów AED w OpenStreetMap, eksporty OpenAEDMap (w tym historyczne pliki CSV/GeoJSON z `aed.openstreetmap.org.pl`), usługi WMS Geoportal.gov.pl oraz oferta CloudFerro.
-**Plik:** `AED/docs/research/raw/osm-ecosystem.md`
-
-## Legenda weryfikacji
-
-| Oznaczenie | Znaczenie |
-| --- | --- |
-| **VERIFIED** | Potwierdzone realnym zapytaniem HTTP/Overpass/API lub odczytem kodu źródłowego w dniu badania. |
-| **VERIFIED (kod)** | Potwierdzone w publicznym kodzie źródłowym OpenAEDMap. |
-| **NOT VERIFIED** | Nie udało się potwierdzić publicznie dostępnym zapytaniem albo źródło nie istnieje. |
-| **N/A** | Nie dotyczy danego źródła. |
-
-> Uwaga praktyczna: OSM nie jest rejestrem medycznym. Brak tagu nie oznacza, że AED nie istnieje, a obecność tagu nie potwierdza, że urządzenie nadal działa. Do celów mapy ratunkowej trzeba osobno modelować status i datę weryfikacji.
+**Typ dokumentu:** research raw, materiał dowodowy dla wspólnego schematu danych AED  
+**Zakres:** OpenStreetMap, OpenAEDMap (`aed.openstreetmap.org.pl`), Overpass API, Geoportal.gov.pl, CloudFerro  
+**Data dostępu do źródeł:** 2026-11-21 (UTC, godziny 18:02-18:16, czasu lokalnego 19:02-19:16)  
+**Autor lane:** `osm-ecosystem`  
+**Zasada:** każdy fakt oznaczony jako **VERIFIED** ma podany URL, status HTTP i wynik zapytania. Brak potwierdzenia oznaczono **NOT VERIFIED** wraz z opisem prób.
 
 ---
 
-## 0. Streszczenie dla projektu
+## 0. Tabela statusów źródeł
 
-1. **OSM** jest jedynym źródłem w tym zestawieniu, które ma kompletny, udokumentowany i maszynowy schemat rekordów AED. Główny tag to `emergency=defibrillator` na **node**. W Polsce ok. **18,3 tys. rekordów** (taginfo, 2026-11-20).
-2. **OpenAEDMap** publikuje dane OSM jako **GeoJSON per kraj**. Dla Polski: `https://openaedmap.org/api/v1/countries/PL.geojson`, **18 298 features**, ok. 7,1 MB, EPSG:4326, licencja ODbL 1.0. Eksport zawiera `@osm_type`, `@osm_id`, `@osm_version` oraz **wszystkie tagi OSM** jako stringi.
-3. **Historyczny CSV** z `aed.openstreetmap.org.pl` miał 15 kolumn i 4 588 rekordów (snapshot 2023-01-07). Dziś domena przekierowuje na OpenAEDMap; CSV i metadata zwracają 404, GeoJSON przekierowuje na aktualny eksport.
-4. **Geoportal.gov.pl** udostępnia WMS/WMTS dla danych referencyjnych (PRG, adresy, BDOT10k, ortofoto), ale **nie publikuje warstwy AED**. To nie jest źródło rekordów AED.
-5. **CloudFerro** to dostawca chmury IaaS/PaaS i danych obserwacji Ziemi (CREODIAS). W publicznych materiałach **nie znaleziono zbioru AED ani usługi WMS z AED**. To nie jest źródło rekordów AED.
-6. Do wspólnego schematu OSM wnosi: identyfikator, współrzędne, dostęp, godziny, opis miejsca, operatora, telefon, producenta/model, datę sprawdzenia i media. **Nie wnosi**: statusu działania, numeru seryjnego, daty ważności elektrod/baterii, pewności co do aktualności.
+| Źródło | Endpoint / plik | HTTP | Format | Status | Uwaga |
+|---|---|---:|---|---|---|
+| OSM Wiki, tagging AED | `https://wiki.openstreetmap.org/wiki/Tag:emergency%3Ddefibrillator` | 200 | HTML / wikitext | **VERIFIED** | strona zatwierdzonego schematu |
+| OSM Wiki PL | `https://wiki.openstreetmap.org/wiki/Pl:Tag:emergency%3Ddefibrillator` | 200 | HTML / wikitext | **VERIFIED** | polskie konwencje i przykłady |
+| OSM API, pojedynczy węzeł | `https://api.openstreetmap.org/api/0.6/node/10739764584.json` | 200 | JSON | **VERIFIED** | pełne metadane OSM, w tym `timestamp` |
+| OpenAEDMap, eksport kraju | `https://openaedmap.org/api/v1/countries/PL.geojson` | 200 | GeoJSON | **VERIFIED** | 18 298 obiektów, 7 135 848 B |
+| OpenAEDMap, eksport świata | `https://openaedmap.org/api/v1/countries/WORLD.geojson` | 200 (HEAD) | GeoJSON | **VERIFIED** | `feature_count` = 179 688 |
+| OpenAEDMap, CSV | `https://openaedmap.org/api/v1/countries/PL.csv` | 404 | JSON błąd | **VERIFIED jako brak** | brak bieżącego eksportu CSV |
+| OpenAEDMap, historyczny CSV | Wayback `20230107044845` / `aed_poland.csv` | 200 | CSV | **VERIFIED (archiwum)** | 4 588 wierszy, 15 kolumn |
+| OpenAEDMap, historyczny GeoJSON | Wayback `20220118100904` / `aed_poland.geojson` | 200 | GeoJSON | **VERIFIED (archiwum)** | 3 622 features |
+| OpenAEDMap, pojedynczy węzeł | `https://openaedmap.org/api/v1/node/9464587317` | 200 | JSON | **VERIFIED** | dodatkowe pola `@photo_*`, `@timezone_*` |
+| Overpass API, główny | `https://overpass-api.de/api/interpreter` | 000 (timeout 120 s) | brak | **NOT VERIFIED** | sieć nie połączyła się z hostem |
+| Overpass API, mirrory | `overpass.kumi.systems`, `overpass.private.coffee`, `maps.mail.ru`, `ovp.dresel.systems` | 000 (timeout) | brak | **NOT VERIFIED** | szczegóły w sekcji 3 |
+| Overpass API, Szwajcaria | `https://overpass.osm.ch/api/interpreter` | 200 | JSON | **VERIFIED, ale tylko CH** | brak polskich danych, test kontrolny 3 348 AED |
+| Taginfo API | `https://taginfo.openstreetmap.org/api/4/tag/stats?key=emergency&value=defibrillator` | 200 | JSON | **VERIFIED** | 179 680 obiektów globalnie, `data_until` 2026-11-21T00:59:08Z |
+| Geoportal WMS, znana usługa PRG | `https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/StandardResolution?SERVICE=WMS&REQUEST=GetCapabilities` | 401 | HTML `Unauthorized.` | **VERIFIED jako 401** | także w Firefoksie, nie tylko curl |
+| Geoportal, katalog usług | `https://www.geoportal.gov.pl/pl/usluga/wykaz-uslug/` | 200 | HTML | **VERIFIED** | brak warstwy „Defibrylatory” |
+| Geoportal, wyszukiwanie WP | `https://www.geoportal.gov.pl/wp-json/wp/v2/search?search=defibrylator` | 200 | JSON `[]` | **VERIFIED jako brak** | brak treści o defibrylatorach |
+| CloudFerro, WMS | `https://wms.cloudferro.com/`, `https://maps.cloudferro.com/` | brak DNS | brak | **NOT VERIFIED** | NXDOMAIN |
+| CloudFerro, domena geo | `https://geo.cloudferro.com/` | 000 (timeout) | brak | **NOT VERIFIED** | host odpowiada na DNS, ale nie na HTTP z tej sieci |
+| CloudFerro, sitemap | `https://www.cloudferro.com/sitemap.xml` | 200 | XML | **VERIFIED** | 131 URL, brak AED/WMS |
 
 ---
 
-## 1. OpenStreetMap (OSM)
+## 1. OpenStreetMap: tagging AED
 
-### 1.1 Model encji
+### 1.1. Główny tag i status schematu
 
-W OSM AED to najczęściej **pojedynczy node** w punkcie rzeczywistej lokalizacji urządzenia. Node ma:
+**VERIFIED**, strona wiki: `https://wiki.openstreetmap.org/wiki/Tag:emergency%3Ddefibrillator`, HTTP 200, rozmiar 7 630 B (wersja `action=raw`).
 
-| Pole OSM API | Typ JSON | Znaczenie |
-| --- | --- | --- |
-| `type` | string | `"node"`, `"way"` lub `"relation"` |
-| `id` | int64 | globalny identyfikator OSM |
-| `lat` | double | szerokość geograficzna WGS84 |
-| `lon` | double | długość geograficzna WGS84 |
-| `timestamp` | string ISO 8601 | czas ostatniej edycji obiektu, **nie** data weryfikacji w terenie |
-| `version` | int32 | kolejna wersja obiektu |
-| `changeset` | int64 | identyfikator changesetu |
-| `user` | string | nazwa użytkownika OSM |
-| `uid` | int64 | identyfikator użytkownika OSM |
-| `tags` | object string->string | wszystkie tagi, zawsze stringi |
+- Główny tag: `emergency=defibrillator`.
+- Status w wiki: `status=approved`, powiązany z `Proposal:Automated external defibrillator`.
+- Geometria: wyłącznie węzeł (`onNode=yes`, `onWay=no`, `onArea=no`, `onRelation=no`).
+- Wiki wprost zabrania dodawania `emergency=defibrillator` do budynku lub punktu usługowego, bo znaczyłoby to, że budynek „jest” defibrylatorem. Alternatywa dla obiektu: `defibrillator=yes` na budynku/obiekcie.
+- Wszystkie wartości tagów w OSM są **stringami**. Typy w tabelach poniżej oznaczają typ logiczny, nie typ JSON.
 
-**VERIFIED:** `GET https://api.openstreetmap.org/api/0.6/node/477958354.json` zwrócił dokładnie powyższy zestaw pól dla realnego AED.
+### 1.2. Tabela tagów według wiki
 
-Dla way/relation geometria jest inna (`nodes`, `members`, `bounds`, `center` przy `out center`). OpenAEDMap importuje **tylko node** (`node[emergency=defibrillator]`), więc w praktyce eksport AED to punkty. W Polsce taginfo odnotowuje 2 way z tym tagiem, ale nie trafiają one do OpenAEDMap.
+| Tag | Rola wg wiki | Typ logiczny | Wartości / uwagi |
+|---|---|---|---|
+| `emergency` | wymagany | string enum | zawsze `defibrillator` |
+| `opening_hours` | ważny | string, składnia OSM | np. `24/7`, `Mo-Fr 07:30-15:30`, `Sa-Su, PH off` |
+| `access` | ważny | string enum | `yes`, `customers`, `private`, `permit`, `permissive`, `no`; `access=emergency` jest przestarzałe i niepoprawne |
+| `phone` | ważny | string | numer do podmiotu odpowiedzialnego za urządzenie |
+| `emergency:phone` | ważny | string | numer ratunkowy regionu, w Polsce zwykle `112` |
+| `defibrillator:location` | ważny | string, dowolny tekst | opis miejsca, np. „Na ścianie w jadalni” |
+| `defibrillator:location:<lang>` | opcjonalny | string | np. `defibrillator:location:pl`, `defibrillator:location:en` |
+| `defibrillator:code` | opcjonalny | string | kod do otwarcia skrzynki, semantyka niejednoznaczna, wiki sugeruje możliwy związek z `ref` / `defibrillator:ref` |
+| `indoor` | ważny | string `yes`/`no` | czy urządzenie jest po wewnętrznej stronie ściany |
+| `locked` | ważny | string `yes`/`no` | czy urządzenie lub skrzynka jest zamknięta |
+| `level:ref` | opcjonalny | string | numer piętra tak, jak jest oznaczony lokalnie |
+| `level` | opcjonalny | string | numer piętra według definicji OSM, nie według oznaczeń lokalnych |
+| `description` | opcjonalny | string | cechy szczególne urządzenia |
+| `manufacturer` | opcjonalny | string | producent defibrylatora |
+| `model` | opcjonalny | string | model defibrylatora |
+| `defibrillator:cabinet` | opcjonalny | string enum | `vertical_door`, `horizontal_door`, `twist`, `mechanical`, `no` |
+| `defibrillator:cabinet:manufacturer` | opcjonalny | string | producent skrzynki |
+| `defibrillator:cabinet:colour` | opcjonalny | string | kolor skrzynki |
+| `ref:GB:the_circuit` | opcjonalny, UK | string | 32-znakowy identyfikator w bazie The Circuit |
 
-### 1.2 Schemat tagów AED
+### 1.3. Polskie konwencje (wiki PL)
 
-Główny tag:
+**VERIFIED**, `https://wiki.openstreetmap.org/wiki/Pl:Tag:emergency%3Ddefibrillator`, HTTP 200, 6 796 B.
 
-```text
-emergency=defibrillator
-```
+Polska strona wiki dodaje kontekst projektu „Mapa oraz rejestr urządzeń AED na terenie Polski” i opisuje:
 
-Wartości tagów są **stringami**. Nawet `level=0` i `ref=594` są stringami. Średniki oznaczają listy, np. `opening_hours`, `phone`.
+- `access=yes`: urządzenie publiczne, bez ograniczeń, często kapsuła na zewnątrz budynku.
+- `access=customers`: dostępne w godzinach otwarcia budynku, często wewnątrz.
+- `access=private`: dostęp bardzo ograniczony, wymaga osoby trzeciej, np. AED w samochodzie OSP.
+- `indoor=yes`: wewnątrz budynku.
+- `indoor=no`: na zewnątrz budynku.
+- `operator`: podmiot lub osoba odpowiedzialna za stan techniczny.
+- `phone`: kontakt do podmiotu odpowiedzialnego za stan techniczny.
+- `emergency:phone=112`: numer ratunkowy.
+- `defibrillator:location` i `defibrillator:location:en`: opis miejsca po polsku i po angielsku.
+- `level`: numer piętra.
 
-| Tag OSM | Typ wartości | Wymagany? | Dozwolone wartości / format | Pokrycie PL* | Znaczenie i uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `emergency` | string enum | **TAK** | `defibrillator` | 100,0% | Główny tag. Bez niego obiekt nie jest AED. |
-| `defibrillator` | string enum | NIE | `yes` (na budynku/obiekcie) | 1 użycie w PL (taginfo, nie w eksporcie AED) | Tag pomocniczy na obiekcie gospodarza. **Nie** jest głównym tagiem AED. Nie używać `defibrillator=*` zamiast `emergency=defibrillator`. |
-| `defibrillator:location` | string (free text) | zalecany | np. `Na ścianie w jadalni` | 67,3% | Dokładny opis miejsca. Najważniejsze pole dla ratownika. |
-| `defibrillator:location:pl` | string | opcjonalny | j.w., po polsku | 28,3% | Wariant językowy. |
-| `defibrillator:location:en` | string | opcjonalny | j.w., po angielsku | 13,2% | Wariant językowy. |
-| `defibrillator:location:<lang>` | string | opcjonalny | np. `:de`, `:fr`, `:pdt` | <0,1% | Inne języki. |
-| `access` | string enum | zalecany | `yes`, `customers`, `private`, `permit`, `permissive`, `no`, `unknown` | 92,5% | Dostęp **prawny**. `access=emergency` jest przestarzałe; dostęp ratunkowy jest domyślny. |
-| `opening_hours` | string (OSM OH) | zalecany | `24/7`, `Mo-Fr 07:30-15:30`, `Mo-Fr 08:00-16:00; Sa-Su, PH off` | 37,1% | Godziny dostępu. `24/7` = 4 136 rekordów (22,6% całości). |
-| `indoor` | string enum | zalecany | `yes`, `no` | 87,3% | Czy urządzenie jest wewnątrz budynku. |
-| `level` | string numeryczny | opcjonalny | `0`, `1`, `-1`, `0.5` | 20,2% | Kondygnacja wg OSM (0 = parter). |
-| `level:ref` | string | opcjonalny | np. `B1`, `parter` | 1 rekord | Oznaczenie kondygnacji widoczne w budynku. |
-| `location` | string enum | opcjonalny | `indoor`, `outdoor`, `vehicle` | 2,3% | Starszy, pomocniczy tag. Nie zastępuje `indoor`. |
-| `locked` | string enum | opcjonalny | `yes`, `no` | 3 rekordy | Czy szafka/urządzenie jest fizycznie zamknięte. |
-| `defibrillator:cabinet` | string enum | opcjonalny | `vertical_door`, `horizontal_door`, `twist`, `totem`, `no` | 0% w PL, 10 wartości globalnie | Typ szafki. |
-| `defibrillator:cabinet:manufacturer` | string | opcjonalny | free text | 0% | Producent szafki. |
-| `defibrillator:cabinet:colour` | string | opcjonalny | free text | 0% | Kolor szafki. |
-| `defibrillator:code` | string | opcjonalny | free text | 0% | Niejasny tag; może oznaczać kod otwarcia. **Nie** utożsamiać z `ref`. |
-| `ref` | string | opcjonalny | free text | 0,8% | Lokalny numer/referencja urządzenia. **Nie** jest globalnie unikalny: 150 rekordów, 140 unikalnych wartości. |
-| `operator` | string | zalecany | free text | 32,8% | Podmiot odpowiedzialny za bieżące utrzymanie. 4 086 unikalnych wartości, wymaga normalizacji. |
-| `operator:type` | string enum | opcjonalny | `government`, `ngo`, `private`, `public`, `school`, `religious` | 0,5% | Typ operatora. |
-| `operator:wikidata` | string QID | opcjonalny | `Q...` | 1,0% | Najlepszy klucz do normalizacji operatora. |
-| `operator:short` | string | opcjonalny | free text | 0,4% | Skrót nazwy operatora. |
-| `phone` | string | zalecany | `+48 33 877 51 05` (E.164/E.123) | 24,5% | Telefon do miejsca/operatora. 208 rekordów ma `112`, co jest wątpliwe jako numer obiektowy. |
-| `emergency:phone` | string | opcjonalny | np. `112`, `999` | 1,1% | Numer służb odpowiedzialnych za obszar. |
-| `email` | string | opcjonalny | adres e-mail | 0,3% | Kontakt. |
-| `website` | string URL | opcjonalny | `https://...` | 0,5% | Strona operatora/miejsca. |
-| `manufacturer` | string | opcjonalny | `Philips`, `Zoll`, `CU Medical Systems`, `HeartSine` | 1,9% | Producent AED. 103 unikalne wartości, pisownia nieustandaryzowana. |
-| `model` | string | opcjonalny | `FRx`, `AED Plus`, `iPAD CU-SP1`, `AED 3` | 0,8% | Model AED. 34 unikalne wartości. |
-| `check_date` | string data | zalecany | `YYYY-MM-DD` | 32,7% | Data ostatniego sprawdzenia **istnienia** obiektu. Nie jest to data przeglądu technicznego. |
-| `survey:date` | string data | opcjonalny | `YYYY-MM-DD`, `YYYY-MM`, `YYYY` | 0,1% | Data ostatniego badania w terenie. |
-| `check_date:opening_hours` | string data | opcjonalny | `YYYY-MM-DD` | 3 rekordy | Data sprawdzenia godzin. |
-| `source` | string | opcjonalny | `survey`, `email od ZUS`, URL | 7,9% | Sposób pozyskania danych. 455 unikalnych wartości. |
-| `description` | string | opcjonalny | free text | 3,3% | Opis miejsca/urządzenia. |
-| `description:pl`, `description:en` | string | opcjonalny | free text | 0,6%, 0,7% | Warianty językowe. |
-| `name` | string | opcjonalny | free text | 0,6% | Nazwa obiektu/miejsca, nie urządzenia. |
-| `wheelchair` | string enum | opcjonalny | `yes`, `limited`, `no`, `designated` | 2,5% | Dostępność dla wózków. |
-| `image` | string URL | opcjonalny | URL | 11,9% | Zdjęcie urządzenia/miejsca. |
-| `image:license` | string | opcjonalny | `CC0` | 7,6% | Licencja zdjęcia. W PL wszystkie 1 383 to `CC0`. |
-| `wikimedia_commons` | string | opcjonalny | `File:...` lub URL | 0,5% | Zdjęcie w Wikimedia Commons. |
-| `panoramax` | string | opcjonalny | UUID | 3 rekordy | Zdjęcie Panoramax. |
-| `mapillary` | string | opcjonalny | image key | 5 rekordów | Zdjęcie Mapillary. |
-| `fixme` | string | opcjonalny | free text | 3,5% | Zaznaczenie problemu do poprawy. |
-| `note` | string | opcjonalny | free text | 1,3% | Notatka dla edytujących. |
-| `addr:street` | string | opcjonalny | free text | 0,4% | Adres. |
-| `addr:housenumber` | string | opcjonalny | free text | 0,6% | Adres. |
-| `addr:postcode` | string | opcjonalny | `XX-XXX` | 0,2% | Adres. |
-| `addr:city` | string | opcjonalny | free text | 0,4% | Adres. |
-| `addr:place` | string | opcjonalny | free text | 0,1% | Adres. |
-| `addr:floor` | string | opcjonalny | free text | 9 rekordów | Kondygnacja w adresie. |
-| `start_date` | string data | opcjonalny | `YYYY-MM-DD` | 0,3% | Data instalacji/uruchomienia. |
-| `ref:api-um-warszawa-pl` | string | opcjonalny | ID z API Warszawy | 0,6% | Źródłowy identyfikator miejski. |
-| `ref:pkt-zycia-2023` | string | opcjonalny | ID programu | 0,2% | Źródłowy identyfikator programu. |
+### 1.4. Realny rekord OSM z API
 
-\* Pokrycie policzone na 18 298 rekordach z eksportu OpenAEDMap `PL.geojson` (2026-11-21). To nie jest pełna populacja OSM: taginfo dla Polski pokazuje 18 321 obiektów (18 319 node + 2 way). Różnica wynika z opóźnienia eksportu, usuniętych obiektów i pominięcia way.
-
-**Ważne rozróżnienie:** `check_date` i `survey:date` to daty sprawdzenia przez człowieka. `timestamp` obiektu OSM to data ostatniej edycji, która może być zmianą kosmetyczną. Do pola `last_verified_at` nie wolno bezrefleksyjnie kopiować `timestamp`.
-
-### 1.3 Realny przykład rekordu OSM
-
-Node `477958354` (Schronisko PTTK Markowe Szczawiny), pobrany z OSM API:
+**VERIFIED**, `https://api.openstreetmap.org/api/0.6/node/10739764584.json`, HTTP 200, 1 553 B.
 
 ```json
 {
   "type": "node",
-  "id": 477958354,
-  "lat": 49.5878956,
-  "lon": 19.5168185,
-  "timestamp": "2022-08-29T12:06:23Z",
-  "version": 12,
-  "changeset": 125520683,
-  "user": "☆Finvenkulo",
-  "uid": 4128818,
+  "id": 10739764584,
+  "lat": 54.1730415,
+  "lon": 16.1931868,
+  "timestamp": "2026-09-16T09:17:31Z",
+  "version": 3,
+  "changeset": 189099205,
+  "user": "pedro's",
+  "uid": 6423094,
   "tags": {
-    "defibrillator:location": "Na ścianie w jadalni",
-    "description": "Schronisko PTTK Markowe Szczawiny",
-    "ele": "1180",
-    "email": "markowe.szczawiny@op.pl",
+    "access": "yes",
+    "check_date": "2026-09-16",
+    "contact:facebook": "https://www.facebook.com/punktyzycia",
+    "defibrillator:location": "Przed wejściem na cmentarz",
+    "defibrillator:location:en": "Next to entrance E to the Communal Cemetery (from Kamieniarska Street).",
+    "defibrillator:location:pl": "Obok wejścia E na Cmentarz Komunalny (od ul. Kamieniarskiej). Punkt Życia #2",
+    "description:en": "Free-standing AED placed in a green, illuminated Rotaid capsule.",
+    "description:pl": "Wolnostojące AED umieszczone w zielonej, podświatlanej kapsule Rotaid.",
+    "email": "kontakt@budkazycia.pl",
     "emergency": "defibrillator",
-    "indoor": "yes",
-    "operator": "PTTK",
-    "phone": "+48 33 877 51 05"
+    "indoor": "no",
+    "level": "0",
+    "manufacturer": "Philips",
+    "model": "FRx",
+    "note": "Projekt \"40 Punktów życia-defibrylatory AED w miejscach publicznych-bezpieczniejszy Koszalin\" ...",
+    "opening_hours": "24/7",
+    "operator": "Biuro Bezpieczeństwa i Zarządzania Kryzysowego Urzędu Miejskiego w Koszalinie",
+    "phone": "+48 94 34 71 112",
+    "ref:pkt-zycia-2023": "2",
+    "source": "Urząd Miejski w Koszalinie",
+    "website": "https://punktyzycia.pl/",
+    "wheelchair": "yes"
   }
 }
 ```
 
-**VERIFIED:** OSM API, 2026-11-21.
+Rekord pokazuje, że OSM API zwraca także `timestamp`, `version`, `changeset`, `user`, `uid`, których **nie ma** w eksporcie GeoJSON OpenAEDMap.
 
-### 1.4 Overpass API: zapytanie i schemat odpowiedzi
+### 1.5. Realny rekord z Warszawy, bogaty w media i identyfikator zewnętrzny
 
-Działające zapytanie (testowane na publicznym endpointcie `https://maps.mail.ru/osm/tools/overpass/api/interpreter`):
-
-```overpassql
-[out:json][timeout:60];
-area["ISO3166-1"="PL"][admin_level=2]->.pl;
-node["emergency"="defibrillator"](area.pl);
-out meta 3;
-```
-
-Odpowiedź (skrót):
+**VERIFIED**, `https://api.openstreetmap.org/api/0.6/node/9464587317.json`, HTTP 200, 1 256 B.
 
 ```json
 {
-  "version": 0.6,
-  "generator": "Overpass API 0.7.62.4 2390de5a",
-  "osm3s": {
-    "timestamp_osm_base": "2026-11-21T18:02:50Z",
-    "timestamp_areas_base": "2026-11-21T16:02:51Z",
-    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
-  },
-  "elements": [
-    {
-      "type": "node",
-      "id": 477958354,
-      "lat": 49.5878956,
-      "lon": 19.5168185,
-      "timestamp": "2022-08-29T12:06:23Z",
-      "version": 12,
-      "changeset": 125520683,
-      "user": "☆Finvenkulo",
-      "uid": 4128818,
-      "tags": { "...": "..." }
-    }
-  ]
+  "type": "node",
+  "id": 9464587317,
+  "lat": 52.2313261,
+  "lon": 21.010198,
+  "timestamp": "2025-08-22T15:28:14Z",
+  "version": 6,
+  "changeset": 170838567,
+  "tags": {
+    "access": "customers",
+    "check_date": "2023-02-19",
+    "defibrillator:location": "W punkcie Obsługi Pasażerów Komunikacji Miejskiej na poziomie -1.",
+    "defibrillator:location:en": "At Public Transport Service Point at -1 floor level.",
+    "emergency": "defibrillator",
+    "image": "https://openaedmap.org/api/v1/photos/view/bWPKgNA1SBEFRUdf0pV_Nw.webp",
+    "image:license": "CC0",
+    "indoor": "yes",
+    "level": "-2",
+    "location": "indoor",
+    "manufacturer": "Philips",
+    "model": "Heartstart HS1",
+    "opening_hours": "Mo-Fr 07:00-20:00; Sa 08:00-15:00; Su off",
+    "operator": "Metro Warszawskie",
+    "ref:api-um-warszawa-pl": "1150",
+    "source": "Miasto Stołeczne Warszawa; https://api.um.warszawa.pl (serwis Otwarte dane po warszawsku)"
+  }
 }
 ```
 
-Schemat elementu:
+Ważne: `check_date=2023-02-19` jest datą sprawdzenia, a `timestamp=2025-08-22` jest datą ostatniej edycji OSM. To dwie różne rzeczy.
 
-| Pole | Typ | Jest w `out meta`? | Uwaga |
-| --- | --- | --- | --- |
-| `type` | string | tak | `node` |
-| `id` | int64 | tak | OSM ID |
-| `lat`, `lon` | double | tak | WGS84 |
-| `timestamp` | string | tak | ostatnia edycja |
-| `version` | int | tak | wersja obiektu |
-| `changeset` | int64 | tak | changeset |
-| `user` | string | tak | autor edycji |
-| `uid` | int64 | tak | ID autora |
-| `tags` | object | tak | tagi AED i kontekstowe |
-| `center` | object | tylko `out center` dla way/relation | `{lat, lon}` |
-| `nodes` | int64[] | dla way | lista node'ów |
-| `members` | object[] | dla relation | członkowie |
+### 1.6. System współrzędnych, licencja, aktualizacja, auth, ograniczenia OSM
 
-**VERIFIED:** zapytanie zwróciło 3 rekordy i metadane. `overpass-api.de` z tej sieci odpowiadał timeoutem, dlatego użyto alternatywnego publicznego endpointu. `out count` na dużym obszarze Polski zwracał 504, więc liczebność potwierdzono przez taginfo, a nie przez licznik Overpass. To ograniczenie jest odnotowane, nie ukryte.
-
-### 1.5 Licencja, aktualizacja, ograniczenia OSM
-
-| Aspekt | Wartość | Status |
-| --- | --- | --- |
-| Licencja danych | **ODbL 1.0** (Open Data Commons Open Database License) | **VERIFIED** |
-| Atrybucja | `© OpenStreetMap contributors`, link do `https://www.openstreetmap.org/copyright` | **VERIFIED** |
-| Wymóg share-alike | Tak, dla zmodyfikowanej bazy danych | **VERIFIED** |
-| Aktualizacja | ciągła, minutely replication; Overpass ma opóźnienie rzędu minut | **VERIFIED** |
-| `timestamp_osm_base` | 2026-11-21T18:02:50Z w zapytaniu testowym | **VERIFIED** |
-| Publiczny Overpass | limity: do 10 000 zapytań/dzień, 1 GB/dzień, 10 min łącznie; przy regularnym użyciu dzielić przez 100; wymagany User-Agent/Referer; brak równoległych skryptów | **VERIFIED** (wiki) |
-| Overpass komercyjnie | zalecany self-hosted lub płatny dostawca | **VERIFIED** (wiki) |
-| Kafelki OSM | nie są API do masowego pobierania; osobna Tile Usage Policy | **VERIFIED** |
-| Jakość | brak gwarancji aktualności i poprawności; dane społecznościowe | **VERIFIED** (charakter projektu) |
-
-Praktyczne ograniczenia:
-
-- OSM nie ma pola „status urządzenia”. Brak tagu `operational_status`.
-- `access` bywa nieaktualny; `opening_hours` nie gwarantuje, że budynek jest otwarty.
-- `check_date` jest rzadkie (32,7%) i nie oznacza przeglądu technicznego.
-- Adresy są prawie nieobecne (0,6% jakiegokolwiek `addr:*`).
-- Część tagów to wolny tekst (`operator`, `defibrillator:location`, `manufacturer`), co utrudnia normalizację.
-- 2 way z tagiem AED nie są importowane przez OpenAEDMap.
+| Cecha | Wartość | Dowód |
+|---|---|---|
+| Układ współrzędnych | EPSG:4326, WGS 84, stopnie dziesiętne | OSM API `lat`/`lon`, GeoJSON `[lon, lat]` |
+| Kolejność w GeoJSON | `[longitude, latitude]` | `ST_X` jako pierwszy element, `ST_Y` jako drugi w `export.sql` OpenAEDMap |
+| Licencja danych | ODbL 1.0 | OSM API: `"license": "http://opendatacommons.org/licenses/odbl/1-0/"` |
+| Atrybucja | `© OpenStreetMap contributors` | OSM API `attribution`, stopka OpenAEDMap |
+| Aktualizacja | ciągła, replikacja minutowa OSM | `PLANET_REPLICA_URL=https://planet.openstreetmap.org/replication/minute/` w OpenAEDMap |
+| Auth odczytu | brak | publiczne API i eksporty |
+| Auth zapisu | OAuth 2.0 | upload zdjęć OpenAEDMap używa `Authorization: Bearer ...` |
+| Ograniczenie geometrii | tylko węzły dla AED | wiki `onNode=yes`, `onWay=no`, `onArea=no` |
+| Znane pułapki | `access=emergency` przestarzałe, `defibrillator:code` niejednoznaczny, `level` vs `level:ref`, brak statusu działania urządzenia | wiki |
 
 ---
 
-## 2. OpenAEDMap
+## 2. OpenAEDMap (`aed.openstreetmap.org.pl`)
 
-### 2.1 Czym jest
+### 2.1. Adresy i przekierowanie
 
-OpenAEDMap to projekt Stowarzyszenia OpenStreetMap Polska. Backend importuje z OSM **wyłącznie node z `emergency=defibrillator`** i publikuje:
+**VERIFIED:** `https://aed.openstreetmap.org.pl/` zwraca HTTP 200 po przekierowaniu na `https://openaedmap.org/pl/`. To ta sama aplikacja, domena historyczna nadal działa.
 
-- kafelki wektorowe,
-- GeoJSON per kraj,
-- API pojedynczego node'a,
-- zdjęcia i ich proxy.
+**VERIFIED:** `https://openaedmap.org/` to frontend MapLibre, backend pod `https://openaedmap.org/api/v1/`. W JS bundle występuje `var Dg = "https://openaedmap.org"`.
 
-**VERIFIED (kod):** `_OVERPASS_QUERY = 'node[emergency=defibrillator];out meta qt;'` w `services/aed_service.py`. Repozytorium: `https://github.com/openstreetmap-polska/openaedmap-backend`.
+### 2.2. Eksport GeoJSON, potwierdzony
 
-### 2.2 Endpointy
+**VERIFIED**, `https://openaedmap.org/api/v1/countries/PL.geojson`, żądanie GET, HTTP/2 200.
 
-| Endpoint | Metoda | Format | Zawartość | Status |
-| --- | --- | --- | --- | --- |
-| `https://openaedmap.org/api/v1/countries/names?language=pl` | GET | JSON | lista krajów, `country_code`, `country_names`, `feature_count`, `data_path` | **VERIFIED** |
-| `https://openaedmap.org/api/v1/countries/PL.geojson` | GET | GeoJSON | wszystkie AED w Polsce | **VERIFIED** |
-| `https://openaedmap.org/api/v1/node/{id}` | GET | JSON (OSM-like) | pojedynczy node + zdjęcie + strefa czasowa | **VERIFIED** |
-| `https://openaedmap.org/api/v1/countries/PL.csv` | GET | - | **404** | **VERIFIED** brak |
-| `https://openaedmap.org/api/v1/countries/PL.json` | GET | - | **404** | **VERIFIED** brak |
+Nagłówki odpowiedzi:
 
-Dla Polski `countries/names` zwróciło:
+```text
+content-type: application/geo+json; charset=utf-8
+content-disposition: attachment
+cache-control: public, max-age=3600, stale-while-revalidate=0
+etag: W/"geojson-70c84d24f2730d9e-fc6011b4304fca29-5533"
+x-version: 14c30d775d6283f968e44347513be5c78cb4c2c6
+age: 3251
+server: cloudflare
+via: 2.0 Caddy
+date: Sat, 21 Nov 2026 18:06:11 GMT
+```
+
+Rozmiar pliku: **7 135 848 B**. Liczba obiektów: **18 298**. Wszystkie geometrie to `Point`, wszystkie `@osm_type` to `node`.
+
+Eksport światowy: `https://openaedmap.org/api/v1/countries/WORLD.geojson`, HEAD 200, ten sam `content-type`, `feature_count` z API krajów wynosi **179 688**. Taginfo dla tego samego dnia podaje **179 680** obiektów `emergency=defibrillator` globalnie, w tym 179 644 węzły, 35 way i 1 relację. Różnica jest spójna ze snapshotem i z filtrem „tylko węzły” w OpenAEDMap.
+
+Lista krajów: `https://openaedmap.org/api/v1/countries/names?language=PL`, HTTP 200, `application/json; charset=utf-8`, 26 671 B. Rekord dla Polski:
 
 ```json
 {
   "country_code": "PL",
+  "country_names": {"PL": "Polska"},
   "feature_count": 18298,
   "data_path": "/api/v1/countries/PL.geojson"
 }
 ```
 
-**VERIFIED:** 2026-11-21, 18:14 UTC.
+### 2.3. Eksport CSV, nie istnieje
 
-### 2.3 GeoJSON: dokładny schemat
+**VERIFIED jako brak:** `https://openaedmap.org/api/v1/countries/PL.csv` zwraca HTTP 404 i treść `{"detail":"Not Found"}`. To samo dla `PL.json`.
 
-Nagłówki odpowiedzi `PL.geojson`:
+Dodatkowo w backendzie OpenAEDMap jedyny eksport to `GeoJSONResponse`, a w SQL `sql/export.sql` budowany jest `FeatureCollection`. W frontendzie nie ma odwołań do CSV. **OpenAEDMap nie udostępnia bieżącego eksportu CSV.** CSV można natomiast uzyskać z Overpass API przez `[out:csv(...)]`, ale to osobne źródło, nie plik OpenAEDMap.
 
-```text
-HTTP/2 200
-content-type: application/geo+json; charset=utf-8
-content-disposition: attachment
-cache-control: public, max-age=3600, stale-while-revalidate=0
-etag: W/"geojson-70c84d24f2730d9e-fc6011b4304fca29-..."
-vary: Accept-Encoding, Accept-Encoding, Origin
-```
+Historyczny CSV jednak istniał i został zweryfikowany w Wayback Machine, patrz sekcja 2.9. To materiał archiwalny, nie aktualny.
 
-Rozmiar: **7 135 848 B** (pierwszy pomiar) / **7 135 986 B** (pomiar późniejszy, dane żywe).
-Liczba features: **18 298**.
-CRS: **EPSG:4326** (GeoJSON domyślnie WGS84; brak pola `crs`).
+### 2.4. Przykładowy rekord GeoJSON (przycięty)
 
-Struktura:
+**VERIFIED**, pochodzi z `PL.geojson`, obiekt `@osm_id=9464587317`.
 
 ```json
 {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [19.5168185, 49.5878956]
-      },
-      "properties": {
-        "@osm_type": "node",
-        "@osm_id": 477958354,
-        "@osm_version": 12,
-        "emergency": "defibrillator",
-        "defibrillator:location": "Na ścianie w jadalni",
-        "description": "Schronisko PTTK Markowe Szczawiny",
-        "ele": "1180",
-        "email": "markowe.szczawiny@op.pl",
-        "indoor": "yes",
-        "operator": "PTTK",
-        "phone": "+48 33 877 51 05"
-      }
-    }
-  ]
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [21.010198, 52.2313261]
+  },
+  "properties": {
+    "access": "customers",
+    "check_date": "2023-02-19",
+    "defibrillator:location": "W punkcie Obsługi Pasażerów Komunikacji Miejskiej na poziomie -1.",
+    "defibrillator:location:en": "At Public Transport Service Point at -1 floor level.",
+    "@osm_id": 9464587317,
+    "@osm_type": "node",
+    "@osm_version": 6,
+    "emergency": "defibrillator",
+    "image": "https://openaedmap.org/api/v1/photos/view/bWPKgNA1SBEFRUdf0pV_Nw.webp",
+    "image:license": "CC0",
+    "indoor": "yes",
+    "level": "-2",
+    "location": "indoor",
+    "manufacturer": "Philips",
+    "model": "Heartstart HS1",
+    "opening_hours": "Mo-Fr 07:00-20:00; Sa 08:00-15:00; Su off",
+    "operator": "Metro Warszawskie",
+    "ref:api-um-warszawa-pl": "1150",
+    "source": "Miasto Stołeczne Warszawa; https://api.um.warszawa.pl (serwis Otwarte dane po warszawsku)"
+  }
 }
 ```
 
-| Pole | Typ | Zawsze? | Znaczenie |
-| --- | --- | --- | --- |
-| `type` | string | tak | `"FeatureCollection"` |
-| `features[].type` | string | tak | `"Feature"` |
-| `features[].geometry.type` | string | tak | `"Point"` |
-| `features[].geometry.coordinates` | `[number, number]` | tak | **`[lon, lat]`** w WGS84 |
-| `features[].properties["@osm_type"]` | string | tak | `"node"` |
-| `features[].properties["@osm_id"]` | int | tak | OSM node ID |
-| `features[].properties["@osm_version"]` | int | tak | wersja node'a |
-| `features[].properties["emergency"]` | string | tak | `"defibrillator"` |
-| `features[].properties[...]` | string | nie | wszystkie pozostałe tagi OSM, bez konwersji typów |
+### 2.5. Pole `@osm_id` i identyfikatory
 
-**Czego nie ma w GeoJSON:**
+- `@osm_id` jest liczbą całkowitą, identyfikatorem węzła OSM. W przykładzie `9464587317`.
+- `@osm_type` ma zawsze wartość `"node"`.
+- `@osm_version` jest liczbą całkowitą, wersją obiektu OSM. W przykładzie `6`.
+- Brak `@osm_timestamp`, `@changeset`, `@user`. To luka dla audytu i weryfikacji.
+- Identyfikatory zewnętrzne występują jako zwykłe tagi, np. `ref:api-um-warszawa-pl=1150`, `ref:pkt-zycia-2023=2`, `ref:GB:the_circuit=...`. Nie ma jednego standardu.
 
-- `@timestamp`, `@user`, `@changeset`, `@uid`: brak proweniencji edycji.
-- `license`, `attribution`, `data_download_ts_utc`: brak metadanych licencji w treści i nagłówkach.
-- `@photo_id`, `@photo_url`, `@photo_source`, `@timezone_name`, `@timezone_offset`: tylko w API node'a.
-- `country_code`: brak w feature; kraj wynika z endpointu.
-- CSV: brak.
+### 2.6. Słownik pól eksportu, częstości w Polsce
 
-**Ważne:** kolejność współrzędnych to `[lon, lat]`, zgodnie z GeoJSON. Przy imporcie do PostGIS trzeba jawnie zamienić na `POINT(lon lat)`.
+Liczebności policzone na `PL.geojson` z 2026-11-21, `n=18 298`. Wartości są stringami, nawet jeśli wyglądają na liczby.
 
-### 2.4 API pojedynczego node'a: dodatkowe pola
+| Pole | Typ logiczny | Obecność | Przykład / wartości | Uwagi |
+|---|---|---:|---|---|
+| `@osm_type` | string enum | 18 298 (100%) | `node` | zawsze węzeł |
+| `@osm_id` | integer int64 | 18 298 (100%) | `9464587317` | klucz źródłowy |
+| `@osm_version` | integer | 18 298 (100%) | `6` | wersja OSM, nie data |
+| `emergency` | string enum | 18 298 (100%) | `defibrillator` | stała |
+| `access` | string enum | 16 918 (92,5%) | `yes` 7 806, `customers` 4 684, `private` 3 045, `permit` 1 198, `permissive` 132, `no` 47, `unknown` 6 | `no` i `unknown` wymagają ostrożności |
+| `indoor` | string `yes`/`no` | 15 970 (87,3%) | `yes` 10 482, `no` 5 488 | strona ściany, nie piętro |
+| `defibrillator:location` | string | 12 318 (67,3%) | `Samochód ratowniczo-gaśniczy` 766, `na wyposażeniu jednostki` 187 | 8 084 różnych wartości |
+| `defibrillator:location:pl` | string | 5 173 (28,3%) | opis polski | wariant językowy |
+| `defibrillator:location:en` | string | 2 407 (13,2%) | opis angielski | wariant językowy |
+| `opening_hours` | string, OSM syntax | 6 781 (37,1%) | `24/7` 4 136, `Mo-Fr 07:30-15:30` 106 | nie jest ISO 8601 |
+| `operator` | string | 6 007 (32,8%) | `ZUS` 177, `InPost` 95, `Tauron` 69 | 4 086 różnych wartości |
+| `check_date` | string ISO 8601 date | 5 982 (32,7%) | `2023-02-19`, `2026-09-30` | data sprawdzenia, nie status |
+| `phone` | string | 4 481 (24,5%) | `112`, `+48 58 778 60 00` | format nieujednolicony |
+| `level` | string | 3 701 (20,2%) | `0` 3 049, `1` 407, `-1` 29, `0.5` 10 | może być ułamkowe lub lista |
+| `image` | string URL | 2 169 (11,9%) | `https://openaedmap.org/api/v1/photos/view/...webp` | może wskazywać zewnętrzny host |
+| `image:license` | string | 1 383 (7,6%) | tylko `CC0` | brak dla 786 obiektów z `image` |
+| `source` | string / URL | 1 445 (7,9%) | `email od ZUS`, `https://api.um.warszawa.pl` | 455 różnych wartości |
+| `manufacturer` | string | 347 (1,9%) | `Philips` 74, `Zoll` 48, `CU Medical Systems` 23 | niespójna kapitalizacja |
+| `model` | string | 146 (0,8%) | `FRx` 32, `AED Plus` 22 | niespójne nazwy |
+| `ref` | string | 150 (0,8%) | `AED-3100`, `Defibrylator AED`, adresy | semantyka niejednolita |
+| `locked` | string `yes`/`no` | 3 (0,02%) | tylko `no` | bardzo rzadkie |
+| `wheelchair` | string enum | 463 (2,5%) | `yes` 304, `limited` 97, `no` 54 | dostępność wózka |
+| `description` | string | 599 (3,3%) | dowolny tekst | |
+| `note` | string | 241 (1,3%) | dowolny tekst | często wymóg licencyjny źródła |
+| `fixme` | string | 632 (3,5%) | dowolny tekst | oznacza problem z danymi |
+| `emergency:phone` | string | 200 (1,1%) | `112` | numer ratunkowy |
+| `operator:type` | string enum | 86 (0,5%) | `ngo` 39, `government` 21, `public` 11, `private` 7, `school` 4 | |
+| `operator:wikidata` | string Q-id | 188 (1,0%) | np. `Q...` | identyfikator Wikidata |
+| `addr:street` | string | 81 (0,4%) | ulica | adres bardzo rzadki |
+| `addr:housenumber` | string | 105 (0,6%) | numer | |
+| `addr:postcode` | string | 37 (0,2%) | kod pocztowy | |
+| `addr:city` | string | 76 (0,4%) | miasto | |
+| `addr:place` | string | 22 (0,1%) | miejscowość | |
+| `addr:floor` | string | 9 (0,05%) | piętro | |
+| `survey:date` | string data lub `YYYY-MM` | 17 (0,1%) | `2025-04-16`, `2026-07` | może być niepełna data |
+| `start_date` | string | 59 (0,3%) | data uruchomienia | |
+| `ele` | string, metry | 4 (0,02%) | `1180` | wysokość |
+| `wikimedia_commons` | string | 84 (0,5%) | nazwa pliku lub URL | media |
+| `mapillary` | string | 5 (0,03%) | ID obrazu | media |
+| `panoramax` | string | 3 (0,02%) | ID obrazu | media |
+| `contact:facebook` | string URL | 38 (0,2%) | profil | kontakt |
+| `website` | string URL | 99 (0,5%) | strona | kontakt |
+| `email` | string | 61 (0,3%) | e-mail | kontakt |
+| `ref:api-um-warszawa-pl` | string | 113 (0,6%) | `1150` | ID z API Warszawy |
+| `ref:pkt-zycia-2023` | string | 32 (0,2%) | `2` | ID programu Koszalin |
+| `defibrillator:cabinet` | string enum | 0 w PL | `vertical_door`, ... | tag z wiki, niewykorzystany |
+| `defibrillator:code` | string | 0 w PL | kod skrzynki | tag z wiki, niewykorzystany |
 
-`GET https://openaedmap.org/api/v1/node/477958354` zwróciło:
+### 2.7. Endpoint pojedynczego węzła i media
+
+**VERIFIED**, `https://openaedmap.org/api/v1/node/9464587317`, HTTP 200, `application/json; charset=utf-8`, 1 268 B.
 
 ```json
 {
@@ -349,780 +341,478 @@ Struktura:
   "license": "https://opendatacommons.org/licenses/odbl/1-0/",
   "elements": [
     {
-      "@photo_id": null,
-      "@photo_url": null,
+      "@photo_id": "bWPKgNA1SBEFRUdf0pV_Nw",
+      "@photo_url": "/api/v1/photos/view/bWPKgNA1SBEFRUdf0pV_Nw.webp",
       "@photo_source": null,
       "@timezone_name": "Europe/Warsaw",
       "@timezone_offset": "UTC+01:00",
       "type": "node",
-      "id": 477958354,
-      "lat": 49.5878956,
-      "lon": 19.5168185,
-      "tags": { "...": "..." },
-      "version": 12
+      "id": 9464587317,
+      "lat": 52.2313261,
+      "lon": 21.010198,
+      "tags": {"...": "..."},
+      "version": 6
     }
   ]
 }
 ```
 
-| Pole dodatkowe | Typ | Znaczenie |
-| --- | --- | --- |
-| `@photo_id` | string/null | ID zdjęcia w OpenAEDMap |
-| `@photo_url` | string/null | URL do zdjęcia lub proxy |
-| `@photo_source` | string/null | źródło zdjęcia (np. Wikimedia, Panoramax) |
-| `@timezone_name` | string/null | np. `Europe/Warsaw` |
-| `@timezone_offset` | string/null | np. `UTC+01:00` |
+Pola `@photo_id`, `@photo_url`, `@photo_source`, `@timezone_name`, `@timezone_offset` występują **tylko** w endpointcie `/node/{id}`, nie w eksporcie GeoJSON.
 
-**VERIFIED:** 2026-11-21. Cache nagłówka: `max-age=60`, `stale=300` (z kodu).
+Upload zdjęć: `POST https://openaedmap.org/api/v1/photos/upload`, pola formularza `node_id`, `file_license`, `file`, `oauth2_credentials`. Backend akceptuje wyłącznie `file_license=CC0`, obrazy JPEG/PNG/WebP do 2 MB i 6 MP, wymaga ważnego tokenu OAuth 2.0 OSM (`Authorization: Bearer`), a po uploadzie aktualizuje tagi `image` i `image:license` w OSM.
 
-### 2.5 Historyczne pliki `aed.openstreetmap.org.pl`
+### 2.8. Aktualizacja, cache, auth, licencja, ograniczenia OpenAEDMap
 
-Domena `aed.openstreetmap.org.pl` dziś przekierowuje na OpenAEDMap. Status bieżący:
+| Cecha | Wartość | Dowód |
+|---|---|---|
+| Źródło danych | replikacja planet OSM, zapytanie `node[emergency=defibrillator];out meta qt;` | `services/aed_service.py` |
+| Kadencja aplikacji | `AED_UPDATE_DELAY = 30 s` | `config.py` |
+| Kadencja eksportów krajowych | `COUNTRY_UPDATE_DELAY = 1 dzień` | `config.py` |
+| Cache HTTP eksportu | `max-age=3600`, `stale-while-revalidate=0` | nagłówki |
+| Wersjonowanie cache | ETag z `map_revision`, np. `...-5533` | `export_service.py` |
+| Auth odczytu | brak | publiczne GET |
+| Auth uploadu | OAuth 2.0 OSM, Bearer token | `api/v1/photos.py` |
+| Licencja danych | ODbL 1.0, atrybucja `© OpenStreetMap contributors` | OSM API i stopka frontendu |
+| Licencja zdjęć | tylko CC0 przy uploadzie, `image:license` przy zewnętrznych | `photos.py` |
+| Ograniczenia eksportu | 4 aktywne eksporty, 64 czytelników, `503` z `Retry-After: 5` | `export_service.py` |
+| Cache CDN | Cloudflare, `age` do 3 251 s w chwili pobrania | nagłówki |
+| Znane pułapki | tylko węzły, brak bieżącego CSV, brak `@osm_timestamp`, brak `user`/`changeset`, brak deduplikacji fizycznych urządzeń, `access=no` jest w danych | analiza PL.geojson i SQL |
 
-| Ścieżka | Status | Cel przekierowania |
-| --- | --- | --- |
-| `/aed_poland.geojson` | **308** | `https://openaedmap.org/api/v1/countries/PL.geojson` (200) |
-| `/aed_poland.csv` | **308** | `https://openaedmap.org/pl/aed_poland.csv` (**404**) |
-| `/aed_poland_metadata.json` | **308** | `https://openaedmap.org/pl/aed_poland_metadata.json` (**404**) |
+### 2.9. Historyczne eksporty CSV i GeoJSON (Wayback)
 
-**VERIFIED:** `curl -I`, 2026-11-21.
+**VERIFIED (archiwum):** `https://web.archive.org/web/20230107044845id_/https://aed.openstreetmap.org.pl/aed_poland.csv` zwraca HTTP 200, `text/csv`, **524 644 B**, **4 588 wierszy danych** i **15 kolumn**. To snapshot z 2023-01-07.
 
-Archiwalne pliki (Wayback Machine) pokazują dokładny dawny schemat.
+Dokładny nagłówek CSV, w kolejności:
 
-#### 2.5.1 CSV, snapshot 2023-01-07
+```text
+access,defibrillator:location,defibrillator:location:pl,description,indoor,latitude,location,longitude,note,note:pl,opening_hours,operator,osm_id,phone,wikimedia_commons
+```
 
-Plik: `https://aed.openstreetmap.org.pl/aed_poland.csv` (Wayback `20230107044845`).
-Rozmiar: 524 644 B. Wiersze: **4 588** danych + nagłówek.
+| Kolumna | Typ | Wypełnione | Uwagi |
+|---|---|---:|---|
+| `access` | string enum | 3 922 | w tym pojedyncze `emergency` i wartości złożone |
+| `defibrillator:location` | string | 3 750 | 2 395 unikalnych |
+| `defibrillator:location:pl` | string | 169 | wariant polski |
+| `description` | string | 170 | |
+| `indoor` | string `yes`/`no` | 2 907 | `yes` 2 216, `no` 691 |
+| `latitude` | decimal | 4 588 | WGS84 |
+| `location` | string enum | 395 | `indoor`, `outdoor`, `vehicle`, free text |
+| `longitude` | decimal | 4 588 | WGS84 |
+| `note` | string | 57 | |
+| `note:pl` | string | 3 | |
+| `opening_hours` | string | 1 378 | `24/7` 773 |
+| `operator` | string | 2 604 | 2 036 unikalnych |
+| `osm_id` | int64 | 4 588 | brak `osm_type`, wszystkie to node |
+| `phone` | string | 1 576 | 1 226 unikalnych |
+| `wikimedia_commons` | string | 9 | |
 
-Dokładna kolejność i typy kolumn:
-
-| Kolumna | Typ | Pokrycie | Uwagi |
-| --- | --- | --- | --- |
-| `access` | string enum | 85,5% | `private`, `customers`, `yes`, `permissive`, `permit`, `no`, `emergency` (1), wartości złożone |
-| `defibrillator:location` | string | 81,7% | 2 395 unikalnych |
-| `defibrillator:location:pl` | string | 3,7% | 159 unikalnych |
-| `description` | string | 3,7% | 69 unikalnych |
-| `indoor` | string enum | 63,4% | `yes` 2 216, `no` 691 |
-| `latitude` | decimal | 100,0% | WGS84 |
-| `location` | string enum | 8,6% | `indoor` 267, `outdoor` 119, `vehicle` 5, pojedyncze free text |
-| `longitude` | decimal | 100,0% | WGS84 |
-| `note` | string | 1,2% | 22 unikalne |
-| `note:pl` | string | 0,1% | 3 |
-| `opening_hours` | string | 30,0% | `24/7` 773 |
-| `operator` | string | 56,8% | 2 036 unikalnych |
-| `osm_id` | int64 | 100,0% | 4 588 unikalnych; **brak `osm_type`**, wszystkie to node |
-| `phone` | string | 34,4% | 1 226 unikalnych |
-| `wikimedia_commons` | string URL | 0,2% | 9 |
-
-**Czego brak w CSV:** `osm_version`, `check_date`, `survey:date`, `manufacturer`, `model`, `ref`, `emergency:phone`, `image`, `image:license`, `wheelchair`, `addr:*`, `level`. To był eksport „pod mapę”, nie pełny dump tagów.
-
-#### 2.5.2 GeoJSON, snapshot 2022-01-18
-
-Plik: `https://aed.openstreetmap.org.pl/aed_poland.geojson` (Wayback `20220118100904`).
-Rozmiar: 192 982 B. Features: **882**. Typ geometrii: `Point`.
-
-Schemat był uboższy niż obecny:
-
-- `properties.osm_id` (int, 100%),
-- tylko wybrane tagi, i tylko gdy istniały: `defibrillator:location` (549), `access` (499), `indoor` (468), `opening_hours` (302), `location` (240), `phone` (61), `note` (35), `note:pl` (36), `description` (16), `defibrillator:location:pl` (8), `wikimedia_commons` (1).
-- Brak `@osm_type`, `@osm_version`, brak pełnego zestawu tagów.
-
-To archiwum ma wartość historyczną. **Nie** należy używać go jako aktualnego źródła.
-
-#### 2.5.3 Metadata, snapshot 2023-01-07
-
-Plik: `https://aed.openstreetmap.org.pl/aed_poland_metadata.json` (Wayback `20230107045919`):
+**VERIFIED (archiwum):** `https://web.archive.org/web/20230107045919id_/https://aed.openstreetmap.org.pl/aed_poland_metadata.json` zwraca HTTP 200, 78 B:
 
 ```json
 {"data_download_ts_utc":"2023-01-07T04:11:51+00:00","number_of_elements":4588}
 ```
 
-To jedyne pole metadanych: data pobrania i liczba elementów. Brak licencji, wersji schematu, bounding box, listy pól.
+**VERIFIED (archiwum):** `https://web.archive.org/web/20220118100904id_/https://aed.openstreetmap.org.pl/aed_poland.geojson` zwraca HTTP 200, 925 099 B, **3 622 features**, wszystkie `Point`. Pola `properties`: `access`, `defibrillator:location`, `defibrillator:location:pl`, `description`, `indoor`, `location`, `note`, `note:pl`, `opening_hours`, `operator`, `osm_id`, `phone`, `wikimedia_commons`. Brak `@osm_type`, `@osm_version` i pełnego zestawu tagów.
 
-### 2.6 Licencja, aktualizacja, ograniczenia OpenAEDMap
+Historyczny CSV był eksportem „pod mapę”, nie pełnym dumpem tagów. Brak w nim `osm_version`, `check_date`, `survey:date`, `manufacturer`, `model`, `ref`, `emergency:phone`, `image`, `image:license`, `wheelchair`, `addr:*` i `level`. **Nie używać archiwum jako aktualnego źródła.**
 
-| Aspekt | Wartość | Status |
-| --- | --- | --- |
-| Licencja | **ODbL 1.0** (w API node: `https://opendatacommons.org/licenses/odbl/1-0/`) | **VERIFIED** |
-| Atrybucja | `OpenStreetMap and contributors`, link do copyright | **VERIFIED** |
-| Aktualizacja bazy | OSM minute replication; `AED_UPDATE_DELAY = 30 s` | **VERIFIED (kod)** |
-| Baseline | Overpass `node[emergency=defibrillator];out meta qt;` | **VERIFIED (kod)** |
-| Cache eksportu | `max-age=3600`, ETag z rewizją | **VERIFIED** (nagłówki) |
-| Format eksportu | tylko GeoJSON per kraj | **VERIFIED** |
-| CSV | brak | **VERIFIED** |
-| Zakres | tylko node, bez way/relation | **VERIFIED (kod)** |
-| Licencja w GeoJSON | brak w treści/nagłówkach | **VERIFIED** |
+### 2.10. Jakość danych w Polsce, liczby
 
-Ograniczenia:
-
-- Eksport nie zawiera informacji o czasie wygenerowania ani o wersji OSM base. ETag pomaga wykryć zmianę, ale nie mówi kiedy.
-- Brak licencji w pliku oznacza, że konsument musi znać warunki ODbL z dokumentacji, a nie z samego pliku.
-- Brak CSV utrudnia analizę w Excelu; trzeba konwertować GeoJSON.
-- Tylko node: 2 way w Polsce są pomijane.
-- `feature_count` może różnić się od taginfo o kilkadziesiąt rekordów z powodu opóźnienia i usunięć.
-
-### 2.7 Porównanie liczb
-
-| Źródło | Zakres | Liczba | Data | Status |
-| --- | --- | --- | --- | --- |
-| taginfo global | wszystkie `emergency=defibrillator` | 179 680 (179 644 node, 35 way, 1 relation) | 2026-11-21T00:59:08Z | **VERIFIED** |
-| taginfo Polska (Geofabrik) | wszystkie | 18 321 (18 319 node, 2 way) | 2026-11-20T21:20:13Z | **VERIFIED** |
-| OpenAEDMap `PL.geojson` | tylko node | 18 298 | 2026-11-21 | **VERIFIED** |
-| Historyczny CSV | tylko node | 4 588 | 2023-01-07 | **VERIFIED** (Wayback) |
-| Historyczny GeoJSON | tylko node | 882 | 2022-01-18 | **VERIFIED** (Wayback) |
-
-Różnica 18 321 vs 18 298 = 23. Składają się na nią 2 way (nieimportowane) oraz ok. 21 node'ów z lagu/usunięć. To szacunek, nie twardy bilans.
+- 18 298 obiektów, z czego 10 893 ma `@osm_version=1`, czyli większość to importy jednorazowe.
+- 12 299 obiektów (67,2%) nie ma ani `check_date`, ani `survey:date`.
+- 1 336 obiektów ma `check_date` lub `survey:date` starsze niż 2025.
+- Adres strukturalny (`addr:street` lub `addr:housenumber`) ma mniej niż 1% obiektów.
+- `manufacturer` ma 1,9%, `model` 0,8%, `locked` 0,02%.
+- `image` ma 11,9%, ale tylko 7,6% ma `image:license`, co oznacza, że część zdjęć nie ma jasnej licencji w tagach.
 
 ---
 
-## 3. Geoportal.gov.pl: usługi WMS
+## 3. Overpass API
 
-### 3.1 Najważniejszy wniosek
+### 3.1. Endpoint i status z tej sieci
 
-**Geoportal nie publikuje warstwy AED.** W katalogu usług WMS/WMTS (`https://www.geoportal.gov.pl/pl/usluga/uslugi-przegladania-wms-i-wmts/`) nie ma warstwy defibrylatorów. Przeszukanie GetCapabilities usługi PRG (52 warstwy) nie znalazło nazw zawierających `defibryl` ani `aed`.
+**VERIFIED jako niedostępne z tej sieci:**
 
-Geoportal jest przydatny jako **źródło referencyjne** do:
+| Endpoint | Wynik |
+|---|---|
+| `https://overpass-api.de/api/status` | HTTP 000, timeout 30 s |
+| `https://overpass-api.de/api/interpreter` (GET, małe zapytanie) | HTTP 000, timeout 25 s |
+| `https://overpass-api.de/api/interpreter` (IPv4, timeout 120 s) | HTTP 000, timeout 120 s |
+| `https://overpass.kumi.systems/api/status` | HTTP 000, timeout 12 s |
+| `https://overpass.kumi.systems/api/interpreter` | HTTP 000, timeout 8 s |
+| `https://z.overpass-api.de/api/status` | HTTP 000, timeout 12 s |
+| `https://overpass.private.coffee/api/interpreter` | HTTP 000, timeout 8 s |
+| `https://overpass.openstreetmap.ru/api/interpreter` | HTTP 000, timeout 8 s |
+| `https://maps.mail.ru/osm/tools/overpass/api/interpreter` | HTTP 000, timeout 20 s |
+| `https://ovp.dresel.systems/api/interpreter` | HTTP 000, timeout 20 s |
+| `https://overpass.nchc.org.tw/api/interpreter` | DNS nie rozwiązuje się |
+| `https://overpass.osm.jp/api/interpreter` | DNS nie rozwiązuje się |
 
-- granic administracyjnych (PRG),
-- punktów adresowych i ulic (Krajowa Integracja Numeracji Adresowej),
-- ortofotomapy i danych topograficznych jako podkładu.
+Wniosek: **Overpass API jako endpoint nie został zweryfikowany w tym środowisku.** To nie znaczy, że usługa nie działa globalnie. To znaczy, że z tej sieci nie udało się uzyskać odpowiedzi.
 
-Nie jest źródłem rekordów AED. Nie ma pola „operator AED”, „model”, „status”.
+### 3.2. Jedyny działający mirror, test kontrolny
 
-### 3.2 GetCapabilities: struktura XML
+**VERIFIED, ale z ograniczeniem:** `https://overpass.osm.ch/api/interpreter` odpowiada HTTP 200, `generator` = `Overpass API 0.7.62.4 2390de5a`, `timestamp_osm_base` = `118638` (wartość nietypowa, prawdopodobnie licznik godzin).
 
-Przykład:
+Test kontrolny dla Szwajcarii:
 
-```text
-https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/AdministrativeBoundaries?SERVICE=WMS&REQUEST=GetCapabilities
+```overpassql
+[out:json][timeout:45];
+node["emergency"="defibrillator"](46,7,47,9);
+out count;
 ```
 
-Odpowiedź: `200 text/xml; charset=UTF-8`, 126 647 B, `WMS_Capabilities version="1.3.0"`.
+Wynik: `nodes=3348`, `ways=0`, `relations=0`, `total=3348`.
 
-Główne elementy:
+Test dla Polski:
 
-| Element XML | Znaczenie | Przykład |
-| --- | --- | --- |
-| `WMS_Capabilities@version` | wersja WMS | `1.3.0` |
-| `Service/Name` | typ usługi | `WMS` |
-| `Service/Title` | nazwa usługi | `Usługa przeglądania Państwowego Rejestru Granic` |
-| `Service/Abstract` | opis | `Usługa WMS publikująca jednostki podziału terytorialnego Polski...` |
-| `Service/ContactInformation` | kontakt | `Główny Urząd Geodezji i Kartografii` |
-| `Capability/Request/GetCapabilities/Format` | formaty capabilities | `text/xml` |
-| `Capability/Request/GetMap/Format` | formaty map | `image/png`, `image/jpeg`, `image/tiff`, `application/pdf`, `image/svg+xml`, `application/json`, `application/x-protobuf` |
-| `Capability/Exception/Format` | formaty błędów | `XML`, `INIMAGE`, `BLANK` |
-| `Capability/Layer/Name` | nazwa warstwy | `A00_Granice_panstwa`, `A01_Granice_wojewodztw` |
-| `Capability/Layer/Title` | tytuł warstwy | `A00_Granice_panstwa` |
-| `Capability/Layer/CRS` | układy współrzędnych | `EPSG:2176` ... `EPSG:2180`, `EPSG:3857`, `EPSG:4326` |
-| `Capability/Layer/EX_GeographicBoundingBox` | zasięg geograficzny | Polska |
-| `Capability/Layer/BoundingBox` | zasięg w danym CRS | zależny od CRS |
-| `Capability/Layer/Style` | styl | `default` |
-
-**VERIFIED:** pobrane GetCapabilities, 2026-11-21.
-
-### 3.3 Konkretne usługi i warstwy
-
-#### PRG (Państwowy Rejestr Granic)
-
-```text
-https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/AdministrativeBoundaries
+```overpassql
+[out:json][timeout:45];
+node["emergency"="defibrillator"](50,14,55,24);
+out count;
 ```
 
-- `Service/Title`: `Usługa przeglądania Państwowego Rejestru Granic`
-- 52 warstwy, m.in.:
-  - `A00_Granice_panstwa`
-  - `A01_Granice_wojewodztw`
-  - `A02_Granice_powiatow`
-  - `A03_Granice_gmin`
-  - `A04_Granice_miast`
-  - `A05_Granice_jednostek_ewidencyjnych`
-  - `A06_Granice_obrebow_ewidencyjnych`
-  - warstwy sądów, prokuratur, policji, obwodów spisowych
-- CRS: `EPSG:2176`, `EPSG:2177`, `EPSG:2178`, `EPSG:2179`, `EPSG:2180`, `EPSG:3857`, `EPSG:4326`
-- `AccessConstraints`: `NONE`
-- `Fees`: `NONE`
+Wynik: `nodes=0`, `ways=0`, `relations=0`, `total=0`.
 
-**VERIFIED.** Brak warstwy AED.
+Test znanego polskiego węzła `477958354`: `elements` puste.
 
-#### Adresy
+Wniosek: ten mirror **nie zawiera danych Polski**, prawdopodobnie jest to ekstrakt Szwajcarii. Nie nadaje się do weryfikacji polskich danych.
 
-```text
-https://mapy.geoportal.gov.pl/wss/ext/KrajowaIntegracjaNumeracjiAdresowej
-```
+### 3.3. Poprawne zapytania do użycia
 
-- `Service/Title`: `Krajowa Integracja Numeracji Adresowej`
-- warstwy: `Punkty adresowe`, `Ulice`, `Ulice - obiekty liniowe`
-- CRS: `EPSG:2176`, `EPSG:2177`, `EPSG:2178`, `EPSG:2179`, `EPSG:2180`, `EPSG:3857`, `EPSG:4326`, `EPSG:900913`
-- `AccessConstraints`/`Fees`: do potwierdzenia w GetCapabilities; usługa publiczna
-- Zastosowanie w projekcie: geokodowanie adresów, uzupełnianie `addr:*`, przypisanie TERYT.
+Zapytanie o wszystkie AED w Polsce, tylko węzły, z metadanymi:
 
-**VERIFIED** dla listy warstw i CRS (GetCapabilities).
-
-#### Ortofotomapa
-
-```text
-https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/StandardResolution
-```
-
-- `Service/Title`: `ORTOFOTOMAPA`
-- warstwa: `Raster`, styl `default`
-- CRS: `CRS:84`, `EPSG:2176` ... `EPSG:2180`, `EPSG:3857`, `EPSG:4326`
-- `AccessConstraints`: `Wykorzystanie usługi nie podlega żadnym ograniczeniom z wyłączeniem automatycznego pobierania i kolekcjonowania obrazów (tzw. harvesting)...`
-- `Fees`: `Brak opłat`
-
-**VERIFIED.** To podkład, nie AED.
-
-### 3.4 Przykład GetMap
-
-```text
-https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/AdministrativeBoundaries
-  ?SERVICE=WMS
-  &VERSION=1.3.0
-  &REQUEST=GetMap
-  &LAYERS=A01_Granice_wojewodztw
-  &STYLES=
-  &CRS=EPSG:4326
-  &BBOX=49.0,14.0,55.0,24.5
-  &WIDTH=1024
-  &HEIGHT=768
-  &FORMAT=image/png
-  &TRANSPARENT=TRUE
-```
-
-Uwaga: w WMS 1.3.0 dla `EPSG:4326` obowiązuje kolejność osi **lat,lon** (`BBOX=minLat,minLon,maxLat,maxLon`). Dla `EPSG:2180` i `EPSG:3857` kolejność jest `x,y`. To częste źródło błędów.
-
-### 3.5 Licencja, aktualizacja, ograniczenia Geoportal WMS
-
-| Aspekt | Wartość | Status |
-| --- | --- | --- |
-| Format | WMS 1.3.0, raster + opcjonalnie JSON/GML/protobuf | **VERIFIED** |
-| CRS | 2176-2180, 3857, 4326; adresy dodatkowo 900913 | **VERIFIED** |
-| AED | brak warstwy | **VERIFIED** |
-| `AccessConstraints` PRG | `NONE` | **VERIFIED** |
-| `Fees` PRG | `NONE` | **VERIFIED** |
-| `AccessConstraints` ORTO | zakaz harvestingu, poza tym bez ograniczeń | **VERIFIED** |
-| `Fees` ORTO | brak opłat | **VERIFIED** |
-| Częstotliwość aktualizacji | **NOT VERIFIED** w GetCapabilities; zależy od źródła (PRG/adresy/ORTO) | **NOT VERIFIED** |
-| Licencja prawna danych | wymaga analizy regulaminu Geoportal; metadane WMS nie są licencją | **NOT VERIFIED** |
-| CORS | **NOT VERIFIED** (nie testowano z przeglądarki) | **NOT VERIFIED** |
-| GetFeatureInfo | zależy od warstwy; **NOT VERIFIED** dla wszystkich | **NOT VERIFIED** |
-
-Ograniczenia:
-
-- WMS zwraca obraz, nie rekordy AED. Do danych atrybutowych potrzebny byłby WFS, ale AED i tak nie ma.
-- Brak maszynowego rejestru AED.
-- Nie nadaje się do masowego harvestingu kafelków (szczególnie ORTO).
-- Nie zastępuje OSM w zakresie lokalizacji AED.
-
----
-
-## 4. CloudFerro
-
-### 4.1 Czym jest CloudFerro
-
-CloudFerro S.A. to europejski dostawca chmury obliczeniowej (IaaS/PaaS), m.in. dla sektora kosmicznego i obserwacji Ziemi. Oferuje:
-
-- CloudFerro Cloud (compute, storage, Kubernetes, AI/ML),
-- CREODIAS (cloud services + Earth Observation data access),
-- dostęp do danych Sentinel, Landsat, MODIS, SMOS itd.
-
-**VERIFIED:** `https://creodias.eu/` i `https://docs.cloudferro.com/` (2026-11-21).
-
-### 4.2 Czy CloudFerro publikuje AED?
-
-**Nie znaleziono.** W publicznych materiałach CloudFerro i CREODIAS:
-
-- brak zbioru danych AED,
-- brak warstwy WMS z AED,
-- brak API rekordu AED,
-- brak słownika pól AED.
-
-Przeszukane: strona główna CloudFerro, dokumentacja `docs.cloudferro.com`, CREODIAS, katalog usług. Fraza `defibryl`/`AED` nie występuje w kontekście danych.
-
-**Status: NOT VERIFIED jako źródło AED.** To nie znaczy, że CloudFerro „nie może” hostować takiego zbioru w przyszłości. Na dzień badania nie ma publicznej oferty.
-
-### 4.3 Czy CloudFerro ma WMS?
-
-CloudFerro jako dostawca chmury może hostować dowolne WMS-y swoich klientów, ale nie jest to publiczna usługa krajowa z AED. CREODIAS udostępnia dane EO, nie AED.
-
-Jeżeli w projekcie potrzebny jest WMS referencyjny dla Polski, właściwym źródłem jest **Geoportal.gov.pl** (PRG, adresy, ortofoto), a nie CloudFerro.
-
-**Status: NOT VERIFIED** dla publicznego WMS CloudFerro z AED.
-
-### 4.4 Schemat pól
-
-Brak schematu AED. Nie ma czego mapować.
-
-| Aspekt | Wartość | Status |
-| --- | --- | --- |
-| Format | brak publicznego formatu AED | **NOT VERIFIED** |
-| CRS | N/A dla AED; dane EO zwykle EPSG:4326 | **N/A** |
-| Licencja | zależy od zbioru EO; nie dotyczy AED | **N/A** |
-| Aktualizacja | N/A dla AED | **N/A** |
-
----
-
-## 5. Porównanie źródeł
-
-| Cecha | OSM API / Overpass | OpenAEDMap GeoJSON | Historyczny CSV | Geoportal WMS | CloudFerro |
-| --- | --- | --- | --- | --- | --- |
-| Format | JSON / XML | GeoJSON | CSV | XML + raster | cloud/EO |
-| CRS | EPSG:4326 | EPSG:4326 | EPSG:4326 | 2176-2180, 3857, 4326 | N/A |
-| Rekordy AED w PL | 18 321 | 18 298 | 4 588 (2023) | **0** | **0** |
-| Pełne tagi | tak | tak | nie (15 kolumn) | nie | nie |
-| `osm_version` | tak | tak | nie | nie | nie |
-| `check_date` | tak | tak | nie | nie | nie |
-| Status urządzenia | nie | nie | nie | nie | nie |
-| Licencja | ODbL 1.0 | ODbL 1.0 | ODbL 1.0 | open/no fees (WMS metadata) | EO license |
-| Aktualizacja | minutely | ~30 s + cache 1 h | archiwum | zależna od warstwy | N/A |
-| Ograniczenia | limity Overpass | tylko node, brak CSV | nieaktualne | brak AED | brak AED |
-
----
-
-## 6. Mapowanie na wspólny schemat AED
-
-### 6.1 Zasady
-
-1. **Identyfikator globalny** budujemy jako `osm:{osm_type}/{osm_id}`. Nie używamy `ref` jako klucza globalnego.
-2. **Współrzędne** zawsze w EPSG:4326, `geometry` jako `Point(lon lat)`. Walidujemy bbox Polski: `lat 49.0-55.0`, `lon 14.0-24.5` (z marginesem na granice).
-3. **Brak wartości** to `null` lub `unknown`, nigdy domyślne `yes`/`no`.
-4. **Status** domyślnie `unknown`. Nie wnioskujemy „działa” z obecności tagu.
-5. **`access`** mapujemy na zamknięty enum. `access=emergency` traktujemy jako niepoprawne/do przeglądu.
-6. **`last_verified_at`** bierzemy tylko z `check_date`/`survey:date`, nie z `timestamp`.
-7. **`operator`** normalizujemy, ale nie scalamy po samej nazwie. Preferowany klucz: `operator:wikidata`.
-8. **Prawa autorskie** zawsze zachowujemy: `license`, `attribution`, `source_url`, `raw_tags`.
-
-### 6.2 Tabela mapowania: identyfikatory
-
-| Pole kanoniczne | Typ | Wymagane | OSM | OpenAEDMap | Transformacja / uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `aed_id` | string | **TAK** | `osm:{type}/{id}` | `osm:{@osm_type}/{@osm_id}` | Klucz główny. Stabilny dopóki OSM ID istnieje. |
-| `source` | enum | **TAK** | `osm` | `openaedmap` | Źródło importu. |
-| `source_record_id` | string | **TAK** | `{type}/{id}` | `{@osm_type}/{@osm_id}` | Identyfikator w źródle. |
-| `osm_type` | enum | **TAK** | `type` | `@osm_type` | `node`/`way`/`relation`; w praktyce `node`. |
-| `osm_id` | int64 | **TAK** | `id` | `@osm_id` | Globalny ID OSM. |
-| `osm_version` | int32 | opcjonalne | `version` | `@osm_version` | Wersja obiektu. |
-| `osm_changeset` | int64 | opcjonalne | `changeset` | brak | Tylko Overpass/OSM API. |
-| `osm_user` | string | opcjonalne | `user` | brak | Proweniencja edycji. |
-| `osm_uid` | int64 | opcjonalne | `uid` | brak | Proweniencja edycji. |
-| `osm_timestamp` | timestamptz | opcjonalne | `timestamp` | brak | Ostatnia edycja, **nie** weryfikacja. |
-| `ref` | string | opcjonalne | `ref` | `ref` | Lokalny numer; nie unikalny globalnie. |
-| `operator_ref` | string | opcjonalne | `ref:api-um-warszawa-pl`, `ref:pkt-zycia-2023` | j.w. | Identyfikator źródłowy operatora. |
-| `country_code` | char(2) | **TAK** | derived | endpoint kraju | `PL` na podstawie geometrii/endpointu. |
-| `teryt` | string | opcjonalne | derived | brak | Wymaga geokodowania/PRG, nie z OSM. |
-
-### 6.3 Tabela mapowania: lokalizacja i adres
-
-| Pole kanoniczne | Typ | Wymagane | OSM | OpenAEDMap | Transformacja / uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `lat` | double | **TAK** | `lat` | `geometry.coordinates[1]` | WGS84. |
-| `lon` | double | **TAK** | `lon` | `geometry.coordinates[0]` | WGS84. |
-| `geometry` | Point | **TAK** | derived | `geometry` | `SRID=4326;POINT(lon lat)`. |
-| `location_description` | text | zalecane | `defibrillator:location` | j.w. | Najważniejsze dla ratownika. |
-| `location_description_pl` | text | opcjonalne | `defibrillator:location:pl` | j.w. | Wariant PL. |
-| `location_description_en` | text | opcjonalne | `defibrillator:location:en` | j.w. | Wariant EN. |
-| `indoor` | enum | zalecane | `indoor` | j.w. | `yes`/`no`/`unknown`. |
-| `level` | text | opcjonalne | `level` | j.w. | Zachować string; parsować numerycznie. |
-| `level_ref` | text | opcjonalne | `level:ref` | j.w. | Etykieta kondygnacji. |
-| `address_street` | text | opcjonalne | `addr:street` | j.w. | Pokrycie 0,4%. |
-| `address_housenumber` | text | opcjonalne | `addr:housenumber` | j.w. | Pokrycie 0,6%. |
-| `address_postcode` | text | opcjonalne | `addr:postcode` | j.w. | Pokrycie 0,2%. |
-| `address_city` | text | opcjonalne | `addr:city` | j.w. | Pokrycie 0,4%. |
-| `address_place` | text | opcjonalne | `addr:place` | j.w. | Pokrycie 0,1%. |
-| `address_floor` | text | opcjonalne | `addr:floor` | j.w. | 9 rekordów. |
-| `description` | text | opcjonalne | `description` | j.w. | 3,3%. |
-| `name` | text | opcjonalne | `name` | j.w. | Nazwa miejsca, nie urządzenia. |
-
-### 6.4 Tabela mapowania: dostęp
-
-| Pole kanoniczne | Typ | Wymagane | OSM | OpenAEDMap | Transformacja / uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `access` | enum | **TAK** | `access` | `access` | `yes`->`public`, `permissive`->`public_tolerated`, `customers`->`customers`, `private`->`private`, `permit`->`permit`, `no`->`no`, brak->`unknown`. |
-| `access_note` | text | opcjonalne | `access:note` | j.w. | 1 rekord. |
-| `opening_hours` | text | zalecane | `opening_hours` | j.w. | Zachować surowy string OSM OH. |
-| `opening_hours_24_7` | bool | opcjonalne | derived | derived | `true` tylko dla dokładnie `24/7`. |
-| `locked` | bool | opcjonalne | `locked` | j.w. | Tylko 3 rekordy. |
-| `lock_code` | text | opcjonalne | `defibrillator:code` | j.w. | Wrażliwe; nie publikować bez potrzeby. |
-| `wheelchair` | enum | opcjonalne | `wheelchair` | j.w. | 2,5%. |
-| `indoor` | enum | zalecane | `indoor` | j.w. | Patrz lokalizacja. |
-
-### 6.5 Tabela mapowania: urządzenie
-
-| Pole kanoniczne | Typ | Wymagane | OSM | OpenAEDMap | Transformacja / uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `device_type` | enum | **TAK** | `emergency=defibrillator` | `emergency` | Zawsze `AED`. |
-| `manufacturer` | text | opcjonalne | `manufacturer` | j.w. | 1,9%; normalizować pisownię. |
-| `model` | text | opcjonalne | `model` | j.w. | 0,8%. |
-| `serial_number` | text | opcjonalne | brak | brak | **Brak w OSM.** Nie mylić z `ref`. |
-| `cabinet` | enum | opcjonalne | `defibrillator:cabinet` | j.w. | 0% w PL. |
-| `cabinet_manufacturer` | text | opcjonalne | `defibrillator:cabinet:manufacturer` | j.w. | 0%. |
-| `cabinet_colour` | text | opcjonalne | `defibrillator:cabinet:colour` | j.w. | 0%. |
-| `battery_expiry` | date | opcjonalne | brak | brak | **Brak w OSM.** |
-| `electrode_expiry` | date | opcjonalne | brak | brak | **Brak w OSM.** |
-| `device_condition` | enum | opcjonalne | brak | brak | **Brak w OSM.** |
-
-### 6.6 Tabela mapowania: status i weryfikacja
-
-| Pole kanoniczne | Typ | Wymagane | OSM | OpenAEDMap | Transformacja / uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `status` | enum | **TAK** | brak | brak | `operational`/`out_of_order`/`unknown`; domyślnie `unknown`. |
-| `status_source` | enum | opcjonalne | brak | brak | `survey`/`operator`/`osm_note`/`unknown`. |
-| `last_verified_at` | date | zalecane | `check_date`, `survey:date` | j.w. | Wybierz nowszą z dat; nie używaj `timestamp`. |
-| `check_date` | date | opcjonalne | `check_date` | j.w. | 32,7%. |
-| `survey_date` | date | opcjonalne | `survey:date` | j.w. | 0,1%. |
-| `source_date` | date | opcjonalne | `source:date` | j.w. | 0%. |
-| `fixme` | text | opcjonalne | `fixme` | j.w. | 3,5%; sygnał problemu. |
-| `note` | text | opcjonalne | `note` | j.w. | 1,3%. |
-| `confidence` | enum | opcjonalne | derived | derived | `high`/`medium`/`low`; reguły niżej. |
-
-Sugerowane reguły `confidence`:
-
-- `high`: `check_date` lub `survey:date` w ciągu 12 miesięcy **oraz** `access` i `defibrillator:location` obecne.
-- `medium`: `check_date`/`survey:date` w ciągu 36 miesięcy **lub** komplet pól dostępowych, ale brak daty.
-- `low`: brak daty weryfikacji **lub** brak `access` **lub** brak opisu miejsca **lub** `fixme`.
-
-### 6.7 Tabela mapowania: operator i kontakt
-
-| Pole kanoniczne | Typ | Wymagane | OSM | OpenAEDMap | Transformacja / uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `operator` | text | zalecane | `operator` | j.w. | 32,8%; 4 086 unikalnych. |
-| `operator_type` | enum | opcjonalne | `operator:type` | j.w. | 0,5%. |
-| `operator_wikidata` | string | opcjonalne | `operator:wikidata` | j.w. | 1,0%; najlepszy klucz normalizacji. |
-| `operator_short` | text | opcjonalne | `operator:short` | j.w. | 0,4%. |
-| `phone` | text | zalecane | `phone` | j.w. | 24,5%; normalizować E.164, zachować raw. |
-| `emergency_phone` | text | opcjonalne | `emergency:phone` | j.w. | 1,1%; często `112`. |
-| `email` | text | opcjonalne | `email` | j.w. | 0,3%. |
-| `website` | text | opcjonalne | `website` | j.w. | 0,5%. |
-| `contact_facebook` | text | opcjonalne | `contact:facebook` | j.w. | 0,2%. |
-| `owner` | text | opcjonalne | brak | brak | **Brak w OSM**; operator != właściciel. |
-
-### 6.8 Tabela mapowania: media
-
-| Pole kanoniczne | Typ | Wymagane | OSM | OpenAEDMap | Transformacja / uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `image_url` | text | opcjonalne | `image` | j.w. | 11,9%; URL może wygasnąć. |
-| `image_license` | text | opcjonalne | `image:license` | j.w. | 7,6%; w PL wszystkie `CC0`. |
-| `wikimedia_commons` | text | opcjonalne | `wikimedia_commons` | j.w. | 0,5%. |
-| `panoramax` | text | opcjonalne | `panoramax` | j.w. | 3 rekordy. |
-| `mapillary` | text | opcjonalne | `mapillary` | j.w. | 5 rekordów. |
-| `photo_id` | text | opcjonalne | brak | `@photo_id` (node API) | Tylko API node'a. |
-| `photo_url` | text | opcjonalne | brak | `@photo_url` (node API) | Proxy OpenAEDMap. |
-| `photo_source` | text | opcjonalne | brak | `@photo_source` (node API) | Źródło zdjęcia. |
-
-### 6.9 Tabela mapowania: metadane i licencja
-
-| Pole kanoniczne | Typ | Wymagane | OSM | OpenAEDMap | Transformacja / uwagi |
-| --- | --- | --- | --- | --- | --- |
-| `license` | string | **TAK** | `ODbL-1.0` | `ODbL-1.0` | Stała dla OSM/OpenAEDMap, mimo braku w GeoJSON. |
-| `attribution` | string | **TAK** | `© OpenStreetMap contributors` | j.w. | Wymagane przez ODbL. |
-| `source_url` | text | **TAK** | `https://www.openstreetmap.org/{type}/{id}` | derived | Link do obiektu. |
-| `source_updated_at` | timestamptz | opcjonalne | `timestamp` | brak | Ostatnia edycja OSM. |
-| `export_generated_at` | timestamptz | opcjonalne | brak | brak | Brak w GeoJSON; historyczny CSV miał `data_download_ts_utc`. |
-| `raw_tags` | jsonb | **TAK** | `tags` | `properties` bez `@*` | Pełna proweniencja i możliwość re-normalizacji. |
-| `imported_at` | timestamptz | **TAK** | ingest | ingest | Czas importu do naszego systemu. |
-| `updated_at` | timestamptz | **TAK** | ingest | ingest | Czas ostatniej zmiany rekordu. |
-| `timezone_name` | text | opcjonalne | brak | `@timezone_name` (node API) | Tylko API node'a. |
-| `timezone_offset` | text | opcjonalne | brak | `@timezone_offset` (node API) | Tylko API node'a. |
-
-### 6.10 Pola obowiązkowe wspólnego schematu
-
-Minimalny rekord do publikacji:
-
-| Pole | Uzasadnienie |
-| --- | --- |
-| `aed_id` | stabilna tożsamość |
-| `source` | proweniencja |
-| `source_record_id` | możliwość ponownego pobrania |
-| `country_code` | zakres terytorialny |
-| `lat`, `lon`, `geometry` | lokalizacja |
-| `device_type` | typ obiektu |
-| `access` | czy można użyć; `unknown` dozwolone, ale jawne |
-| `status` | `unknown` dozwolone, ale jawne |
-| `license`, `attribution`, `source_url` | zgodność z ODbL |
-| `raw_tags` | audyt i re-normalizacja |
-| `imported_at`, `updated_at` | operacyjne |
-
-**Nie** są obowiązkowe, bo OSM ich nie gwarantuje: `location_description`, `operator`, `phone`, `manufacturer`, `model`, `check_date`, `opening_hours`, `indoor`, `level`, `ref`, `image_url`.
-
-### 6.11 Czego brakuje w OSM i co trzeba dodać
-
-| Brakujące pole | Dlaczego ważne | Możliwe źródło |
-| --- | --- | --- |
-| `status` (działa/nie działa) | AED może być uszkodzony lub wyłączony | zgłoszenia operatora, formularz, weryfikacja terenowa |
-| `last_verified_at` | `check_date` pokrywa tylko 32,7% | formularz, import od operatora |
-| `serial_number` | identyfikacja egzemplarza | operator, tabliczka znamionowa |
-| `battery_expiry` | pewność działania | operator/serwis |
-| `electrode_expiry` | pewność działania | operator/serwis |
-| `owner` | odpowiedzialność prawna | operator/JST |
-| `access` dla 7,5% | czy ratownik wejdzie | weryfikacja terenowa |
-| `location_description` dla 32,7% | znalezienie w budynku | weryfikacja terenowa |
-| adres (`addr:*`) dla 99,4% | geokodowanie, TERYT | Geoportal adresy, operator |
-| `opening_hours` dla 62,9% | czy dostępne w nocy | operator |
-| `level` dla 79,8% | piętro w budynku | operator |
-| `image` dla 88,1% | rozpoznanie miejsca | OpenAEDMap photos, Wikimedia |
-
-### 6.12 Normalizacja wartości
-
-#### `access`
-
-| OSM | Kanoniczne | Uwaga |
-| --- | --- | --- |
-| `yes` | `public` | domyślny publiczny |
-| `permissive` | `public_tolerated` | formalnie niepubliczny, ale tolerowany |
-| `customers` | `customers` | tylko klienci/klienci obiektu |
-| `private` | `private` | prywatny |
-| `permit` | `permit` | wymagane pozwolenie |
-| `no` | `no` | brak dostępu |
-| `unknown` lub brak | `unknown` | nie zgadujemy |
-| `emergency` | `invalid` | przestarzałe; do przeglądu |
-
-#### `indoor`
-
-| OSM | Kanoniczne |
-| --- | --- |
-| `yes` | `indoor` |
-| `no` | `outdoor` |
-| brak | `unknown` |
-
-`location=indoor/outdoor/vehicle` traktować jako dodatkową wskazówkę, nie nadrzędne.
-
-#### `opening_hours`
-
-- Zachować surowy string.
-- `24/7` -> `opening_hours_24_7 = true`.
-- Puste -> `null` (nie `24/7`).
-- Parsować biblioteką wspierającą OSM OH; przy błędzie zapisać `raw` i `parse_error`.
-
-#### `phone`
-
-- Zachować `raw_phone`.
-- Znormalizować do E.164, jeśli możliwe.
-- `112`, `999`, `998` traktować jako `emergency_phone`, nie `phone` obiektowy; oznaczyć do przeglądu.
-
-#### `operator`
-
-- Trim, scal whitespace, ujednolić `sp. z o.o.` itp.
-- Nie scalać rekordów tylko po nazwie.
-- Jeśli `operator:wikidata` istnieje, użyć QID jako klucza encji.
-- `operator` może być puste przy `operator:wikidata`.
-
-#### `manufacturer` / `model`
-
-- Zachować raw.
-- Utworzyć słownik aliasów (`PHILIPS`/`Philips`, `ZOLL`/`Zoll`).
-- `model` nie powinien zawierać nazwy producenta.
-
-#### `ref`
-
-- Zachować jako `source_ref`.
-- Nie używać jako `aed_id`.
-- Jeśli `ref` wygląda na numer seryjny, **nie** przenosić automatycznie do `serial_number` bez potwierdzenia.
-
-### 6.13 Przykładowy rekord kanoniczny
-
-Dla node `477958354`:
-
-```json
-{
-  "aed_id": "osm:node/477958354",
-  "source": "osm",
-  "source_record_id": "node/477958354",
-  "osm_type": "node",
-  "osm_id": 477958354,
-  "osm_version": 12,
-  "osm_changeset": 125520683,
-  "osm_user": "☆Finvenkulo",
-  "osm_uid": 4128818,
-  "osm_timestamp": "2022-08-29T12:06:23Z",
-  "country_code": "PL",
-  "lat": 49.5878956,
-  "lon": 19.5168185,
-  "geometry": { "type": "Point", "coordinates": [19.5168185, 49.5878956] },
-  "location_description": "Na ścianie w jadalni",
-  "location_description_pl": null,
-  "location_description_en": null,
-  "indoor": "indoor",
-  "level": null,
-  "level_ref": null,
-  "address_street": null,
-  "address_housenumber": null,
-  "address_postcode": null,
-  "address_city": null,
-  "address_place": null,
-  "description": "Schronisko PTTK Markowe Szczawiny",
-  "access": "unknown",
-  "opening_hours": null,
-  "opening_hours_24_7": null,
-  "locked": null,
-  "wheelchair": null,
-  "device_type": "AED",
-  "manufacturer": null,
-  "model": null,
-  "serial_number": null,
-  "cabinet": null,
-  "status": "unknown",
-  "status_source": null,
-  "last_verified_at": null,
-  "check_date": null,
-  "survey_date": null,
-  "confidence": "low",
-  "operator": "PTTK",
-  "operator_type": null,
-  "operator_wikidata": null,
-  "phone": "+48 33 877 51 05",
-  "emergency_phone": null,
-  "email": "markowe.szczawiny@op.pl",
-  "website": null,
-  "image_url": null,
-  "image_license": null,
-  "wikimedia_commons": null,
-  "license": "ODbL-1.0",
-  "attribution": "© OpenStreetMap contributors",
-  "source_url": "https://www.openstreetmap.org/node/477958354",
-  "source_updated_at": "2022-08-29T12:06:23Z",
-  "export_generated_at": null,
-  "raw_tags": {
-    "defibrillator:location": "Na ścianie w jadalni",
-    "description": "Schronisko PTTK Markowe Szczawiny",
-    "ele": "1180",
-    "email": "markowe.szczawiny@op.pl",
-    "emergency": "defibrillator",
-    "indoor": "yes",
-    "operator": "PTTK",
-    "phone": "+48 33 877 51 05"
-  },
-  "imported_at": "2026-11-21T19:00:00Z",
-  "updated_at": "2026-11-21T19:00:00Z"
-}
-```
-
-Uwagi do przykładu:
-
-- `access` jest `unknown`, bo tag nie występuje. To poprawne, nie „public”.
-- `status` jest `unknown`, bo OSM nie ma statusu.
-- `confidence` jest `low`, bo brak `check_date`/`survey:date` i brak `access`.
-- `indoor` zmapowano z `indoor=yes` na `indoor`.
-
-### 6.14 Deduplikacja
-
-- W obrębie OSM: `osm_type + osm_id` jest unikalny. Nie deduplikować po współrzędnych.
-- Między źródłami: dopiero po normalizacji, z jawnym progiem:
-  - odległość < 30-50 m,
-  - ten sam typ urządzenia,
-  - podobny operator (QID lub znormalizowana nazwa),
-  - podobny adres/opis miejsca,
-  - różne `aed_id` -> zapisać jako `same_as`/`merged_into`, nie usuwać.
-- Nie scalać automatycznie rekordów o różnych `operator:wikidata`.
-- Nie scalać tylko dlatego, że `ref` jest taki sam: `ref` nie jest globalny.
-
-### 6.15 Braki i ryzyka
-
-| Ryzyko | Wpływ | Mitygacja |
-| --- | --- | --- |
-| Brak statusu | mapa pokazuje niedziałające AED | status `unknown`, zbieranie zgłoszeń |
-| Brak daty weryfikacji | fałszywe poczucie aktualności | eksponować `last_verified_at`, nie `timestamp` |
-| `access=private` 16,6% | ratownik może nie wejść | wyraźny filtr „publiczne” |
-| `opening_hours` 37,1% | dostęp nocny nieznany | pole `unknown`, nie domyślne 24/7 |
-| Adresy 0,6% | trudna nawigacja | Geoportal adresy + opis miejsca |
-| `operator` 4 086 unikalnych | trudna agregacja | `operator:wikidata` + słownik |
-| Brak licencji w GeoJSON | ryzyko naruszenia ODbL | własna atrybucja i link do licencji |
-| Tylko node | 2 way pominięte | świadomie zaakceptowane lub własny import OSM |
-
----
-
-## 7. Reprodukcja badań
-
-```bash
-# 1. OSM API: pojedynczy rekord
-curl -sS https://api.openstreetmap.org/api/0.6/node/477958354.json | jq .
-
-# 2. Overpass: 3 rekordy z metadanymi
-curl -sS --data-urlencode 'data=[out:json][timeout:60];
+```overpassql
+[out:json][timeout:180];
 area["ISO3166-1"="PL"][admin_level=2]->.pl;
 node["emergency"="defibrillator"](area.pl);
-out meta 3;' \
-  https://maps.mail.ru/osm/tools/overpass/api/interpreter | jq .
+out meta;
+```
 
-# 3. Taginfo: liczebność Polski
-curl -sS 'https://taginfo.geofabrik.de/europe:poland/api/4/tag/stats?key=emergency&value=defibrillator' | jq .
+Zapytanie o jeden węzeł:
 
-# 4. OpenAEDMap: liczba i eksport
-curl -sS 'https://openaedmap.org/api/v1/countries/names?language=pl' | jq '.[] | select(.country_code=="PL")'
-curl -sS -o PL.geojson 'https://openaedmap.org/api/v1/countries/PL.geojson'
-python3 -c 'import json; d=json.load(open("PL.geojson")); print(len(d["features"]))'
+```overpassql
+[out:json][timeout:25];
+node(477958354);
+out meta;
+```
 
-# 5. OpenAEDMap: pojedynczy node
-curl -sS 'https://openaedmap.org/api/v1/node/477958354' | jq .
+Eksport CSV z Overpass, jeśli potrzebny jest plik tabelaryczny:
 
-# 6. Historyczny CSV/GeoJSON (Wayback)
-curl -sSL 'https://web.archive.org/web/20230107044845id_/https://aed.openstreetmap.org.pl/aed_poland.csv' -o aed_poland.csv
-head -1 aed_poland.csv
-curl -sSL 'https://web.archive.org/web/20220118100904id_/https://aed.openstreetmap.org.pl/aed_poland.geojson' -o aed_poland.geojson
+```overpassql
+[out:csv(::type,::id,::lat,::lon,emergency,access,indoor,"defibrillator:location",operator,check_date;true;"|")][timeout:180];
+area["ISO3166-1"="PL"][admin_level=2]->.pl;
+node["emergency"="defibrillator"](area.pl);
+out meta;
+```
 
-# 7. Geoportal: GetCapabilities
-curl -sS 'https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/AdministrativeBoundaries?SERVICE=WMS&REQUEST=GetCapabilities' -o prg.xml
-grep -ioE 'defibryl|aed' prg.xml || echo 'brak warstwy AED'
+### 3.4. Format, licencja, limity, auth
 
-# 8. CloudFerro: brak publicznego AED
-curl -sSL 'https://creodias.eu/' | grep -ioE 'defibryl|aed' || echo 'brak AED w CREODIAS'
+| Cecha | Wartość | Źródło |
+|---|---|---|
+| Formaty wyjścia | JSON (`[out:json]`), XML (`[out:xml]`), CSV (`[out:csv(...)]`) | wiki Overpass API |
+| GeoJSON | brak natywnego `[out:geojson]`, trzeba konwertować z JSON lub `out geom` | wiki |
+| Geometria | `out meta` daje `lat`/`lon` dla węzłów, `out geom` daje geometrię dla way/relation | wiki |
+| Licencja danych | ODbL 1.0, pole `osm3s.copyright` w odpowiedzi | odpowiedź JSON |
+| Auth | brak dla publicznych instancji | wiki |
+| Limit głównej instancji | 10 000 zapytań/dzień, 1 GB/dzień, łącznie 10 min przetwarzania/dzień, brak równoległych skryptów | wiki Overpass API, FOSSGIS |
+| Wymagany nagłówek | `User-Agent` lub `Referer` identyfikujący aplikację | wiki |
+| Błędy 429/406 | odczekać 30 s przed kolejnym zapytaniem | wiki |
+| Komercyjne użycie | self-hosting lub płatna instancja | wiki |
+
+Najważniejsza pułapka: odpowiedź Overpass JSON **nie jest** GeoJSON. Ma własny format `{"version":0.6,"elements":[...]}`, a współrzędne węzła są w `lat`/`lon`, nie w `coordinates`.
+
+---
+
+## 4. Geoportal.gov.pl, usługa „Defibrylatory” WMS
+
+### 4.1. Co udało się sprawdzić
+
+**VERIFIED:** `https://www.geoportal.gov.pl/pl/usluga/wykaz-uslug/` zwraca HTTP 200 i 72 396 B. W treści nie ma ciągu `defibryl`, `defibrylator` ani `AED`. Lista zawiera usługi WMS/WMTS, WFS, WCS, ATOM, CSW, OpenLS i API, ale nie warstwę defibrylatorów.
+
+**VERIFIED:** `https://www.geoportal.gov.pl/wp-json/wp/v2/search?search=defibrylator&per_page=20` zwraca HTTP 200 i pustą tablicę `[]`. Zapytanie `search=AED` zwraca tylko przypadkowe treści, m.in. „XVI Podlaskie Forum GIS” i „OpenLS service”, bez warstwy AED.
+
+**VERIFIED:** strona `https://www.geoportal.gov.pl/pl/usluga/uslugi-przegladania-wms-i-wmts/` zwraca HTTP 200 i 212 320 B. Występują tam endpointy WMS m.in. `https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/...`, `https://mapy.geoportal.gov.pl/wss/ext/KrajowaIntegracjaNumeracjiAdresowej`, `https://mapy.geoportal.gov.pl/wss/ext/KGSG/CzasowyZakazPrzebywania`, ale **żadna warstwa nie nazywa się „Defibrylatory”**.
+
+### 4.2. Próby GetCapabilities
+
+**VERIFIED:** każde zapytanie do `mapy.geoportal.gov.pl` z tej sieci kończy się HTTP 401:
+
+```text
+GET https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/StandardResolution?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0
+HTTP 401
+content-type: text/html;charset=UTF-8
+<html><head><title>Unauthorized.</title></head><body><h1>Unauthorized.</h1><p></p></body></html>
+```
+
+To samo dla `VERSION=1.1.1`, dla `http://` i `https://`, dla `wss/service/pub/guest/ComposableWebService/ows`. To samo w Firefoksie, nie tylko w `curl`. Zatem host wymaga autoryzacji, sesji lub blokuje to środowisko na poziomie WAF. Nie można przez to pobrać `GetCapabilities` żadnej warstwy.
+
+### 4.3. Wniosek
+
+**NOT VERIFIED:** nie potwierdzono istnienia publicznej usługi WMS „Defibrylatory” na `Geoportal.gov.pl`.
+
+Co próbowano:
+1. `GetCapabilities` znanej usługi PRG, HTTP 401.
+2. Przegląd oficjalnego katalogu usług GUGiK, brak wpisu.
+3. Wyszukiwanie w WordPress REST API Geoportal, brak wpisu.
+4. Przegląd listy endpointów WMS/WMTS, brak warstwy AED.
+5. Wyszukiwarki zewnętrzne (Google, Bing, DuckDuckGo, Mojeek, Brave) były zablokowane captcha albo zwracały wyniki niepowiązane, więc nie stanowią dowodu.
+
+Jeżeli taka usługa istnieje, jest to prawdopodobnie usługa niepubliczna, wymagająca klucza, sesji albo umowy. Dla projektu nie należy na niej opierać się bez potwierdzenia u dostawcy. Ewentualny układ współrzędnych Geoportal to zwykle EPSG:2180 (PUWG 1992) lub EPSG:4326, ale **tego nie zweryfikowano**, bo nie udało się pobrać capabilities.
+
+---
+
+## 5. CloudFerro WMS
+
+### 5.1. Co udało się sprawdzić
+
+**VERIFIED:** CloudFerro to dostawca chmury IaaS, nie publiczny serwis geospatial z warstwą AED.
+
+- `https://wms.cloudferro.com/` -> DNS NXDOMAIN, brak rekordu A.
+- `https://maps.cloudferro.com/` -> DNS NXDOMAIN.
+- `https://geoserver.cloudferro.com/` -> DNS NXDOMAIN.
+- `https://geo.cloudferro.com/` -> rekord A `64.225.133.163`, ale połączenie HTTP timeout 12 s.
+- `https://www.cloudferro.com/sitemap.xml` -> HTTP 200, 131 URL w sitemapach `post`, `page`, `case-studies`. Po filtrze `aed|defib|wms|map|health|med|gis|geoportal` nie ma żadnego trafienia.
+- W JS OpenAEDMap widnieje stopka „hosted by CloudFerro” i link `https://cloudferro.com/`. CloudFerro jest partnerem hostingowym OpenAEDMap, obok UMW, CEZ, PW i GUGiK.
+
+### 5.2. Wniosek
+
+**NOT VERIFIED:** nie istnieje publiczny „CloudFerro WMS” z danymi AED, przynajmniej nie pod typowymi hostami i nie w oficjalnym katalogu CloudFerro.
+
+Co próbowano:
+1. DNS dla `wms`, `maps`, `geoserver`, `geo` subdomen.
+2. HTTP HEAD/GET dla działającej domeny `geo.cloudferro.com`.
+3. Sitemap CloudFerro i filtr tematyczny.
+4. Analiza stopki OpenAEDMap, gdzie CloudFerro występuje jako hosting partner.
+
+Rekomendacja: traktować CloudFerro jako **infrastrukturę hostingu OpenAEDMap**, a nie jako źródło danych AED. Nie ma czego mapować na wspólny schemat poza metadanymi provenance.
+
+---
+
+## 6. Tabela mapowania na wspólny schemat AED
+
+Kolumna „Pokrycie PL” dotyczy eksportu OpenAEDMap `PL.geojson` z 2026-11-21. „Wymagane” oznacza rekomendację dla naszego schematu, nie wymóg OSM.
+
+### 6.1. Identyfikatory i provenance
+
+| Koncept kanoniczny | Kandydat pola | Źródło OSM / OpenAEDMap | Typ | Wymagane | Pokrycie PL | Uwagi |
+|---|---|---|---|---:|---:|---|
+| ID obiektu | `id` | `@osm_type` + `/` + `@osm_id` | string | tak | 100% | np. `node/9464587317`, stabilne w OSM |
+| ID źródła | `source_id` | `@osm_id` | int64 | tak | 100% | bez typu node |
+| Wersja źródła | `source_version` | `@osm_version` | int | tak | 100% | do wykrywania zmian |
+| Typ źródła | `source_type` | `@osm_type` | enum | tak | 100% | zawsze `node` |
+| Znacznik czasu źródła | `source_timestamp` | brak w GeoJSON, jest `timestamp` w OSM API | ISO 8601 | tak | 0% w GeoJSON | luka eksportu |
+| Rewizja zmian | `source_changeset` | brak w GeoJSON, jest `changeset` w OSM API | int64 | nie | 0% | audyt |
+| Autor zmiany | `source_user` | brak w GeoJSON, jest `user` w OSM API | string | nie | 0% | audyt |
+| URL źródła | `source_url` | `https://www.openstreetmap.org/node/{@osm_id}` | URL | tak | 100% (pochodna) | budować z ID |
+| Licencja | `license` | ODbL 1.0 | string | tak | 100% (pochodna) | `ODbL-1.0` |
+| Atrybucja | `attribution` | `© OpenStreetMap contributors` | string | tak | 100% (pochodna) | wymagana |
+| Data pobrania | `retrieved_at` | data żądania | ISO 8601 | tak | 100% (pochodna) | dodać w ETL |
+| ID zewnętrzny | `external_ids` | `ref:api-um-warszawa-pl`, `ref:pkt-zycia-2023`, `ref:GB:the_circuit`, `ref` | object/array | nie | <1% | brak standardu |
+
+### 6.2. Lokalizacja i adres
+
+| Koncept kanoniczny | Kandydat pola | Źródło OSM / OpenAEDMap | Typ | Wymagane | Pokrycie PL | Uwagi |
+|---|---|---|---|---:|---:|---|
+| Szerokość | `location.lat` | `geometry.coordinates[1]` lub OSM `lat` | float | tak | 100% | EPSG:4326 |
+| Długość | `location.lon` | `geometry.coordinates[0]` lub OSM `lon` | float | tak | 100% | EPSG:4326 |
+| Geometria | `location.geometry` | `geometry` | GeoJSON Point | tak | 100% | `[lon, lat]` |
+| Opis miejsca | `location.description` | `defibrillator:location` | string | tak | 67,3% | brak dla 1/3 |
+| Opis PL | `location.description_pl` | `defibrillator:location:pl` | string | nie | 28,3% | |
+| Opis EN | `location.description_en` | `defibrillator:location:en` | string | nie | 13,2% | |
+| Wewnątrz/zewnątrz | `location.indoor` | `indoor` | bool | tak | 87,3% | `yes`/`no` |
+| Piętro | `location.level` | `level` | string | nie | 20,2% | może być `-2`, `0.5` |
+| Piętro lokalne | `location.level_ref` | `level:ref` | string | nie | ~0% | oznaczenia lokalne |
+| Ulica | `location.address.street` | `addr:street` | string | nie | 0,4% | prawie brak |
+| Numer | `location.address.housenumber` | `addr:housenumber` | string | nie | 0,6% | |
+| Kod pocztowy | `location.address.postcode` | `addr:postcode` | string | nie | 0,2% | |
+| Miasto | `location.address.city` | `addr:city` | string | nie | 0,4% | |
+| Miejscowość | `location.address.place` | `addr:place` | string | nie | 0,1% | |
+| Piętro adresowe | `location.address.floor` | `addr:floor` | string | nie | 0,05% | |
+| Wejście | `location.entrance` | `entrance` | string | nie | ~0% | |
+| Dostępność wózka | `location.wheelchair` | `wheelchair` | enum | nie | 2,5% | `yes`/`limited`/`no` |
+| Wysokość | `location.elevation_m` | `ele` | float | nie | 0,02% | metry |
+
+### 6.3. Dostęp
+
+| Koncept kanoniczny | Kandydat pola | Źródło OSM / OpenAEDMap | Typ | Wymagane | Pokrycie PL | Uwagi |
+|---|---|---|---|---:|---:|---|
+| Typ dostępu | `access.type` | `access` | enum | tak | 92,5% | `yes`, `customers`, `private`, `permit`, `permissive`, `no`, `unknown` |
+| Godziny dostępu | `access.opening_hours` | `opening_hours` | string OSM | tak | 37,1% | nie ISO 8601 |
+| Zamknięcie | `access.locked` | `locked` | bool | nie | 0,02% | prawie brak |
+| Kod do skrzynki | `access.code` | `defibrillator:code` | string | nie | 0% | niejednoznaczne, dane wrażliwe |
+| Uwagi o dostępie | `access.note` | `access:note`, `note:access` | string | nie | ~0% | |
+| Dostępność 24/7 | `access.24_7` | `opening_hours=24/7` | bool (pochodna) | nie | 22,6% | 4 136 z 18 298 |
+| Dostęp publiczny | `access.is_public` | pochodna z `access` | bool | tak | 92,5% (pochodna) | `yes`/`permissive` = publiczny, `private`/`no` = nie |
+
+### 6.4. Urządzenie
+
+| Koncept kanoniczny | Kandydat pola | Źródło OSM / OpenAEDMap | Typ | Wymagane | Pokrycie PL | Uwagi |
+|---|---|---|---|---:|---:|---|
+| Producent | `device.manufacturer` | `manufacturer`, `defibrillator:brand` | string | nie | 1,9% | kapitalizacja nieujednolicona |
+| Model | `device.model` | `model` | string | nie | 0,8% | nazwy nieujednolicone |
+| Typ skrzynki | `device.cabinet.type` | `defibrillator:cabinet` | enum | nie | 0% | `vertical_door`, `horizontal_door`, `twist`, `mechanical`, `no` |
+| Producent skrzynki | `device.cabinet.manufacturer` | `defibrillator:cabinet:manufacturer` | string | nie | 0% | |
+| Kolor skrzynki | `device.cabinet.colour` | `defibrillator:cabinet:colour` | string | nie | 0% | |
+| Przenośny | `device.portable` | `portable` | bool | nie | ~0% | |
+| Numer referencyjny | `device.ref` | `ref` | string | nie | 0,8% | semantyka niejednolita, nie numer seryjny |
+| Numer seryjny | `device.serial` | brak standardu OSM | string | nie | 0% | **brak w źródle** |
+| Numer krajowy | `device.national_id` | brak standardu OSM | string | nie | 0% | **brak w źródle** |
+
+### 6.5. Status i weryfikacja
+
+| Koncept kanoniczny | Kandydat pola | Źródło OSM / OpenAEDMap | Typ | Wymagane | Pokrycie PL | Uwagi |
+|---|---|---|---|---:|---:|---|
+| Data sprawdzenia | `verification.last_checked_at` | `check_date` | ISO 8601 date | tak | 32,7% | nie jest statusem |
+| Data pomiaru | `verification.survey_date` | `survey:date` | ISO 8601 date lub `YYYY-MM` | nie | 0,1% | może być niepełna |
+| Status działania | `verification.status` | brak | enum | tak | 0% | **brak w źródle** |
+| Wynik inspekcji | `verification.result` | brak | string | nie | 0% | **brak w źródle** |
+| Problem do naprawy | `verification.fixme` | `fixme` | string | nie | 3,5% | sygnał problemu |
+| Notatka | `verification.note` | `note` | string | nie | 1,3% | często wymóg licencyjny |
+| Wersja OSM | `verification.osm_version` | `@osm_version` | int | tak | 100% | pochodna |
+| Znacznik edycji | `verification.osm_timestamp` | brak w GeoJSON, jest w OSM API | ISO 8601 | tak | 0% | luka |
+| Świeżość | `verification.age_days` | pochodna z `check_date` | int | tak | 32,7% | obliczać w ETL |
+| Termin ważności elektrod | `verification.pad_expiry` | brak | date | nie | 0% | **brak w źródle** |
+| Termin ważności baterii | `verification.battery_expiry` | brak | date | nie | 0% | **brak w źródle** |
+| Dostępność w czasie rzeczywistym | `verification.realtime_available` | brak | bool | nie | 0% | **brak w źródle** |
+
+### 6.6. Operator i kontakt
+
+| Koncept kanoniczny | Kandydat pola | Źródło OSM / OpenAEDMap | Typ | Wymagane | Pokrycie PL | Uwagi |
+|---|---|---|---|---:|---:|---|
+| Nazwa operatora | `operator.name` | `operator` | string | tak | 32,8% | 4 086 różnych wartości |
+| Typ operatora | `operator.type` | `operator:type` | enum | nie | 0,5% | `ngo`, `government`, `public`, `private`, `school`, `religious` |
+| ID Wikidata | `operator.wikidata` | `operator:wikidata` | string Q-id | nie | 1,0% | |
+| Wikipedia | `operator.wikipedia` | `operator:wikipedia` | string | nie | 0,3% | |
+| Krótka nazwa | `operator.short_name` | `operator:short`, `short_operator` | string | nie | 0,5% | |
+| Telefon | `operator.phone` | `phone`, `contact:phone`, `phone:mobile` | string | tak | 24,5% | format nieujednolicony |
+| Telefon ratunkowy | `operator.emergency_phone` | `emergency:phone`, `emergency_telephone_code` | string | tak | 1,1% | w Polsce `112` |
+| E-mail | `operator.email` | `email` | string | nie | 0,3% | |
+| Strona | `operator.website` | `website`, `url`, `contact:facebook` | URL | nie | 0,5% | |
+| Marka | `operator.brand` | `brand`, `defibrillator:brand` | string | nie | ~0,1% | |
+
+### 6.7. Media
+
+| Koncept kanoniczny | Kandydat pola | Źródło OSM / OpenAEDMap | Typ | Wymagane | Pokrycie PL | Uwagi |
+|---|---|---|---|---:|---:|---|
+| Główne zdjęcie | `media.primary_url` | `image` | URL | nie | 11,9% | może być zewnętrzny host |
+| Licencja zdjęcia | `media.license` | `image:license` | string | tak, jeśli jest zdjęcie | 7,6% | tylko `CC0` w PL |
+| Źródło zdjęcia | `media.source` | `@photo_source`, `image` | URL | nie | 0% w GeoJSON | tylko `/node/{id}` |
+| ID zdjęcia OpenAEDMap | `media.photo_id` | `@photo_id` | string | nie | 0% w GeoJSON | tylko `/node/{id}` |
+| URL zdjęcia OpenAEDMap | `media.photo_url` | `@photo_url` | URL | nie | 0% w GeoJSON | tylko `/node/{id}` |
+| Wikimedia Commons | `media.wikimedia_commons` | `wikimedia_commons` | string | nie | 0,5% | |
+| Mapillary | `media.mapillary` | `mapillary` | string | nie | 0,03% | |
+| Panoramax | `media.panoramax` | `panoramax` | string | nie | 0,02% | |
+| Flickr | `media.flickr` | `flickr` | string | nie | ~0% | |
+
+### 6.8. Metadane i licencja
+
+| Koncept kanoniczny | Kandydat pola | Źródło OSM / OpenAEDMap | Typ | Wymagane | Pokrycie PL | Uwagi |
+|---|---|---|---|---:|---:|---|
+| Pierwotne źródło | `provenance.source` | `source`, `source:url`, `source:addr` | string | tak | 7,9% | 455 różnych wartości |
+| Licencja danych | `provenance.license` | ODbL 1.0 | string | tak | 100% (pochodna) | |
+| Atrybucja | `provenance.attribution` | `© OpenStreetMap contributors` | string | tak | 100% (pochodna) | |
+| URL obiektu | `provenance.url` | `https://www.openstreetmap.org/node/{id}` | URL | tak | 100% (pochodna) | |
+| Data pobrania | `provenance.retrieved_at` | data ETL | ISO 8601 | tak | 100% (pochodna) | |
+| Wersja danych | `provenance.dataset_version` | ETag lub `x-version` | string | nie | 100% (pochodna) | np. `5533` |
+| Strefa czasowa | `provenance.timezone` | `@timezone_name` | string IANA | nie | 0% w GeoJSON | tylko `/node/{id}` |
+| Offset czasu | `provenance.timezone_offset` | `@timezone_offset` | string | nie | 0% w GeoJSON | tylko `/node/{id}` |
+
+---
+
+## 7. Pola obowiązkowe, pokrycie i luki
+
+### 7.1. Co jest obowiązkowe w OSM
+
+W OSM obowiązkowy jest tylko `emergency=defibrillator`. Wszystkie pozostałe tagi są opcjonalne, choć wiki nazywa niektóre „important”. To oznacza, że **schemat OSM nie gwarantuje** żadnego z pól potrzebnych do bezpiecznego korzystania z mapy AED.
+
+### 7.2. Co powinno być obowiązkowe w naszym schemacie
+
+Minimalny zestaw dla mapy:
+
+1. `id` i `source_id`, `source_type`, `source_version`.
+2. `location.lat`, `location.lon`, `location.geometry`.
+3. `access.type` i `access.is_public`.
+4. `verification.last_checked_at` lub jawne `verification.status`.
+5. `provenance.source`, `provenance.license`, `provenance.attribution`, `provenance.retrieved_at`.
+
+### 7.3. Największe braki w źródle
+
+| Brak | Konsekwencja | Obecność w PL |
+|---|---|---:|
+| `verification.status` (działa / nie działa) | nie można oznaczyć awarii | 0% |
+| `verification.osm_timestamp` w GeoJSON | nie wiadomo, kiedy obiekt był edytowany | 0% |
+| `device.serial` / `device.national_id` | brak identyfikacji fizycznego urządzenia | 0% |
+| `verification.pad_expiry` / `battery_expiry` | brak informacji o gotowości do użycia | 0% |
+| strukturalny adres | brak możliwości adresowego wyszukiwania | <1% |
+| `operator.name` | brak kontaktu do właściciela | 32,8% |
+| `access.opening_hours` | brak informacji, kiedy podejść | 37,1% |
+| `image:license` przy każdym zdjęciu | ryzyko prawne przy mediach | 7,6% |
+
+### 7.4. Rekomendacje mapowania
+
+1. Budować `id` jako `node/{@osm_id}`, a `source_version` brać z `@osm_version`.
+2. Nie traktować `check_date` jako statusu. To tylko data ostatniego sprawdzenia. Osobno liczyć `verification.age_days`.
+3. `access` mapować na zamknięty enum, a `access=no` i `access=unknown` oznaczać jako „niedostępny publicznie” z flagą do weryfikacji.
+4. `opening_hours` przechowywać jako string OSM i dodatkowo parsować do `access.is_24_7`.
+5. `level` i `level:ref` trzymać osobno, bo mają różne znaczenie.
+6. Media bez `image:license` oznaczać jako `license=unknown` i nie publikować bez wyjaśnienia.
+7. Dołożyć własne `verification.status`, `verification.last_verified_by` i `verification.source`, bo OSM ich nie ma.
+8. Przy imporcie zapisywać `provenance.retrieved_at` i ETag eksportu, bo plik GeoJSON nie ma znacznika czasu danych.
+9. Nie używać CloudFerro ani Geoportal jako źródła danych AED, dopóki nie zostaną potwierdzone publiczne endpointy i warunki licencji.
+10. Jeśli potrzebny jest CSV, generować go z Overpass `[out:csv(...)]` lub z naszego ETL, nie szukać CSV w OpenAEDMap.
+
+---
+
+## 8. Dokładne komendy użyte do weryfikacji
+
+```bash
+# OSM Wiki
+curl -sS -L "https://wiki.openstreetmap.org/w/index.php?title=Tag:emergency%3Ddefibrillator&action=raw"
+
+# OSM API, realny węzeł
+curl -sS "https://api.openstreetmap.org/api/0.6/node/10739764584.json"
+
+# OpenAEDMap, eksport kraju
+curl -sS -L -D headers.txt \
+  "https://openaedmap.org/api/v1/countries/PL.geojson" -o PL.geojson
+
+# OpenAEDMap, CSV, oczekiwany 404
+curl -sS -L "https://openaedmap.org/api/v1/countries/PL.csv"
+
+# OpenAEDMap, pojedynczy węzeł
+curl -sS "https://openaedmap.org/api/v1/node/9464587317"
+
+# Taginfo
+curl -sS "https://taginfo.openstreetmap.org/api/4/tag/stats?key=emergency&value=defibrillator"
+
+# Overpass, główny endpoint, test z tej sieci
+curl -sS --max-time 120 -G "https://overpass-api.de/api/interpreter" \
+  --data-urlencode 'data=[out:json][timeout:90];node["emergency"="defibrillator"](52.229,21.011,52.232,21.015);out meta 2;'
+
+# Overpass, mirror szwajcarski, test kontrolny
+curl -sS -G "https://overpass.osm.ch/api/interpreter" \
+  --data-urlencode 'data=[out:json][timeout:45];node["emergency"="defibrillator"](46,7,47,9);out count;'
+
+# Geoportal, GetCapabilities
+curl -sS -L -A "Mozilla/5.0" \
+  "https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/StandardResolution?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0"
+
+# Geoportal, katalog usług
+curl -sS -L "https://www.geoportal.gov.pl/pl/usluga/wykaz-uslug/"
+
+# CloudFerro, DNS i sitemap
+getent hosts wms.cloudferro.com
+curl -sS -L "https://www.cloudferro.com/sitemap.xml"
 ```
 
 ---
 
-## 8. Wnioski dla wzorcowego zakresu danych
+## 9. Podsumowanie decyzji
 
-1. **OSM jest dobrym źródłem lokalizacji i opisu miejsca**, ale nie statusu i nie danych technicznych.
-2. **OpenAEDMap to wygodny eksport OSM**, ale nie zastępuje OSM API: brak CSV, brak metadanych czasu, tylko node.
-3. **Geoportal i CloudFerro nie są źródłami AED.** Trzeba to jasno powiedzieć w dokumentacji projektu, żeby nie obiecywać integracji, której nie ma.
-4. **Wspólny schemat powinien mieć jawne `unknown`** dla dostępu i statusu. To lepsze niż fałszywe `yes`.
-5. **Pola obowiązkowe** to tożsamość, lokalizacja, typ, licencja i proweniencja. Reszta jest „best effort”.
-6. **Brakujące pola** (status, numer seryjny, ważność elektrod, właściciel) muszą pochodzić z formularza/operatora, nie z OSM.
-7. **`last_verified_at` musi być oddzielone od `osm_timestamp`**, inaczej raport będzie fałszywie „świeży”.
-
----
-
-## 9. Statusy weryfikacji: skrót
-
-| Twierdzenie | Status |
-| --- | --- |
-| `emergency=defibrillator` jest głównym tagiem AED | **VERIFIED** (wiki + dane) |
-| W Polsce jest ok. 18,3 tys. AED w OSM | **VERIFIED** (taginfo + OpenAEDMap) |
-| OpenAEDMap eksportuje 18 298 node'ów dla PL | **VERIFIED** (API) |
-| OpenAEDMap GeoJSON ma `@osm_type`, `@osm_id`, `@osm_version` i tagi | **VERIFIED** (plik) |
-| OpenAEDMap nie ma CSV | **VERIFIED** (404) |
-| Historyczny CSV miał 15 kolumn i 4 588 rekordów | **VERIFIED** (Wayback) |
-| Historyczny GeoJSON miał 882 features | **VERIFIED** (Wayback) |
-| Geoportal WMS nie ma warstwy AED | **VERIFIED** (GetCapabilities, 52 warstwy) |
-| Geoportal PRG WMS ma EPSG:2176-2180, 3857, 4326 | **VERIFIED** |
-| CloudFerro nie ma publicznego AED | **NOT VERIFIED jako źródło AED** (brak znalezionych dowodów) |
-| CloudFerro ma publiczny WMS z AED | **NOT VERIFIED** (brak) |
-| Częstotliwość aktualizacji warstw Geoportal | **NOT VERIFIED** (brak w GetCapabilities) |
-| Licencja prawna danych Geoportal | **NOT VERIFIED** (wymaga regulaminu) |
-
----
-
-## 10. Źródła
-
-| Źródło | URL | Wykorzystanie |
-| --- | --- | --- |
-| OSM Wiki, `Tag:emergency=defibrillator` | https://wiki.openstreetmap.org/wiki/Tag:emergency%3Ddefibrillator | schemat tagów AED, rekomendacje |
-| OSM Wiki, `Key:defibrillator:location` | https://wiki.openstreetmap.org/wiki/Key:defibrillator:location | opis pola lokalizacji |
-| OSM Wiki, `Key:check_date`, `Key:survey:date` | https://wiki.openstreetmap.org/wiki/Key:check_date | semantyka dat weryfikacji |
-| OSM copyright | https://www.openstreetmap.org/copyright | ODbL 1.0, atrybucja |
-| Overpass API Wiki | https://wiki.openstreetmap.org/wiki/Overpass_API | limity, składnia, publiczne endpointy |
-| OSM API 0.6 | https://api.openstreetmap.org/api/0.6/ | schemat node'a |
-| Taginfo Polska | https://taginfo.geofabrik.de/europe:poland/ | liczebność i wartości tagów |
-| OpenAEDMap API | https://openaedmap.org/api/v1/ | GeoJSON, node, lista krajów |
-| OpenAEDMap backend | https://github.com/openstreetmap-polska/openaedmap-backend | import tylko node, interwał 30 s, ODbL |
-| Historyczny CSV (Wayback) | https://web.archive.org/web/20230107044845id_/https://aed.openstreetmap.org.pl/aed_poland.csv | 15 kolumn, 4 588 rekordów |
-| Historyczny GeoJSON (Wayback) | https://web.archive.org/web/20220118100904id_/https://aed.openstreetmap.org.pl/aed_poland.geojson | 882 features |
-| Historyczne metadata (Wayback) | https://web.archive.org/web/20230107045919id_/https://aed.openstreetmap.org.pl/aed_poland_metadata.json | data pobrania, liczba elementów |
-| Geoportal, WMS/WMTS | https://www.geoportal.gov.pl/pl/usluga/uslugi-przegladania-wms-i-wmts/ | katalog usług, brak AED |
-| Geoportal, PRG WMS | https://mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WMS/AdministrativeBoundaries | GetCapabilities, warstwy, EPSG |
-| Geoportal, adresy WMS | https://mapy.geoportal.gov.pl/wss/ext/KrajowaIntegracjaNumeracjiAdresowej | warstwy adresowe |
-| CREODIAS | https://creodias.eu/ | dane EO, brak AED |
-| CloudFerro docs | https://docs.cloudferro.com/ | katalog usług, brak AED/WMS AED |
-
----
-
-*Dokument badawczy. Nie jest poradą prawną. Przed publikacją danych w dane.gov.pl należy zweryfikować warunki ODbL i regulamin Geoportal.*
+- **OpenStreetMap** jest jedynym w pełni zweryfikowanym, otwartym źródłem danych AED dla Polski. Licencja ODbL 1.0, geometria EPSG:4326, tagging `emergency=defibrillator`.
+- **OpenAEDMap** jest gotowym, wygodnym eksportem OSM. Bieżący GeoJSON jest potwierdzony, bieżący CSV nie istnieje, ale historyczny CSV z 2023-01-07 jest dostępny w Wayback. Dane są świeże (replikacja 30 s, cache 1 h), ale eksport gubi `timestamp`, `changeset` i `user`.
+- **Overpass API** jest właściwym narzędziem do zapytań ad hoc i CSV, ale z tego środowiska główne instancje były nieosiągalne. Do produkcji trzeba zapewnić własną instancję, płatny dostęp lub stabilny mirror.
+- **Geoportal.gov.pl** nie ma potwierdzonej publicznej warstwy „Defibrylatory”. Wszystkie znane endpointy WMS zwracają 401, a katalog usług nie zawiera takiej warstwy.
+- **CloudFerro** to hosting OpenAEDMap, nie źródło danych AED. Nie ma publicznego WMS z AED.
+- Do wspólnego schematu trzeba dodać pola, których OSM nie ma: status działania, wynik inspekcji, identyfikator fizycznego urządzenia, terminy ważności elektrod i baterii oraz znacznik czasu źródła.
