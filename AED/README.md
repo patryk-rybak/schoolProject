@@ -89,6 +89,7 @@ Aplikacja działa pod http://localhost:3000.
 | Zadanie | Komenda |
 | --- | --- |
 | Serwer deweloperski | `bun run dev` |
+| Lokalny HTTPS dla testu dane.gov.pl | `bun run dev:tls` |
 | Typecheck | `bun run typecheck` |
 | Lint | `bun run lint` |
 | Format | `bun run format` |
@@ -145,6 +146,30 @@ bun run db:studio
 ```
 
 Drizzle Kit działa na Bunie. `@libsql/client` jest zależnością deweloperską, ponieważ CLI Drizzle Kit potrzebuje klienta SQLite; aplikacja w runtime używa `bun:sqlite`.
+
+## Integracja z dane.gov.pl
+
+Backend publikuje dane AED w formacie harwestera dane.gov.pl (`urn:otwarte-dane:harvester:1.13`). Portal sam pobiera feed raz na dobę — nie ma API do wypychania danych.
+
+| Endpoint | Zawartość |
+| --- | --- |
+| `/harvester/feed.xml` | feed XML 1.13 (GET/HEAD) |
+| `/harvester/feed.md5` | suma MD5 dokładnie tych bajtów |
+| `/data/aed.csv` | rejestr AED w CSV |
+| `/data/aed.geojson` | rejestr AED jako GeoJSON |
+
+Zasoby muszą być dostępne przez HTTPS, dlatego do testów lokalnych służy
+`bun run dev:tls` (self-signed proxy na porcie 3443).
+
+Pełna instrukcja testu end-to-end z lokalnym portalem (łącznie z wymaganym
+workerem Celery, regułą `ufw` i obejściem walidacji formularza dla adresów IP):
+[`backend/gov-api/README.md`](./backend/gov-api/README.md).
+
+```bash
+bun run dev
+PUBLIC_BASE_URL=https://172.18.18.1:3443 bun run dev   # wariant dla portalu w Dockerze
+bun run dev:tls
+```
 
 ## Auth
 

@@ -17,6 +17,7 @@
     "predev": "bun frontend/scripts/copy-maplibre-worker.ts",
     "prebuild": "bun frontend/scripts/copy-maplibre-worker.ts",
     "dev": "bunx --bun vite dev --port 3000",
+    "dev:tls": "bun frontend/scripts/dev-tls-proxy.ts",
     "build": "bunx --bun vite build",
     "preview": "bun .output/server/index.mjs",
     "typecheck": "tsc --noEmit",

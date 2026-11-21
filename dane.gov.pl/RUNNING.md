@@ -125,11 +125,16 @@ services actually needed:
 ```bash
 sudo docker compose -f docker-compose.local.yml up -d --build \
   mcod-db mcod-redis mcod-rabbitmq mcod-elasticsearch mcod-rdfdb mcod-smtp mcod-nginx \
-  mcod-local-admin mcod-local-api mcod-local-cms
+  mcod-local-admin mcod-local-api mcod-local-cms mcod-local-celery
 ```
 
 The first build takes several minutes (Python 3.8 image, Elasticsearch plugins,
 Fuseki, nginx) and looks frozen — let it finish.
+
+`mcod-local-celery` is the worker that runs asynchronous tasks, including the
+harvester XML validation in the admin panel and scheduled imports. Start it
+whenever you test the dane.gov.pl integration (see
+`AED/backend/gov-api/README.md`).
 
 Check that nothing died:
 
