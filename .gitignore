@@ -16,3 +16,7 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
+
+# dane.gov.pl sources: extracted trees are local only (see dane.gov.pl/RUNNING.md)
+/dane.gov.pl/backend/
+/dane.gov.pl/frontend/
