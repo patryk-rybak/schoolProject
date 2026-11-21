@@ -129,12 +129,19 @@ map:
   access_type:
     map:
       value:
-        field: properties.device_public_access
+        func: lower
+        args:
+          - field: properties.device_public_access
       cases:
+        "publiczny": public
+        "ogólnodostępny": public
+        "ogolnodostepny": public
         "tak": public
         "yes": public
         "true": public
         "public": public
+        "niepubliczny": private
+        "prywatny": private
         "nie": private
         "no": private
         "false": private
@@ -143,12 +150,16 @@ map:
     when:
       op: regex
       left:
-        field: properties.device_availability
-      right: "(?i)24"
+        func: lower
+        args:
+          - field: properties.device_access_description
+      right: "(24|całodob|calodob)"
     then: true
     else: null
   manufacturer:
     field: properties.device_manufacturer
+  label:
+    field: properties.defibrillator_id
   device_type:
     const: public_aed
   status:
@@ -157,10 +168,12 @@ map:
     const: unverified
   confidence:
     const: 0.8
+  # The API has no operator field. The city is the publisher; do not infer an
+  # operator from the dataset owner.
   operator_name:
-    const: m.st. Warszawa
+    const: null
   operator_type:
-    const: municipality
+    const: null
   source_updated_at:
     const: "2026-06-01"
 
@@ -210,6 +223,11 @@ publish:
   enabled: false
   license_id: CC-BY-4.0
   attribution: "m.st. Warszawa — dane.gov.pl, CC BY 4.0"
+  allowed_for_ingest: true
+  allowed_for_export: true
+  terms_url: "https://creativecommons.org/licenses/by/4.0/"
+  terms_hash: "sha256:2c31f90b734f0e2dd5dc017737eb2094e133be99a188396659c9cdb3bd3d0625"
+  terms_checked_at: "2026-11-21T00:00:00Z"
   redact:
     - serial_number
     - phone

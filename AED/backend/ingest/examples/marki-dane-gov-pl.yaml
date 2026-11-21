@@ -86,7 +86,7 @@ map:
   name:
     field: Lokalizacja
   label:
-    field: Nazwa
+    field: Numer Id
   facility_type:
     const: unknown
   # Kolumna "Długość geograficzna" faktycznie zawiera szerokość (lat).
@@ -115,10 +115,12 @@ map:
     const: unverified
   confidence:
     const: 0.6
+  # The CSV has no operator column. "Miasto Marki" is the publisher; the
+  # operator is not proven by this dataset.
   operator_name:
-    const: Miasto Marki
+    const: null
   operator_type:
-    const: municipality
+    const: null
   source_updated_at:
     const: "2025-07-10"
 
@@ -178,6 +180,11 @@ publish:
   enabled: true
   license_id: CC-BY-4.0
   attribution: "Miasto Marki — dane.gov.pl, CC BY 4.0"
+  allowed_for_ingest: true
+  allowed_for_export: true
+  terms_url: "https://creativecommons.org/licenses/by/4.0/"
+  terms_hash: "sha256:2c31f90b734f0e2dd5dc017737eb2094e133be99a188396659c9cdb3bd3d0625"
+  terms_checked_at: "2026-11-21T00:00:00Z"
   redact: []
   exports:
     - csv

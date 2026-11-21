@@ -1,0 +1,431 @@
+{
+	"connector": {
+		"family": "file_static",
+		"notes": "Pojedynczy duży plik GeoJSON; pobieranie warunkowe po ETag/Last-Modified.",
+		"parser": "geojson"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": false
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 18298
+		},
+		"golden_sample": {
+			"required_match_ratio": 0.95,
+			"size": 25
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 0.01,
+			"max_duplicate_id_ratio": 0,
+			"max_null_ratio": {
+				"lat": 0,
+				"lon": 0,
+				"name": 0.5
+			},
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "ignore",
+			"on_missing_field": "warn",
+			"on_new_field": "review",
+			"on_type_change": "fail"
+		},
+		"volume": {
+			"max_delta_ratio": 0.5,
+			"min_records": 10000,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": true,
+			"last_modified": true
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 6
+		},
+		"retries": {
+			"backoff_ms": 2000,
+			"max": 2
+		},
+		"timeout_ms": 120000,
+		"url": "https://openaedmap.org/api/v1/countries/PL.geojson",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"map": {
+		"access_type": {
+			"else": {
+				"map": {
+					"cases": {
+						"customers": "customers",
+						"no": "private",
+						"permissive": "permissive",
+						"private": "private",
+						"public": "public",
+						"yes": "public"
+					},
+					"default": "unknown",
+					"value": {
+						"field": "access"
+					}
+				}
+			},
+			"then": "key",
+			"when": {
+				"left": {
+					"field": "locked"
+				},
+				"op": "eq",
+				"right": "yes"
+			}
+		},
+		"city": {
+			"coalesce": [
+				{
+					"field": "addr:city"
+				},
+				{
+					"field": "addr:place"
+				}
+			]
+		},
+		"confidence": {
+			"const": 0.55
+		},
+		"coord_precision_m": {
+			"const": 15
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"description": {
+			"field": "description"
+		},
+		"device_type": {
+			"const": "public_aed"
+		},
+		"email": {
+			"coalesce": [
+				{
+					"field": "contact:email"
+				},
+				{
+					"field": "email"
+				}
+			]
+		},
+		"entrance_description": {
+			"coalesce": [
+				{
+					"field": "defibrillator:location:pl"
+				},
+				{
+					"field": "defibrillator:location"
+				}
+			]
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"fee": {
+			"args": [
+				{
+					"field": "fee"
+				}
+			],
+			"func": "to_bool"
+		},
+		"house_number": {
+			"field": "addr:housenumber"
+		},
+		"indoor": {
+			"args": [
+				{
+					"field": "indoor"
+				}
+			],
+			"func": "to_bool"
+		},
+		"is_24_7": {
+			"else": null,
+			"then": true,
+			"when": {
+				"left": {
+					"field": "opening_hours"
+				},
+				"op": "eq",
+				"right": "24/7"
+			}
+		},
+		"label": {
+			"field": "ref"
+		},
+		"last_verified_at": {
+			"args": [
+				{
+					"field": "check_date"
+				}
+			],
+			"func": "to_date"
+		},
+		"lat": {
+			"coord": {
+				"format": "geojson",
+				"from": "geometry",
+				"on_invalid": "reject",
+				"pick": "lat"
+			}
+		},
+		"level": {
+			"field": "level"
+		},
+		"lon": {
+			"coord": {
+				"format": "geojson",
+				"from": "geometry",
+				"on_invalid": "reject",
+				"pick": "lon"
+			}
+		},
+		"manufacturer": {
+			"field": "manufacturer"
+		},
+		"model": {
+			"field": "model"
+		},
+		"name": {
+			"coalesce": [
+				{
+					"field": "name"
+				},
+				{
+					"field": "defibrillator:location:pl"
+				},
+				{
+					"field": "defibrillator:location"
+				},
+				{
+					"field": "operator"
+				},
+				{
+					"const": "Defibrylator AED"
+				}
+			]
+		},
+		"note": {
+			"field": "note"
+		},
+		"opening_hours": {
+			"field": "opening_hours"
+		},
+		"operator_name": {
+			"field": "operator"
+		},
+		"operator_type": {
+			"map": {
+				"cases": {
+					"government": "government",
+					"ngo": "ngo",
+					"private": "business",
+					"public": "government"
+				},
+				"default": "unknown",
+				"value": {
+					"field": "operator:type"
+				}
+			}
+		},
+		"phone": {
+			"coalesce": [
+				{
+					"field": "phone"
+				},
+				{
+					"field": "contact:phone"
+				}
+			]
+		},
+		"photo_license": {
+			"field": "image:license"
+		},
+		"photo_url": {
+			"field": "image"
+		},
+		"postcode": {
+			"field": "addr:postcode"
+		},
+		"room": {
+			"field": "room"
+		},
+		"serial_number": {
+			"field": "serial_number"
+		},
+		"source_url": {
+			"template": "https://www.openstreetmap.org/{osm_type}/{osm_id}",
+			"vars": {
+				"osm_id": {
+					"args": [
+						{
+							"field": "@osm_id"
+						}
+					],
+					"func": "to_string"
+				},
+				"osm_type": {
+					"args": [
+						{
+							"field": "@osm_type"
+						}
+					],
+					"func": "lower"
+				}
+			}
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"street": {
+			"field": "addr:street"
+		},
+		"verification_status": {
+			"else": "unverified",
+			"then": "probable",
+			"when": {
+				"left": {
+					"args": [
+						{
+							"field": "check_date"
+						},
+						{
+							"builtin": "fetched_at"
+						}
+					],
+					"func": "date_age_days"
+				},
+				"op": "lte",
+				"right": 365
+			}
+		},
+		"website": {
+			"coalesce": [
+				{
+					"field": "contact:website"
+				},
+				{
+					"field": "website"
+				}
+			]
+		},
+		"wheelchair_access": {
+			"map": {
+				"cases": {
+					"limited": "limited",
+					"no": "no",
+					"yes": "yes"
+				},
+				"default": "unknown",
+				"value": {
+					"field": "wheelchair"
+				}
+			}
+		}
+	},
+	"parse": {
+		"encoding": "utf-8",
+		"json": {
+			"unwrap_string": false
+		}
+	},
+	"publish": {
+		"allowed_for_export": true,
+		"allowed_for_ingest": true,
+		"attribution": "© OpenStreetMap contributors",
+		"enabled": true,
+		"exports": [
+			"geojson",
+			"csv"
+		],
+		"license_id": "ODbL-1.0",
+		"redact": [
+			"serial_number"
+		],
+		"terms_checked_at": "2026-11-21T00:00:00Z",
+		"terms_hash": "sha256:b8d8aebb21bf405f93f6e21bbf0d8f0a749844f9812ec58692f189add6402b47",
+		"terms_url": "https://opendatacommons.org/licenses/odbl/1-0/"
+	},
+	"records": {
+		"dedupe": {
+			"keep": "last",
+			"key": [
+				{
+					"field": "@osm_type"
+				},
+				{
+					"field": "@osm_id"
+				}
+			],
+			"on_duplicate": "warn"
+		},
+		"identity": {
+			"dataset_id": {
+				"const": "openaedmap:PL"
+			},
+			"source_record_id": {
+				"template": "{@osm_type}/{@osm_id}"
+			},
+			"stable": true
+		},
+		"path": "/features"
+	},
+	"source": {
+		"access_type": "file",
+		"coverage": {
+			"country": "PL",
+			"notes": "Eksport tylko node; 2 waye z tagiem emergency=defibrillator nie trafiają do PL.geojson."
+		},
+		"enabled": true,
+		"homepage_url": "https://openaedmap.org/",
+		"id": "openaedmap",
+		"license": {
+			"attribution": "© OpenStreetMap contributors",
+			"id": "ODbL-1.0",
+			"share_alike": true,
+			"url": "https://opendatacommons.org/licenses/odbl/1-0/"
+		},
+		"name": "OpenAEDMap — eksport krajowy PL",
+		"notes": "Źródło bazowe P0. Brak statusu działania, adresy addr:* pokryte ok. 0,4%, check_date ok. 32,7%. Każdy rekord musi pozostać unverified/probable, nigdy confirmed bez weryfikacji terenowej.\n",
+		"publisher": "OpenAEDMap / OpenStreetMap contributors",
+		"reliability_tier": "community",
+		"update_frequency": "continuous"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				14.1,
+				49,
+				24.2,
+				54.9
+			],
+			"on_invalid": "reject"
+		},
+		"enums": true,
+		"on_error": "reject",
+		"required": [
+			"name",
+			"lat",
+			"lon"
+		]
+	},
+	"version": 1
+}

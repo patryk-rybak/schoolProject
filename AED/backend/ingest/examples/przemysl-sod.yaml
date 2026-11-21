@@ -119,10 +119,12 @@ map:
     const: 0.85
   last_verified_at:
     const: "2024-11-05"
+  # The local portal has no operator field. The publisher is Straż Miejska,
+  # not necessarily the device operator, so do not invent an operator value.
   operator_name:
-    const: Gmina Miasto Przemyśl
+    const: null
   operator_type:
-    const: municipality
+    const: null
   phone:
     func: normalize_phone
     args:
@@ -207,6 +209,11 @@ publish:
   enabled: true
   license_id: CC-BY-4.0
   attribution: "Miasto Przemyśl — Portal Otwartych Danych, CC BY 4.0"
+  allowed_for_ingest: true
+  allowed_for_export: true
+  terms_url: "https://creativecommons.org/licenses/by/4.0/"
+  terms_hash: "sha256:2c31f90b734f0e2dd5dc017737eb2094e133be99a188396659c9cdb3bd3d0625"
+  terms_checked_at: "2026-11-21T00:00:00Z"
   redact: []
   exports:
     - geojson

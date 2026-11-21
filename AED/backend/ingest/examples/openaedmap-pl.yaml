@@ -75,6 +75,20 @@ map:
       - field: "defibrillator:location:pl"
       - field: "defibrillator:location"
       - field: operator
+      # 92% of PL features have no name and 33% have no location tag. A generic
+      # name is better than rejecting most of the national dataset at validation.
+      - const: "Defibrylator AED"
+  source_url:
+    template: "https://www.openstreetmap.org/{osm_type}/{osm_id}"
+    vars:
+      osm_type:
+        func: lower
+        args:
+          - field: "@osm_type"
+      osm_id:
+        func: to_string
+        args:
+          - field: "@osm_id"
   facility_type:
     const: unknown
   lat:
@@ -94,7 +108,9 @@ map:
   country_code:
     const: PL
   city:
-    field: "addr:city"
+    coalesce:
+      - field: "addr:city"
+      - field: "addr:place"
   street:
     field: "addr:street"
   house_number:
@@ -201,9 +217,13 @@ map:
       - field: phone
       - field: "contact:phone"
   email:
-    field: "contact:email"
+    coalesce:
+      - field: "contact:email"
+      - field: email
   website:
-    field: "contact:website"
+    coalesce:
+      - field: "contact:website"
+      - field: website
   photo_url:
     field: image
   photo_license:
@@ -259,6 +279,11 @@ publish:
   enabled: true
   license_id: ODbL-1.0
   attribution: "© OpenStreetMap contributors"
+  allowed_for_ingest: true
+  allowed_for_export: true
+  terms_url: "https://opendatacommons.org/licenses/odbl/1-0/"
+  terms_hash: "sha256:b8d8aebb21bf405f93f6e21bbf0d8f0a749844f9812ec58692f189add6402b47"
+  terms_checked_at: "2026-11-21T00:00:00Z"
   redact:
     - serial_number
   exports:

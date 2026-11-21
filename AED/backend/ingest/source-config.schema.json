@@ -512,6 +512,30 @@
         "enabled": { "type": "boolean" },
         "license_id": { "type": "string" },
         "attribution": { "type": "string" },
+        "allowed_for_ingest": {
+          "type": "boolean",
+          "description": "License gate. True only when license_id, attribution, terms_hash and terms_checked_at are present and approved."
+        },
+        "allowed_for_export": {
+          "type": "boolean",
+          "description": "Export gate. A source may be ingested but excluded from public exports and dane.gov.pl feeds."
+        },
+        "terms_url": { "type": "string", "format": "uri" },
+        "terms_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "SHA-256 of the normalized license or terms document, not of the data payload."
+        },
+        "terms_checked_at": { "type": "string", "format": "date-time" },
+        "permission_document_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Written permission for a closed or unclear license."
+        },
+        "approved_by": {
+          "type": "string",
+          "description": "Admin who approved ingest/export gates when the license requires four-eyes review."
+        },
         "redact": { "type": "array", "items": { "$ref": "#/$defs/canonicalField" } },
         "exports": { "type": "array", "items": { "enum": ["csv", "geojson", "json"] } }
       }

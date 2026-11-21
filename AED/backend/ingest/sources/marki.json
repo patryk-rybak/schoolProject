@@ -1,0 +1,228 @@
+{
+	"connector": {
+		"family": "file_static",
+		"notes": "Dwustopniowe parsowanie (outer quotes, potem CSV) i walidacja bbox Marki.",
+		"parser": "csv"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": true,
+			"max_suspicious_ratio": 0.13,
+			"on_breach": "review"
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 8,
+			"schema_fields": [
+				"Długość geograficzna",
+				"Szerokość geograficzna",
+				"Nazwa",
+				"Lokalizacja",
+				"Adres",
+				"Numer Id"
+			]
+		},
+		"golden_sample": {
+			"required_match_ratio": 1,
+			"size": 8
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 0.13,
+			"max_duplicate_id_ratio": 0,
+			"max_null_ratio": {
+				"lat": 0,
+				"lon": 0,
+				"name": 0
+			},
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "fail",
+			"on_missing_field": "fail",
+			"on_new_field": "review",
+			"on_type_change": "review"
+		},
+		"volume": {
+			"max_delta_ratio": 0.5,
+			"min_records": 6,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": true,
+			"last_modified": true
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 30
+		},
+		"retries": {
+			"backoff_ms": 1000,
+			"max": 2
+		},
+		"timeout_ms": 30000,
+		"url": "https://api.dane.gov.pl/media/resources/20250710/Defibrylator_GminaMiastoMarki_1.csv",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"map": {
+		"access_type": {
+			"const": "unknown"
+		},
+		"address_text": {
+			"field": "Adres"
+		},
+		"confidence": {
+			"const": 0.6
+		},
+		"coord_precision_m": {
+			"const": 15
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"device_type": {
+			"const": "public_aed"
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"label": {
+			"field": "Numer Id"
+		},
+		"lat": {
+			"args": [
+				{
+					"field": "Długość geograficzna"
+				}
+			],
+			"func": "to_float"
+		},
+		"lon": {
+			"args": [
+				{
+					"field": "Szerokość geograficzna"
+				}
+			],
+			"func": "to_float"
+		},
+		"name": {
+			"field": "Lokalizacja"
+		},
+		"operator_name": {
+			"const": null
+		},
+		"operator_type": {
+			"const": null
+		},
+		"source_updated_at": {
+			"const": "2025-07-10"
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"verification_status": {
+			"const": "unverified"
+		}
+	},
+	"parse": {
+		"csv": {
+			"delimiter": ",",
+			"empty_as_null": true,
+			"header": true,
+			"quote": "\"",
+			"repair_double_quotes": true,
+			"skip_rows": 0,
+			"unwrap_outer_quotes": true
+		},
+		"encoding": "utf-8-sig",
+		"trim_headers": true
+	},
+	"publish": {
+		"allowed_for_export": true,
+		"allowed_for_ingest": true,
+		"attribution": "Miasto Marki — dane.gov.pl, CC BY 4.0",
+		"enabled": true,
+		"exports": [
+			"csv",
+			"geojson"
+		],
+		"license_id": "CC-BY-4.0",
+		"redact": [],
+		"terms_checked_at": "2026-11-21T00:00:00Z",
+		"terms_hash": "sha256:2c31f90b734f0e2dd5dc017737eb2094e133be99a188396659c9cdb3bd3d0625",
+		"terms_url": "https://creativecommons.org/licenses/by/4.0/"
+	},
+	"records": {
+		"dedupe": {
+			"keep": "last",
+			"key": [
+				{
+					"field": "Numer Id"
+				}
+			],
+			"on_duplicate": "reject"
+		},
+		"identity": {
+			"dataset_id": {
+				"const": "dane.gov.pl:4955"
+			},
+			"source_record_id": {
+				"template": "marki:{Numer Id}"
+			},
+			"stable": true
+		},
+		"path": "$"
+	},
+	"source": {
+		"access_type": "file",
+		"coverage": {
+			"country": "PL",
+			"notes": "8 rekordów; CSV i XLSX. CSV ma wadliwe cytowanie i niespójną kolejność osi.",
+			"teryt": [
+				"143101"
+			]
+		},
+		"enabled": true,
+		"homepage_url": "https://dane.gov.pl/pl/dataset/4955",
+		"id": "marki",
+		"license": {
+			"attribution": "Miasto Marki — dane.gov.pl, CC BY 4.0",
+			"id": "CC-BY-4.0",
+			"share_alike": false,
+			"url": "https://creativecommons.org/licenses/by/4.0/"
+		},
+		"name": "Defibrylatory w Markach",
+		"notes": "Preferowany parser CSV po naprawie cytowania; XLSX jest alternatywą. Wiersz Numer Id=7 nie należy do Marek i musi trafić do kolejki review, nie na mapę.\n",
+		"publisher": "Miasto Marki",
+		"reliability_tier": "official_local",
+		"update_frequency": "once"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				21.05,
+				52.28,
+				21.18,
+				52.38
+			],
+			"on_invalid": "review"
+		},
+		"enums": true,
+		"on_error": "review",
+		"required": [
+			"name",
+			"lat",
+			"lon"
+		]
+	},
+	"version": 1
+}
