@@ -21,4 +21,4 @@ jobs:
         run: echo "TODO: Install dependencies"
 
       - name: Run tests (TODO)
-        run: exit 1
+        run: echo "dupa"; exit 1
