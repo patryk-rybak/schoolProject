@@ -2,6 +2,25 @@
 
 Minimalna aplikacja TanStack Start, która renderuje mapę Polski z MapLibre GL JS i kafelkami Protomaps oraz polskimi etykietami. To punkt wyjścia dla mapy AED (defibrylatorów).
 
+## Struktura repozytorium
+
+Kod aplikacji znajduje się w katalogu `AED/`. W katalogu głównym repozytorium
+zostają tylko materiały niezwiązane z uruchamianiem aplikacji:
+
+| Ścieżka | Zawartość |
+| --- | --- |
+| `AED/` | aplikacja: kod, konfiguracja, skrypty, dokumentacja techniczna |
+| `task_description/` | treść zadania konkursowego (PDF) |
+| `dane.gov.pl/` | opublikowane źródła portalu dane.gov.pl (archiwa) i instrukcja uruchomienia |
+
+Wszystkie poniższe komendy uruchamiaj z katalogu `AED/`:
+
+```bash
+cd AED
+bun install
+bun run dev
+```
+
 ## Stack
 
 - TanStack Start + TanStack Router (React 19, routing plikowy)
