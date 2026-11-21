@@ -1,0 +1,256 @@
+# HTTP evidence log — dane.przemysl.eu AED
+
+Date: 2026-11-21 (UTC)
+Base: https://dane.przemysl.eu/wp-json/sod/v1
+All requests unauthenticated. curl 8.x. No custom headers beyond Accept.
+
+## 1. CKAN probe (negative)
+
+GET https://dane.przemysl.eu/api/3/action/package_search?q=defibrylatory
+-> 404 text/html (WordPress 404). Not a CKAN portal.
+
+GET https://dane.przemysl.eu/wp-json/wp/v2/search?search=defibrylator
+-> 200 []
+
+## 2. Discovery
+
+GET https://dane.przemysl.eu/wp-json/
+-> 200; routes include /sod/v1/{datasets,resources,...}, /ode/v2/catalog
+
+GET https://dane.przemysl.eu/wp-json/sod/v1/openapi.json
+-> 200 application/json; OpenAPI 3.2.1; title "Studio Otwartych Danych API"; version 0.9.334.0
+-> security: null; securitySchemes: null
+-> paths: /datasets, /datasets/{id}, /resources, /resources/{id},
+   /resources/{id}/data, /resources/{id}/geojson, /resources/{id}/kml,
+   /resources/{id}/shp.zip, /dataservices, /forms, ...
+
+GET https://dane.przemysl.eu/wp-json/ode/v2/catalog
+-> 200 {"datasets":62,"resources":120,"providers":11,"updated_at":1795284100}
+
+GET https://dane.przemysl.eu/sitemap.xml
+-> 200 sitemap index (Google XML Sitemaps)
+
+GET https://dane.przemysl.eu/zbiory-danych/defibrylatory-aed-na-terenie-miasta-przemysla/
+-> 200 text/html; title contains "Defibrylatory AED na terenie miasta Przemyśla"
+-> embedded API URL: /wp-json/sod/v1/datasets/13
+
+## 3. Datasets
+
+GET /datasets?per_page=100
+-> 200; count=20; returned 20. per_page ignored.
+
+GET /datasets?limit=100&offset=0
+-> 200; count=61; returned 61; dataset 13 included (last).
+GET /datasets?limit=10&offset=55
+-> 200; count=6; ids [262,256,244,239,216,13]
+
+GET /datasets?search=AED  (also defibryl, aed, Defibrylatory)
+-> 200; search ignored; same 20 default page.
+
+GET /datasets/13
+-> 200 application/json; dataset 13:
+   title "Defibrylatory AED na terenie miasta Przemyśla"
+   identifier "PRZ-DEFIBRYLATOR"
+   publisher "Straż Miejska w Przemyślu"
+   license "" ; license_uri ".../creative-commons-cc-by-4-0/" ; license_page 316
+   accrual_periodicity CONT / "Na bieżąco (ciągła)"
+   updated 2026-01-20T17:58:39+00:00 ; version 1.1
+   quality.freshness.last_updated "2026-05-15 13:59"
+   resources: [ id 15, format geojson, api_data /resources/15/data ]
+
+GET /resources?dataset_id=13
+-> 200; one resource id 15; updated 2026-04-29T05:27:28+00:00; format geojson
+
+GET /resources/15
+-> 200; source_mode "url"
+   source_url https://przemysl.skycms.com.pl/open-data/20/1730818801_b50R6UVxPgoVdBbq/geojson
+   data_date "2026-01-01"
+   license_url https://dane.przemysl.eu/creative-commons-cc-by-4-0/
+   geojson https://dane.przemysl.eu/wp-json/sod/v1/resources/15/geojson
+   geo_layer null, kml null, shp null
+
+## 4. Data formats
+
+GET /resources/15/data
+-> 200 application/json; 26908 bytes
+   keys: resource, data, geo
+   data.columns = 14 tabular columns (no lat/lon)
+   data.pagination = {limit, offset, total_rows:21, source_total_rows:21,
+                      complete:true, sort_by:"", sort_dir:"asc"}
+   geo.points = 21 {lat,lng,title}
+   geo.bbox = {minLat:49.7781797, minLng:22.7482498,
+               maxLat:49.7972693, maxLng:22.7912987}
+   geo.count = 21
+
+GET /resources/15/data?format=geojson
+-> 200 application/geo+json; FeatureCollection; 21 features
+   feature: {type, id, geometry, properties}
+   properties includes geometry, longitude, latitude (duplicated)
+
+GET /resources/15/geojson
+-> 200 application/json (not application/geo+json); FeatureCollection; 21 features
+
+GET /resources/15/data?format=csv
+-> 200 text/csv; UTF-8 BOM; 14 columns; **body is a JSON-encoded string**
+   (starts b'"\\ufeffid,...'; literal \\n, \\", \\uXXXX; 0 real newlines)
+   default limit = 10 rows; limit=100 -> 21 rows; no coordinates
+
+GET /resources/15/structured
+-> 200 application/json; columns = 19 (adds youtube_url, panorama_url,
+   geometry, longitude, latitude); total_rows = 21
+
+GET /resources/15/kml
+-> 404 {"code":"sod_geo_missing","message":"Resource has no linked geo layer",
+        "data":{"status":404}}
+
+GET /resources/15/shp.zip
+-> 404 (no linked geo layer)
+
+GET /resources/15.data.json
+-> 200 application/json; full table 14 columns; 21 rows; 140694 bytes
+
+GET /resources/15.data.csv
+-> 200 text/csv; 43928 bytes; 14 columns; 21 rows
+   same transport defect: body is a JSON-encoded string, 0 real newlines
+
+GET /resources/15.metadata.jsonld
+-> 200 application/ld+json; DCAT Dataset; distributions CSV/JSON/CSVW;
+   conformsTo DCAT 2 and CSVW; modified 2026-04-29T05:27:28+00:00
+
+GET /resources/15.data.csv-metadata.json
+-> 200 application/json; CSVW; id integer, home_number integer, rest string
+
+GET /resources/15.openapi.json
+-> 200; openapi 3.2.1; servers https://dane.przemysl.eu;
+   security null; paths:
+   /wp-json/sod/v1/resources/15.data.csv
+   /wp-json/sod/v1/resources/15.data.json
+   /wp-json/sod/v1/resources/15.metadata.jsonld
+   /wp-json/sod/v1/resources/15.data.csv-metadata.json
+
+## 5. Parameter behaviour
+
+GET /resources/15/data?limit=3&offset=0
+-> 200; 3 rows ids [744,745,746]; pagination.total_rows 21
+GET /resources/15/data?limit=3&offset=3
+-> 200; 3 rows ids [747,748,749]
+GET /resources/15/data?limit=100
+-> 200; 21 rows
+
+GET /resources/15/data?fields=id,name,latitude,longitude&limit=2
+-> 200; data.columns [id,name,latitude,longitude]; rows have latitude:null,
+   longitude:null (canonical table has no such columns)
+
+GET /resources/15/data?format=geojson&bbox=22.77,49.78,22.78,49.79
+-> 200; 21 features (bbox not applied)
+
+GET /resources/15/data?format=gpx
+-> 200 application/json (gpx silently ignored; JSON envelope returned)
+
+GET /resources/15/data?format=csv
+GET /resources/15/data?format=csv&limit=100
+GET /resources/15/data?format=csv&limit=5&offset=5
+-> 200; decoded CSV rows: 10, 21, 5 respectively
+   ids start [744,745,746], [744,...], [749,751,752]
+   => CSV default limit is 10; JSON/GeoJSON default return all 21
+
+GET /resources/15/data?format=geojson
+GET /resources/15/data?format=geojson&limit=100
+-> 200; 21 features both (no truncation)
+
+## 6. Headers
+
+GET -I /resources/15/data?format=geojson
+-> 200
+   Content-Type: application/geo+json; charset=utf-8
+   Access-Control-Allow-Origin: *
+   Access-Control-Allow-Methods: GET, OPTIONS
+   Access-Control-Allow-Headers: Authorization, X-WP-Nonce, ...
+   Cache-Control: public, max-age=300, must-revalidate
+   X-RateLimit-Limit: 120
+   X-RateLimit-Remaining: 113
+   X-RateLimit-Reset: 1795284240
+   X-Robots-Tag: noindex
+   (no ETag, no Last-Modified observed)
+
+GET -D - /resources/15/data
+-> 200 application/json; same CORS, cache and rate-limit headers;
+   X-RateLimit-Limit 120 / Remaining 119
+
+GET -D - /resources/15/geojson
+-> 200 application/json; same CORS; no Cache-Control observed
+
+## 7. Upstream source and checksum
+
+GET -I https://przemysl.skycms.com.pl/open-data/20/1730818801_b50R6UVxPgoVdBbq/geojson
+-> 200 (HTTP/2)
+   content-disposition: attachment; filename=1730818801_b50R6UVxPgoVdBbq.geojson
+   content-type: application/json
+   cache-control: no-store, no-cache, must-revalidate
+   set-cookie: cms_public=...
+
+GET source_url
+-> 200; 48823 bytes; 21 features; SHA-256
+   2f49fe5394c1eb9e841ad5921b19c1cade6b843278d7283534658f0caba01797
+
+Timestamp 1730818801 -> 2024-11-05T15:00:01Z
+
+DCAT checksum for resource distribution:
+   spdx:checksumValue 2f49fe5394c1eb9e841ad5921b19c1cade6b843278d7283534658f0caba01797
+-> matches upstream SHA-256 exactly.
+
+## 8. National mirror (cross-check)
+
+GET https://api.dane.gov.pl/1.4/datasets?q=defibrylatory&per_page=20
+-> 200; 4 results; includes id 4581
+   "Lokalizacje AED – Automatycznych Defibrylatorów Zewnętrznych w Przemyślu"
+
+GET https://api.dane.gov.pl/1.4/datasets/4581
+-> 200; institution Urząd Miejski w Przemyślu (145)
+   license_name "CC0 1.0"
+   update_frequency "Codziennie"
+   modified 2024-11-06T06:42:45Z
+   created 2024-11-06T06:40:48Z
+   verified 2024-11-20T09:40:20Z
+   url https://przemysl.pl/45/mapa-interaktywna.html#/map?category=54
+   formats ["csv","geojson","json","xml"]
+
+GET https://api.dane.gov.pl/1.4/datasets/4581/resources
+-> 200; 5 resources (GML, GeoJSON, JSON, CSV, GML v2)
+
+GET https://api.dane.gov.pl/media/resources/20241106/1730818801_b50R6UVxPgoVdBbq.geojson
+-> 200; 48823 bytes
+   SHA-256 2f49fe5394c1eb9e841ad5921b19c1cade6b843278d7283534658f0caba01797
+-> byte-identical to city source and upstream file.
+
+## 9. License page
+
+GET https://dane.przemysl.eu/creative-commons-cc-by-4-0/
+-> 200; "Creative Commons – Uznanie autorstwa 4.0 Międzynarodowa (CC BY 4.0)"
+   requires attribution: Miasto Przemyśl, dataset name, CC BY 4.0, link
+   excludes personal data, legally protected info, coats of arms/logos
+
+## 10. Data quality queries
+
+21 records, ids 744-765 except 750.
+
+Field fill:
+  id/name/description/category/city/street/postcode/gallery/geometry/lon/lat  21/21
+  home_number 19/21 (missing 753, 755)
+  phone 1/21 (746)
+  email 2/21 (745, 746)
+  www 2/21 (745, 746)
+  links 2/21 (745, 746)
+  attachments 0/21
+  youtube_url 0/21
+  panorama_url 0/21
+
+Unique descriptions: 3 / 21 (boilerplate)
+Category always "Defibrylatory AED"; city always "Przemyśl"; postcode always "37-700".
+
+AED number regex AED\s*-?\s*(\d{4,5}) matches 21/21 names.
+Duplicate device number: 7639 in id 757 and id 764.
+No duplicate coordinates.
+
+BBox: lat 49.7781797..49.7972693, lon 22.7482498..22.7912987.
+WGS84 / EPSG:4326 (GeoJSON RFC 7946; no explicit crs member).
