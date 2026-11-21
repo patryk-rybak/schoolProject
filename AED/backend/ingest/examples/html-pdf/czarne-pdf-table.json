@@ -35,7 +35,6 @@
     "user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
   },
   "parse": {
-    "encoding": "binary",
     "trim_headers": false,
     "pdf_table": {
       "pages": [1],
