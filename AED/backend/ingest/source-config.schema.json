@@ -20,6 +20,7 @@
       "additionalProperties": { "$ref": "#/$defs/fieldSpec" }
     },
     "validate": { "$ref": "#/$defs/validate" },
+    "geocoding": { "$ref": "#/$defs/geocoding" },
     "drift": { "$ref": "#/$defs/drift" },
     "publish": { "$ref": "#/$defs/publish" }
   },
@@ -65,8 +66,8 @@
       "additionalProperties": false,
       "required": ["family", "parser"],
       "properties": {
-        "family": { "enum": ["file_static", "http_json", "http_json_api", "google_my_maps_kml", "arcgis_query", "ckan_datastore", "html_table", "manual"] },
-        "parser": { "enum": ["csv", "xlsx", "json", "geojson", "kml", "jsonapi", "html_table"] },
+        "family": { "enum": ["file_static", "http_json", "http_json_api", "google_my_maps_kml", "arcgis_query", "ckan_datastore", "html_table", "html_list", "pdf_table", "manual"] },
+        "parser": { "enum": ["csv", "xlsx", "json", "geojson", "kml", "jsonapi", "html_table", "html_list", "pdf_table"] },
         "notes": { "type": "string" }
       }
     },
@@ -169,9 +170,136 @@
           "additionalProperties": false,
           "properties": {
             "point_only": { "type": "boolean" },
-            "document_name_must_match": { "type": "string" }
+            "document_name_must_match": { "type": "string" },
+            "document_name_pattern": { "type": "string" },
+            "placemark_name_pattern": { "type": "string" },
+            "require_coordinates": { "type": "boolean" },
+            "on_missing_geometry": { "enum": ["reject", "review", "skip"] },
+            "on_non_point_geometry": { "enum": ["reject", "review", "skip"] },
+            "min_point_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+            "on_low_point_ratio": { "enum": ["warn", "review", "fail"] },
+            "extended_data_as_object": { "type": "boolean" },
+            "strip_cdata": { "type": "boolean" },
+            "description_format": { "enum": ["text", "html"] }
           }
-        }
+        },
+        "html_table": { "$ref": "#/$defs/htmlTableConfig" },
+        "html_list": { "$ref": "#/$defs/htmlListConfig" },
+        "pdf_table": { "$ref": "#/$defs/pdfTableConfig" }
+      }
+    },
+    "regexFilter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["regex"],
+      "properties": {
+        "regex": { "type": "string" },
+        "flags": { "type": "string" }
+      }
+    },
+    "htmlFieldExtract": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": { "enum": ["text", "html", "attr"], "description": "Domyślnie text." },
+        "attr": { "type": "string", "description": "Nazwa atrybutu, gdy source=attr." },
+        "regex": { "type": "string" },
+        "group": { "type": "integer", "minimum": 0 },
+        "flags": { "type": "string" },
+        "null_values": { "type": "array", "items": { "type": "string" } },
+        "default": {}
+      }
+    },
+    "htmlTableConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "select": { "type": "string", "description": "Selektor CSS tabel, domyślnie table." },
+        "table_index": { "type": "integer", "minimum": 0, "description": "Wybierz jedną tabelę po filtrze require_headers/require_keys." },
+        "require_headers": { "type": "array", "items": { "type": "string" }, "description": "Zostaw tylko tabele, których nagłówek zawiera wszystkie etykiety." },
+        "require_keys": { "type": "array", "items": { "type": "string" }, "description": "Zostaw tylko tabele key_value zawierające wszystkie klucze." },
+        "orientation": { "enum": ["rows", "key_value"], "description": "rows: pierwszy wiersz to nagłówek. key_value: każdy wiersz to klucz i wartość." },
+        "columns": { "type": "array", "items": { "type": "string" }, "description": "Nadpisuje nazwy kolumn odczytane z header_row. Długość musi odpowiadać liczbie komórek." },
+        "header_row": { "type": "integer", "minimum": 0 },
+        "data_start_row": { "type": "integer", "minimum": 0 },
+        "key_column": { "type": "integer", "minimum": 0 },
+        "value_column": { "type": "integer", "minimum": 0 },
+        "value_join": { "enum": ["space", "newline"], "description": "Jak łączyć wiele węzłów tekstowych w komórce." },
+        "normalize_headers": { "type": "boolean", "description": "Trim, zwijanie białych znaków i NBSP w nazwach nagłówków." },
+        "trim": { "type": "boolean" },
+        "collapse_whitespace": { "type": "boolean" },
+        "empty_as_null": { "type": "boolean" },
+        "skip_empty_rows": { "type": "boolean" },
+        "min_records": { "type": "integer", "minimum": 0 },
+        "max_records": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+    "htmlListConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["select"],
+      "properties": {
+        "select": { "type": "string", "description": "Selektor CSS elementów, z których każdy jest kandydatem na rekord." },
+        "record_filter": { "$ref": "#/$defs/regexFilter" },
+        "fields": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/htmlFieldExtract" },
+          "description": "Wyrażenia wyciągające pola z tekstu/atrybutów elementu. Wynik zawiera też pole text."
+        },
+        "item_text_separator": { "type": "string" },
+        "trim": { "type": "boolean" },
+        "collapse_whitespace": { "type": "boolean" },
+        "empty_as_null": { "type": "boolean" },
+        "min_records": { "type": "integer", "minimum": 0 },
+        "max_records": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+    "pdfTableConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["columns", "row_anchor"],
+      "properties": {
+        "pages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 1 },
+          "description": "Zakres stron [from, to] lub [from]. Tylko strony z warstwą tekstową."
+        },
+        "require_text_layer": { "type": "boolean" },
+        "min_text_chars": { "type": "integer", "minimum": 0 },
+        "expected_page_count": { "type": "integer", "minimum": 1 },
+        "strategy": { "enum": ["word_positions"] },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "x_min", "x_max"],
+            "properties": {
+              "key": { "type": "string" },
+              "x_min": { "type": "number" },
+              "x_max": { "type": "number" }
+            }
+          }
+        },
+        "row_anchor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["column", "regex"],
+          "properties": {
+            "column": { "type": "string" },
+            "regex": { "type": "string" }
+          }
+        },
+        "row_tolerance": { "type": "number", "minimum": 0 },
+        "multi_line": { "enum": ["join_space", "join_newline", "first"] },
+        "trim": { "type": "boolean" },
+        "collapse_whitespace": { "type": "boolean" },
+        "empty_as_null": { "type": "boolean" },
+        "min_records": { "type": "integer", "minimum": 0 },
+        "max_records": { "type": ["integer", "null"], "minimum": 0 }
       }
     },
     "records": {
@@ -405,7 +533,10 @@
         "status", "status_reason", "verification_status", "confidence",
         "last_verified_at", "last_seen_at", "is_public", "operator_name",
         "operator_type", "phone", "email", "website", "photo_url", "photo_license",
-        "source_updated_at"
+        "source_updated_at", "location_status", "geom_source", "address_kind",
+        "address_confidence", "address_source", "geocode_provider",
+        "geocode_version", "geocode_confidence", "geocoded_at",
+        "geocode_input_sha256", "geocode_note"
       ]
     },
     "validate": {
@@ -413,6 +544,7 @@
       "additionalProperties": false,
       "properties": {
         "required": { "type": "array", "items": { "$ref": "#/$defs/canonicalField" } },
+        "require_location": { "enum": ["none", "address_or_point", "point"] },
         "coords": {
           "type": "object",
           "additionalProperties": false,
@@ -424,11 +556,60 @@
               "items": { "type": "number" },
               "description": "[minLon, minLat, maxLon, maxLat]."
             },
-            "on_invalid": { "enum": ["reject", "review", "null"] }
+            "on_invalid": { "enum": ["reject", "review", "null"] },
+            "on_missing": {
+              "enum": ["accept", "review", "reject"],
+              "description": "Decyzja, gdy brak obu współrzędnych i rekord ma adres. Domyślnie review."
+            }
           }
         },
         "enums": { "type": "boolean" },
         "on_error": { "enum": ["reject", "review"] }
+      }
+    },
+    "geocoding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "strategy": { "enum": ["structured_first", "text_first", "structured_only"] },
+        "provider_order": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "enum": ["uug", "prg", "nominatim"] }
+        },
+        "address_template": { "type": "string" },
+        "required_components": {
+          "type": "array",
+          "items": { "enum": ["city", "commune", "street", "house_number", "postcode"] }
+        },
+        "min_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "precision_m": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "building": { "type": "number", "minimum": 1 },
+            "street": { "type": "number", "minimum": 1 },
+            "locality": { "type": "number", "minimum": 1 }
+          }
+        },
+        "on_failure": { "enum": ["address_only", "review", "reject"] },
+        "cache_ttl_days": { "type": "integer", "minimum": 0 },
+        "refresh_after_days": { "type": "integer", "minimum": 0 },
+        "rate_limit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "requests_per_minute": { "type": "number", "minimum": 0.1 } }
+        },
+        "verification": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cross_check_source_id": { "type": "string" },
+            "max_distance_m": { "type": "number", "minimum": 0 },
+            "promote_verification": { "enum": ["never", "probable"] }
+          }
+        }
       }
     },
     "action": { "enum": ["ignore", "warn", "review", "fail"] },

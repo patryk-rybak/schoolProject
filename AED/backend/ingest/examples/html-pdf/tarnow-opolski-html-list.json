@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "source": {
+    "id": "tarnow-opolski",
+    "name": "AED w Gminie Tarnów Opolski",
+    "publisher": "Gmina Tarnów Opolski / Fundacja OPOLSAR",
+    "homepage_url": "https://opolsar.pl/aed/",
+    "access_type": "html",
+    "reliability_tier": "official_local",
+    "license": {
+      "id": "NOASSERTION",
+      "attribution": "Fundacja OPOLSAR — https://opolsar.pl/aed/ (brak deklaracji licencji)"
+    },
+    "coverage": {
+      "country": "PL",
+      "notes": "Gmina wiejska Tarnów Opolski, opolskie. 10 urządzeń w 9 lokalizacjach: Tarnów Opolski (4), Nakło (2), Kosorowice (1), Raszowa (1), Przywory (2 urządzenia w jednej lokalizacji)."
+    },
+    "update_frequency": "unknown",
+    "enabled": true,
+    "notes": "Klasa B+ z audytu JST. Strona zbudowana z bloków div.et_pb_text_inner, nie z tabeli ani listy. Każdy rekord to jeden blok zawierający numer, nagłówek dostępności, Miejsce, Adres, Pozycja GPS, telefon, Informacje, Model AED, Tryb pediatryczny i Opiekuna technicznego. Chronologia na stronie zaczyna się 2024-02-01, ale nie ma jednoznacznej daty aktualizacji całej listy."
+  },
+  "connector": {
+    "family": "html_list",
+    "parser": "html_list",
+    "notes": "Selektor div.et_pb_text_inner + filtr Pozycja GPS. Pola wyciągane regexami z tekstu bloku."
+  },
+  "fetch": {
+    "url": "https://opolsar.pl/aed/",
+    "method": "GET",
+    "timeout_ms": 45000,
+    "retries": { "max": 2, "backoff_ms": 2000 },
+    "rate_limit": { "requests_per_minute": 4 },
+    "conditional": { "etag": true, "last_modified": true },
+    "pagination": { "type": "none" },
+    "user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+  },
+  "parse": {
+    "encoding": "utf-8",
+    "trim_headers": false,
+    "html_list": {
+      "select": "div.et_pb_text_inner",
+      "record_filter": { "regex": "Pozycja GPS" },
+      "fields": {
+        "record_no": { "regex": "^\\s*(\\d+)\\.", "group": 1 },
+        "heading": { "regex": "^\\s*\\d+\\.\\s*(.*?)\\s+Miejsce:", "group": 1 },
+        "place": { "regex": "Miejsce:\\s*(.*?)\\s+Adres:", "group": 1 },
+        "address": { "regex": "Adres:\\s*(.*?)\\s+Pozycja GPS", "group": 1 },
+        "coords": { "regex": "Pozycja GPS\\s*:\\s*\\(([\\d.]+),\\s*([\\d.]+)\\)", "group": 0 },
+        "lat": { "regex": "Pozycja GPS\\s*:\\s*\\(([\\d.]+),", "group": 1 },
+        "lon": { "regex": "Pozycja GPS\\s*:\\s*\\([\\d.]+,\\s*([\\d.]+)\\)", "group": 1 },
+        "phone": { "regex": "Tel\\. kontaktowy:\\s*(.*?)\\s+Informacje:", "group": 1, "null_values": ["brak danych", "brak danych."] },
+        "info": { "regex": "Informacje:\\s*(.*?)\\s+Model AED:", "group": 1 },
+        "model": { "regex": "Model AED:\\s*(.*?)\\s+Tryb pediatryczny:", "group": 1, "null_values": ["brak danych", "brak danych."] },
+        "pediatric": { "regex": "Tryb pediatryczny:\\s*(.*?)(?:\\s+Opiekun techniczny:|$)", "group": 1, "null_values": ["brak danych", "brak danych."] },
+        "operator": { "regex": "Opiekun techniczny:\\s*(.*)$", "group": 1, "null_values": ["brak danych", "brak danych."] }
+      },
+      "item_text_separator": " ",
+      "trim": true,
+      "collapse_whitespace": true,
+      "empty_as_null": true,
+      "min_records": 8,
+      "max_records": 12
+    }
+  },
+  "records": {
+    "path": "$",
+    "identity": {
+      "source_record_id": { "template": "tarnow-opolski:{place}:{record_no}" },
+      "dataset_id": { "const": "opolsar:html:aed" },
+      "stable": true
+    },
+    "dedupe": { "key": [{ "field": "place" }, { "field": "record_no" }], "keep": "last", "on_duplicate": "reject" }
+  },
+  "map": {
+    "source_url": { "const": "https://opolsar.pl/aed/" },
+    "name": { "field": "place" },
+    "label": { "template": "{place}/{record_no}" },
+    "description": { "field": "info" },
+    "note": { "field": "text" },
+    "facility_type": {
+      "when": { "op": "regex", "left": { "field": "place" }, "right": "(?i)Remiza OSP" },
+      "then": "osp_fire_station",
+      "else": {
+        "when": { "op": "regex", "left": { "field": "place" }, "right": "(?i)Urząd Gminy" },
+        "then": "municipal_office",
+        "else": {
+          "when": { "op": "regex", "left": { "field": "place" }, "right": "(?i)NZOZ|przychodni" },
+          "then": "clinic",
+          "else": {
+            "when": { "op": "regex", "left": { "field": "place" }, "right": "(?i)Biurowiec" },
+            "then": "workplace",
+            "else": "unknown"
+          }
+        }
+      }
+    },
+    "lat": { "func": "to_float", "args": [{ "field": "lat" }] },
+    "lon": { "func": "to_float", "args": [{ "field": "lon" }] },
+    "coord_precision_m": { "const": 15 },
+    "country_code": { "const": "PL" },
+    "city": { "regex": { "in": { "field": "address" }, "pattern": "^([^,]+)" } },
+    "address_text": { "field": "address" },
+    "entrance_description": { "field": "info" },
+    "access_type": {
+      "when": { "op": "regex", "left": { "field": "heading" }, "right": "(?i)OGÓLNODOSTĘPNY" },
+      "then": "public",
+      "else": {
+        "when": { "op": "regex", "left": { "field": "heading" }, "right": "(?i)POJAZDU OSP" },
+        "then": "dispatcher",
+        "else": {
+          "when": { "op": "regex", "left": { "field": "heading" }, "right": "(?i)OGRANICZONA" },
+          "then": "private",
+          "else": "unknown"
+        }
+      }
+    },
+    "is_24_7": {
+      "when": { "op": "regex", "left": { "field": "heading" }, "right": "24H" },
+      "then": true,
+      "else": null
+    },
+    "phone": { "field": "phone" },
+    "model": { "field": "model" },
+    "pads_type": {
+      "when": { "op": "regex", "left": { "field": "pediatric" }, "right": "(?i)^tak" },
+      "then": "dual",
+      "else": {
+        "when": { "op": "regex", "left": { "field": "pediatric" }, "right": "(?i)^nie" },
+        "then": "adult",
+        "else": "unknown"
+      }
+    },
+    "device_type": { "const": "public_aed" },
+    "status": { "const": "unknown" },
+    "verification_status": { "const": "unverified" },
+    "confidence": { "const": 0.8 },
+    "last_verified_at": { "const": null },
+    "operator_name": { "field": "operator" },
+    "operator_type": {
+      "when": { "op": "regex", "left": { "field": "operator" }, "right": "OSP" },
+      "then": "osp_ksrg",
+      "else": "unknown"
+    },
+    "source_updated_at": { "const": null }
+  },
+  "validate": {
+    "required": ["name", "lat", "lon"],
+    "coords": { "bbox": [17.95, 50.54, 18.16, 50.63], "on_invalid": "review" },
+    "enums": true,
+    "on_error": "review"
+  },
+  "drift": {
+    "baseline": {
+      "record_count": 10,
+      "generated_at": "2026-11-21",
+      "schema_fields": ["text", "record_no", "heading", "place", "address", "coords", "lat", "lon", "phone", "info", "model", "pediatric", "operator"]
+    },
+    "schema": { "on_new_field": "review", "on_missing_field": "fail", "on_type_change": "review", "on_header_order_change": "ignore" },
+    "volume": { "min_records": 8, "max_delta_ratio": 0.5, "on_breach": "review" },
+    "quality": {
+      "max_coord_invalid_ratio": 0.0,
+      "max_duplicate_id_ratio": 0.0,
+      "max_null_ratio": { "name": 0.0, "lat": 0.0, "lon": 0.0 },
+      "on_breach": "review"
+    },
+    "axis": { "enabled": true, "max_suspicious_ratio": 0.0, "on_breach": "review" },
+    "golden_sample": { "size": 10, "required_match_ratio": 1.0 },
+    "actions": { "warn": "log", "review": "quarantine", "fail": "disable" }
+  },
+  "publish": {
+    "enabled": false,
+    "license_id": "NOASSERTION",
+    "attribution": "Fundacja OPOLSAR — brak deklaracji licencji; publikacja wymaga zgody wydawcy",
+    "redact": ["phone"],
+    "exports": []
+  }
+}
