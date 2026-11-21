@@ -21,6 +21,24 @@ bun install
 bun run dev
 ```
 
+## Plan modułów
+
+Katalogi `frontend/` i `backend/` zawierają **wyłącznie dokumentację planowanych
+modułów** (bez kodu) — kod aplikacji pozostaje w `src/`. Dzięki temu wiadomo,
+co i gdzie będzie rozwijane.
+
+| Warstwa | Moduł | Status |
+| --- | --- | --- |
+| frontend | [`auth-form/`](./frontend/auth-form/README.md) | planowane |
+| frontend | [`aed-form/`](./frontend/aed-form/README.md) | planowane |
+| frontend | [`map/`](./frontend/map/README.md) | częściowo istnieje |
+| frontend | [`social-media/`](./frontend/social-media/README.md) | planowane |
+| backend | [`auth/`](./backend/auth/README.md) | częściowo istnieje |
+| backend | [`ingest/`](./backend/ingest/README.md) | planowane |
+| backend | [`normalize/`](./backend/normalize/README.md) | planowane |
+| backend | [`store/`](./backend/store/README.md) | planowane |
+| backend | [`gov-api/`](./backend/gov-api/README.md) | planowane |
+
 ## Stack
 
 - TanStack Start + TanStack Router (React 19, routing plikowy)
