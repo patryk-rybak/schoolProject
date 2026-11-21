@@ -1,52 +1,183 @@
-Welcome to your new TanStack Start app!
+# Mapa AED
 
-# Getting Started
+Minimalna aplikacja TanStack Start, która renderuje mapę Polski z MapLibre GL JS i kafelkami Protomaps oraz polskimi etykietami. To punkt wyjścia dla mapy AED (defibrylatorów).
 
-To run this application:
+## Stack
+
+- TanStack Start + TanStack Router (React 19, routing plikowy)
+- Vite 8 + Nitro 3 z presetem `bun`
+- Bun 1.4 jako runtime, menedżer pakietów i sterownik SQLite
+- MapLibre GL JS 6.19.0 + Protomaps/PMTiles
+- Tailwind CSS v4 + shadcn/ui (`new-york`, komponenty na bazie Radix UI)
+- Drizzle ORM z `bun:sqlite`
+- better-auth
+- Biome + TypeScript w trybie strict
+
+## Getting Started
 
 ```bash
 bun install
 bun run dev
 ```
 
-## Commit Conventions
+Aplikacja działa pod http://localhost:3000.
 
-This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+`bun install` uruchamia `scripts/copy-maplibre-worker.ts`, który kopiuje worker MapLibre do `public/maplibre-gl-worker.mjs`.
 
-Use the format `<type>(<scope>): <description>`, for example:
+## Skrypty
+
+| Zadanie | Komenda |
+| --- | --- |
+| Serwer deweloperski | `bun run dev` |
+| Typecheck | `bun run typecheck` |
+| Lint | `bun run lint` |
+| Format | `bun run format` |
+| Lint + format + importy | `bun run check` |
+| Autofix | `bun run check:write` |
+| Wszystkie kontrole | `bun run verify` |
+| Build | `bun run build` |
+| Podgląd builda | `bun run preview` |
+| Migracje | `bun run db:generate`, `bun run db:migrate`, `bun run db:push` |
+| Drizzle Studio | `bun run db:studio` |
+| Kafelki mapy | `bun run map:tiles` |
+| Nowy komponent shadcn | `bunx --bun shadcn@latest add <nazwa>` |
+
+## Mapa
+
+Strona główna (`src/routes/index.tsx`) renderuje `src/components/map/poland-map.tsx`: MapLibre GL JS wyśrodkowany na Polsce (`19.1451, 51.9194`), z polskimi etykietami z Protomaps, kontrolkami nawigacji i skali oraz alertem shadcn, gdy mapa nie może się wczytać.
+
+Wyciąg kafelków kończy się na zoomie 15, a mapa pozwala dojść do zoomu 18. Źródło ma przypięte `maxzoom: 15`, więc MapLibre overzoomuje kafelki z15 zamiast żądać brakujących kafelków. Kafelki pochodzą z `/api/pmtiles` (`src/routes/api/pmtiles.ts`), który obsługuje nagłówki `Range` i odpowiada `206 Partial Content`. Nie podłączaj PMTiles bezpośrednio do pliku statycznego, ponieważ hosting statyczny nie zwraca zakresów bajtów wymaganych przez PMTiles.
+
+Wygeneruj lokalny wyciąg PMTiles (domyślnie zoom 15, około 4 GB, ignorowany przez git):
 
 ```bash
-git commit -m "feat(ui): add data table filters"
-git commit -m "fix(auth): handle expired sessions"
+bun run map:tiles
 ```
 
-Common types are `feat`, `fix`, `docs`, `style`, `refactor`, `test`, and `chore`.
+Skrypt pobiera najnowszy dzienny build Protomaps i wycina Polskę do `public/poland.pmtiles`. Domyślnie używa `PMTILES_THREADS=12` i ponawia próbę do `PMTILES_ATTEMPTS=3` razy. Nadpisz ustawienia przez `POLAND_MAXZOOM`, `POLAND_BBOX`, `PMTILES_THREADS`, `PMTILES_ATTEMPTS` lub `PROTOMAPS_PLANET_URL`. Szybki, mały wyciąg: `POLAND_MAXZOOM=10 bun run map:tiles` (około 100 MB; mapa nadal przybliża, ale kafelki są rozmyte).
 
-# Building For Production
+Worker MapLibre jest ładowany jako statyczny zasób z `/maplibre-gl-worker.mjs?v=6.19.0`. Utrzymuj parametr `?v=` w `src/components/map/poland-map.tsx` zgodny z wersją `maplibre-gl`, aby unieważniać cache po aktualizacji. Nie serwuj workera przez route serwerowy: middleware Nitro w trybie dev kieruje żądania z `Sec-Fetch-Dest: worker` do plików statycznych i pomija route API.
 
-To build this application for production:
+## UI
+
+Projekt używa wyłącznie natywnych komponentów shadcn/ui generowanych przez CLI: `alert`, `badge`, `button` i `card`. Są zarządzane przez rejestr shadcn, bazują na Radix UI i zachowują styl `new-york` oraz motyw oparty na zmiennych CSS w `src/styles.css`. Nie edytuj wygenerowanych plików w `src/components/ui/` ręcznie i nie dodawaj własnych prymitywów zamiast komponentów shadcn.
 
 ```bash
-bun run build
+bunx --bun shadcn@latest add <nazwa>
 ```
 
-## Styling
+## Database
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+Aplikacja używa natywnego sterownika SQLite Buna przez `drizzle-orm/bun-sqlite`. Plik bazy pochodzi z `DATABASE_URL` (domyślnie `dev.db`), a `src/db/index.ts` włącza WAL i `synchronous = NORMAL`. Schemat znajduje się w `src/db/schema.ts`.
 
-### Removing Tailwind CSS
+```bash
+bun run db:generate
+bun run db:migrate
+bun run db:push
+```
 
-If you prefer not to use Tailwind CSS:
+Drizzle Kit działa na Bunie. `@libsql/client` jest zależnością deweloperską, ponieważ CLI Drizzle Kit potrzebuje klienta SQLite; aplikacja w runtime używa `bun:sqlite`.
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
+## Auth
 
-## Linting & Formatting
+better-auth jest skonfigurowany w `src/lib/auth.ts` (logowanie e-mailem i hasłem, plugin `tanstackStartCookies`), klient w `src/lib/auth-client.ts`, a handler w `src/routes/api/auth/$.ts`.
 
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
+Ustaw w `.env.local`:
 
+```bash
+BETTER_AUTH_SECRET=...
+BETTER_AUTH_URL=http://localhost:3000
+```
+
+Sekret wygenerujesz przez `bunx --bun @better-auth/cli secret`.
+
+## Routing
+
+Routing jest plikowy i oparty na TanStack Router. Pliki w `src/routes/` tworzą route'y, a `src/router.tsx` buduje router z `routeTree.gen.ts`. Nie edytuj `src/routeTree.gen.ts` ręcznie; generuje go `bun run dev` lub `bun run build`.
+
+Aby dodać route, dodaj plik w `src/routes/`:
+
+```tsx
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/o-projekcie")({
+	component: About,
+});
+
+function About() {
+	return <main>O projekcie</main>;
+}
+```
+
+Layout aplikacji znajduje się w `src/routes/__root.tsx` i używa `shellComponent` do renderowania dokumentu HTML.
+
+## Server Functions i API Routes
+
+Server functions z TanStack Start pozwalają uruchamiać kod serwerowy bezpośrednio z komponentów:
+
+```tsx
+import { createServerFn } from "@tanstack/react-start";
+
+const getServerTime = createServerFn({ method: "GET" }).handler(async () => {
+	return new Date().toISOString();
+});
+```
+
+Route'y API definiuje się przez `server.handlers`:
+
+```tsx
+import { createFileRoute } from "@tanstack/react-router";
+import { json } from "@tanstack/react-start";
+
+export const Route = createFileRoute("/api/hello")({
+	server: {
+		handlers: {
+			GET: () => json({ message: "Hello, World!" }),
+		},
+	},
+});
+```
+
+## Data Fetching
+
+Dane ładuj przez `loader` TanStack Router lub przez server functions. Aplikacja nie ma integracji z TanStack Query: nie ma providera `QueryClient` ani devtools. Jeśli w przyszłości dodasz Query, zainstaluj `@tanstack/react-query` i podłącz provider w `src/router.tsx`.
+
+```tsx
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/osoby")({
+	loader: async () => {
+		const response = await fetch("https://swapi.dev/api/people");
+		return response.json();
+	},
+	component: Osoby,
+});
+
+function Osoby() {
+	const data = Route.useLoaderData();
+	return (
+		<ul>
+			{data.results.map((person: { name: string }) => (
+				<li key={person.name}>{person.name}</li>
+			))}
+		</ul>
+	);
+}
+```
+
+## Environment Variables
+
+Zmienne środowiskowe mieszkają w `.env.local` (nigdy nie commitowanym). Bun ładuje ten plik automatycznie:
+
+- `DATABASE_URL` — ścieżka do pliku SQLite (domyślnie `dev.db`)
+- `BETTER_AUTH_URL` — bazowy URL better-auth
+- `BETTER_AUTH_SECRET` — sekret podpisujący better-auth
+
+W kodzie serwerowym używaj `process.env` lub `Bun.env`, a w kliencie `import.meta.env` dla zmiennych z prefiksem `VITE_`. Nie ma modułu walidacji `src/env.ts`; kafelki zawsze pochodzą z `/api/pmtiles`.
+
+## Linting i formatowanie
+
+Projekt używa Biome do lintowania i formatowania: tabulatory, podwójne cudzysłowy, organizacja importów.
 
 ```bash
 bun run lint
@@ -54,263 +185,39 @@ bun run format
 bun run check
 ```
 
+## Commit Conventions
 
-## Deploy with Nitro
+Projekt stosuje [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Format: `<type>(<scope>): <description>`.
 
-This project uses Nitro's Bun preset and runs on the [Bun](https://bun.com) runtime.
+```bash
+git commit -m "feat(map): add AED markers"
+git commit -m "fix(auth): handle expired sessions"
+git commit -m "docs(readme): document map tile defaults"
+```
+
+Dozwolone typy: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+
+## Deploy
+
+Build korzysta z presetu Bun w Nitro:
 
 ```bash
 bun run build
 bun .output/server/index.mjs
 ```
 
-The build output is a self-contained Bun server. To deploy, push the `.output/` directory to your host and run the server command above.
-
-For host-specific presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.) and tuning, see https://v3.nitro.build/deploy.
-
-
-## Database
-
-The app uses Bun's native SQLite driver through `drizzle-orm/bun-sqlite`. The database file comes from `DATABASE_URL` (defaults to `dev.db`) and WAL mode is enabled at startup.
-
-```bash
-bun run db:generate
-bun run db:push
-```
-
-Drizzle Kit runs on Bun too. `@libsql/client` is installed as a dev dependency because Drizzle Kit needs a SQLite client for its CLI commands; the application itself uses `bun:sqlite`.
-
-
-## Map
-
-The home page renders a [Protomaps](https://protomaps.com) basemap of Poland with [MapLibre GL JS](https://maplibre.org/) and Polish labels.
-
-Generate the local PMTiles extract (about 100 MB at zoom 10, ignored by git):
-
-```bash
-bun run map:tiles
-```
-
-The script downloads the latest Protomaps daily build and extracts Poland into `public/poland.pmtiles`. Override the output with `POLAND_MAXZOOM`, `POLAND_BBOX`, or `PROTOMAPS_PLANET_URL`. To use a hosted PMTiles archive instead, set `VITE_PROTOMAPS_PMTILES_URL`.
-
-`bun install` also copies the self-contained MapLibre worker into `public/` via the `postinstall` script, so the map does not depend on a worker CDN.
-
-
-## Shadcn
-
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
-
-```bash
-bunx --bun shadcn@latest add button
-```
-
+Katalog `.output/` zawiera samodzielny serwer Bun. Aby wdrożyć, wyślij `.output/` na hosting i uruchom powyższą komendę. Presety dla innych platform opisuje dokumentacja Nitro: https://v3.nitro.build/deploy.
 
 ## AI Tooling
 
-- TanStack Agent Skills are enabled through `@tanstack/intent`. `package.json#intent.skills` permits `@tanstack/*`; run `bunx @tanstack/intent@latest list` to inspect the skills that ship with the installed packages.
-- The local `/tanstack` skill wraps `intent list` and `intent load` for version-matched Start, Router, Query, and Table guidance in Jcode.
-- The shadcn skill is installed in `.claude/skills/shadcn` and is available in Jcode as `/shadcn`. It reads `components.json` and provides project-aware component guidance.
-- The shadcn MCP server is configured in `.jcode/mcp.json` and `.mcp.json`. It runs the shadcn CLI through Bun and can search the official registry. Pass `registries: ["@shadcn"]` explicitly when a client starts outside the project directory.
+- TanStack Agent Skills są dostępne przez `@tanstack/intent`. `package.json#intent.skills` dopuszcza `@tanstack/*`; użyj `bunx --no-install --package @tanstack/intent intent list`, aby zobaczyć lokalne skille.
+- Lokalny skill `/tanstack` opakowuje `intent list` i `intent load` dla wskazówek dopasowanych do wersji Start i Router.
+- Skill shadcn jest w `.claude/skills/shadcn` i jest dostępny w Jcode jako `/shadcn`. Czyta `components.json` i uruchamia CLI shadcn.
+- Serwer MCP shadcn jest skonfigurowany w `.jcode/mcp.json` i `.mcp.json` i działa przez Bun. Przy wywołaniach spoza katalogu projektu podawaj `registries: ["@shadcn"]`.
 
-## T3Env
+## Learn More
 
-- You can use T3Env to add type safety to your environment variables.
-- Add Environment variables to the `src/env.mjs` file.
-- Use the environment variables in your code.
-
-### Usage
-
-```ts
-import { env } from "#/env";
-
-console.log(env.VITE_APP_TITLE);
-```
-
-
-
-
-
-## Setting up Better Auth
-
-1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
-
-   ```bash
-   bunx --bun @better-auth/cli secret
-   ```
-
-2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
-
-### Adding a Database (Optional)
-
-Better Auth can work in stateless mode, but to persist user data, add a database:
-
-```typescript
-// src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-
-export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
-```
-
-Then run migrations:
-
-```bash
-bunx --bun @better-auth/cli migrate
-```
-
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+- [TanStack Start](https://tanstack.com/start) i [TanStack Router](https://tanstack.com/router)
+- [MapLibre GL JS](https://maplibre.org/) i [Protomaps](https://protomaps.com)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Drizzle ORM](https://orm.drizzle.team/) i [better-auth](https://www.better-auth.com)
