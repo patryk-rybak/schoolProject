@@ -7,8 +7,8 @@ Pliki:
 | Plik | Rola |
 | --- | --- |
 | [`normalized-source-inventory.csv`](./normalized-source-inventory.csv) | 69 źródeł, znormalizowane pola, priorytety, connector/parser, licencje, TERYT, blockery |
-| [`config-smoke-report.md`](./config-smoke-report.md) | live smoke 69 konfiguracji: statusy HTTP, liczniki rekordów, pokrycie wymaganych pól |
-| [`config-smoke-report.json`](./config-smoke-report.json) | maszynowy wynik smoke z metrykami per źródło i kodem błędu |
+| [`config-smoke-lane-26-37.md`](./config-smoke-lane-26-37.md) | live smoke 12 źródeł HTML (pozycje 26-37) z 2026-11-21 |
+| [`manual-transcription-review.md`](./manual-transcription-review.md) | przegląd źródeł manualnych: osiągalność, format artefaktu, klasy transkrypcji |
 | [`../raw/voivodeships/national-registries.csv`](../raw/voivodeships/national-registries.csv) | surowy inwentarz wejściowy 69 źródeł |
 | [`../raw/voivodeships/national-registries.md`](../raw/voivodeships/national-registries.md) | opis klas A/B+/B/B- i rekomendacje |
 | [`../raw/voivodeships/national-scan-method.md`](../raw/voivodeships/national-scan-method.md) | metoda skanu i ograniczenia pokrycia |

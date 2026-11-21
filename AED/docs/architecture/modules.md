@@ -31,7 +31,7 @@ AED/
 │   │   ├── ingest/
 │   │   │   ├── types.ts          # cross-lane contracts (no db/http imports)
 │   │   │   ├── errors.ts         # ConfigError, FetchError, ParseError, reason codes
-│   │   │   ├── registry.ts       # YAML SourceConfig[] + registry loader/upsert
+│   │   │   ├── registry.ts       # JSON SourceConfig[] + registry loader/upsert
 │   │   │   ├── run.ts            # orchestration for one source run
 │   │   │   ├── lock.ts           # acquire/reap sync_run lock
 │   │   │   ├── hash.ts           # stable JSON stringify + sha256
@@ -50,7 +50,7 @@ AED/
 │   │   │   │   ├── jsonapi.ts
 │   │   │   │   └── html-table.ts
 │   │   │   ├── config/
-│   │   │   │   ├── loader.ts     # Bun.YAML.parse + JSON Schema + family matrix
+│   │   │   │   ├── loader.ts     # JSON registry + Zod/JSON Schema + family matrix
 │   │   │   │   ├── schema.ts     # runtime shape guards for SourceConfig
 │   │   │   │   └── mapping-dsl.ts# whitelisted mapping functions, no eval
 │   │   │   ├── connectors/
@@ -210,23 +210,23 @@ Add `.data/` (snapshot root) and `backups/` next to the existing ignored
 
 ### 4.1 Connector-config lane
 
-The config lane owns the YAML contract and its validation:
+The config lane owns the JSON registry contract and its validation:
 
-- `backend/ingest/source-config.schema.json` (JSON Schema 2020-12),
-- one `backend/ingest/sources/<id>.yaml` per source plus `examples/*.yaml`,
+- `backend/ingest/datasources-config.json` (single registry for all sources),
+- `backend/ingest/datasources-config.schema.json` (JSON Schema 2020-12),
 - the family/parser matrix and mapping DSL specification.
 
 Storage consumes:
 
 - `SourceConfig`, `ConnectorFamily`, `ParserKind`, `ConnectorResult`,
   `DriftSignal` from `src/server/ingest/types.ts`,
-- `loadRegistry()` that parses with `Bun.YAML.parse`, validates against the
-  JSON Schema, rejects an invalid family/parser pair, and upserts `source` +
-  `source_config`,
+- `loadRegistry()` that parses `datasources-config.json`, validates against the
+  JSON Schema, rejects an invalid family/parser pair or duplicate id, and
+  upserts `source` + `source_config`,
 - one connector implementation per family, not per source,
 - documented stable `sourceRecordId` assignment in `records.identity`.
 
-Hand-off test: a fake YAML with two static records runs through `runSource()`
+Hand-off test: a fake config entry with two static records runs through `runSource()`
 and produces the expected `source_record` rows without touching canonical
 tables until the normalize lane is implemented.
 
@@ -388,14 +388,14 @@ Use a temporary SQLite file (`mkdtemp` + `DATABASE_URL`) rather than a shared
 
 1. **M1 storage**: schema modules, pragmas, migrations, migration test.
 2. **Contracts and primitives**: `types.ts`, `hash.ts`, `errors.ts`, config
-   loader with `Bun.YAML.parse` + JSON Schema, CSV/GeoJSON parsers, snapshot
+   loader with JSON parsing + JSON Schema, CSV/GeoJSON parsers, snapshot
    store.
 3. **HTTP layer**: client, retry, rate limit, secrets, redaction, with tests.
-4. **First vertical slice**: OpenAEDMap YAML + `file_static`/`geojson` family ->
+4. **First vertical slice**: OpenAEDMap config entry + `file_static`/`geojson` family ->
    parse -> record upsert -> run summary, still without canonical writes.
 5. **M2 canonical**: normalize, validate, UUIDs, canonical repository, map read
    query. The first map points can render from `aed` + `facility`.
-6. **Second connector**: Przemyśl YAML + `http_json` family, proving the config
+6. **Second connector**: Przemyśl config entry + `http_json` family, proving the config
    layer rather than a per-source code path.
 7. **Dedup**: exact OSM aliases first, spatial review queue second.
 8. **Lifecycle**: absence/removal and verification status.

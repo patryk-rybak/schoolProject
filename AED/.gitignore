@@ -18,10 +18,5 @@ dist-ssr
 __unconfig*
 todos.json
 
-# generated core dataset (rebuild with `bun run core:build`)
-data/core/core*.json
-data/core/core*.geojson
-data/core/core.csv
-data/core/core.sqlite
-data/core/core.sqlite-*
-data/core/build-smoke/
+# generated runtime datasets and raw snapshots (rebuild with `bun run ingest:run`)
+.data/

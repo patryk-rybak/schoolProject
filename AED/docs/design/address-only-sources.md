@@ -174,7 +174,7 @@ Zmiana względem quality spec: `MISSING_COORDS` przestaje być `fatal`, gdy istn
 
 ## 5. Deduplikacja bez geometrii
 
-Blocking i scoring z [`../architecture/dedup.md`](../architecture/dedup.md) już przewidują klucz `address`. Uzupełnienie:
+Blocking i scoring z [`../aed-data-sources-common-schema.md`](../aed-data-sources-common-schema.md#9-identyfikatory-deduplikacja-i-scalanie) już przewidują klucz `address`. Uzupełnienie:
 
 1. **Klucz adresowy** `teryt_commune|ulic|house_number` lub `street|house|city` działa bez `lat/lon`.
 2. **Para address-only z address-only** może dojść do `0.85` tylko przy zgodnym adresie, nazwie i operatorze. Sama zgodność adresu daje maksymalnie `0.60`, czyli review, nie auto-merge.
@@ -433,7 +433,7 @@ geocoding:
 
 ### 9.3 Zmiany w schemacie JSON
 
-Schemat [`../../backend/ingest/source-config.schema.json`](../../backend/ingest/source-config.schema.json) dostaje:
+Schemat [`../../backend/ingest/datasources-config.schema.json`](../../backend/ingest/datasources-config.schema.json) dostaje:
 
 - opcjonalne `geocoding`,
 - `validate.coords.on_missing`,
@@ -441,7 +441,8 @@ Schemat [`../../backend/ingest/source-config.schema.json`](../../backend/ingest/
 - pola kanoniczne `location_status`, `geom_source`, `address_kind`, `address_confidence`, `geocode_*`,
 - nową rodzinę connectora `html_list` i parser `html_list`.
 
-Szablon: [`../../backend/ingest/examples/generic-address-list.yaml`](../../backend/ingest/examples/generic-address-list.yaml).
+Przykład wpisu: [`../../backend/ingest/datasources-config.json`](../../backend/ingest/datasources-config.json)
+(źródła `address_only` z `geocoding.enabled: true`).
 
 ## 10. Migracja i wdrożenie
 

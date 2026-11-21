@@ -9,8 +9,8 @@ Suszec, Czarne
 [`aed-data-sources-common-schema.md`](./aed-data-sources-common-schema.md),
 [`research/raw/voivodeships/national-registries.md`](./research/raw/voivodeships/national-registries.md)
 
-Konfiguracje: [`../backend/ingest/examples/html-pdf/`](../backend/ingest/examples/html-pdf/).
-Schemat: [`../backend/ingest/source-config.schema.json`](../backend/ingest/source-config.schema.json).
+Konfiguracje: wpisy w [`../backend/ingest/datasources-config.json`](../backend/ingest/datasources-config.json).
+Schemat: [`../backend/ingest/datasources-config.schema.json`](../backend/ingest/datasources-config.schema.json).
 
 ---
 
@@ -145,26 +145,25 @@ już działa.
 
 ## 3. Konfiguracje
 
-| Plik | Źródło | Rodzina / parser | Rekordy | `enabled` |
+| `source.id` | Źródło | Rodzina / parser | Rekordy | `enabled` |
 | --- | --- | --- | ---: | --- |
-| [`slawa-html-table.json`](../backend/ingest/examples/html-pdf/slawa-html-table.json) | Sława | `html_table` / `html_table` | 13 | tak |
-| [`manowo-html-list.json`](../backend/ingest/examples/html-pdf/manowo-html-list.json) | Manowo | `html_list` / `html_list` | 8 | tak |
-| [`tarnow-opolski-html-list.json`](../backend/ingest/examples/html-pdf/tarnow-opolski-html-list.json) | Tarnów Opolski | `html_list` / `html_list` | 10 | tak |
-| [`suszec-html-table.json`](../backend/ingest/examples/html-pdf/suszec-html-table.json) | Suszec | `html_table` / `html_table` | 5 | tak |
-| [`czarne-pdf-table.json`](../backend/ingest/examples/html-pdf/czarne-pdf-table.json) | Czarne | `pdf_table` / `pdf_table` | 20 | nie |
+| `slawa` | Sława | `html_table` / `html_table` | 13 | tak |
+| `manowo` | Manowo | `html_list` / `html_list` | 8 | tak |
+| `tarnow-opolski` | Tarnów Opolski | `html_list` / `html_list` | 10 | tak |
+| `suszec` | Suszec | `html_table` / `html_table` | 5 | tak |
+| `czarne` | Czarne | `pdf_table` / `pdf_table` | 20 | nie |
 
 Wszystkie konfiguracje przechodzą walidację JSON Schema 2020-12. Sprawdzenie:
 
 ```bash
 cd AED/backend/ingest
 python3 - <<'PY'
-import json, glob, jsonschema
-schema = json.load(open("source-config.schema.json"))
+import json, jsonschema
+schema = json.load(open("datasources-config.schema.json"))
 jsonschema.Draft202012Validator.check_schema(schema)
 v = jsonschema.Draft202012Validator(schema)
-for f in sorted(glob.glob("examples/html-pdf/*.json")):
-    v.validate(json.load(open(f)))
-    print("OK", f)
+v.validate(json.load(open("datasources-config.json")))
+print("OK datasources-config.json")
 PY
 ```
 

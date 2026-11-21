@@ -209,4 +209,4 @@ Każde źródło przechodzi przed importem:
 | [`address-only-sources.md`](./address-only-sources.md) | model, geokodowanie, publikacja, konfiguracja |
 | [`../research/raw/voivodeships/national-registries.md`](../research/raw/voivodeships/national-registries.md) | pełna tabela 69 źródeł A/B+/B/B- |
 | [`../research/raw/voivodeships/national-registries.csv`](../research/raw/voivodeships/national-registries.csv) | ta sama tabela w CSV |
-| [`../../backend/ingest/examples/generic-address-list.yaml`](../../backend/ingest/examples/generic-address-list.yaml) | szablon konfiguracji źródła adresowego |
+| [`../../backend/ingest/datasources-config.json`](../../backend/ingest/datasources-config.json) | rejestr źródeł, w tym konfiguracje adresowe `address_only` |

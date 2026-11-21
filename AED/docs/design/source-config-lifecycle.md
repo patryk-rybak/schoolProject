@@ -6,7 +6,7 @@
 | Wersja | 1.0 (projekt do review) |
 | Zależy od | [`../aed-data-sources-common-schema.md`](../aed-data-sources-common-schema.md), [`./admin-console.md`](./admin-console.md), [`../architecture/ingestion.md`](../architecture/ingestion.md), [`../architecture/persistence.md`](../architecture/persistence.md), [`../architecture/operations.md`](../architecture/operations.md) |
 | Dotyczy | `src/routes/admin/sources/**`, `src/routes/api/admin/sources/**`, `src/server/config/**`, `src/server/ingest/**`, `src/db/schema.ts` |
-| Schemat konfiguracji | [`../../backend/ingest/source-config.schema.json`](../../backend/ingest/source-config.schema.json) |
+| Schemat konfiguracji | [`../../backend/ingest/datasources-config.schema.json`](../../backend/ingest/datasources-config.schema.json) |
 | Status | projekt do implementacji; nie zastępuje schematu konfiguracji, tylko definiuje jego cykl życia |
 
 ## 1. Cel i granice
@@ -79,7 +79,7 @@ Zasady:
 3. `source.config_json` i `source.config_version` pozostają jako **zdenormalizowany mirror aktywnej wersji** dla kodu, który jeszcze ich używa. Są aktualizowane wyłącznie w transakcji aktywacji i nie są źródłem prawdy.
 4. `source.id` jest niezmienne. Zmiana identyfikatora to nowe źródło i migracja historii, nigdy `UPDATE`.
 5. Connector family i parser muszą istnieć w kodzie. Jeśli wnioskowanie wskaże format bez obsługi, kreator kończy się stanem `needs_connector`, a nie improwizowanym scraperem.
-6. Dla `managed_by='code'` plik YAML z `backend/ingest/sources/` pozostaje źródłem prawdy. Loader liczy `source_sha256` i `config_sha256`, a jeśli nie ma wersji o tym hashu, tworzy ją jako `origin='code'` i aktywuje w transakcji. Code review i CI są bramką tego trybu; UI nie pozwala edytować takiej wersji.
+6. Dla `managed_by='code'` wpis w `backend/ingest/datasources-config.json` pozostaje źródłem prawdy. Loader liczy `source_sha256` i `config_sha256`, a jeśli nie ma wersji o tym hashu, tworzy ją jako `origin='code'` i aktywuje w transakcji. Code review i CI są bramką tego trybu; UI nie pozwala edytować takiej wersji.
 7. Dla `managed_by='runtime'` nie ma pliku YAML w repozytorium. Wersje powstają wyłącznie przez kreator/API i przechodzą pełne bramki. Eksport konfiguracji do pliku jest kopią audytową, nie źródłem prawdy.
 
 ### 4.2 Wymagania integracyjne dla innych lane'ów
@@ -95,8 +95,8 @@ Te punkty nie są zmianą cudzego projektu, ale muszą wejść do wspólnego kon
 | Normalizacja | `normalizer_version` musi zawierać wersję kodu normalizera i `config_sha256[0:12]`, gdy zmienia się mapowanie | `ingestion.md` §7 |
 | Fetch | przyjmować `UrlPolicy` i `SecretResolver` z tego dokumentu, nie własne wyjątki | `ingestion.md` §4, `operations.md` §9 |
 | Eksport | nie eksportować pól z wersji, która nie jest `active` | `observability-licensing.md` |
-| `source-config.schema.json` | dodać opcjonalny blok `activation` (`canary`, `auto_rollback`, `watch_window_runs`, `rollback_revision`), blok `schedule` (`cron`, `timezone`, `jitter_seconds`), `auth.user_env`/`auth.password_env` dla `basic`, a w `publish`: `allowed_for_ingest`, `allowed_for_export`, `terms_hash`, `terms_checked_at` | schemat konfiguracji |
-| `source_config` i `config_sha256` | `ingestion.md` §3 definiuje `source_config` i hash po dokładnych bajtach YAML. Ten projekt ujednolica nazwę na `source_config_version` i rozdziela `config_sha256` (kanoniczny JSON, tożsamość semantyczna) od `source_sha256` (dokładne bajty importu, audyt). Loader używa `config_sha256` do wykrycia zmiany mapowania, a `source_sha256` tylko do audytu pliku. | `ingestion.md` §3, `persistence.md` §3.1 |
+| `datasources-config.schema.json` | dodać opcjonalny blok `activation` (`canary`, `auto_rollback`, `watch_window_runs`, `rollback_revision`), blok `schedule` (`cron`, `timezone`, `jitter_seconds`), `auth.user_env`/`auth.password_env` dla `basic`, a w `publish`: `allowed_for_ingest`, `allowed_for_export`, `terms_hash`, `terms_checked_at` | schemat konfiguracji |
+| `source_config` i `config_sha256` | `ingestion.md` §3 definiuje `source_config` i hash po dokładnych bajtach wpisu rejestru. Ten projekt ujednolica nazwę na `source_config_version` i rozdziela `config_sha256` (kanoniczny JSON, tożsamość semantyczna) od `source_sha256` (dokładne bajty importu, audyt). Loader używa `config_sha256` do wykrycia zmiany mapowania, a `source_sha256` tylko do audytu pliku. | `ingestion.md` §3, `persistence.md` §3.1 |
 | `access_type` i `update_frequency` | ujednolicić enum: schemat ma `file`, `api`, `html`, `kml`, `manual` oraz `continuous`, `daily`, `weekly`, `monthly`, `quarterly`, `once`, `unknown`, a `admin-console.md` używa też `wms`, `wfs`, `app`, `manual`, `hourly`. Do czasu migracji `app` traktujemy jak `manual`, a `hourly` jak `daily` | schemat, `admin-console.md` |
 | `source.id` | ujednolicić wzorzec: schemat dopuszcza `^[a-z0-9][a-z0-9._-]*$`, a `admin-console.md` wymaga `^[a-z][a-z0-9_]{2,31}$`. Rekomendacja: schemat plus limit 32 znaków i zakaz `..` | schemat, `admin-console.md` |
 

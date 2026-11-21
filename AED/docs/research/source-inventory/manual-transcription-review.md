@@ -20,7 +20,7 @@ sygnaturę pliku i warstwę tekstową, jeśli format na to pozwalał.
 | Znaleziono i poprawiono jeden istotny błąd | Imielin: artykuł linkuje ODT z 5 rekordami i pełnymi współrzędnymi WGS84. Poprzednia konfiguracja twierdziła `NO_COORDS`, `E_MAPA_JS` i wymagała geokodowania. |
 | Czarne ma warstwę tekstową | PDF 1.7, 1 strona, 20 wierszy. Konfiguracja `pdf_table` jest poprawna, a `needs_ocr` z inwentarza jest nieaktualne. |
 | Domena powiatu szamotulskiego była błędna | `powiat-szamotulski.pl` nie rozwiązuje się. Poprawny host to `powiat-szamotuly.pl`; wykaz to DOCX. |
-| Luka kontraktu | Ręcznie edytowany `backend/ingest/source-config.schema.json` nie ma wariantu `manual`, więc konfiguracje manualne (25 w chwili przeglądu) nie przechodzą walidacji tym schematem. Generowany schemat Zod przechodzi dla wszystkich 25 manualnych i dla Czarnego `pdf_table`. |
+| Luka kontraktu | Ówczesny ręcznie edytowany schemat nie miał wariantu `manual`, więc konfiguracje manualne (25 w chwili przeglądu) nie przechodziły walidacji tym schematem. Generowany schemat Zod przechodził dla wszystkich 25 manualnych i dla Czarnego `pdf_table`. Obecnie kontraktem jest `backend/ingest/datasources-config.schema.json` generowany z Zod. |
 
 ## 2. Klasy transkrypcji
 
@@ -69,8 +69,8 @@ udanego żądania; `429/503` opisano w kolumnie uwag.
 
 ## 4. Czarne: przegląd konfiguracji PDF
 
-Konfiguracja źródłowa `backend/ingest/sources/czarne.json` jest po przeglądzie
-wariantem `pdf_table`, a nie `manual`. Sprawdzenia:
+Wpis `czarne` w rejestrze `backend/ingest/datasources-config.json` jest po
+przeglądzie wariantem `pdf_table`, a nie `manual`. Sprawdzenia:
 
 | Element | Wynik |
 | --- | --- |
@@ -107,10 +107,10 @@ zmienić na `pdf_text_layer`, bo OCR nie jest potrzebny.
 1. **Dodać `odt` do enum `format`** w `src/server/ingest/config/schema.ts` i w
    schemacie ręcznym. ODT jest realnym formatem źródłowym, a `other` traci
    informację potrzebną operatorowi.
-2. **Ujednolicić schemat ręczny z generowanym.** `manual` i `pdf_table` nie
-   istnieją w `backend/ingest/source-config.schema.json`, więc konfiguracje
-   manualne nie przechodzą walidacji tym plikiem. Albo dodać warianty, albo
-   oznaczyć generowany schemat jako jedyny kontrakt walidacyjny.
+2. **Utrzymać jeden kontrakt walidacyjny.** W chwili przeglądu `manual` i
+   `pdf_table` nie istniały w ręcznym schemacie; dziś walidację wykonuje
+   generowany `backend/ingest/datasources-config.schema.json`, który obejmuje
+   oba warianty.
 3. **Nie pobierać danych z e-mapy.** Dopiewo, Imielin, Koźmin i inne źródła
    linkują e-mapę jako plan miasta. To nie jest warstwa AED ani API.
 4. **Golden sample dla Czarnego.** Rekonstrukcja `word_positions` musi zostać
