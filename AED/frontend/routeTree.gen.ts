@@ -11,6 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPmtilesRouteImport } from './routes/api/pmtiles'
+import { Route as DataAedDotcsvRouteImport } from './routes/data/aed[.]csv'
+import { Route as DataAedDotgeojsonRouteImport } from './routes/data/aed[.]geojson'
+import { Route as HarvesterFeedDotmd5RouteImport } from './routes/harvester/feed[.]md5'
+import { Route as HarvesterFeedDotxmlRouteImport } from './routes/harvester/feed[.]xml'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +27,26 @@ const ApiPmtilesRoute = ApiPmtilesRouteImport.update({
   path: '/api/pmtiles',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DataAedDotcsvRoute = DataAedDotcsvRouteImport.update({
+  id: '/data/aed.csv',
+  path: '/data/aed.csv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataAedDotgeojsonRoute = DataAedDotgeojsonRouteImport.update({
+  id: '/data/aed.geojson',
+  path: '/data/aed.geojson',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HarvesterFeedDotmd5Route = HarvesterFeedDotmd5RouteImport.update({
+  id: '/harvester/feed.md5',
+  path: '/harvester/feed.md5',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HarvesterFeedDotxmlRoute = HarvesterFeedDotxmlRouteImport.update({
+  id: '/harvester/feed.xml',
+  path: '/harvester/feed.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -32,30 +56,68 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
+  '/data/aed.csv': typeof DataAedDotcsvRoute
+  '/data/aed.geojson': typeof DataAedDotgeojsonRoute
+  '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
+  '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
+  '/data/aed.csv': typeof DataAedDotcsvRoute
+  '/data/aed.geojson': typeof DataAedDotgeojsonRoute
+  '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
+  '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
+  '/data/aed.csv': typeof DataAedDotcsvRoute
+  '/data/aed.geojson': typeof DataAedDotgeojsonRoute
+  '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
+  '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/pmtiles' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/api/pmtiles'
+    | '/data/aed.csv'
+    | '/data/aed.geojson'
+    | '/harvester/feed.md5'
+    | '/harvester/feed.xml'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/pmtiles' | '/api/auth/$'
-  id: '__root__' | '/' | '/api/pmtiles' | '/api/auth/$'
+  to:
+    | '/'
+    | '/api/pmtiles'
+    | '/data/aed.csv'
+    | '/data/aed.geojson'
+    | '/harvester/feed.md5'
+    | '/harvester/feed.xml'
+    | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/pmtiles'
+    | '/data/aed.csv'
+    | '/data/aed.geojson'
+    | '/harvester/feed.md5'
+    | '/harvester/feed.xml'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiPmtilesRoute: typeof ApiPmtilesRoute
+  DataAedDotcsvRoute: typeof DataAedDotcsvRoute
+  DataAedDotgeojsonRoute: typeof DataAedDotgeojsonRoute
+  HarvesterFeedDotmd5Route: typeof HarvesterFeedDotmd5Route
+  HarvesterFeedDotxmlRoute: typeof HarvesterFeedDotxmlRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -75,6 +137,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPmtilesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/data/aed.csv': {
+      id: '/data/aed.csv'
+      path: '/data/aed.csv'
+      fullPath: '/data/aed.csv'
+      preLoaderRoute: typeof DataAedDotcsvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data/aed.geojson': {
+      id: '/data/aed.geojson'
+      path: '/data/aed.geojson'
+      fullPath: '/data/aed.geojson'
+      preLoaderRoute: typeof DataAedDotgeojsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/harvester/feed.md5': {
+      id: '/harvester/feed.md5'
+      path: '/harvester/feed.md5'
+      fullPath: '/harvester/feed.md5'
+      preLoaderRoute: typeof HarvesterFeedDotmd5RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/harvester/feed.xml': {
+      id: '/harvester/feed.xml'
+      path: '/harvester/feed.xml'
+      fullPath: '/harvester/feed.xml'
+      preLoaderRoute: typeof HarvesterFeedDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -88,6 +178,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiPmtilesRoute: ApiPmtilesRoute,
+  DataAedDotcsvRoute: DataAedDotcsvRoute,
+  DataAedDotgeojsonRoute: DataAedDotgeojsonRoute,
+  HarvesterFeedDotmd5Route: HarvesterFeedDotmd5Route,
+  HarvesterFeedDotxmlRoute: HarvesterFeedDotxmlRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

@@ -17,3 +17,6 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
+
+# local dev TLS certificate (dev-tls-proxy)
+.cert/
