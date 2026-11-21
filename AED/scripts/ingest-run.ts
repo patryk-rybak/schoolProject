@@ -128,9 +128,11 @@ async function main(): Promise<void> {
 	if (args.fetch) {
 		const includeDisabled = args.all || args.sourceIds !== undefined;
 		for (const config of selected) {
+			const hasher = new Bun.CryptoHasher("sha256");
+			hasher.update(JSON.stringify(config));
 			results.push(
 				await fetchSource(config, {
-					configPath: registry.configPath,
+					configSha256: hasher.digest("hex"),
 					includeDisabled,
 					rawDir: args.rawDir,
 				}),
@@ -163,7 +165,7 @@ async function main(): Promise<void> {
 
 	const { manifest } = dataset;
 	console.log(
-		`Core: ${manifest.record_count} rekordów, ${manifest.public_count} publicznych, ${manifest.internal_count} wewnętrznych, ${manifest.mappable_count} na mapie.`,
+		`Core: ${manifest.record_count} rekordów, ${manifest.mappable_count} na mapie.`,
 	);
 	for (const source of manifest.sources) {
 		const status = source.error

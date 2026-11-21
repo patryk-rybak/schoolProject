@@ -1,64 +1,17 @@
 import type { SourceConfig } from "../config/schema";
 import {
 	type RecordValue,
-	evaluateExpression,
 	flattenGeoJsonFeature,
 	parseCsv,
 	parseJsonRecords,
 	parseKml,
-} from "../smoke/parsers";
+} from "../parsers";
 
 export type ParsedSource = {
 	records: RecordValue[];
 	parser: string;
 	seen: number;
 };
-
-export type DedupedSource = {
-	records: RecordValue[];
-	duplicates: number;
-};
-
-export function dedupeRecords(
-	config: SourceConfig,
-	records: RecordValue[],
-): DedupedSource {
-	const dedupe = config.records.dedupe;
-	if (dedupe?.key === undefined || dedupe.key.length === 0) {
-		return { duplicates: 0, records };
-	}
-	const keep = dedupe.keep ?? "first";
-	const onDuplicate = dedupe.on_duplicate ?? "warn";
-	const indexes = new Map<string, number>();
-	const output: RecordValue[] = [];
-	let duplicates = 0;
-	for (const [index, row] of records.entries()) {
-		const key = dedupe.key
-			.map((expr) =>
-				JSON.stringify(
-					evaluateExpression(expr, row, {
-						row_index: index,
-						source_id: config.source.id,
-					}),
-				),
-			)
-			.join("|");
-		const existing = indexes.get(key);
-		if (existing === undefined) {
-			indexes.set(key, output.length);
-			output.push(row);
-			duplicates += 0;
-			continue;
-		}
-		duplicates += 1;
-		if (keep === "last") {
-			output[existing] = row;
-		} else if (onDuplicate === "merge") {
-			output[existing] = { ...output[existing], ...row };
-		}
-	}
-	return { duplicates, records: output };
-}
 
 function asRecord(value: unknown): RecordValue {
 	return value !== null && typeof value === "object" && !Array.isArray(value)

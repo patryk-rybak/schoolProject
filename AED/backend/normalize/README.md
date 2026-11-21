@@ -22,7 +22,7 @@ aby mapa i portal dane.gov.pl pokazywały ten sam zestaw pól niezależnie od
 
 ## Zależności
 
-- [`../ingest/`](../ingest/README.md) — dane wejściowe,
+- [`../ingest/`](../ingest/) — dane wejściowe,
 - [`../store/`](../store/README.md) — zapis wyniku.
 
 ## Stan obecny

@@ -1,13 +1,20 @@
 import { z } from "zod";
 
 /**
- * Runtime contract for a declarative AED source configuration.
+ * Runtime contract for a declarative AED source configuration (slim).
  *
- * This module is the single source of truth for the shape of a source config.
- * The generated `datasources-config.schema.json` mirrors the structural shape,
- * but the Zod schema adds parser-specific unions and semantic refinements that
- * JSON Schema alone cannot express (URL policy, parser/family matrix, license
- * mirroring, lookup paths, duplicate ids).
+ * A source config describes only:
+ * - source identity (`source`: id, name, enabled),
+ * - connector type (`connector`: family + parser, compatibility matrix),
+ * - where the data lives and how to fetch it (`fetch`),
+ * - how to decode it (`parse`),
+ * - where the records are (`records.path`),
+ * - how source columns map to the canonical schema (`map`),
+ * - minimal per-source data-quality validation (`validate`: required + coords).
+ *
+ * Deduplication, schema-change detection, publish gates and quality scoring
+ * are intentionally NOT part of this contract; they run later on the
+ * aggregated dataframe.
  *
  * The JSON Schema artifact is generated with `buildDatasourcesConfigJsonSchema()`
  * and checked in by `scripts/generate-source-config-schema.ts`.
@@ -43,7 +50,7 @@ export const PARSERS = [
 
 export type Parser = (typeof PARSERS)[number];
 
-/** Family/parser compatibility matrix from docs/ingest-source-config.md §4.3. */
+/** Family/parser compatibility matrix. */
 export const CONNECTOR_PARSER_MATRIX = {
 	file_static: ["csv", "xlsx", "json", "geojson", "kml"],
 	http_json: ["json"],
@@ -128,25 +135,6 @@ export const CANONICAL_FIELDS = [
 
 export type CanonicalField = (typeof CANONICAL_FIELDS)[number];
 
-export const ACCESS_TYPES = ["file", "api", "html", "kml", "manual"] as const;
-export const RELIABILITY_TIERS = [
-	"authoritative",
-	"official_local",
-	"community",
-	"aggregator",
-	"derived",
-	"app",
-	"register",
-] as const;
-export const UPDATE_FREQUENCIES = [
-	"continuous",
-	"daily",
-	"weekly",
-	"monthly",
-	"quarterly",
-	"once",
-	"unknown",
-] as const;
 export const ENCODINGS = ["utf-8", "utf-8-sig", "iso-8859-2"] as const;
 export const PAGINATION_TYPES = [
 	"none",
@@ -156,31 +144,13 @@ export const PAGINATION_TYPES = [
 	"link_header",
 ] as const;
 export const AUTH_TYPES = ["none", "bearer", "header", "basic"] as const;
-export const DRIFT_ACTIONS = ["ignore", "warn", "review", "fail"] as const;
-export const FIELD_ON_MISSING = [
-	"null",
-	"reject",
-	"review",
-	"default",
-] as const;
-export const EXPORT_FORMATS = ["csv", "geojson", "json"] as const;
 
-export type AccessType = (typeof ACCESS_TYPES)[number];
-export type ReliabilityTier = (typeof RELIABILITY_TIERS)[number];
-export type UpdateFrequency = (typeof UPDATE_FREQUENCIES)[number];
 export type Encoding = (typeof ENCODINGS)[number];
 export type PaginationType = (typeof PAGINATION_TYPES)[number];
 export type AuthType = (typeof AUTH_TYPES)[number];
-export type DriftAction = (typeof DRIFT_ACTIONS)[number];
-export type FieldOnMissing = (typeof FIELD_ON_MISSING)[number];
 
 export const canonicalFieldSchema = z.enum(CANONICAL_FIELDS);
-export const accessTypeSchema = z.enum(ACCESS_TYPES);
-export const reliabilityTierSchema = z.enum(RELIABILITY_TIERS);
-export const updateFrequencySchema = z.enum(UPDATE_FREQUENCIES);
 export const encodingSchema = z.enum(ENCODINGS);
-export const driftActionSchema = z.enum(DRIFT_ACTIONS);
-export const exportFormatSchema = z.enum(EXPORT_FORMATS);
 
 // ---------------------------------------------------------------------------
 // Mapping DSL
@@ -390,13 +360,10 @@ export const coordSpecSchema: z.ZodType<CoordSpec> = z.union([
 	}),
 ]);
 
+/** Field spec: an expression, or a wrapper adding a fallback default. */
 const fieldSpecWrapperSchema = z.strictObject({
 	value: exprSchema,
-	required: z.boolean().optional(),
-	on_missing: z.enum(FIELD_ON_MISSING).optional(),
 	default: jsonScalarSchema.optional(),
-	confidence: z.number().min(0).max(1).optional(),
-	note: z.string().optional(),
 });
 
 export const fieldSpecSchema = z.union([exprSchema, fieldSpecWrapperSchema]);
@@ -412,36 +379,10 @@ const sourceIdSchema = z.string().regex(/^[a-z0-9][a-z0-9._-]{0,31}$/, {
 		"Identyfikator źródła: 1-32 znaków [a-z0-9._-], musi zaczynać się od litery lub cyfry.",
 });
 
-const licenseSchema = z.strictObject({
-	id: z.string().min(1),
-	url: httpsUrlSchema.optional(),
-	attribution: z.string().optional(),
-	share_alike: z.boolean().optional(),
-});
-
-const coverageSchema = z.strictObject({
-	country: z
-		.string()
-		.regex(/^[A-Z]{2}$/, {
-			message: "Kod kraju musi mieć dwa znaki ISO 3166-1.",
-		})
-		.optional(),
-	teryt: z.array(z.string().regex(/^\d{2,7}$/)).optional(),
-	notes: z.string().optional(),
-});
-
 export const sourceSchema = z.strictObject({
 	id: sourceIdSchema,
 	name: z.string().min(1),
-	publisher: z.string().min(1),
-	homepage_url: httpsUrlSchema.optional(),
-	access_type: accessTypeSchema,
-	reliability_tier: reliabilityTierSchema,
-	license: licenseSchema,
-	coverage: coverageSchema.optional(),
-	update_frequency: updateFrequencySchema.optional(),
 	enabled: z.boolean().optional(),
-	notes: z.string().optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -509,11 +450,6 @@ const rateLimitSchema = z.strictObject({
 	requests_per_minute: z.number().min(0.1).optional(),
 });
 
-const conditionalSchema = z.strictObject({
-	etag: z.boolean().optional(),
-	last_modified: z.boolean().optional(),
-});
-
 export const fetchSchema = z.strictObject({
 	url: httpsUrlSchema,
 	method: z.enum(["GET", "POST"]).optional(),
@@ -528,7 +464,6 @@ export const fetchSchema = z.strictObject({
 	max_redirects: z.number().int().min(0).max(5).optional(),
 	retries: retriesSchema.optional(),
 	rate_limit: rateLimitSchema.optional(),
-	conditional: conditionalSchema.optional(),
 	pagination: paginationSchema.optional(),
 	user_agent: z.string().optional(),
 });
@@ -739,27 +674,14 @@ export type ManualParseConfig = z.infer<typeof manualParseSchema>;
 export type ParseConfig = z.infer<typeof parseConfigSchema>;
 
 // ---------------------------------------------------------------------------
-// Records, validation, drift, publish, schedule
+// Records and minimal validation
 // ---------------------------------------------------------------------------
-
-const identitySchema = z.strictObject({
-	source_record_id: exprSchema,
-	dataset_id: exprSchema.optional(),
-	stable: z.boolean().optional(),
-});
-
-const dedupeSchema = z.strictObject({
-	key: z.array(exprSchema).min(1).optional(),
-	keep: z.enum(["first", "last"]).optional(),
-	on_duplicate: z.enum(["warn", "reject", "merge"]).optional(),
-});
 
 export const recordsSchema = z.strictObject({
 	path: z.string().min(1),
-	identity: identitySchema,
-	dedupe: dedupeSchema.optional(),
 });
 
+/** Sanity range for coordinates: [minLon, minLat, maxLon, maxLat]. */
 const bboxSchema = z.tuple([
 	z.number().min(-180).max(180),
 	z.number().min(-90).max(90),
@@ -769,315 +691,60 @@ const bboxSchema = z.tuple([
 
 export const validateSchema = z.strictObject({
 	required: z.array(canonicalFieldSchema).optional(),
-	require_location: z
-		.enum(["point", "address_or_point", "address", "none"])
-		.optional(),
 	coords: z
 		.strictObject({
 			bbox: bboxSchema.optional(),
-			on_invalid: z.enum(["reject", "review", "null"]).optional(),
-			on_missing: z.enum(["reject", "review", "null"]).optional(),
-		})
-		.optional(),
-	enums: z.boolean().optional(),
-	on_error: z.enum(["reject", "review"]).optional(),
-});
-
-const baselineSchema = z.strictObject({
-	record_count: z.union([z.number().int().min(0), z.null()]).optional(),
-	schema_file: z.string().optional(),
-	schema_fields: z.array(z.string()).optional(),
-	generated_at: z.string().optional(),
-});
-
-const driftRulesSchema = z.strictObject({
-	on_new_field: driftActionSchema.optional(),
-	on_missing_field: driftActionSchema.optional(),
-	on_type_change: driftActionSchema.optional(),
-	on_header_order_change: driftActionSchema.optional(),
-});
-
-const volumeDriftSchema = z.strictObject({
-	min_records: z.number().int().min(0).optional(),
-	max_records: z.union([z.number().int().min(0), z.null()]).optional(),
-	max_delta_ratio: z.number().min(0).max(1).optional(),
-	on_breach: driftActionSchema.optional(),
-});
-
-const qualityDriftSchema = z.strictObject({
-	max_coord_invalid_ratio: z.number().min(0).max(1).optional(),
-	max_duplicate_id_ratio: z.number().min(0).max(1).optional(),
-	max_null_ratio: z
-		.partialRecord(canonicalFieldSchema, z.number().min(0).max(1))
-		.optional(),
-	on_breach: driftActionSchema.optional(),
-});
-
-const axisDriftSchema = z.strictObject({
-	enabled: z.boolean().optional(),
-	max_suspicious_ratio: z.number().min(0).max(1).optional(),
-	on_breach: driftActionSchema.optional(),
-});
-
-const goldenSampleSchema = z.strictObject({
-	file: z.string().optional(),
-	size: z.number().int().min(1).optional(),
-	required_match_ratio: z.number().min(0).max(1).optional(),
-});
-
-const driftActionsSchema = z.strictObject({
-	warn: z.literal("log").optional(),
-	review: z.literal("quarantine").optional(),
-	fail: z.enum(["disable", "abort"]).optional(),
-});
-
-export const driftSchema = z.strictObject({
-	baseline: baselineSchema.optional(),
-	schema: driftRulesSchema.optional(),
-	volume: volumeDriftSchema.optional(),
-	quality: qualityDriftSchema.optional(),
-	axis: axisDriftSchema.optional(),
-	golden_sample: goldenSampleSchema.optional(),
-	actions: driftActionsSchema.optional(),
-});
-
-export const publishSchema = z.strictObject({
-	enabled: z.boolean().optional(),
-	license_id: z.string().min(1).optional(),
-	attribution: z.string().optional(),
-	allowed_for_ingest: z.boolean().optional(),
-	allowed_for_export: z.boolean().optional(),
-	terms_url: httpsUrlSchema.optional(),
-	terms_hash: z
-		.string()
-		.regex(/^sha256:[0-9a-f]{64}$/, {
-			message: "terms_hash musi mieć format sha256:<64 znaki hex>.",
-		})
-		.optional(),
-	terms_checked_at: z.string().optional(),
-	permission_document_url: httpsUrlSchema.optional(),
-	approved_by: z.string().optional(),
-	redact: z.array(canonicalFieldSchema).optional(),
-	exports: z.array(exportFormatSchema).optional(),
-});
-
-export const scheduleSchema = z.strictObject({
-	cron: z.string().regex(/^(?:\S+\s+){4}\S+$/, {
-		message: "Cron musi mieć dokładnie 5 pól.",
-	}),
-	timezone: z.string().min(1),
-	jitter_seconds: z.number().int().min(0).max(3600).optional(),
-});
-
-export const activationSchema = z.strictObject({
-	mode: z.enum(["canary", "immediate"]).optional(),
-	canary: z.boolean().optional(),
-	auto_rollback: z.boolean().optional(),
-	watch_window_runs: z.number().int().min(1).optional(),
-	rollback_revision: z.number().int().min(1).optional(),
-});
-
-export const geocodingSchema = z.strictObject({
-	enabled: z.boolean().optional(),
-	strategy: z
-		.enum(["structured_first", "unstructured_first", "structured_only"])
-		.optional(),
-	provider_order: z.array(z.string()).optional(),
-	address_template: z.string().optional(),
-	required_components: z.array(z.string()).optional(),
-	min_confidence: z.number().min(0).max(1).optional(),
-	precision_m: z.record(z.string(), z.number().min(0)).optional(),
-	on_failure: z.enum(["address_only", "review", "reject"]).optional(),
-	cache_ttl_days: z.number().int().min(0).optional(),
-	refresh_after_days: z.number().int().min(1).optional(),
-	rate_limit: z
-		.strictObject({ requests_per_minute: z.number().min(0.1).optional() })
-		.optional(),
-	verification: z
-		.strictObject({
-			cross_check_source_id: z.string().optional(),
-			max_distance_m: z.number().min(0).optional(),
-			promote_verification: z
-				.enum(["never", "probable", "confirmed"])
-				.optional(),
-		})
-		.optional(),
-	geoportal: z
-		.strictObject({
-			endpoint: httpsUrlSchema.optional(),
-			request: z.string().min(1).optional(),
-			max_results: z.number().int().min(1).max(15).optional(),
-			min_accuracy: z.number().min(0).max(1).optional(),
-			only_exact_numbers: z.boolean().optional(),
-			srid: z.literal(2180).optional(),
-			output_srid: z.literal(4326).optional(),
 		})
 		.optional(),
 });
-
-/** Defaults for the public GUGiK UUG geocoder used by address-only sources. */
-export const GUGIK_UUG_GEOCODER = {
-	id: "gugik-uug",
-	endpoint: "https://services.gugik.gov.pl/uug/",
-	request: "GetAddress",
-	srid: 2180,
-	output_srid: 4326,
-} as const;
-
-/** @deprecated Use GUGIK_UUG_GEOCODER. Kept for configs written before the name was fixed. */
-export const GEOPORTAL_GEOCODER = GUGIK_UUG_GEOCODER;
 
 // ---------------------------------------------------------------------------
 // Top-level config: one variant per parser
 // ---------------------------------------------------------------------------
 
-const connectorNotesSchema = z.string().optional();
-
-const baseSections = {
-	version: z.literal(1),
-	source: sourceSchema,
-	fetch: fetchSchema,
-	records: recordsSchema,
-	map: z.partialRecord(canonicalFieldSchema, fieldSpecSchema),
-	validate: validateSchema,
-	drift: driftSchema,
-	publish: publishSchema.optional(),
-	geocoding: geocodingSchema.optional(),
-	schedule: scheduleSchema.optional(),
-	activation: activationSchema.optional(),
-};
-
-const csvSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.literal("file_static"),
-		parser: z.literal("csv"),
-		notes: connectorNotesSchema,
-	}),
-	parse: csvParseSchema,
-});
-
-const xlsxSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.literal("file_static"),
-		parser: z.literal("xlsx"),
-		notes: connectorNotesSchema,
-	}),
-	parse: xlsxParseSchema,
-});
-
-const jsonSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.enum([
-			"file_static",
-			"http_json",
-			"http_json_api",
-			"arcgis_query",
-			"ckan_datastore",
-		]),
-		parser: z.literal("json"),
-		notes: connectorNotesSchema,
-	}),
-	parse: jsonParseSchema,
-});
-
-const geojsonSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.literal("file_static"),
-		parser: z.literal("geojson"),
-		notes: connectorNotesSchema,
-	}),
-	parse: geojsonParseSchema,
-});
-
-const kmlSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.enum(["file_static", "google_my_maps_kml"]),
-		parser: z.literal("kml"),
-		notes: connectorNotesSchema,
-	}),
-	parse: kmlParseSchema,
-});
-
-const jsonapiSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.literal("http_json_api"),
-		parser: z.literal("jsonapi"),
-		notes: connectorNotesSchema,
-	}),
-	parse: jsonapiParseSchema,
-});
-
-const htmlTableSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.literal("html_table"),
-		parser: z.literal("html_table"),
-		notes: connectorNotesSchema,
-	}),
-	parse: htmlTableParseSchema,
-});
-
-const htmlListSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.literal("html_list"),
-		parser: z.literal("html_list"),
-		notes: connectorNotesSchema,
-	}),
-	parse: htmlListParseSchema,
-});
-
-const pdfTableSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.literal("pdf_table"),
-		parser: z.literal("pdf_table"),
-		notes: connectorNotesSchema,
-	}),
-	parse: pdfTableParseSchema,
-});
-
-const manualSourceConfigSchema = z.strictObject({
-	...baseSections,
-	connector: z.strictObject({
-		family: z.literal("manual"),
-		parser: z.literal("manual"),
-		notes: connectorNotesSchema,
-	}),
-	parse: manualParseSchema,
-});
+function buildSourceVariant<P extends Parser>(parser: P) {
+	const families = CONNECTOR_FAMILIES.filter((family) =>
+		(CONNECTOR_PARSER_MATRIX[family] as readonly Parser[]).includes(parser),
+	) as [ConnectorFamily, ...ConnectorFamily[]];
+	return z.strictObject({
+		source: sourceSchema,
+		connector: z.strictObject({
+			family: z.enum(families),
+			parser: z.literal(parser),
+		}),
+		fetch: fetchSchema,
+		parse: PARSER_PARSE_SCHEMAS[parser],
+		records: recordsSchema,
+		map: z.partialRecord(canonicalFieldSchema, fieldSpecSchema),
+		validate: validateSchema,
+	});
+}
 
 export const SOURCE_CONFIG_VARIANTS = {
-	csv: csvSourceConfigSchema,
-	xlsx: xlsxSourceConfigSchema,
-	json: jsonSourceConfigSchema,
-	geojson: geojsonSourceConfigSchema,
-	kml: kmlSourceConfigSchema,
-	jsonapi: jsonapiSourceConfigSchema,
-	html_table: htmlTableSourceConfigSchema,
-	html_list: htmlListSourceConfigSchema,
-	pdf_table: pdfTableSourceConfigSchema,
-	manual: manualSourceConfigSchema,
+	csv: buildSourceVariant("csv"),
+	xlsx: buildSourceVariant("xlsx"),
+	json: buildSourceVariant("json"),
+	geojson: buildSourceVariant("geojson"),
+	kml: buildSourceVariant("kml"),
+	jsonapi: buildSourceVariant("jsonapi"),
+	html_table: buildSourceVariant("html_table"),
+	html_list: buildSourceVariant("html_list"),
+	pdf_table: buildSourceVariant("pdf_table"),
+	manual: buildSourceVariant("manual"),
 } as const;
 
 /** Structural schema. Semantic, cross-field checks live in `sourceConfigSchema`. */
 export const sourceConfigBaseSchema = z.union([
-	csvSourceConfigSchema,
-	xlsxSourceConfigSchema,
-	jsonSourceConfigSchema,
-	geojsonSourceConfigSchema,
-	kmlSourceConfigSchema,
-	jsonapiSourceConfigSchema,
-	htmlTableSourceConfigSchema,
-	htmlListSourceConfigSchema,
-	pdfTableSourceConfigSchema,
-	manualSourceConfigSchema,
+	SOURCE_CONFIG_VARIANTS.csv,
+	SOURCE_CONFIG_VARIANTS.xlsx,
+	SOURCE_CONFIG_VARIANTS.json,
+	SOURCE_CONFIG_VARIANTS.geojson,
+	SOURCE_CONFIG_VARIANTS.kml,
+	SOURCE_CONFIG_VARIANTS.jsonapi,
+	SOURCE_CONFIG_VARIANTS.html_table,
+	SOURCE_CONFIG_VARIANTS.html_list,
+	SOURCE_CONFIG_VARIANTS.pdf_table,
+	SOURCE_CONFIG_VARIANTS.manual,
 ]);
 
 export type SourceConfigBase = z.infer<typeof sourceConfigBaseSchema>;
@@ -1164,13 +831,6 @@ function collectLookupFiles(
 	}
 }
 
-function isConstantExpr(expr: Expr): boolean {
-	if (expr === null || typeof expr !== "object") {
-		return true;
-	}
-	return "const" in expr;
-}
-
 function safeRelativeLookupPath(file: string): boolean {
 	if (file.startsWith("/") || /^[A-Za-z]:[\\/]/.test(file)) {
 		return false;
@@ -1196,18 +856,6 @@ function refineSourceConfig(
 			path: ["map"],
 			message: "Mapping musi zawierać co najmniej jedno pole kanoniczne.",
 		});
-	}
-
-	for (const [field, spec] of Object.entries(value.map)) {
-		if (spec && typeof spec === "object" && "required" in spec) {
-			if (spec.on_missing === "default" && spec.default === undefined) {
-				ctx.addIssue({
-					code: "custom",
-					path: ["map", field, "default"],
-					message: "on_missing=default wymaga wartości default.",
-				});
-			}
-		}
 	}
 
 	const required = value.validate.required ?? [];
@@ -1249,47 +897,6 @@ function refineSourceConfig(
 		}
 	}
 
-	const volume = value.drift.volume;
-	if (
-		volume?.min_records !== undefined &&
-		typeof volume.max_records === "number" &&
-		volume.max_records < volume.min_records
-	) {
-		ctx.addIssue({
-			code: "custom",
-			path: ["drift", "volume", "max_records"],
-			message: "max_records nie może być mniejsze od min_records.",
-		});
-	}
-
-	if (value.publish?.enabled) {
-		if (!value.publish.license_id) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["publish", "license_id"],
-				message: "Publikacja wymaga license_id.",
-			});
-		} else if (value.publish.license_id !== value.source.license.id) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["publish", "license_id"],
-				message:
-					"license_id publikacji musi być zgodny z source.license.id (rollback przywraca stan prawny).",
-			});
-		}
-		if (
-			value.source.license.attribution !== undefined &&
-			!value.publish.attribution
-		) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["publish", "attribution"],
-				message:
-					"Licencja źródła wymaga atrybucji także w publish.attribution.",
-			});
-		}
-	}
-
 	const headers = value.fetch.headers ?? {};
 	for (const name of Object.keys(headers)) {
 		if (FORBIDDEN_HEADERS.includes(name.toLowerCase())) {
@@ -1313,24 +920,6 @@ function refineSourceConfig(
 					"Auth basic wymaga password_env oraz user_env albo env (zgodnie z kontraktem sekretów).",
 			});
 		}
-	}
-
-	const dedupe = value.records.dedupe;
-	if (dedupe?.on_duplicate && !dedupe.key) {
-		ctx.addIssue({
-			code: "custom",
-			path: ["records", "dedupe", "key"],
-			message: "on_duplicate wymaga klucza dedupe.key.",
-		});
-	}
-
-	if (isConstantExpr(value.records.identity.source_record_id)) {
-		ctx.addIssue({
-			code: "custom",
-			path: ["records", "identity", "source_record_id"],
-			message:
-				"source_record_id nie może być stałą; musi identyfikować rekord źródłowy.",
-		});
 	}
 
 	const lookupFiles: { path: string; file: string }[] = [];

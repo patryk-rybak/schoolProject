@@ -41,7 +41,6 @@ export const ADDRESS_SOURCES = [
 	"derived",
 ] as const;
 
-export const PUBLISH_STATES = ["published", "quarantined", "archived"] as const;
 export const CLAIM_STATUSES = [
 	"unclaimed",
 	"pending",
@@ -53,7 +52,6 @@ export type LocationStatus = (typeof LOCATION_STATUSES)[number];
 export type GeomSource = (typeof GEOM_SOURCES)[number];
 export type AddressKind = (typeof ADDRESS_KINDS)[number];
 export type AddressSource = (typeof ADDRESS_SOURCES)[number];
-export type PublishState = (typeof PUBLISH_STATES)[number];
 export type ClaimStatus = (typeof CLAIM_STATUSES)[number];
 
 const nullableText = z.string().nullable();
@@ -93,7 +91,6 @@ export const canonicalAedRecordSchema = z
 			.regex(/^[0-9a-f]{64}$/)
 			.nullable(),
 		geocode_note: nullableText,
-		publish_state: z.enum(PUBLISH_STATES).default("quarantined"),
 		claim_status: z.enum(CLAIM_STATUSES).default("unclaimed"),
 		claimed_by: nullableText.default(null),
 		claimed_at: nullableText.default(null),

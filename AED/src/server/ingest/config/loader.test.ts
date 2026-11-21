@@ -49,7 +49,6 @@ describe("datasources registry", () => {
 		expect(registry.errors).toEqual([]);
 		expect(registry.byId.size).toBe(11);
 		expect(registry.summary.total).toBe(11);
-		expect(registry.summary.addressOnly).toBe(0);
 		expect(registry.summary.withCoordinates).toBe(11);
 		expect(registry.summary.byParser["csv"]).toBe(2);
 		expect(registry.summary.byParser["json"]).toBe(2);

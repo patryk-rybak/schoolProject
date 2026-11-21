@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
-import { basename, extname, join, resolve } from "node:path";
+import { basename, extname, join } from "node:path";
 import type { SourceConfig } from "../config/schema";
-import { resolveJsonPath } from "../smoke/parsers";
+import { resolveJsonPath } from "../parsers";
 
 /**
  * Fetches one declarative source and writes a raw-first snapshot:
@@ -22,7 +22,6 @@ const DEFAULT_RETRY_BACKOFF_MS = 500;
 const MAX_REQUESTS_PER_SOURCE = 1_000;
 const DEFAULT_USER_AGENT =
 	"AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)";
-const DEFAULT_CONFIG_PATH = "backend/ingest/datasources-config.json";
 
 type Env = Record<string, string | undefined>;
 
@@ -41,8 +40,7 @@ export type SourceFetchMeta = {
 	content_type: string | null;
 	bytes: number;
 	sha256: string | null;
-	config_path: string;
-	license_id: string | null;
+	config_sha256: string | null;
 	raw_file: string | null;
 	record_count?: number | null;
 	blocked: boolean;
@@ -70,8 +68,8 @@ export type SourceFetchOptions = {
 	rawDir: string;
 	/** Fetch disabled sources too. Defaults to false. */
 	includeDisabled?: boolean;
-	/** Path recorded in meta; defaults to backend/ingest/datasources-config.json. */
-	configPath?: string;
+	/** Sha256 of the per-source config JSON, recorded in meta when provided. */
+	configSha256?: string;
 	/** Environment used for auth secrets. Defaults to process.env. */
 	env?: Env;
 	fetchImpl?: FetchLike;
@@ -579,13 +577,11 @@ function baseMeta(
 	return {
 		blocked: status === "blocked",
 		bytes: 0,
-		config_path:
-			options.configPath ?? resolve(process.cwd(), DEFAULT_CONFIG_PATH),
+		config_sha256: options.configSha256 ?? null,
 		content_type: null,
 		fetched_at: (options.now?.() ?? new Date()).toISOString(),
 		final_url: config.fetch.url,
 		http_status: null,
-		license_id: config.source.license?.id ?? null,
 		raw_file: null,
 		sha256: null,
 		source_id: config.source.id,

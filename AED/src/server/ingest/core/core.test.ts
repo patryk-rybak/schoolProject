@@ -27,13 +27,14 @@ describe("core parser and mapper", () => {
 		expect(parsed.records).toHaveLength(1);
 		const { record } = mapSourceRecord(config, parsed.records[0]!, 0);
 		expect(record.source_id).toBe("marki");
-		expect(record.source_record_id).toBe("marki:1");
-		expect(record.record_id).toBe("marki:marki:1");
+		// Slim config has no records.identity and marki does not map
+		// source_record_id, so the row-index fallback applies.
+		expect(record.source_record_id).toBe("marki:0");
+		expect(record.record_id).toBe("marki:marki:0");
 		expect(record.name).toBe("AED Marki Centrum");
 		expect(record.lat).toBeCloseTo(21.12);
 		expect(record.lon).toBeCloseTo(52.3);
 		expect(record.location_status).toBe("point");
-		expect(record.publish_state).toBe("published");
 		expect(record.verification_status).toBe("unverified");
 		expect(parseCanonicalAedRecord(record)).toBeTruthy();
 	});

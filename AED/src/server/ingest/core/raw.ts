@@ -10,8 +10,7 @@ export type RawSnapshotMeta = {
 	content_type?: string;
 	bytes?: number;
 	sha256?: string;
-	config_path?: string;
-	license_id?: string;
+	config_sha256?: string;
 	raw_file?: string;
 	file?: string;
 	path?: string;
