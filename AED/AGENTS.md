@@ -48,6 +48,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 | --- | --- |
 | Install dependencies | `bun install` |
 | Dev server | `bun run dev` (http://localhost:3000) |
+| Local HTTPS proxy for dane.gov.pl | `bun run dev:tls` (https://0.0.0.0:3443) |
 | Build | `bun run build` |
 | Preview production build | `bun run preview` |
 | Lint | `bun run lint` |
@@ -61,6 +62,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 | Add a shadcn component | `bunx --bun shadcn@latest add <name>` |
 | Generate Poland map tiles | `bun run map:tiles` |
 | Typecheck | `bun run typecheck` |
+| Run tests | `bun test` |
 | Run all checks | `bun run verify` |
 | Auto-fix lint/format | `bun run check:write` |
 
@@ -89,6 +91,10 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 - `vite.config.ts` — Vite, TanStack Start, Tailwind, and Nitro plugins
 - `frontend/scripts/fetch-poland-pmtiles.sh` — downloads a Protomaps extract for Poland
 - `frontend/scripts/copy-maplibre-worker.ts` — copies the MapLibre worker into `frontend/public/`; no `api/maplibre-worker.ts` route exists
+- `frontend/scripts/dev-tls-proxy.ts` — self-signed HTTPS proxy for testing against the local dane.gov.pl harvester
+- `backend/gov-api/` — dane.gov.pl feed builder (XML 1.13, MD5, CSV, GeoJSON) and vendored XSD
+- `frontend/routes/harvester/` — `/harvester/feed.xml` and `/harvester/feed.md5`
+- `frontend/routes/data/` — `/data/aed.csv` and `/data/aed.geojson`
 
 There is no `frontend/integrations/` directory and no `frontend/env.ts` validation module. Read server configuration from `process.env` and client `VITE_` variables from `import.meta.env`. There is no TanStack Query provider or devtools integration; use route loaders and server functions.
 
@@ -109,11 +115,17 @@ Non-default paths to keep in mind: Vite serves static files from `frontend/publi
 - `frontend/public/maplibre-gl-worker.mjs` is copied by `postinstall`/`predev`/`prebuild` and ignored by git. The map loads it as a static asset (`/maplibre-gl-worker.mjs?v=6.19.0`); keep the `?v=` query in sync with the `maplibre-gl` version so caches are invalidated. Do not serve the worker through a server route: Nitro's dev middleware routes `Sec-Fetch-Dest: worker` requests to static assets and skips API routes.
 - The PMTiles archive is served by `frontend/routes/api/pmtiles.ts` with HTTP byte-range support; static hosting does not provide the range responses PMTiles needs.
 
+The dane.gov.pl feed is deterministic per data version: `lastUpdateDate` comes
+from `MAX(updated_at)`, and the artifact is cached so `/harvester/feed.xml` and
+`/harvester/feed.md5` always serve the same bytes. `extIdent` values are stable
+upsert keys — never change them. Resource URLs must be `https://` (XSD pattern).
+
 Environment variables live in `.env.local` (never committed):
 
 - `DATABASE_URL` — SQLite file path
 - `BETTER_AUTH_URL` — base URL for better-auth
 - `BETTER_AUTH_SECRET` — signing secret
+- `PUBLIC_BASE_URL` — https origin used in feed resource links (default `https://localhost:3443`; use `https://172.18.18.1:3443` for the local portal container)
 
 ## UI Rules
 
@@ -132,7 +144,7 @@ Environment variables live in `.env.local` (never committed):
 - `frontend/components/**` is excluded from Biome and the TypeScript root include. `frontend/components/ui/` is registry-managed shadcn code; add or update it with the shadcn CLI. Hand-written components such as `frontend/map/poland-map.tsx` live alongside it and are covered by project conventions even though the directory is excluded.
 - Avoid `any`, prefer inferred types, and keep server-only code out of client components.
 - Do not edit `frontend/routeTree.gen.ts`; regenerate it with `bun run dev` or `bun run build`.
-- Tests: there is no test suite yet. If you add tests, use `bun test` and place `*.test.ts` files near the code they cover.
+- Tests: run with `bun test`; place `*.test.ts` files near the code they cover. `backend/gov-api/feed.test.ts` validates the generated feed against the vendored XSD with `xmllint` when available.
 
 ## Git and Pull Requests
 

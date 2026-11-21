@@ -18,5 +18,8 @@ dist-ssr
 __unconfig*
 todos.json
 
+# local dev TLS certificate (dev-tls-proxy)
+.cert/
+
 # generated runtime datasets and raw snapshots (rebuild with `bun run ingest:run`)
 .data/
