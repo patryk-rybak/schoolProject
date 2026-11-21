@@ -1,0 +1,207 @@
+{
+	"connector": {
+		"family": "html_table",
+		"notes": "Pierwsza tabela na stronie ma 2 kolumny i 15 wierszy danych: Miejscowość i adres oraz Miejsce umieszczenia AED. Druga tabela to tylko przycisk mapy. 15 lokalizacji (14 stacjonarnych + 1 mobilny).",
+		"parser": "html_table"
+	},
+	"drift": {
+		"actions": {
+			"fail": "disable",
+			"review": "quarantine",
+			"warn": "log"
+		},
+		"axis": {
+			"enabled": false,
+			"max_suspicious_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"baseline": {
+			"generated_at": "2026-11-21",
+			"record_count": 15
+		},
+		"quality": {
+			"max_coord_invalid_ratio": 1,
+			"max_duplicate_id_ratio": 0.1,
+			"on_breach": "review"
+		},
+		"schema": {
+			"on_header_order_change": "ignore",
+			"on_missing_field": "review",
+			"on_new_field": "review",
+			"on_type_change": "review"
+		},
+		"volume": {
+			"max_delta_ratio": 0.5,
+			"min_records": 15,
+			"on_breach": "review"
+		}
+	},
+	"fetch": {
+		"conditional": {
+			"etag": true,
+			"last_modified": true
+		},
+		"method": "GET",
+		"pagination": {
+			"type": "none"
+		},
+		"rate_limit": {
+			"requests_per_minute": 6
+		},
+		"retries": {
+			"backoff_ms": 1500,
+			"max": 2
+		},
+		"timeout_ms": 30000,
+		"url": "https://kolbaskowo.pl/gdzie-znalezc-aed-w-gminie-kolbaskowo.html",
+		"user_agent": "AED-PL-ingest/0.1 (+https://example.org/aed; contact: data@example.org)"
+	},
+	"geocoding": {
+		"address_template": "{address_text}, {city}",
+		"cache_ttl_days": 365,
+		"enabled": true,
+		"geoportal": {
+			"endpoint": "https://services.gugik.gov.pl/uug/",
+			"max_results": 5,
+			"min_accuracy": 0.8,
+			"only_exact_numbers": true,
+			"output_srid": 4326,
+			"request": "GetAddress",
+			"srid": 2180
+		},
+		"min_confidence": 0.8,
+		"on_failure": "address_only",
+		"provider_order": [
+			"gugik-uug"
+		],
+		"rate_limit": {
+			"requests_per_minute": 30
+		},
+		"required_components": [
+			"city"
+		],
+		"strategy": "structured_first"
+	},
+	"map": {
+		"access_type": {
+			"const": "unknown"
+		},
+		"address_text": {
+			"field": "address"
+		},
+		"city": {
+			"const": "Kołbaskowo"
+		},
+		"confidence": {
+			"const": 0.3
+		},
+		"country_code": {
+			"const": "PL"
+		},
+		"facility_type": {
+			"const": "unknown"
+		},
+		"name": {
+			"template": "{address} – {placement}",
+			"vars": {
+				"address": {
+					"field": "address"
+				},
+				"placement": {
+					"field": "placement"
+				}
+			}
+		},
+		"source_url": {
+			"const": "https://kolbaskowo.pl/gdzie-znalezc-aed-w-gminie-kolbaskowo.html"
+		},
+		"status": {
+			"const": "unknown"
+		},
+		"verification_status": {
+			"const": "unverified"
+		}
+	},
+	"parse": {
+		"encoding": "utf-8",
+		"html_table": {
+			"collapse_whitespace": true,
+			"columns": [
+				"address",
+				"placement"
+			],
+			"data_start_row": 1,
+			"empty_as_null": true,
+			"header_row": 0,
+			"max_records": 20,
+			"min_records": 15,
+			"normalize_headers": true,
+			"orientation": "rows",
+			"select": "table",
+			"table_index": 0,
+			"trim": true
+		},
+		"trim_headers": true
+	},
+	"publish": {
+		"allowed_for_export": false,
+		"allowed_for_ingest": false,
+		"attribution": "Kołbaskowo — NOASSERTION",
+		"enabled": false,
+		"exports": [],
+		"license_id": "NOASSERTION"
+	},
+	"records": {
+		"identity": {
+			"source_record_id": {
+				"template": "kolbaskowo:{row_index}"
+			},
+			"stable": false
+		},
+		"path": "$"
+	},
+	"schedule": {
+		"cron": "0 3 * * 1",
+		"jitter_seconds": 300,
+		"timezone": "Europe/Warsaw"
+	},
+	"source": {
+		"access_type": "html",
+		"coverage": {
+			"country": "PL",
+			"notes": "zachodniopomorskie; gmina wiejska; 15 lokalizacji (14 stacjonarnych + 1 mobilny); brak TERYT w Wikidata. 15 lokalizacji (14 stacjonarnych + 1 mobilny); brak TERYT w Wikidata."
+		},
+		"enabled": false,
+		"homepage_url": "https://kolbaskowo.pl/gdzie-znalezc-aed-w-gminie-kolbaskowo.html",
+		"id": "kolbaskowo",
+		"license": {
+			"attribution": "Kołbaskowo: brak deklaracji licencji",
+			"id": "NOASSERTION"
+		},
+		"name": "Kołbaskowo",
+		"notes": "15 lokalizacji (14 stacjonarnych + 1 mobilny); brak TERYT w Wikidata. 15 lokalizacji (14 stacjonarnych + 1 mobilny); brak TERYT w Wikidata.",
+		"publisher": "Kołbaskowo",
+		"reliability_tier": "official_local",
+		"update_frequency": "unknown"
+	},
+	"validate": {
+		"coords": {
+			"bbox": [
+				14.07,
+				49,
+				24.15,
+				54.84
+			],
+			"on_invalid": "review",
+			"on_missing": "review"
+		},
+		"enums": true,
+		"on_error": "review",
+		"require_location": "address_or_point",
+		"required": [
+			"name",
+			"address_text"
+		]
+	},
+	"version": 1
+}
