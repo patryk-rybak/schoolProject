@@ -87,12 +87,14 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 - `frontend/styles.css` — Tailwind v4 theme and CSS variables
 - `drizzle.config.ts` — Drizzle Kit config
 - `vite.config.ts` — Vite, TanStack Start, Tailwind, and Nitro plugins
-- `scripts/fetch-poland-pmtiles.sh` — downloads a Protomaps extract for Poland
-- `scripts/copy-maplibre-worker.ts` — copies the MapLibre worker into `public/`; no `api/maplibre-worker.ts` route exists
+- `frontend/scripts/fetch-poland-pmtiles.sh` — downloads a Protomaps extract for Poland
+- `frontend/scripts/copy-maplibre-worker.ts` — copies the MapLibre worker into `frontend/public/`; no `api/maplibre-worker.ts` route exists
 
 There is no `frontend/integrations/` directory and no `frontend/env.ts` validation module. Read server configuration from `process.env` and client `VITE_` variables from `import.meta.env`. There is no TanStack Query provider or devtools integration; use route loaders and server functions.
 
 Path aliases: `#/*` and `@/*` map to `./frontend/*`; `#backend/*` and `@backend/*` map to `./backend/*`.
+
+Non-default paths to keep in mind: Vite serves static files from `frontend/public` (`publicDir` in `vite.config.ts`), and Drizzle Kit writes migrations to `backend/store/drizzle` (`out` in `drizzle.config.ts`).
 
 ## Runtime and Data Rules
 
@@ -103,8 +105,8 @@ Path aliases: `#/*` and `@/*` map to `./frontend/*`; `#backend/*` and `@backend/
 - Prefer Drizzle's synchronous APIs (`db.select().from(...).all()`) in Bun-native server code.
 - Schema changes require a generated migration and a corresponding `db:push` or `db:migrate`.
 - The development database has exactly one domain table, `aed_devices` (`backend/store/schema.ts`). Access it through `backend/store/aed-store.ts`, not by importing `db` directly. The table and its columns are temporary; the final AED model will replace it.
-- `public/poland.pmtiles` is generated locally and ignored by git. Run `bun run map:tiles` after cloning or when the map data is stale. The script defaults to `POLAND_MAXZOOM=15` (about 4 GB), `PMTILES_THREADS=12`, and `PMTILES_ATTEMPTS=3`; override with `POLAND_BBOX` or `PROTOMAPS_PLANET_URL` when needed. The map pins the source `maxzoom` to 15 and overzooms those tiles up to `maxZoom: 18`. The script keeps an existing archive untouched and extracts to a temporary file before swapping, so failed downloads and normal runs never re-download or destroy it; set `POLAND_FORCE=1` to regenerate.
-- `public/maplibre-gl-worker.mjs` is copied by `postinstall`/`predev`/`prebuild` and ignored by git. The map loads it as a static asset (`/maplibre-gl-worker.mjs?v=6.19.0`); keep the `?v=` query in sync with the `maplibre-gl` version so caches are invalidated. Do not serve the worker through a server route: Nitro's dev middleware routes `Sec-Fetch-Dest: worker` requests to static assets and skips API routes.
+- `frontend/public/poland.pmtiles` is generated locally and ignored by git. Run `bun run map:tiles` after cloning or when the map data is stale. The script defaults to `POLAND_MAXZOOM=15` (about 4 GB), `PMTILES_THREADS=12`, and `PMTILES_ATTEMPTS=3`; override with `POLAND_BBOX` or `PROTOMAPS_PLANET_URL` when needed. The map pins the source `maxzoom` to 15 and overzooms those tiles up to `maxZoom: 18`. The script keeps an existing archive untouched and extracts to a temporary file before swapping, so failed downloads and normal runs never re-download or destroy it; set `POLAND_FORCE=1` to regenerate.
+- `frontend/public/maplibre-gl-worker.mjs` is copied by `postinstall`/`predev`/`prebuild` and ignored by git. The map loads it as a static asset (`/maplibre-gl-worker.mjs?v=6.19.0`); keep the `?v=` query in sync with the `maplibre-gl` version so caches are invalidated. Do not serve the worker through a server route: Nitro's dev middleware routes `Sec-Fetch-Dest: worker` requests to static assets and skips API routes.
 - The PMTiles archive is served by `frontend/routes/api/pmtiles.ts` with HTTP byte-range support; static hosting does not provide the range responses PMTiles needs.
 
 Environment variables live in `.env.local` (never committed):

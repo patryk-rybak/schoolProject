@@ -23,7 +23,8 @@
 			"!**/dane.gov.pl",
 			"!**/frontend/components",
 			"!**/frontend/routeTree.gen.ts",
-			"!**/frontend/styles.css"
+			"!**/frontend/styles.css",
+			"!**/backend/store/drizzle"
 		]
 	},
 	"formatter": {
