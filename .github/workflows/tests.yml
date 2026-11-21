@@ -1,0 +1,24 @@
+name: Automated Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Set up environment (TODO)
+        run: echo "TODO: Configure environment"
+
+      - name: Install dependencies (TODO)
+        run: echo "TODO: Install dependencies"
+
+      - name: Run tests (TODO)
+        run: echo "No tests configured yet - passing placeholder"
