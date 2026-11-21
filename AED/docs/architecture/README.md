@@ -39,12 +39,19 @@ lanes.
 8. **Every stage is replayable.** Stored documents plus connector and
    normalizer versions reproduce candidates. Replaying an unchanged document
    must produce zero new canonical rows and observations.
+9. **Sources are config, not code.** One validated YAML per source selects a
+   generic connector family (`file_static`, `http_json`, ...) and a whitelisted
+   mapping DSL. The exact YAML and hash are stored in `source_config` for every
+   historical run.
+10. **Drift quarantines, it does not publish.** Schema/volume/quality review
+    signals store the new snapshot but leave the previous public projection
+    live until an operator accepts the baseline.
 
 ## Contract entry points
 
 | Lane | Must provide | Must consume |
 | --- | --- | --- |
-| connector-config | `SourceDefinition`, `Connector`, stable ids, config validation | `types.ts`, `source` table, snapshot writer |
+| connector-config | YAML per source, JSON Schema, generic `Connector` families, stable ids | `SourceConfig`/`ConnectorResult`, `source` + `source_config`, snapshot writer |
 | dedup-merge | `matchCandidate`, scoring, precedence | `MatchInput`/`MatchDecision`, `aed_alias`, merge helper |
 | lifecycle-cleansing | validation reason codes, status transitions, confidence | `ValidationResult`, `record_candidate`, `missing_streak` |
 | ops-ui-api | auth guard, routes, pagination, UI | `AedListItem`, `AedDetail`, `IngestStatus` queries |

@@ -70,17 +70,20 @@ run, never edited by hand in production.
 | --- | --- | --- |
 | `id` | text PK | slug, e.g. `osm`, `przemysl`, `warszawa` |
 | `name`, `publisher`, `homepage_url` | text | display metadata |
-| `access_type` | text | `api`, `file`, `wms`, `wfs`, `html`, `manual`, `app` |
-| `connector_kind` | text | implementation key, e.g. `geojson`, `csv`, `rest_json` |
+| `access_type` | text | `api`, `file`, `wms`, `wfs`, `html`, `kml`, `manual`, `app` |
+| `connector_family` | text | `file_static`, `http_json`, `http_json_api`, `arcgis_query`, `ckan_datastore`, `google_my_maps_kml`, `html_table`, `manual` |
+| `parser` | text | `csv`, `xlsx`, `json`, `geojson`, `kml`, `jsonapi`, `html_table` |
 | `base_url` | text | no secrets in URL; tokens go through `secret_env` |
 | `license_id`, `license_url`, `attribution` | text | export contract |
 | `coverage_teryt` | text | optional comma-separated TERYT list |
-| `reliability_tier` | text | `authoritative`, `official_local`, `community`, `aggregator`, `derived`, `app` |
+| `reliability_tier` | text | `authoritative`, `official_local`, `community`, `aggregator`, `derived`, `app`, `register` |
 | `update_frequency` | text | declared cadence, informational |
 | `schedule_cron`, `timezone` | text | scheduler contract, default `Europe/Warsaw` |
 | `enabled` | bool | disabled sources keep history |
 | `requires_auth`, `secret_env` | bool, text | env variable **name**, never the value |
-| `config_json` | json | connector parameters; must be secret-free |
+| `allowed_for_ingest`, `allowed_for_export` | bool | license gate, default false until reviewed |
+| `config_json` | json | validated connector config; secret-free |
+| `config_sha256` | text | hash of the exact `source_config.config_yaml` in force |
 | `config_version` | integer | bump forces a full refresh and new candidate version |
 | `cursor_json` | json | incremental cursor (page token, last modified, high-water mark) |
 | `last_checked_at`, `last_success_at` | timestamp | operational |
@@ -95,6 +98,26 @@ with `requires_auth = true` must have `secret_env`.
 `cursor_json` is written only after a run commits successfully. A crashed run
 must resume from the previous cursor, not from a partially advanced one.
 
+#### `source_config` — immutable configuration snapshots
+
+The config lane keeps one YAML file per source. The loader validates it against
+`backend/ingest/source-config.schema.json`, then stores the exact bytes here.
+This is what makes a historical `sync_run` reproducible after the YAML changes.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `source_id` | text PK FK | one active config per source |
+| `version` | integer | config contract version |
+| `config_yaml` | text | exact validated YAML |
+| `config_sha256` | text | SHA-256 of `config_yaml` |
+| `baseline_json` | json | drift baseline (counts, schema, golden sample) |
+| `baseline_sha256` | text | hash of baseline |
+| `active` | bool | only one active row per source |
+| `loaded_at` | timestamp | |
+
+`sync_run.config_sha256` points at the version used for that run. A config
+change is a new row or a new hash; never mutate a historical row.
+
 ### 3.2 `sync_run` — idempotent execution record
 
 | Column | Type | Notes |
@@ -103,15 +126,18 @@ must resume from the previous cursor, not from a partially advanced one.
 | `source_id` | text FK | `source.id` |
 | `run_key` | text | idempotency key, see below |
 | `trigger` | text | `schedule`, `manual`, `replay`, `backfill` |
-| `status` | text | `running`, `ok`, `partial`, `failed`, `skipped` |
+| `status` | text | `running`, `ok`, `partial`, `quarantined`, `failed`, `skipped` |
+| `stage` | text | latest stage: `fetch`, `parse`, `normalize`, `match`, `merge`, `export` |
 | `started_at`, `finished_at` | timestamp | |
 | `attempt` | integer | retry attempt of the whole run, starts at 1 |
-| `config_version`, `connector_version`, `normalizer_version` | text/integer | reproducibility |
+| `config_version`, `config_sha256`, `connector_version`, `normalizer_version` | text/integer | reproducibility |
+| `http_status` | integer | dominant response status, for the ops list |
 | `bytes_fetched` | integer | |
 | `not_modified` | bool | conditional GET returned 304 |
-| `documents_fetched`, `records_seen`, `records_parsed` | integer | |
+| `documents_fetched`, `records_seen`, `records_parsed`, `records_declared` | integer | |
 | `records_accepted`, `records_rejected`, `records_unchanged` | integer | |
 | `records_created`, `records_updated`, `records_removed` | integer | canonical effects |
+| `drift_events`, `quarantined` | integer, bool | drift outcome for this run |
 | `error_code`, `error_message` | text | fatal run error only |
 | `lock_expires_at` | timestamp | stale-lock recovery |
 
@@ -332,7 +358,28 @@ from duplicating evidence. Only changed source payloads create new observations.
 - `aed_merge`: `from_aed_id`, `into_aed_id`, `decision`, `score`, `actor`,
   `created_at`; records every merge for reversal and audit.
 
-### 3.10 `ingest_error` — bounded error reporting
+### 3.10 `drift_event` — schema, volume, and quality signals
+
+Drift is a first-class storage object, not a log line.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | text PK | |
+| `source_id` | text FK | |
+| `sync_run_id` | text FK | |
+| `layer` | text | `transport`, `schema`, `volume`, `quality`, `axis`, `semantic`, `sample` |
+| `signal` | text | machine key |
+| `severity` | text | `warn`, `review`, `fail` |
+| `observed`, `baseline` | text | JSON or scalar evidence |
+| `action` | text | `continue`, `quarantine`, `disable_source`, `reject_record` |
+| `message` | text | redacted explanation |
+| `created_at` | timestamp | |
+
+`severity = review` sets `sync_run.status = 'quarantined'` and forbids replacing
+the published projection; accepted records are stored but not published until
+an operator updates the baseline.
+
+### 3.11 `ingest_error` — bounded error reporting
 
 | Column | Type | Notes |
 | --- | --- | --- |
@@ -348,6 +395,28 @@ from duplicating evidence. Only changed source payloads create new observations.
 Cap errors per run (for example first 1,000 per reason code) and keep aggregate
 counts in `sync_run`. This prevents a broken source from filling the disk while
 still giving operators a useful sample.
+
+### 3.12 Admin extension tables (owned by ops lane)
+
+The ops/admin lane needs these tables on top of the core model. Storage defines
+their keys and invariants here so migrations can be generated once:
+
+- `review_item`: `id`, `type` (`duplicate_candidate`, `coordinate_conflict`,
+  `bad_coordinates`, `field_conflict`, `missing_license`,
+  `removed_candidate`), `status`, `priority`, `aed_id_a`, `aed_id_b`,
+  `source_record_id`, `score`, `reason`, `evidence_json`, `created_at`,
+  `resolved_by`, `resolved_at`, `resolution_note`.
+- `license`: `id`, `name`, `url`, `spdx`, `share_alike`,
+  `attribution_required`, `commercial_ok`, `derivative_ok`, `notes`.
+- `license_alert`: `id`, `source_id`, `license_id`, `severity`, `status`,
+  `message`, `created_at`, `resolved_at`.
+- `user_role`: `user_id`, `role` (`admin`, `editor`, `steward`, `viewer`),
+  primary key `(user_id, role)`.
+- `metric_snapshot`: `id`, `captured_at`, `payload_json` for health dashboards.
+- `export_run`: `id`, `started_at`, `finished_at`, `status`, `data_sha256`,
+  `row_count`, `license_mode`, `feed_sha256`, `error`.
+
+These are append-only or role-guarded; the merge engine never writes them.
 
 ## 4. Drizzle mapping notes
 
@@ -402,10 +471,10 @@ still giving operators a useful sample.
 
 | Phase | Contents | Unblocks |
 | --- | --- | --- |
-| M1 | `source`, `sync_run`, `source_document`, `source_record`, `ingest_error` | fetch/parse skeleton, replay |
+| M1 | `source`, `source_config`, `sync_run`, `source_document`, `source_record`, `ingest_error` | fetch/parse skeleton, replay |
 | M2 | `record_candidate`, `operator`, `facility`, `aed`, `aed_alias` | normalize, dedup, map reads |
-| M3 | `observation`, `field_provenance`, `media`, `audit_log`, `aed_merge` | lifecycle, provenance UI |
-| M4 | `submission`, FTS/R*Tree (if needed), export/read indexes | user submissions, scale |
+| M3 | `observation`, `field_provenance`, `media`, `audit_log`, `aed_merge`, `drift_event` | lifecycle, drift quarantine, provenance UI |
+| M4 | `submission`, `review_item`, `license`, `license_alert`, `user_role`, `metric_snapshot`, `export_run`, FTS/R*Tree (if needed) | admin panel, export, scale |
 
 Each phase is independently deployable. M2 does not require lifecycle rules to
 exist yet; rejected candidates simply remain unmerged.

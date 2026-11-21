@@ -44,13 +44,26 @@ AED/
 │   │   │   │   └── redact.ts     # URL/header/JSON redaction
 │   │   │   ├── parsers/
 │   │   │   │   ├── csv.ts        # RFC 4180 + BOM/CRLF/double-quote handling
-│   │   │   │   └── geojson.ts
-│   │   │   └── sources/
-│   │   │       ├── osm.ts        # OpenAEDMap national export
-│   │   │       ├── przemysl.ts   # SOD API / structured GeoJSON
-│   │   │       ├── krosno.ts
-│   │   │       ├── marki.ts
-│   │   │       └── warszawa.ts
+│   │   │   │   ├── xlsx.ts
+│   │   │   │   ├── geojson.ts
+│   │   │   │   ├── kml.ts
+│   │   │   │   ├── jsonapi.ts
+│   │   │   │   └── html-table.ts
+│   │   │   ├── config/
+│   │   │   │   ├── loader.ts     # Bun.YAML.parse + JSON Schema + family matrix
+│   │   │   │   ├── schema.ts     # runtime shape guards for SourceConfig
+│   │   │   │   └── mapping-dsl.ts# whitelisted mapping functions, no eval
+│   │   │   ├── connectors/
+│   │   │   │   ├── file-static.ts
+│   │   │   │   ├── http-json.ts
+│   │   │   │   ├── http-json-api.ts
+│   │   │   │   ├── google-my-maps-kml.ts
+│   │   │   │   ├── arcgis-query.ts
+│   │   │   │   ├── ckan-datastore.ts
+│   │   │   │   └── html-table.ts
+│   │   │   └── drift/
+│   │   │       ├── signals.ts    # schema, volume, quality, axis, sample
+│   │   │       └── baseline.ts   # baseline compare + advance rules
 │   │   ├── normalize/
 │   │   │   ├── types.ts          # canonical field object types
 │   │   │   ├── normalize.ts      # pure RawRecord -> NormalizedCandidate
@@ -118,8 +131,9 @@ flowchart TD
 Hard rules:
 
 1. `types.ts` imports nothing from `db`, `http`, `store`, or routes.
-2. `sources/*` import only `types`, `parsers`, `hash`, and small utilities.
-   They never import `store` or `db`. A connector is a pure fetch/parse adapter.
+2. `config/*` and `connectors/*` import only `types`, `parsers`, `hash`, and
+   small utilities. They never import `store` or `db`. A connector is a pure
+   fetch adapter; the config is data.
 3. `normalize/*` is pure and deterministic. No `Date.now()`, no network, no DB.
 4. `store/*` is the only layer that imports `src/db`. It maps rows to domain
    objects and never contains HTTP or parsing logic.
@@ -196,22 +210,28 @@ Add `.data/` (snapshot root) and `backups/` next to the existing ignored
 
 ### 4.1 Connector-config lane
 
-Deliverables this lane consumes:
+The config lane owns the YAML contract and its validation:
 
-- `SourceDefinition` and `Connector` from `src/server/ingest/types.ts`.
-- `SourceRegistry` shape and `loadRegistry()` idempotent upsert in
-  `src/server/ingest/registry.ts`.
-- `source` table with schedule, secret-env name, config version, cursor.
+- `backend/ingest/source-config.schema.json` (JSON Schema 2020-12),
+- one `backend/ingest/sources/<id>.yaml` per source plus `examples/*.yaml`,
+- the family/parser matrix and mapping DSL specification.
 
-The connector lane owns:
+Storage consumes:
 
-- one `SourceDefinition` per source and its `Connector` implementation,
-- config schema validation and connector version strings,
-- documented stable `sourceRecordId` assignment.
+- `SourceConfig`, `ConnectorFamily`, `ParserKind`, `ConnectorResult`,
+  `DriftSignal` from `src/server/ingest/types.ts`,
+- `loadRegistry()` that parses with `Bun.YAML.parse`, validates against the
+  JSON Schema, rejects an invalid family/parser pair, and upserts `source` +
+  `source_config`,
+- one connector implementation per family, not per source,
+- documented stable `sourceRecordId` assignment in `records.identity`.
 
-Hand-off test: a fake source with two static records runs through
-`runSource()` and produces the expected `source_record` rows without touching
-canonical tables until the normalize lane is implemented.
+Hand-off test: a fake YAML with two static records runs through `runSource()`
+and produces the expected `source_record` rows without touching canonical
+tables until the normalize lane is implemented.
+
+The runtime validator is required, not optional. A missing field, unknown
+canonical key, or invalid family/parser pair fails the source before any fetch.
 
 ### 4.2 Dedup-merge lane
 
@@ -367,18 +387,20 @@ Use a temporary SQLite file (`mkdtemp` + `DATABASE_URL`) rather than a shared
 ## 7. Implementation order
 
 1. **M1 storage**: schema modules, pragmas, migrations, migration test.
-2. **Contracts and primitives**: `types.ts`, `hash.ts`, `errors.ts`, CSV/GeoJSON
-   parsers, snapshot store.
+2. **Contracts and primitives**: `types.ts`, `hash.ts`, `errors.ts`, config
+   loader with `Bun.YAML.parse` + JSON Schema, CSV/GeoJSON parsers, snapshot
+   store.
 3. **HTTP layer**: client, retry, rate limit, secrets, redaction, with tests.
-4. **First vertical slice**: OpenAEDMap connector -> parse -> record upsert ->
-   run summary, still without canonical writes.
+4. **First vertical slice**: OpenAEDMap YAML + `file_static`/`geojson` family ->
+   parse -> record upsert -> run summary, still without canonical writes.
 5. **M2 canonical**: normalize, validate, UUIDs, canonical repository, map read
    query. The first map points can render from `aed` + `facility`.
-6. **Second connector**: Przemyśl, proving connector independence.
+6. **Second connector**: Przemyśl YAML + `http_json` family, proving the config
+   layer rather than a per-source code path.
 7. **Dedup**: exact OSM aliases first, spatial review queue second.
 8. **Lifecycle**: absence/removal and verification status.
-9. **CSV sources**: Krosno, Marki (double-quote and axis-swap fixtures), then
-   Warszawa once a token is available.
+9. **CSV and token sources**: Krosno, Marki (double-quote and axis-swap
+   fixtures), then Warszawa once a token is available.
 10. **Operations**: scheduler, status queries, prune/reap/verify commands.
 11. **Export/gov-api**: consume the read model; separate lane.
 

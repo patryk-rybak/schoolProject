@@ -82,6 +82,10 @@ CLI framework dependency for this surface.
 | `backfill --source <id> --file <path>` | import a local snapshot through the normal path |
 | `status [--source <id>]` | recent runs and current source health |
 | `errors --run <id>` | bounded errors for a run, grouped by reason code |
+| `config validate [--source <id>]` | parse every YAML, validate JSON Schema, family/parser matrix, canonical keys |
+| `config show --source <id>` | print the active config and `config_sha256` |
+| `drift list [--source <id>]` | open `drift_event` rows, grouped by severity |
+| `drift accept-baseline --run <id>` | operator approval after a review; requires explicit `--yes` |
 | `verify [--source <id>]` | integrity checks: hashes, orphan aliases, duplicates, missing snapshots |
 | `prune-snapshots [--dry-run]` | apply snapshot retention |
 | `reap-stale [--dry-run]` | mark expired `running` runs as `failed` |
@@ -98,7 +102,7 @@ keep stderr in the service log.
 | `0` | all requested work succeeded (including `skipped` and `not modified`) |
 | `1` | fatal error: migration missing, database unavailable, invalid config |
 | `2` | usage error: unknown command or option |
-| `3` | partial: at least one source failed or had rejections above guard |
+| `3` | partial or quarantined: at least one source failed, was quarantined, or had rejections above guard |
 | `4` | lock contention: another run owns the source and `--wait` was not set |
 | `5` | verification failed |
 
@@ -127,6 +131,8 @@ Rules:
   many sources do not start on the same minute. Scheduled runs pass the original
   slot to the run key, so jitter does not change idempotency.
 - Disabled sources are not scheduled but remain queryable and retain data.
+- A source whose YAML fails validation is not scheduled; the run reports
+  `failed` with `CONFIG_INVALID` and does not fetch.
 - `enabled` is checked at run start and again before merge; an operator can
   disable a source while a long fetch is in progress.
 
@@ -162,8 +168,8 @@ containers and are not durable. The database row is the source of truth.
 ### Storage
 
 - Secret **values** exist only in the process environment.
-- `source.secret_env` stores the environment variable **name**, for example
-  `AED_WARSZAWA_TOKEN`.
+- `source.secret_env` is derived from `fetch.auth.env` in the YAML and stores
+  the environment variable **name**, for example `AED_WARSZAWA_TOKEN`.
 - `.env.local` is loaded by Bun automatically in development. It is ignored by
   git and must never appear in a build artifact.
 - Production injects environment variables through the orchestrator's secret
@@ -356,6 +362,24 @@ Backups:
 3. If the process is still alive but not heartbeating, terminate it; the
    transaction rolls back and the lock expires.
 
+### A run is quarantined
+
+1. `bun scripts/ingest.ts drift list --source <id>` shows the layer, observed
+   value, and baseline.
+2. Inspect the stored document and the golden sample; do not edit the database
+   to force `ok`.
+3. If the change is legitimate, update the source YAML or explicitly run
+   `drift accept-baseline --run <id> --yes`; this writes an audit entry.
+4. If the source is wrong, keep `enabled = false` and contact the publisher.
+5. The previous published projection stays live until a later `ok` run.
+
+### A config change was rejected
+
+1. `config validate --source <id>` prints the failing path and key.
+2. Fix the YAML; never edit `source_config` rows by hand.
+3. `config show` confirms the new `config_sha256`; the first run compares
+   against a golden sample and does not reuse the old incremental cursor.
+
 ### The map shows too few records
 
 1. Check the last run status and `records_rejected_ratio`.
@@ -384,3 +408,7 @@ Backups:
 5. `prune-snapshots --dry-run` reports the same byte total as a subsequent real
    prune with no other changes.
 6. `verify` detects a deliberately corrupted snapshot and a dangling alias.
+7. `config validate` rejects an unknown canonical key and an invalid
+   family/parser pair before any network call.
+8. A quarantined run stores records but leaves the published projection
+   unchanged until `drift accept-baseline`.

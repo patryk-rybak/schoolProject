@@ -17,7 +17,9 @@ flowchart LR
     C --> D[parse to RawRecord]
     D --> E[upsert source_record by semantic hash]
     E --> F[normalize + validate]
-    F --> G[match + alias]
+    F --> D1[drift signals]
+    D1 --> G[match + alias]
+    D1 -. quarantine .-> K
     G --> H[merge canonical rows]
     H --> I[mark absence for complete snapshots]
     I --> J[finalize run + cursor + metrics]
@@ -42,7 +44,10 @@ Stages are separated by persisted artifacts:
 
 These TypeScript shapes are the contract. They live in
 `src/server/ingest/types.ts` and are imported by connector, normalize, dedup,
-lifecycle, and ops lanes. Keep them free of Drizzle and HTTP details.
+lifecycle, and ops lanes. Keep them free of Drizzle and HTTP details. The
+connector family interface follows the config lane's contract
+(`docs/ingest-source-config.md` §4.1), extended with the raw body needed for
+snapshotting.
 
 ```ts
 export type SourceTier =
@@ -51,7 +56,27 @@ export type SourceTier =
 	| "community"
 	| "aggregator"
 	| "derived"
-	| "app";
+	| "app"
+	| "register";
+
+export type ConnectorFamily =
+	| "file_static"
+	| "http_json"
+	| "http_json_api"
+	| "google_my_maps_kml"
+	| "arcgis_query"
+	| "ckan_datastore"
+	| "html_table"
+	| "manual";
+
+export type ParserKind =
+	| "csv"
+	| "xlsx"
+	| "json"
+	| "geojson"
+	| "kml"
+	| "jsonapi"
+	| "html_table";
 
 export type FetchedDocument = {
 	url: string;
@@ -85,12 +110,73 @@ export type ParsedDocument = {
 	warnings: string[];
 };
 
-export type Connector<Config = unknown> = {
-	id: string;
+export type DriftSignal = {
+	layer: "transport" | "schema" | "volume" | "quality" | "axis" | "semantic" | "sample";
+	signal: string;
+	severity: "warn" | "review" | "fail";
+	observed: unknown;
+	baseline: unknown;
+	action: "continue" | "quarantine" | "disable_source" | "reject_record";
+	message: string;
+};
+
+export type ConnectorResult = {
+	documents: FetchedDocument[];
+	records: RawRecord[];
+	meta: {
+		httpStatus: number;
+		contentType: string | null;
+		etag: string | null;
+		lastModified: string | null;
+		payloadSha256: string;
+		bytes: number;
+		pages: number;
+		recordsDeclared?: number;
+	};
+	complete: boolean;
+	warnings: DriftSignal[];
+};
+
+export type Connector = {
+	family: ConnectorFamily;
 	version: string;
-	validateConfig(config: unknown): Config;
-	fetch(ctx: FetchContext, config: Config): Promise<FetchedDocument[]>;
-	parse(doc: FetchedDocument, config: Config): Promise<ParsedDocument>;
+	fetch(config: SourceConfig, ctx: FetchContext): Promise<ConnectorResult>;
+};
+
+export type SourceConfig = {
+	version: 1;
+	source: {
+		id: string;
+		name: string;
+		publisher: string;
+		homepage_url?: string;
+		access_type: "file" | "api" | "html" | "kml" | "manual";
+		reliability_tier: SourceTier;
+		license: {
+			id: string;
+			url?: string;
+			attribution?: string;
+			share_alike?: boolean;
+		};
+		coverage?: { country?: string; teryt?: string[]; notes?: string };
+		update_frequency?:
+			| "continuous"
+			| "daily"
+			| "weekly"
+			| "monthly"
+			| "quarterly"
+			| "once"
+			| "unknown";
+		enabled?: boolean;
+	};
+	connector: { family: ConnectorFamily; parser: ParserKind };
+	fetch: Record<string, unknown>;
+	parse: Record<string, unknown>;
+	records: Record<string, unknown>;
+	map: Record<string, unknown>;
+	validate: Record<string, unknown>;
+	drift: Record<string, unknown>;
+	publish?: Record<string, unknown>;
 };
 
 export type NormalizedCandidate = {
@@ -147,7 +233,7 @@ Boundary rules:
 
 - A connector **never** imports `db`, never writes files except through the
   snapshot writer, and never resolves secrets itself. It receives an already
-  authenticated `FetchContext`.
+  authenticated `FetchContext` and a validated `SourceConfig`.
 - A normalizer is pure: same `RawRecord` + same `normalizer_version` produces the
   same candidate bytes.
 - The merge engine is the only code allowed to write canonical tables. It
@@ -156,38 +242,46 @@ Boundary rules:
 
 ## 3. Source registry and configuration
 
-Sources are declared in code, one file per connector, and assembled into a
-registry:
+Sources are declared as one YAML file per source under
+`backend/ingest/sources/*.yaml` (examples in `backend/ingest/examples/`) and
+validated against `backend/ingest/source-config.schema.json`. The config is
+data, not code: no `eval`, no JS, no network access in the mapping DSL. The
+registry loader reads every file, validates the family/parser matrix, and
+upserts `source` plus an immutable `source_config` row.
 
 ```ts
-export type SourceDefinition = {
-	id: string;
-	name: string;
-	publisher: string;
-	accessType: "api" | "file" | "html" | "manual" | "app";
+// SourceConfig is the parsed YAML; config_sha256 is over the exact file bytes.
+type LoadedSource = {
+	config: SourceConfig;
+	configYaml: string;
+	configSha256: string;
 	connector: Connector;
-	baseUrl: string;
-	license: { id: string; url?: string; attribution: string };
-	reliabilityTier: SourceTier;
-	schedule: { cron: string; timezone: string } | null;
-	enabled: boolean;
-	requiresAuth: boolean;
-	secretEnv?: `AED_${string}_TOKEN`;
+	scheduleCron: string | null;
+	timezone: string;
+	secretEnv: string | null; // from fetch.auth.env
 	fullSnapshot: boolean;
-	/** How many complete snapshots missing a record may persist before removal. */
 	removalGraceRuns: number;
-	config: unknown;
 };
 ```
 
-The registry loader performs an idempotent `source` upsert before each run. If
-`configVersion` or the connector version changed, the loader forces a full
-refresh and starts a new candidate version; it does not reuse incremental
-cursors across incompatible config.
+Use `Bun.YAML.parse` for the file and the JSON Schema validator for the shape.
+The runtime must validate, not only CI: an invalid config fails the source
+before any fetch. Validate that `parser` is allowed for `connector.family`
+(the matrix in `docs/ingest-source-config.md` §4.3).
+
+The registry loader performs an idempotent `source` upsert before each run and
+stores the exact YAML and hash in `source_config`. If `config_sha256` or the
+connector version changed, the loader forces a full refresh and starts a new
+candidate version; it does not reuse incremental cursors across incompatible
+config. Historical runs keep their `config_sha256`.
 
 Default grace values are conservative: authoritative full snapshots remove
 after 2 complete misses, community and aggregator sources after 3. A partial or
 failed document never contributes to removal counts.
+
+Publish gates: `source.allowed_for_ingest` and `source.allowed_for_export`
+default to false until an admin reviews the license. A source can be fetched
+for research while export remains blocked.
 
 ## 4. Fetch stage
 
@@ -290,6 +384,42 @@ rejected, the run ends `partial` even if the HTTP fetch succeeded. This catches
 schema drift (for example a renamed CSV column) before it marks most of the
 source absent.
 
+### 7.5 Drift detection and quarantine
+
+The config lane defines drift layers and thresholds
+(`docs/ingest-source-config.md` §5): transport, schema, volume, quality, axis,
+semantic, and golden sample. Storage persists each signal as `drift_event` and
+applies the resulting action:
+
+| Severity / action | Run status | Publication effect |
+| --- | --- | --- |
+| `warn` | `ok` or `partial` | publish accepted rows; keep baseline |
+| `review` / `quarantine` | `quarantined` | store accepted rows, do **not** replace the published projection, keep old baseline |
+| `fail` / `disable_source` | `failed` | retain previous data, set `source.enabled = false` if the config allows auto-disable |
+
+Quarantine is not deletion. The new snapshot and accepted records are stored
+for inspection, but the public projection continues to serve the last
+published complete snapshot. An operator resolves the review by updating the
+config or baseline; a new successful run clears quarantine.
+
+Baseline rules:
+
+- The baseline is stored in `source_config.baseline_json` and only advances on
+  `ok` runs.
+- `partial` and `quarantined` runs never advance the baseline.
+- A config change that alters `map`, `records`, or `parse` starts a new
+  `config_sha256`; the first run is compared against a golden sample, not
+  against a stale baseline.
+- Drift checks compare identity, coordinates, name, and status; cosmetic
+  description changes do not block publication.
+
+### 7.6 Publication gate
+
+Only `ok` and `partial` runs may update the published projection. `quarantined`
+and `failed` runs leave the previous projection in place. The export lane reads
+the last published projection version, not directly from `aed`, so a
+quarantined source cannot leak unreviewed data onto the map or dane.gov.pl.
+
 ## 8. Matching and merge
 
 ### Deterministic matches first
@@ -357,6 +487,7 @@ nothing to absence counts. This prevents one timeout from wiping the map.
 | Process crashes mid-merge | transaction rolls back; alias/observation/canonical rows stay consistent |
 | Source returns an empty but complete snapshot | absence counters advance; lifecycle decides removal |
 | Source returns an empty partial snapshot | no absence counters advance |
+| Drift review triggers | `quarantined`; previous publication remains live |
 
 Additional rules:
 
@@ -395,6 +526,8 @@ Additional rules:
 | `PARSE_*` | parse | no | failed or partial |
 | `SCHEMA_*` | parse | no | failed; candidate version unchanged |
 | `OUT_OF_POLAND`, `INVALID_DATE` | validate | no | record rejected, run continues |
+| `DRIFT_REVIEW`, `SCHEMA_DRIFT`, `VOLUME_DRIFT` | drift | no | `quarantined`, baseline unchanged |
+| `DRIFT_FAIL` | drift | no | `failed`, retain previous publication |
 | `MATCH_*`, `MERGE_*` | match/merge | no | record error, run partial |
 | `DB_*` | any write | depends | transaction rollback, retry once |
 
@@ -403,6 +536,8 @@ Run status:
 - `ok`: every document complete, no fatal errors, rejection rate below guard.
 - `partial`: some records rejected or a document incomplete, but committed data
   is consistent.
+- `quarantined`: drift review required; accepted data is stored but the
+  published projection is unchanged.
 - `failed`: no usable document, auth/config error, or transaction failure.
 - `skipped`: lock or duplicate run key.
 - `not modified` is represented as `ok` with a `not_modified` flag, not a
@@ -439,3 +574,6 @@ rows and zero new observations.
    candidate per record and updates no canonical value that did not change.
 6. Two concurrent `run --source osm` invocations result in one fetched run and
    one `skipped` run.
+7. A simulated volume drop below the baseline threshold produces a
+   `quarantined` run, stores the new records, and leaves the published
+   projection byte-identical.
