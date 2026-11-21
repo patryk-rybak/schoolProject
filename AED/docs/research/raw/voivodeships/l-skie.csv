@@ -1,0 +1,77 @@
+voivodeship,unit,type,score,registry_hint,class,priority,url,points,fields,license,format,notes
+śląskie,Bieruń,gmina miejska,11,true,B,true,https://www.bierun.pl/mieszkancy/defibrylatory-aed-w-bieruniu,14,"adres, dokładne umiejscowienie; brak współrzędnych",brak jawnej,"HTML, tabela 15 wierszy",14 lokalizacji; link OpenAEDMap; max_count 13 zaniża
+śląskie,Myszków,gmina miejska,11,true,C,true,https://www.miastomyszkow.pl/kategorie/1189-dwa-defibrylatory-dla-urzedu-miasta,,,,HTML,news: 2 defibrylatory dla Urzędu Miasta; brak listy publicznej
+śląskie,Koszęcin,gmina wiejska,9,true,B,true,https://koszecin.pl/defibrylatory-aed-w-koszecinie.html,2,"adres, opis miejsca",brak jawnej,HTML + OpenAEDMap,2 opisane lokalizacje; max_count 19 to liczba wystąpień słowa
+śląskie,Pawłowice,gmina wiejska,8,true,B,true,https://www.pawlowice.pl/mieszkaniec/zdrowie/mapa-defibrylatorow-aed,12,"miejsce, adres, wewnątrz/zewnątrz",brak jawnej,HTML + Google My Maps,"12 lokalizacji, w tym 7 OSP; mid=1DSs_ESjkEU6AaxZjgpLgwtk5tlG11gc"
+śląskie,Imielin,gmina miejska,6,true,B,true,https://www.imielin.pl/pl/205/6222/do-ratowania-zycia-defibrylatory-w-imielinie-.html,5,"adres, dostęp/godziny",brak jawnej,HTML + e-mapa,5 lokalizacji; 2 zewnętrzne 24/7; userview=140
+śląskie,Sławków,gmina miejska,6,false,C,true,"https://www.slawkow.pl/artykuly-z-tagiem,defibrylator",,,,HTML,"2 lokalizacje w newsach (Ratusz, Młyńska 14a); brak rejestru"
+śląskie,powiat pszczyński,powiat,6,true,C,true,https://www.powiat.pszczyna.pl/szukaj/?q=defibrylator,,,,HTML,"news: 3 AED w Starostwie, Centrum Przesiadkowym i szkole"
+śląskie,Knurów,gmina miejska,5,true,C,true,https://www.knurow.pl/main/szukaj?szukaj=defibrylator,,,,HTML,"wzmianki, m.in. projekt budżetu obywatelskiego; brak listy"
+śląskie,Pyskowice,gmina miejska,5,true,C,true,https://www.pyskowice.pl/szukaj.html?search=defibrylator,,,,HTML,pojedyncza wzmianka w sesji Rady Miejskiej
+śląskie,Racibórz,gmina miejska,5,true,C,true,https://www.raciborz.pl/urzad/aktualnosci_lista/Firma-Henkel-przekazala-defibrylatory-Miastu-Raciborz/idn:11338,,,,HTML,"news: 4 lokalizacje (Visit Racibórz, Przedszkole nr 24, Park Roth, Arboretum)"
+śląskie,powiat rybnicki,powiat,5,true,D,true,https://starostwo.rybnik.pl/?s=defibrylator,,,,HTML,wyszukiwarka bez treści AED; brak wykazu
+śląskie,Olsztyn,gmina miejsko-wiejska,4,true,C,true,https://www.olsztyn-jurajski.pl/?s=defibrylator,,,,HTML,news: 1 AED przekazany gminie
+śląskie,Jaworze,gmina wiejska,4,true,C,true,https://www.jaworze.pl/wyniki-wyszukiwania?search=defibrylator,,,,HTML,news: 3 AED na terenie gminy; brak tabeli adresowej
+śląskie,Kobiór,gmina wiejska,4,false,C,false,https://samorzad.gov.pl/web/gmina-kobior/,,,,HTML,news: AED w Urzędzie Gminy i przy OSP
+śląskie,Koszarawa,gmina wiejska,4,false,C,false,http://www.gminakoszarawa.pl/,,,,HTML,news: AED dla OSP Koszarawa; pojedyncza lokalizacja
+śląskie,Kruszyna,gmina wiejska,4,true,C,true,https://www.kruszyna.pl?s=defibrylator,,,,HTML,"news: zakup 4 AED, pierwszy w Urzędzie Gminy"
+śląskie,Mykanów,gmina wiejska,4,true,C,true,https://mykanow.pl?s=defibrylator,,,,HTML,wyniki wyszukiwania i news o pierwszej pomocy; brak wykazu
+śląskie,Rędziny,gmina wiejska,4,false,C,false,http://www.redziny.pl,,,,HTML,news: AED na budynku GOK; pojedyncza lokalizacja
+śląskie,Gorzyce,gmina wiejska,3,true,B,true,https://www.gorzyce.pl/aktualnosci/index/Nowe-defibrylatory-AED-juz-dostepne-w-solectwach-Gminy-Gorzyce/idn:1469,12,"sołectwo/obiekt, opis miejsca",brak jawnej,HTML (news z listą),12 lokalizacji; bez współrzędnych
+śląskie,Rajcza,gmina wiejska,3,true,C,true,https://rajcza.pl/?s=defibrylator,,,,HTML,postępowanie na zakup AED; brak listy lokalizacji
+śląskie,Niegowa,gmina,2,false,C,false,http://www.niegowa.pl/,,,,HTML,zapytanie ofertowe na zakup AED; brak listy
+śląskie,Radlin,gmina miejska,2,false,C,false,http://www.radlin.pl,,,,HTML,wyniki wyszukiwania; brak wykazu lokalizacji
+śląskie,powiat myszkowski,powiat,2,false,C,false,http://www.powiatmyszkowski.pl/,,,,HTML,wzmianki o sprzęcie szpitalnym/karetkach; brak listy
+śląskie,Psary,gmina wiejska,1,true,D,true,https://www.psary.pl/component/finder/search?Itemid=101&q=defibrylator,,,,HTML,wyszukiwarka: brak wyników dla „defibrylator”
+śląskie,powiat bieruńsko-lędziński,powiat,1,false,C,false,http://www.powiatbl.pl,,,,HTML,wyniki wyszukiwania/news; brak wykazu
+śląskie,powiat raciborski,powiat,1,false,C,false,http://www.powiatraciborski.pl,,,,HTML,"news: AED w PUP, PKS i jednostkach powiatu"
+śląskie,Miasteczko Śląskie,gmina miejska,0,false,D,false,http://www.miasteczko-slaskie.pl,,,,HTML,wyszukiwarka: brak wyników
+śląskie,Pszów,gmina miejska,0,false,D,false,http://www.pszow.pl/,,,,HTML,brak trafień AED
+śląskie,Rydułtowy,gmina miejska,0,false,D,false,http://www.rydultowy.pl,,,,HTML,brak trafień AED
+śląskie,Tarnowskie Góry,gmina miejska,0,false,D,false,http://www.tarnowskiegory.pl,,,,HTML,wyszukiwarka bez trafień AED
+śląskie,Wodzisław Śląski,gmina miejska,0,false,D,false,http://www.wodzislaw-slaski.com.pl/,,,,HTML,brak trafień AED
+śląskie,Wojkowice,gmina miejska,0,false,C,false,http://www.wojkowice.pl,,,,HTML,ogólny artykuł o pierwszej pomocy; brak lokalizacji
+śląskie,Godów,gmina wiejska,0,false,C,false,http://www.godow.pl,,,,HTML,news: AED na remizie OSP Godów; pojedyncza lokalizacja
+śląskie,Mysłowice,miasto na prawach powiatu,0,false,D,false,http://www.myslowice.pl,,,,HTML,brak trafień AED
+śląskie,powiat częstochowski,powiat,0,false,D,false,http://www.czestochowa.powiat.pl,,,,HTML,brak trafień AED
+śląskie,powiat lubliniecki,powiat,0,false,D,false,http://www.lubliniec.starostwo.gov.pl/,,,,HTML,brak trafień AED
+śląskie,powiat tarnogórski,powiat,0,false,D,false,http://www.powiat.tarnogorski.pl/,,,,HTML,wyszukiwarka bez treści AED
+śląskie,Gmina Ogrodzieniec,gmina miejsko-wiejska,-1,false,D,false,http://www.ogrodzieniec.pl,,,,HTML,brak trafień AED
+śląskie,Gmina Włodowice,gmina miejsko-wiejska,-1,false,D,false,http://www.wlodowice.pl,,,,HTML,wyszukiwarka bez trafień AED
+śląskie,Kłobuck,gmina miejsko-wiejska,-1,false,D,false,http://www.gminaklobuck.pl/,,,,HTML,tylko nagłówek wyszukiwarki; brak treści AED
+śląskie,Pilica,gmina miejsko-wiejska,-1,false,D,false,http://www.pilica.pl,,,,HTML,brak trafień AED
+śląskie,Pszczyna,gmina miejsko-wiejska,-1,false,D,false,http://www.pszczyna.pl,,,,HTML,brak trafień AED
+śląskie,Toszek,gmina miejsko-wiejska,-1,false,D,false,http://www.toszek.pl/,,,,HTML,brak trafień AED
+śląskie,Wilamowice,gmina miejsko-wiejska,-1,false,D,false,http://www.gmina.wilamowice.pl,,,,HTML,brak trafień AED
+śląskie,Lelów,gmina wiejska,-1,false,C,false,http://www.lelow.pl,,,,HTML,wzmianka o defibrylatorze szkoleniowym; brak AED publicznych
+śląskie,Nędza,gmina wiejska,-1,false,C,false,http://www.nedza.pl,,,,HTML,news: AED przy paczkomatach InPost w Nędzy i Szymocicach
+śląskie,Ornontowice,gmina wiejska,-1,false,C,false,http://www.ornontowice.pl,,,,HTML,news: AED i szkolenia w KS StandART
+śląskie,powiat będziński,powiat,-1,false,D,false,http://www.starostwo.bedzin.pl,,,,HTML,wyszukiwarka: „Nothing Found”
+śląskie,Kuźnia Raciborska,gmina miejsko-wiejska,-2,false,C,false,http://www.kuzniaraciborska.pl,,,,HTML,wzmianka/news; brak wykazu
+śląskie,Irządze,gmina wiejska,-2,false,D,false,http://www.irzadze.pl,,,,HTML,brak trafień AED
+śląskie,Kroczyce,gmina wiejska,-2,false,D,false,https://www.kroczyce.pl/,,,,HTML,brak trafień AED
+śląskie,Lipie,gmina wiejska,-2,false,D,false,http://www.lipie.pl/,,,,HTML,brak trafień AED
+śląskie,Lipowa,gmina wiejska,-2,false,D,false,http://www.ug-lipowa.com/,,,,HTML,błędna domena w wyniku (olegames.io); fałszywy alarm
+śląskie,Mstów,gmina wiejska,-2,false,D,false,http://www.ug-mstow.com.pl/,,,,HTML,brak trafień AED
+śląskie,Pilchowice,gmina wiejska,-2,false,D,false,http://www.pilchowice.pl/,,,,HTML,tylko nagłówek wyszukiwarki; brak treści AED
+śląskie,Radziechowy-Wieprz,gmina wiejska,-2,false,D,false,http://www.radziechowy-wieprz.pl/,,,,HTML,brak trafień AED
+śląskie,Suszec,gmina wiejska,-2,false,B,false,https://suszec.pl/pl/6556/17612/informacja-na-temat-danych-lokalizacji-urzadzen-aed-na-terenie-gminy-suszec.html,5,"współrzędne, mobilność, adres/opis, telefon, dostęp, godziny",brak jawnej,"HTML, tabela 5 rekordów",Najbogatsze pola w regionie; 4 AED w OSP + 1 kapsuła 24/7
+śląskie,Wyry,gmina wiejska,-2,false,D,false,http://www.wyry.pl,,,,HTML,brak trafień AED
+śląskie,Węgierska Górka,gmina wiejska,-2,false,D,false,http://www.wegierska-gorka.opg.pl/,,,,HTML,brak trafień AED
+śląskie,Łodygowice,gmina wiejska,-2,false,D,false,http://www.lodygowice.com.pl/,,,,HTML,brak trafień AED
+śląskie,Żarnowiec,gmina wiejska,-2,false,D,false,http://www.zarnowiec.pl,,,,HTML,brak trafień AED
+śląskie,Radzionków,gmina miejska,-3,false,D,false,http://www.radzionkow.pl,,,,HTML,wyszukiwarka: brak wyników
+śląskie,Konopiska,gmina wiejska,-3,false,C,false,http://www.konopiska.pl,,,,HTML,news o bezpieczeństwie; brak wykazu AED
+śląskie,Krzyżanowice,gmina wiejska,-3,false,C,false,http://www.krzyzanowice.pl,,,,HTML,wzmianka/news; brak wykazu
+śląskie,Miedźna,gmina wiejska,-3,false,C,false,http://www.miedzna.pl,,,,HTML,wzmianka/news; brak wykazu
+śląskie,Pawonków,gmina wiejska,-3,false,C,false,https://www.pawonkow.pl/,,,,HTML,wzmianka/news; brak wykazu
+śląskie,powiat mikołowski,powiat,-3,false,D,false,http://www.powiat.mikolow.pl/,,,,HTML,wyszukiwarka bez treści AED
+śląskie,Kornowac,gmina wiejska,-4,false,C,false,http://www.kornowac.pl,,,,HTML,news: AED na remizie OSP Łańce
+śląskie,Gaszowice,gmina wiejska,-5,false,D,false,https://www.gaszowice.pl/,,,,HTML,wyszukiwarka: brak wyników
+śląskie,Herby,gmina wiejska,-5,false,D,false,http://www.herby.pl,,,,HTML,wyszukiwarka bez treści AED
+śląskie,Kamienica Polska,gmina wiejska,-5,false,D,false,http://www.kamienicapolska.gmina.pl,,,,HTML,wyszukiwarka: „Nothing Found”
+śląskie,Mierzęcice,gmina wiejska,-6,false,D,false,http://www.mierzecice.pl/,,,,HTML,wyszukiwarka: brak wyników
+śląskie,OpenAEDMap / OSM (krajowe),źródło maszynowe,,,A,false,https://openaedmap.org/api/v1/countries/PL.geojson,1728,"@osm_id,@osm_type,@osm_version,emergency,access,indoor,defibrillator:location,opening_hours,check_date,operator,phone,level,addr:street,addr:housenumber","ODbL 1.0, atrybucja © OpenStreetMap contributors","GeoJSON, EPSG:4326",Snapshot 2026-11-21; 1728 z 18299 punktów PL; Katowice bbox ok. 258; addr:* ok. 1%
+śląskie,Urząd Marszałkowski Województwa Śląskiego,samorząd województwa,,,C,false,https://bip.slaskie.pl/zamowienia_publiczne,0,brak,brak,HTML,"Brak rejestru/mapy AED; tylko postępowanie OR-ZN.272.1.58.2020.MJ na 63 AED (Jaworzno 22, powiat kłobucki 28) i newsy"
+śląskie,Katowice,miasto na prawach powiatu,,,C,false,https://katowice.eu/dla-mieszkańca/bezpieczeństwo-publiczne/instrukcje-postępowania/pierwsza-pomoc,0,brak,brak,HTML,Brak oficjalnej listy/mapy; tylko instrukcja pierwszej pomocy; 24katowice.pl podaje 245 AED (68 publicznych)
+śląskie,24katowice.pl (trzeci sektor),agregator,,,C,false,https://24katowice.pl/defibrylatory,245,"liczba AED, 68 ogólnodostępnych",brak jawnej,HTML/mapa,"Agregator niezależny, nieoficjalny; przydatny jako trop do weryfikacji"

@@ -1,0 +1,59 @@
+unit,type,score,registry_hint,class,url,points,fields,license,format,evidence
+Tczew,gmina miejska,2,False,A,https://tczew.pl/aed/,12,"nazwa (ulica + obiekt), współrzędne (lon,lat,0); brak strukturalnego adresu i opisu",brak jawnej licencji; eksport Google My Maps (ToS Google),KML (Google My Maps) + HTML,"Oficjalna strona miasta Tczew z mapą AED; publiczny eksport KML 12 placemarków, HTTP 200. To quasi-A: maszynowy KML, ale bez formalnego API/datasetu."
+Pruszcz Gdański,gmina miejska,13,True,B,https://pruszcz-gdanski.pl/defibrylatory,15,"adres, budynek/obiekt, sposób umieszczenia","brak jawnej licencji (strona urzędu, nie open data)",HTML (lista),"Oficjalna strona miasta; lista 15 defibrylatorów (strona zawiera 26 wystąpień słowa „defibrylator”, ale 15 pozycji). HTTP 200."
+Nowa Wieś Lęborska,gmina wiejska,11,True,B,https://www.nwl.pl/dla-mieszkanca/bezpieczenstwo/automatyczne-defibrylatory/,10,"miejscowość/lokalizacja, adres, umieszczenie (np. kapsuła, samochód OSP)","brak jawnej licencji (strona urzędu, nie open data)",PNG (tabela) + HTML,"Oficjalna strona gminy; załącznik ""Wykaz defibrylatorów (AED)"" PNG, 10 wierszy. HTTP 200."
+powiat starogardzki,powiat,10,True,B,https://powiatstarogard.pl/wydzial-nadzoru-wlascicielskiego-i-zdrowia/siec-defibrylatorow/,28,"lokalizacja/obiekt, adres","brak jawnej licencji (strona powiatu, nie open data)",HTML (lista) + mapa obrazkowa,"Oficjalna strona powiatu; 28 pozycji <li>, deklaracja 28 zakupionych AED. HTTP 200. Modyfikacja 2026-05-14."
+Żukowo,gmina miejsko-wiejska,10,True,B,"https://www.zukowo.pl/Defibrylatory_AED_w_gminie_Zukowo,1007",27,nazwa obiektu/miejscowości; część pozycji z adresem w opisie,"brak jawnej licencji (strona urzędu, nie open data)",HTML (lista),Oficjalna strona gminy; 27 lokalizacji. HTTP 200. Aktualizacja informacji: 2026-06-19.
+Czarne,gmina miejsko-wiejska,9,True,B,https://czarne.pl/files/file_add/download/35_document.pdf,20,"lp, nazwa obiektu, adres, współrzędne geograficzne (WGS84), umieszczenie AED, uwagi/dostępność",brak jawnej licencji (PDF urzędu gminy),"PDF (tabela, 1 str.)","Oficjalna strona gminy Czarne; PDF ""Lokalizacje defibrylatorów AED..."" 20 wierszy ze współrzędnymi. HTTP 200."
+Szemud,gmina wiejska,9,True,B,https://szemud.pl/defibrylatory-aed.html,13,"miejscowość/obiekt, adres (na mapie)",brak jawnej licencji (BIP gminy),JPG (mapa) + HTML,"Oficjalna strona/BIP gminy; mapa ""Lokalizacja defibrylatorów AED w Gminie Szemud"" (9920x7575), 13 lokalizacji z adresami. HTTP 200."
+Kosakowo,gmina wiejska,4,True,B,https://gminakosakowo.pl/aktualnosci/informacja-o-zainstalowanych-ogolnodostepnych-defibrylatorach-aed-w-gminie-kosakowo/,10,nazwa obiektu/miejscowość; brak adresu i współrzędnych,brak jawnej licencji (strona gminy),HTML (lista),Oficjalna strona gminy; 10 ogólnodostępnych AED; strona odsyła do OpenAEDMap. HTTP 200. Publikacja 2026-08-05.
+Gdańsk,miasto/województwo,,,B,"https://www.gdansk.pl/budzet-obywatelski/Ogolnomiejski-Bezpieczny-Gdansk-26-defibrylatorow-do-ratowania-zycia-w-przestrzeni-miasta,a,164468",26,"lp, lokalizacja (ulica/punkt/obiekt)",brak jawnej licencji (copyright portalu gdansk.pl),HTML (lista),Oficjalny portal miasta Gdańska; artykuł z 2020 r. lista 26 lokalizacji AED. HTTP 200.
+Słupsk,miasto/województwo,,,B,https://www.slupsk.pl/mieszkaniec/zdrowie-i-sprawy-spoleczne/defibrylatory-aed,25,"Lp, nazwa instytucji, adres, lokalizacja AED, dostępność",brak jawnej licencji (strona urzędu miasta),HTML (tabela),Oficjalna strona miasta Słupsk; tabela 25 wierszy; część wierszy opisuje kilka urządzeń. HTTP 200.
+Lębork,gmina miejska,11,True,C,https://www.lebork.pl/aktualnosci/strazacy-ochotnicy-walcza-o-defibrylator-akcja-aed-max/,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+powiat lęborski,powiat,10,True,C,https://www.powiat-lebork.com/aktualnosci-3/defibrylator-w-starostwie-juz-dostepny/,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Wejherowo,gmina miejska,6,True,C,https://www.wejherowo.pl/szukaj.html?q=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+powiat kwidzyński,powiat,6,True,C,https://www.powiatkwidzynski.pl/portal/szukaj?q=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Kwidzyn,gmina miejska,5,True,C,https://kwidzyn.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Parchowo,gmina wiejska,5,False,C,https://parchowo.pl/,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Prabuty,gmina miejsko-wiejska,5,True,C,https://www.prabuty.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+"Reda, Poland",gmina miejska,5,True,C,https://miasto.reda.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Wicko,gmina wiejska,5,False,C,https://www.wicko.pl/aktualnosci/automatyczny-defibrylator-zewnetrzny-w-gokis-w-wicku/,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+powiat gdański,powiat,5,True,C,https://powiat-gdanski.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Sztutowo,gmina wiejska,4,True,C,https://www.sztutowo.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Koczała,gmina wiejska,3,True,C,https://koczala.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Chojnice,gmina miejska,2,False,C,https://miastochojnice.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Debrzno,gmina miejsko-wiejska,1,False,C,https://debrzno.pl?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Q78712,gmina miejska,1,False,C,https://rumia.eu/ListaStron/Wszystkie?query=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Łeba,gmina miejska,1,False,C,https://leba.eu/pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Brusy,gmina miejsko-wiejska,0,False,C,https://www.brusy.pl/component/finder/search?Itemid=101&q=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Cewice,gmina wiejska,0,False,C,https://cewice.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Czerwionka-Leszczyny,gmina miejsko-wiejska,0,False,C,https://www.czerwionka-leszczyny.pl/main/szukaj/?szukaj=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Kępice,gmina miejsko-wiejska,0,False,C,https://kepice.pl/site/search?q=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Choczewo,gmina wiejska,-1,False,C,https://www.choczewo.com.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Kolbudy,gmina wiejska,-1,False,C,https://www.kolbudy.pl/wyszukaj?q=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Puck (gmina),gmina wiejska,-1,False,C,https://gmina.puck.pl?s=defibrylator,,,,HTML,Tylko wzmianki/szkolenia AED; brak listy lokalizacji.
+Suchy Dąb,gmina wiejska,-1,False,C,https://www.suchy-dab.pl/component/finder/search?Itemid=158&q=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Dąbrowa Zielona,gmina wiejska,-2,False,C,https://dabrowazielona.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Studzienice,gmina wiejska,-2,False,C,https://www.studzienice.pl/?s=defibrylator,,,,HTML,Tylko wzmianki/news lub wyniki wyszukiwania; brak listy/rejestru wielu AED.
+Gdynia,miasto/województwo,,,C,https://www.gdynia.pl/wyszukiwarka/action/elastic?Searcher_SearchForm%5Bquery%5D=defibrylator,0,,,HTML,"Brak miejskiego rejestru/listy; tylko artykuły o pojedynczych AED (Witomino 2 urządzenia, Oksywie 1). Otwarte dane Gdyni (CKAN): 0 zbiorów dla „defibrylator”."
+Urząd Marszałkowski Województwa Pomorskiego,miasto/województwo,,,C,https://pomorskie.eu/wp-json/wp/v2/search?search=defibrylator,0,,,HTML/JSON wyszukiwarki,"Tylko newsy: defibrylatory w pociągach, zakupy dla szpitali, konferencje; brak rejestru publicznych AED."
+Trąbki Wielkie,gmina wiejska,3,True,D,https://trabkiw.ug.gov.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Puck (miasto),gmina miejska,0,False,D,http://www.miasto.puck.pl,,,,HTML,Brak wyników AED na stronie miasta; max_count 0.
+powiat człuchowski,powiat,0,False,D,https://www.starostwo.czluchow.org.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+powiat kartuski,powiat,0,False,D,https://kartuskipowiat.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+powiat nowodworski,powiat,0,False,D,"https://www.nowydworgdanski.pl/redir,szukaj?jezyk=1&szukaj=defibrylator",,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+powiat wejherowski,powiat,0,False,D,https://powiatwejherowski.pl/szukaj?search=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Czechowice-Dziedzice,gmina miejsko-wiejska,-1,False,D,https://czechowice-dziedzice.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Czersk,gmina miejsko-wiejska,-1,False,D,https://czersk.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Gniew,gmina miejsko-wiejska,-1,False,D,"https://www.gniew.pl/redir,szukaj?szukaj=defibrylator",,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Kartuzy,gmina miejsko-wiejska,-1,False,D,https://www.kartuzy.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Nowy Staw,gmina miejsko-wiejska,-1,False,D,https://www.wp.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Władysławowo,gmina miejsko-wiejska,-1,False,D,https://wladyslawowo.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Chmielno,gmina wiejska,-2,False,D,https://www.chmielno.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Gmina Linia,gmina wiejska,-2,False,D,https://www.aftermarket.pl/domena/ug-linia.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Miłoradz,gmina wiejska,-2,False,D,https://www.miloradz.malbork.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Smętowo Graniczne,gmina wiejska,-2,False,D,https://www.aftermarket.pl/domena/smetowo.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Stary Dzierzgoń,gmina wiejska,-2,False,D,https://www.starydzierzgon.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Zblewo,gmina wiejska,-2,False,D,https://www.zblewo.pl/,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Skarszewy,gmina miejsko-wiejska,-4,False,D,https://www.skarszewy.pl/component/finder/search?Itemid=101&q=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.
+Liniewo,gmina wiejska,-5,False,D,https://www.liniewo.pl/?s=defibrylator,,,,HTML,Brak potwierdzonego AED/rejestru; wynik negatywny lub fałszywy alarm.

@@ -23,7 +23,7 @@
 ## 0. TL;DR
 
 1. **Nie ma centralnego, obowiązkowego rejestru AED w Polsce.** Dane są rozproszone między OSM, pojedyncze gminy, rejestry podmiotów i aplikacje komercyjne.
-2. **OpenStreetMap jest faktycznym kręgosłupem ekosystemu.** OpenAEDMap publikuje całą Polskę jako GeoJSON (18 298 punktów), a Geoportal.gov.pl i CloudFerro **nie mają publicznej warstwy AED** — służą co najwyżej jako dane referencyjne (PRG, adresy, ortofoto).
+2. **OpenStreetMap jest faktycznym kręgosłupem ekosystemu.** OpenAEDMap publikuje całą Polskę jako GeoJSON (18 298 punktów). Geoportal.gov.pl udostępnia tylko warstwę WMS `Defibrylatory` zasilaną danymi OSM, a CloudFerro **nie ma publicznej warstwy AED**; oba służą co najwyżej jako dane referencyjne (PRG, adresy, ortofoto).
 3. **Skala OSM w Polsce to ok. 18,3 tys. rekordów** (Taginfo, 2026-11-20; OpenAEDMap: 18 298 features). To największy jednolity zbiór AED w kraju, ale bez statusu działania i z niepełnymi polami operacyjnymi.
 4. **Na dane.gov.pl są tylko 4 zbiory AED**: Krosno, Przemyśl, Marki i Warszawa. Każdy ma inny format i inne kolumny; tylko Przemyśl ma w pełni otwarte, udokumentowane API.
 5. **Wspólny rdzeń danych jest mały:** identyfikator źródła, nazwa/lokalizacja, współrzędne, adres, zdjęcie, licencja. Reszta (dostęp, godziny, status, operator, model, przeglądy) jest dostępna tylko w niektórych źródłach albo wcale.
@@ -44,7 +44,7 @@ OpenStreetMap definiuje faktyczny standard tagowania AED (`emergency=defibrillat
 - wspólny zestaw tagów i wspólne ograniczenia (brak statusu, brak seriali, rzadkie `check_date`),
 - konieczność zachowania atrybucji OSM i licencji ODbL w każdej warstwie pochodnej.
 
-**Korekta wobec listy źródeł:** Geoportal.gov.pl **nie publikuje warstwy AED** — jego WMS-y udostępniają PRG, adresy i ortofotomapę. CloudFerro to dostawca chmury IaaS/PaaS i danych obserwacji Ziemi; w publicznych materiałach **nie ma zbioru ani WMS z AED**. Oba źródła mogą być przydatne jako referencja adresowa lub podkład, ale nie jako źródło rekordów AED.
+**Korekta wobec listy źródeł:** Geoportal.gov.pl **nie publikuje niezależnego rejestru AED**, ale hostuje warstwę WMS `Defibrylatory` zasilaną danymi OSM (endpoint `/wss/ext/OSM/Defibrylatory`). To wizualizacja OSM, nie drugi zbiór danych. CloudFerro to dostawca chmury IaaS/PaaS i danych obserwacji Ziemi; w publicznych materiałach **nie ma zbioru ani WMS z AED**. Oba źródła mogą być przydatne jako referencja adresowa lub podkład, ale nie jako źródło rekordów AED.
 
 ### 1.2 Cztery różne światy formatów lokalnych
 
@@ -99,7 +99,7 @@ Dlatego model musi rozróżniać **„brak danych”** od **„dane negatywne”
 
 1. OpenAEDMap / Mapa AED (aed.openstreetmap.org.pl → openaedmap.org)
 2. OpenStreetMap (Overpass API, OSM API, Taginfo)
-3. Geoportal.gov.pl (GUGiK) — sprawdzony: **brak warstwy AED**; WMS referencyjny (PRG, adresy, ortofoto)
+3. Geoportal.gov.pl (GUGiK) — sprawdzony: **tylko warstwa WMS `Defibrylatory` z danymi OSM**, bez niezależnego rejestru; WMS referencyjny (PRG, adresy, ortofoto)
 4. CloudFerro WMS — sprawdzony: **brak publicznego WMS/AED**; hosting OpenAEDMap, nie źródło
 5. SOS DAE (sosdae.com)
 6. Ratuj z Sercem (ratujzsercem.pl)
@@ -126,7 +126,7 @@ Dlatego model musi rozróżniać **„brak danych”** od **„dane negatywne”
 ### 2.3 Ograniczenia
 
 - **Overpass API był niestabilny w środowisku badawczym** (timeouty). Zamiast tego użyto eksportu krajowego OpenAEDMap (`PL.geojson`, 18 298 features) i statystyk Taginfo (18 321 rekordów OSM w PL). Liczby są spójne; ewentualny własny import PBF/Overpass należy potwierdzić w środowisku produkcyjnym.
-- **Geoportal/CloudFerro:** w publicznym katalogu nie znaleziono warstwy AED, a część endpointów WMS zwraca `401`. Nie ma czego mapować; Geoportal pozostaje źródłem referencyjnym adresów/TERYT.
+- **Geoportal/CloudFerro:** w publicznym katalogu nie znaleziono niezależnej warstwy AED. Geoportal hostuje jednak warstwę WMS `Defibrylatory` z danymi OSM (`/wss/ext/OSM/Defibrylatory`), która nie daje eksportu. Część endpointów WMS zwraca `401`. Geoportal pozostaje źródłem referencyjnym adresów/TERYT.
 - **Aplikacje mobilne:** audyt obejmował 47 testów HTTP; ocena dotyczy dostępności publicznych endpointów, nie pełnej funkcjonalności aplikacji po zalogowaniu.
 - **Rejestry rządowe:** KSRG jest PDF-em bez adresów, RPWDL wymaga reCAPTCHA/Keycloak, RSPO — Basic auth na wniosek, NFZ jest publiczne. Żaden nie zawiera pola AED; ustalenia potwierdzone realnymi zapytaniami, ale dostępy do RPWDL/RSPO pozostają ograniczone.
 
@@ -138,7 +138,7 @@ Dlatego model musi rozróżniać **„brak danych”** od **„dane negatywne”
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `osm` | OpenStreetMap | OSM Foundation / społeczność | API, Overpass | JSON, XML, PBF | nie | ODbL 1.0 | ciągła | tak | community |
 | `openaedmap` | OpenAEDMap | OpenAEDMap / OSM PL | MVT, REST node API | MVT, JSON | nie | ODbL 1.0 | ciągła (pochodna OSM) | tak | derived/aggregator |
-| `geoportal_wms` | Geoportal.gov.pl — WMS referencyjny (PRG, adresy, ortofoto) | GUGiK | WMS | XML/GML/PNG | nie | otwarte / bez opłat (metadane WMS) | zależna od warstwy | **nie** — brak warstwy AED | reference |
+| `geoportal_wms` | Geoportal.gov.pl — WMS referencyjny (PRG, adresy, ortofoto) + warstwa OSM `Defibrylatory` | GUGiK | WMS | XML/GML/PNG | nie | otwarte / bez opłat (metadane WMS) | zależna od warstwy | **częściowo** — tylko OSM, bez eksportu | reference |
 | `cloudferro_wms` | CloudFerro / CREODIAS | CloudFerro | chmura IaaS/PaaS, dane EO | — | — | zależna od zbioru | — | **nie** — brak publicznego AED | not_a_source |
 | `przemysl` | Otwarte Dane Przemyśl | Straż Miejska w Przemyślu | REST/OpenAPI | JSON, CSV, GeoJSON | nie | CC BY 4.0 (mirror: CC0) | deklaracja ciągła; plik 2024-11-05 | tak | official_local |
 | `krosno` | Defibrylatory w Krośnie | Miasto Krosno (dane.gov.pl) | plik CSV | CSV | nie | CC0 1.0 | jednorazowo 2024 | tak | official_local |
@@ -276,11 +276,12 @@ Dlatego model musi rozróżniać **„brak danych”** od **„dane negatywne”
 
 ### 4.2 Geoportal.gov.pl i CloudFerro — korekta założenia
 
-**Najważniejszy wniosek:** żadne z tych źródeł nie publikuje dziś warstwy AED.
+**Najważniejszy wniosek:** żadne z tych źródeł nie publikuje dziś niezależnego rejestru AED. Geoportal hostuje tylko wizualizację OSM.
 
 #### Geoportal.gov.pl (GUGiK)
 
-- W publicznym katalogu WMS/WMTS Geoportalu **nie znaleziono warstwy AED**. Przeszukanie `GetCapabilities` usługi PRG (52 warstwy) nie wykazało nazw zawierających `defibril` ani `aed`; część endpointów WMS zwraca `401`, więc brak warstwy jest bardzo prawdopodobny, ale nie potwierdzony w 100%. **Status: Verified dla braku w zbadanym katalogu; NOT VERIFIED dla absolutnej negacji.**
+- W publicznym katalogu WMS/WMTS Geoportalu **nie znaleziono niezależnej warstwy AED**. Przeszukanie `GetCapabilities` usługi PRG (52 warstwy) nie wykazało nazw zawierających `defibril` ani `aed`; część endpointów WMS zwraca `401`. **Status: Verified dla braku niezależnego rejestru; NOT VERIFIED dla absolutnej negacji.**
+- **Korekta 2026-11-21:** istnieje warstwa `https://mapy.geoportal.gov.pl/wss/ext/OSM/Defibrylatory?service=WMS&request=GetCapabilities`. `GetMap` zwraca PNG, ale `GetFeatureInfo` nie dał danych, a `service=WFS` jest wyłączone. Ścieżka `/wss/ext/OSM/` wskazuje, że to dane OSM, nie rejestr GUGiK. Szczegóły: [`research/raw/voivodeships/geoportal-osm-wms.md`](./research/raw/voivodeships/geoportal-osm-wms.md).
 - Geoportal udostępnia natomiast:
   - **PRG** — granice państwa, województw, powiatów, gmin, miast, jednostek ewidencyjnych,
   - **Krajową Integrację Numeracji Adresowej** — punkty adresowe i ulice,
@@ -515,7 +516,7 @@ Legenda: ✅ dostępne bezpośrednio, ⚠️ częściowe/pochodne, ❌ brak, —
 | zdjęcie | ⚠️ 11,9% | ⚠️ | ✅ 100% | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | licencja | ✅ ODbL | ✅ ODbL | ✅ CC BY 4.0 | ✅ CC0 | ✅ CC BY 4.0 | ✅ CC BY 4.0 | ⚠️ | ⚠️ regulamin | ⚠️ regulamin |
 
-**Kolumny Geoportal i CloudFerro zostały usunięte**, bo nie mają warstwy AED (patrz §4.2). Geoportal może uzupełnić adres i TERYT, ale nie jest źródłem rekordu AED.
+**Kolumny Geoportal i CloudFerro zostały usunięte**, bo nie mają niezależnej warstwy AED (patrz §4.2). Geoportal hostuje tylko warstwę WMS z danymi OSM; może uzupełnić adres i TERYT, ale nie jest źródłem rekordu AED.
 
 **Wniosek:** wspólny schemat musi mieć **pola opcjonalne** i **poziom pewności**. Nie wolno wymagać od każdego źródła tych samych danych.
 
@@ -1449,6 +1450,7 @@ license_id,attribution,updated_at,fetched_at
 | `research/raw/gov-registers.md` | KSRG/OSP, RPWDL, NFZ, RSPO/SIO, OLiOC — gotowe |
 | `research/raw/aggregator-apps.md` | aplikacje i agregatory — gotowe |
 | `research/raw/municipal-open-data.md` | gminy i miasta — gotowe |
+| [`research/raw/voivodeships/`](./research/raw/voivodeships/) | audyt 2 765 JST: 16 raportów wojewódzkich, tabela krajowa, metoda, KML, Geoportal |
 
 ### 18.3 Reprodukcja
 
@@ -1471,6 +1473,13 @@ curl -sS "https://api.dane.gov.pl/1.4/datasets/4581/resources"
 # Warszawa (wymaga tokena)
 curl -X POST "https://dane.um.warszawa.pl/api/action/get_scb_lokalizacja_defibrylatorow" \
   -H "Authorization: $TOKEN" -H "Content-Type: application/json" -d '{}'
+
+# Audyt JST
+python3 /home/zdziszkee/.jcode/scratch/scan_jst.py --csv /home/zdziszkee/.jcode/scratch/jst_units.csv
+python3 /home/zdziszkee/.jcode/scratch/refine_hits.py
+python3 /home/zdziszkee/.jcode/scratch/prepare_lanes2.py
+python3 /home/zdziszkee/.jcode/scratch/audit_content.py
+python3 /home/zdziszkee/.jcode/scratch/scan_top_maps.py
 ```
 
 ### 18.4 Changelog
@@ -1479,6 +1488,162 @@ curl -X POST "https://dane.um.warszawa.pl/api/action/get_scb_lokalizacja_defibry
 | --- | --- | --- |
 | 0.1 | 2026-11-21 | pierwszy draft: inwentarz, model kanoniczny, DDL, kontrakt eksportu |
 | 1.0 | 2026-11-21 | integracja wyników 5 lane'ów: OSM/OpenAEDMap, rejestry, aplikacje, gminy; korekta Geoportal/CloudFerro; macierz pokrycia; decyzje licencyjne |
+| 1.1 | 2026-11-21 | audyt 2 765 JST: 10 lokalnych źródeł A, 5 B+, 44 B, 9 B-; 16 raportów wojewódzkich; KML i Geoportal WMS; korekta Geoportal |
+
+
+## 19. Audyt rejestrów JST w Polsce (2 765 jednostek)
+
+Ta sekcja jest uzupełnieniem raportu o pytanie, którego nie obejmował pierwotny research: **czy każda polska gmina, miasto, powiat i województwo prowadzi publiczny rejestr AED**. Nie jest to lista wszystkich AED w Polsce. To lista miejsc, w których taki rejestr istnieje, oraz wzorców technologicznych, które można wykorzystać do harvestingu.
+
+Pełna metoda, liczby i ograniczenia: [`research/raw/voivodeships/national-scan-method.md`](./research/raw/voivodeships/national-scan-method.md). Tabela źródeł: [`research/raw/voivodeships/national-registries.md`](./research/raw/voivodeships/national-registries.md) i [`national-registries.csv`](./research/raw/voivodeships/national-registries.csv). Raporty 16 województw: [`research/raw/voivodeships/`](./research/raw/voivodeships/).
+
+### 19.1. Metoda i pokrycie
+
+Listę jednostek zbudowano z Wikidata: 2 765 jednostek z Polski, które mają stronę internetową (`P856`) i typ JST. W tym:
+
+| Kategoria | Liczba |
+| --- | ---: |
+| gminy wiejskie | 1 418 |
+| gminy miejsko-wiejskie | 713 |
+| powiaty | 314 |
+| gminy miejskie | 232 |
+| miasta na prawach powiatu | 66 |
+| województwa | 16 |
+| `gmina` bez podtypu | 6 |
+| **Razem** | **2 765** |
+
+Pokrycie: 314/314 powiatów, 16/16 województw, 66/66 miast na prawach powiatu, około 95,6% gmin. Brakuje około 108 gmin, które nie mają strony w Wikidata albo nie mają jej oznaczonej. To jedyna luka pokrycia i wymaga uzupełnienia kluczem TERYT + BIP powiatu.
+
+Skan był prowadzony skryptem `scan_jst.py`: robots.txt, timeout 4 s, limit 1,5 MB, 64 wątki, priorytet województw, miast i powiatów. Pobierano stronę główną, sitemap, wyszukiwarkę gminną i linki zawierające `defibryl`, `AED` lub `defibrylator`.
+
+| Metryka | Liczba |
+| --- | ---: |
+| jednostki ze stroną | 2 765 |
+| jednostki z co najmniej jednym trafieniem | 947 |
+| jednostki bez trafienia | 1 818 |
+| jednostki z `score >= 5` | 101 |
+| jednostki z `registry_hint = 1` | 173 |
+
+Drugi przebieg (`refine_hits.py`) i scoring (`prepare_lanes2.py`) dały 16 plików kandydatów, po jednym na województwo. Następnie 16 agentów zweryfikowało priorytetowe jednostki, urząd marszałkowski i miasto wojewódzkie, zapisując raport i CSV dla każdego województwa.
+
+**Ważne:** etykiety województw w Wikidata są zaszumione. Przykład: Choroszcz (powiat białostocki) jest w surowym pliku oznaczony jako `zachodniopomorskie`. W tabeli zbiorczej jednostki są grupowane po faktycznym województwie, nie po etykiecie z pliku. To nie zmienia pokrycia, ale może mylić w plikach lane'ów.
+
+### 19.2. Klasa A: dane maszynowe z geometrią
+
+W całym kraju znaleziono **10 lokalnych źródeł klasy A** i jedno źródło krajowe. Klasa A oznacza format maszynowy z geometrią, nie licencję otwartą. Licencja jest osobną kolumną.
+
+| Źródło | Województwo | Format | Punkty | Licencja | Uwagi |
+| --- | --- | --- | ---: | --- | --- |
+| **Zielona Góra** | lubuskie | KML (Google My Maps) | **165** | brak, ToS Google | `mid=1WXrqKMAgKA_kzG5aF6bMiXpaFVA`; 165/165 ze współrzędnymi, 93/165 z opisem. |
+| **Łódź** | łódzkie | KML (Google My Maps) | **136** | brak, ToS Google | `mid=1FMKFbebKJPYqD4C87pXWPqNjEHuEswE`; `name` = `defibrylator - <adres>`, `description` = dostęp. |
+| **Olsztyn** | warmińsko-mazurskie | KML (Google My Maps) | **43** | brak, ToS Google | `mid=1J5zJj9kL49uq8799g5qNgfl21NoztwzK`; lista HTML ma 54 pozycje, KML 43 punkty. Agent zaklasyfikował B z powodu licencji; format jest A. |
+| **Bełchatów** | łódzkie | KML (Google My Maps) | **32** | brak, ToS Google | `mid=171VXaQTmWbIPbtUvHfuzwQredJE3krA`; nazwa = obiekt + ulica. |
+| **Pawłowice** | śląskie | KML (Google My Maps) | **12** | brak, ToS Google | `mid=1DSs_ESjkEU6AaxZjgpLgwtk5tlG11gc`; nazwa + adres w `description`; 7 OSP. |
+| **Tczew** | pomorskie | KML (Google My Maps) | **12** | brak, ToS Google | `mid=1FJwYx26MGn5rWzS6mN2GJN_OZvy-EzY`; nazwa + współrzędne, bez opisu. |
+| **Warszawa** | mazowieckie | JSON API | brak danych bez tokena | **CC BY 4.0** | `POST https://dane.um.warszawa.pl/api/action/get_scb_lokalizacja_defibrylatorow`; bez tokena 403. |
+| **Marki** | mazowieckie | CSV + XLSX | **8** | **CC BY 4.0** | CSV wadliwie zacytowany; nagłówek deklaruje `lon,lat`, dane są `lat,lon`; jeden rekord poza Markami. |
+| **Przemyśl** | podkarpackie | GeoJSON/JSON/CSV/GML | **21** | **CC0 1.0** | Najbogatsze pola w kraju; API SOD. |
+| **Krosno** | podkarpackie | CSV | **21** | **CC0 1.0** | Spacje wiodące w nazwach pól; brak operatora. |
+| **OpenAEDMap / OSM** | cała Polska | GeoJSON + MVT + JSON node | **18 299** | **ODbL 1.0** | Jedyny pełny, otwarty zbiór krajowy. Pokrycie nierówne, adresy słabe. |
+
+Łącznie sześć map KML daje **400 punktów** (165 + 136 + 43 + 32 + 12 + 12 = 400) z współrzędnymi, ale bez licencji i bez daty. To największy lokalny zbiór geometrii poza OSM.
+
+### 19.3. Klasa B+: HTML/PDF z współrzędnymi
+
+Pięć źródeł ma współrzędne w HTML lub PDF i nadaje się do stosunkowo prostego parsowania. To najlepszy materiał do podniesienia do klasy A.
+
+| Źródło | Województwo | Punkty | Pola | Uwagi |
+| --- | --- | ---: | --- | --- |
+| **Sława** | lubuskie | **13** | `Lp.`, miejscowość, obiekt, adres, dostępność, współrzędne, uwagi | 13/13 ze współrzędnymi; aktualizacja 2026-09-02; część AED tylko dla OSP/WOPR/RWS. |
+| **Manowo** | zachodniopomorskie | **8** | ID, adres, obiekt, współrzędne | 8 punktów GM#1-GM#8; współrzędne w formacie `(lat, lon)`. |
+| **Tarnów Opolski** | opolskie | **10 urządzeń / 9 lokalizacji** | miejsce, adres, GPS, telefon, dostępność, model, tryb pediatryczny, opiekun | Program OSP JRS Nakło; 2 urządzenia w jednej lokalizacji. |
+| **Suszec** | śląskie | **5** | współrzędne, mobilność, adres/opis, telefon, dostęp, godziny | 4 AED w samochodach OSP + 1 kapsuła 24/7 w Rudziczce. |
+| **Czarne** | pomorskie | **20** | lp, obiekt, adres, współrzędne WGS84, umieszczenie, dostępność | PDF z tabelą; najlepszy schemat w regionie, wymaga ekstrakcji. |
+
+### 19.4. Klasa B: oficjalne listy i mapy
+
+Klasy B jest 44, a B- 9. Nie ma sensu wypisywać wszystkich w tym miejscu. Pełna tabela jest w [`national-registries.md`](./research/raw/voivodeships/national-registries.md). Największe i najlepiej opisane:
+
+| Źródło | Województwo | Punkty | Co zawiera |
+| --- | --- | ---: | --- |
+| **Bydgoszcz** | kujawsko-pomorskie | 114 adresów | KML bez geometrii, `name` = adres, `ExtendedData` = `NR`, `INSTYTUCJA`. |
+| **Kraków** | małopolskie | 58 w tabeli / 74 deklarowane | Tabela HTML z adresami, paginacja 20/20/18, kolumna „Mapa” pusta. |
+| **Lublin** | lubelskie | 48 (46 unikalnych adresów) | HTML + PDF `aed_lublin_stan_17.03.2026.pdf`; piętro/wejście. |
+| **powiat szamotulski** | wielkopolskie | 47 | DOCX w BIP; adresy i uwagi o dostępie. |
+| **Toruń** | kujawsko-pomorskie | 46 | HTML, nazwa + adres; link do OpenAEDMap. |
+| **powiat starogardzki** | pomorskie | 28 | Sieć PAD, 28 adresów. |
+| **Żukowo** | pomorskie | 27 | HTML, nazwa obiektu/miejscowości, część adresów. |
+| **Gdańsk** | pomorskie | 26 | HTML, lista 26 lokalizacji z 2020 r.; wymaga weryfikacji. |
+| **Słupsk** | pomorskie | 25 | HTML, instytucja + adres + lokalizacja AED + dostępność. |
+| **Polkowice** | dolnośląskie | 21 miejsc / 23 urządzenia | Obiekt, częściowy adres, operator, liczba. |
+| **Przemęt** | wielkopolskie | 21 wpisów / 20 lokalizacji | Lista 24/7, adresy, częściowo linki Google Maps. |
+| **Śmigiel** | wielkopolskie | 17 | Tabela: adres, lokalizacja, dostępność, operator. |
+| **Pruszcz Gdański** | pomorskie | 15 | 15 adresów + object ID e-mapa. |
+| **Kołbaskowo** | zachodniopomorskie | 15 | 14 stacjonarnych + 1 mobilny; tabela pokazuje część. |
+| **Piła** | wielkopolskie | 15 | Lista adresów; KML to 97 polygonów zasięgu, nie punkty AED. |
+| **Strzegom** | dolnośląskie | 15 miejsc / 19 urządzeń | Wykaz z 2024-09-27, OSP i pojazdy. |
+| **Bieruń** | śląskie | 14 | Tabela adres + dokładne umiejscowienie. |
+| **Lwówek** | wielkopolskie | 14 | 14 lokalizacji. |
+| **Kobierzyce** | dolnośląskie | 13 | 13 adresów, 24/7. |
+| **Rzekuń** | mazowieckie | 13 | Tylko nazwy obiektów. |
+| **Suchy Las** | wielkopolskie | 12 | 12 lokalizacji. |
+| **Gorzyce** | śląskie | 12 | 12 sołectw/obiektów. |
+| **Czaplinek** | zachodniopomorskie | 11 | Wykaz gminny. |
+| **Nieporęt** | mazowieckie | 10 | PDF: 10 lokalizacji, adresy, telefony, godziny. |
+| **Łomża** | podlaskie | 10 | 10 lokalizacji w oficjalnych artykułach. |
+
+Reszta klasy B to listy od 2 do 9 punktów, m.in. Ostróda (6), Lubawa (5), Imielin (5), Koszęcin (2), Biskupiec (2), Barlinek (8), Połczyn-Zdrój (8), Świdwin (5), Nowa Sól (6), Świdnica (8), Koźmin Wielkopolski (3), Dopiewo (11, tylko JPG), Dziadowa Kłoda (5+), Lubin (3+).
+
+### 19.5. Czego nie ma
+
+To równie ważne jak lista znalezionych rejestrów.
+
+- **Żaden urząd marszałkowski nie prowadzi publicznego rejestru AED.** Sprawdzono 16/16 województw. Są tylko newsy, uchwały, szkolenia i zamówienia.
+- **Największe miasta często nie mają rejestru.** Poznań, Wrocław, Katowice, Kielce, Białystok, Szczecin, Gorzów Wielkopolski, Opole, Rzeszów i Gdynia nie mają publicznej listy lub mapy AED. Bydgoszcz ma listę adresową, ale nie ma kompletnego API.
+- **dane.gov.pl ma tylko 4 zbiory AED:** Krosno, Przemyśl, Marki i Warszawa. Nie ma zbioru wojewódzkiego ani centralnego.
+- **Geoportal nie jest źródłem AED.** Hostuje tylko warstwę WMS `Defibrylatory` zasilaną danymi OSM. Szczegóły i korekta: [`research/raw/voivodeships/geoportal-osm-wms.md`](./research/raw/voivodeships/geoportal-osm-wms.md).
+- **Brakuje około 108 gmin** bez strony w Wikidata. To jedyna luka pokrycia i wymaga uzupełnienia kluczem TERYT + BIP powiatu.
+
+### 19.6. Wzorce technologiczne i mapowanie na schemat
+
+| Wzorzec | Liczba miejsc | Co daje | Ryzyko | Mapowanie |
+| --- | ---: | --- | --- | --- |
+| Google My Maps KML | 6 punktowych + 1 lista bez geometrii | punkty, nazwy, często opis | brak licencji, endpoint nieudokumentowany, brak daty | `source.kind='kml'`, `source_record.external_id='{mid}:{name}'`, `aed.lat/lon` z `Point/coordinates` |
+| HTML/PDF z współrzędnymi | 5 | punkty, adresy, dostępność | ręczny parser lub ekstrakcja PDF, brak licencji | `source.kind='html_table'`/`'pdf'`, `field_provenance` dla `lat/lon` = `scraped_html`/`pdf_table` |
+| HTML lista adresów | 40+ | adresy, obiekty | geokodowanie, brak współrzędnych | `source.kind='html_list'`, `facility.address`, `aed.lat/lon = NULL` do czasu geokodowania |
+| PDF/DOCX/PNG/JPG | 8+ | adresy, czasem dostępność | OCR lub ręczne przepisanie | `source.kind='pdf'/'docx'/'image'`, `confidence` obniżone o 0.2 |
+| e-mapa.net | 25 stron z AED, 215 instancji w skanie | mapa, object ID | dane ładowane JS, brak prostego eksportu | `source.kind='html_embed'`, `source_record.external_id='poi.object.{id}'` |
+| WMS Geoportal | 1 warstwa | wizualizacja OSM | brak WFS, brak eksportu | nie importować jako źródła rekordu; tylko overlay |
+
+Zasady dla nowych źródeł:
+
+1. **KML bez geometrii** (Bydgoszcz) traktuj jako listę adresów, nie jako punkty. `aed.lat/lon = NULL`.
+2. **KML z polygonami** (Piła) traktuj jako zasięg, nie jako AED. Nie twórz z tego rekordów `aed`.
+3. **HTML z współrzędnymi** (Sława, Manowo, Tarnów Opolski, Suszec) i **PDF z współrzędnymi** (Czarne) parsuj i zapisuj `field_provenance` dla każdego pola.
+4. **PDF/DOCX/PNG/JPG** wymagają transkrypcji. Oznacz `confidence` niżej i dodaj `observation.notes` z informacją o metodzie.
+5. **Brak daty** oznacza `observation.observed_at = NULL`. Nie podstawiaj daty pobrania jako daty obserwacji.
+6. **Brak licencji** oznacza `source.license = 'unknown'` i osobną decyzję prawną. Nie zakładaj, że dane publiczne są wolne.
+
+### 19.7. Rekomendacje wdrożeniowe
+
+1. **Importuj najpierw klasę A:** OpenAEDMap/OSM jako bazę, potem Warszawa, Marki, Przemyśl, Krosno, Łódź, Zielona Góra, Bełchatów, Pawłowice, Olsztyn, Tczew.
+2. **B+ podnieś do A** parserem HTML/PDF: Sława, Manowo, Tarnów Opolski, Suszec, Czarne.
+3. **B traktuj jako weryfikację**, nie jako źródło masowe. Geokoduj adresy i oznacz `confidence` niżej.
+4. **Nie importuj B- bez weryfikacji:** Kcynia, Żuromin, Rzekuń, UMWL, Dziadowa Kłoda, Nowa Sól, Świdnica, Dopiewo, Koszęcin.
+5. **Wystąp o licencje** do gmin z A/B+. Wszystkie mają „wszystkie prawa zastrzeżone” albo brak deklaracji. Potrzebna jest zgoda na redystrybucję.
+6. **Uzupełnij 108 gmin** bez strony w Wikidata. Rekomendowany klucz: TERYT + BIP powiatu. To jedyna luka pokrycia.
+7. **Nie buduj na Geoportal WMS.** Użyj OpenAEDMap bezpośrednio.
+
+### 19.8. Pliki dowodowe
+
+| Plik | Zawartość |
+| --- | --- |
+| [`research/raw/voivodeships/national-registries.md`](./research/raw/voivodeships/national-registries.md) | tabela 69 źródeł A/B+/B/B- |
+| [`research/raw/voivodeships/national-registries.csv`](./research/raw/voivodeships/national-registries.csv) | ta sama tabela w CSV |
+| [`research/raw/voivodeships/national-scan-method.md`](./research/raw/voivodeships/national-scan-method.md) | metoda, pokrycie, ograniczenia, reprodukcja |
+| [`research/raw/voivodeships/google-my-maps-kml.md`](./research/raw/voivodeships/google-my-maps-kml.md) | KML, pułapki, parsowanie |
+| [`research/raw/voivodeships/geoportal-osm-wms.md`](./research/raw/voivodeships/geoportal-osm-wms.md) | korekta Geoportal |
+| [`research/raw/voivodeships/`](./research/raw/voivodeships/) | 16 raportów wojewódzkich `.md` i `.csv` |
 
 ---
 

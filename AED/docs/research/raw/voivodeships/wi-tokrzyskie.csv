@@ -1,0 +1,42 @@
+voivodeship,unit,qid,type,score,registry_hint,class,url,aed_points,fields,license,format,evidence
+świętokrzyskie,Sędziszów,Q554663,gmina miejsko-wiejska,9,true,C,https://sedziszow.pl/zdrowie/defibrylator-aed-w-gminie-sedziszow/,1,"lokalizacja, dostęp 24/7, opis",brak jawnej,HTML,1 AED na budynku Urzędu Miejskiego; brak listy/mapy
+świętokrzyskie,Klimontów,Q567380,gmina miejsko-wiejska,4,true,C,https://klimontow.pl/?s=defibrylator,1,"OSP, pojazd",brak jawnej,HTML,news: nowe auto w OSP Klimontów (2023-02-01)
+świętokrzyskie,Krasocin,Q555583,gmina wiejska,4,false,C,https://www.krasocin.com.pl/index.php/dla-mieszkancow/zycie-codzienne/wiadomosci-gminne/2467-warsztaty-pierwszej-pomocy-i-zakup-defibrylatora-aed-w-sulkowie,1,"lokalizacja (Dom Ludowy w Sułkowie), opis",brak jawnej,HTML,warsztaty i zakup 1 AED
+świętokrzyskie,Kije,Q553284,gmina wiejska,3,true,C,https://kije.pl/?s=defibrylator,1,OSP,brak jawnej,HTML,news: Z serca dla serca - OSP Kije nadaje rytm
+świętokrzyskie,Słupia,Q554031,gmina wiejska,3,true,D,https://slupia.pl/?s=defibrylator,0,-,-,HTML,brak wyników wyszukiwania
+świętokrzyskie,Opatowiec,Q553741,gmina miejsko-wiejska,1,true,D,http://old.opatowiec.pl?s=defibrylator,0,-,-,HTML,"stary serwis, fraza negatywna"
+świętokrzyskie,Skarżysko-Kamienna,Q644002,gmina miejska,0,false,D,https://um.skarzysko.pl/?s=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Starachowice,Q751094,gmina miejska,0,false,D,https://starachowice.eu/cms/search/index?q=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Mirzec,Q553676,gmina wiejska,0,false,D,https://mirzec.pl/?s=defibrylator,0,-,-,HTML,"7 wyników, brak treści AED"
+świętokrzyskie,Moskorzew,Q553685,gmina wiejska,0,false,D,https://moskorzew.pl/?s=defibrylator,0,-,-,HTML,"wyniki OSP, brak treści AED"
+świętokrzyskie,powiat jędrzejowski,Q1335675,powiat,0,false,D,https://jedrzejow.pl?s=defibrylator,0,-,-,HTML,nie znaleziono
+świętokrzyskie,powiat opatowski,Q1144129,powiat,0,false,D,https://www.opatow.pl/?s=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,powiat pińczowski,Q119729,powiat,0,false,C,https://powiat.pinczow.pl/?s=defibrylator,0,-,brak jawnej,HTML,"news o nowoczesnym sprzęcie (luty 2026), wzmianka"
+świętokrzyskie,powiat włoszczowski,Q1335517,powiat,0,false,D,https://powiat-wloszczowa.pl/?s=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Bodzentyn,Q553715,gmina miejsko-wiejska,-1,false,D,https://www.bodzentyn.ugm.pl/index.php?searchword=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Jędrzejów,Q554427,gmina miejsko-wiejska,-1,false,D,https://jedrzejow.eu/?s=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Końskie,Q555607,gmina miejsko-wiejska,-1,false,C,https://umkonskie.pl/?s=defibrylator,0,-,brak jawnej,HTML,wzmianka o pokazach pierwszej pomocy z AED
+świętokrzyskie,Nowa Słupia,Q554605,gmina miejsko-wiejska,-1,false,D,https://nowaslupia.pl/?s=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Nowy Korczyn,Q555599,gmina miejsko-wiejska,-1,false,D,https://ug.nowykorczyn.pl/?s=defibrylator,0,-,-,HTML,brak wyników treści
+świętokrzyskie,Pacanów,Q553728,gmina miejsko-wiejska,-1,false,D,https://pacanow.pl/pl/?s=defibrylator,0,-,-,HTML,brak wyników treści
+świętokrzyskie,Pińczów,Q553744,gmina miejsko-wiejska,-1,false,D,https://pinczow.com.pl/?s=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Stopnica,Q553451,gmina miejsko-wiejska,-1,false,D,https://umig.stopnica.pl/?s=defibrylator,0,-,-,HTML,brak wyników treści
+świętokrzyskie,Stąporków,Q553633,gmina miejsko-wiejska,-1,false,D,https://staporkow.pl/wyszukiwarka/?q=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Szydłów,Q553427,gmina miejsko-wiejska,-1,false,D,https://www.szydlow.pl/?s=defibrylator,0,-,-,HTML,brak wyników treści
+świętokrzyskie,Wąchock,Q555550,gmina miejsko-wiejska,-1,false,D,https://wachock.pl/szukaj/?szukaj=defibrylator,0,-,-,HTML,"wynik o strażakach, brak AED w treści"
+świętokrzyskie,Bliżyn,Q555596,gmina wiejska,-1,false,C,https://www.blizyn.pl/szukajx?q=defibrylator,1+,"OSP, wyposażenie",brak jawnej,HTML,news OSP Sorbin: elektrody AED
+świętokrzyskie,Baćkowice,Q554642,gmina wiejska,-2,false,C,https://www.backowice-gmina.pl/index.php/component/finder/search?q=defibrylator,0,-,brak jawnej,HTML,"ogłoszenie o zamówieniu na sprzęt, wzmianka"
+świętokrzyskie,Czarnocin,Q554687,gmina wiejska,-2,false,D,https://czarnocin.com.pl/?s=defibrylator,0,-,-,HTML,brak wyników treści
+świętokrzyskie,Imielno,Q554459,gmina wiejska,-2,false,D,https://imielno.pl/?s=defibrylator,0,-,-,HTML,brak wyników treści
+świętokrzyskie,Lipnik,Q554054,gmina wiejska,-2,false,D,https://www.lipnik.pl/?s=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Nagłowice,Q553504,gmina wiejska,-2,false,D,https://www.wp.pl/?s=defibrylator,0,-,-,HTML,strona przekierowuje do wp.pl
+świętokrzyskie,Oksa,Q555587,gmina wiejska,-2,false,D,http://www.oksa.pl/?s=defibrylator,0,-,-,HTML,0 trafień
+świętokrzyskie,Sadowie,Q554581,gmina wiejska,-2,false,D,https://sadowie.com.pl/?s=defibrylator,0,-,-,HTML,"domena SEO, fałszywy alarm"
+świętokrzyskie,Secemin,Q553345,gmina wiejska,-2,false,C,https://www.secemin.pl/wyszukiwarka?szukaj=defibrylator,1,"ambulans, wyposażenie",brak jawnej,HTML,news: ambulans z defibrylatorem
+świętokrzyskie,Smyków,Q553610,gmina wiejska,-2,false,D,https://www.fortes.pl/?s=defibrylator,0,-,-,HTML,"strona ISP, fałszywy alarm"
+świętokrzyskie,Wojciechowice,Q553422,gmina wiejska,-2,false,D,http://wojciechowice.com.pl,0,-,-,HTML,0 trafień
+świętokrzyskie,Złota,Q553416,gmina wiejska,-2,false,D,https://gminazlota.pl/?s=defibrylator,0,-,-,HTML,brak wyników treści
+świętokrzyskie,Łoniów,Q554547,gmina wiejska,-2,false,D,https://loniow.pl/?s=defibrylator,0,-,-,HTML,brak wyników treści
+świętokrzyskie,Łączna,Q554005,gmina wiejska,-2,false,D,https://www.laczna.pl,0,-,-,HTML,0 trafień
+świętokrzyskie,Nowiny,Q553601,gmina wiejska,-3,false,D,https://www.nowiny.com.pl/?s=defibrylator,0,-,-,HTML,Nothing Found
+świętokrzyskie,Łagów,Q554124,gmina miejsko-wiejska,-4,false,D,https://lagow-gmina.pl/?s=defibrylator,0,-,-,HTML,Brak wyników wyszukiwania
