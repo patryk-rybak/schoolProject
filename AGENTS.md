@@ -60,6 +60,7 @@ Guidance for AI coding agents working in this repository. Keep this file current
 ## Agent Tooling
 
 - TanStack packages ship Agent Skills. `package.json#intent.skills` permits `@tanstack/*`, and the `intent-skills` block at the top of this file explains how to list and load them.
+- The local `/tanstack` skill wraps `intent list` and `intent load` so Jcode can pull version-matched Start, Router, Query, and Table guidance.
 - The shadcn skill is installed at `.claude/skills/shadcn` and is available in Jcode as `/shadcn`. It reads `components.json` and runs the shadcn CLI for project-aware work.
 - The shadcn MCP server is configured in `.jcode/mcp.json` and `.mcp.json` with `bunx --no-install --bun shadcn mcp`.
 - The MCP server is daemon-scoped and starts outside the project directory. Pass `registries: ["@shadcn"]` to MCP search and view calls; use the `/shadcn` skill when an operation needs project configuration.
