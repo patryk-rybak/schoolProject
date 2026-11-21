@@ -134,7 +134,7 @@ Fuseki, nginx) and looks frozen — let it finish.
 `mcod-local-celery` is the worker that runs asynchronous tasks, including the
 harvester XML validation in the admin panel and scheduled imports. Start it
 whenever you test the dane.gov.pl integration (see
-`AED/backend/gov-api/README.md`).
+`AED/README.md`).
 
 Check that nothing died:
 
