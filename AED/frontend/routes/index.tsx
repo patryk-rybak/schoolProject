@@ -30,7 +30,8 @@ function Home() {
 				<CardContent className="flex flex-col gap-4">
 					<div className="flex flex-wrap items-center justify-between gap-3">
 						<p className="text-muted-foreground text-sm">
-							Kliknij mapę w dowolnym miejscu, aby dodać AED („Dodaj AED tutaj”).
+							Kliknij mapę w dowolnym miejscu, aby dodać AED („Dodaj AED
+							tutaj”).
 						</p>
 						<div className="flex flex-wrap items-center gap-2">
 							<Button asChild={true} size="sm">

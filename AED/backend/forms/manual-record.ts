@@ -78,8 +78,11 @@ export interface ManualFieldError {
 export class ManualRecordError extends Error {
 	readonly issues: readonly ManualFieldError[];
 
-	constructor(issues: readonly ManualFieldError[]) {
-		super(issues.map((issue) => `${issue.field}: ${issue.message}`).join("; "));
+	constructor(issues: readonly ManualFieldError[], options?: ErrorOptions) {
+		super(
+			issues.map((issue) => `${issue.field}: ${issue.message}`).join("; "),
+			options,
+		);
 		this.name = "ManualRecordError";
 		this.issues = issues;
 	}
@@ -310,12 +313,15 @@ export function buildManualRecord(
 			attributes,
 		});
 	} catch (error) {
-		throw new ManualRecordError([
-			{
-				field: "record",
-				message: error instanceof Error ? error.message : String(error),
-			},
-		]);
+		throw new ManualRecordError(
+			[
+				{
+					field: "record",
+					message: error instanceof Error ? error.message : String(error),
+				},
+			],
+			{ cause: error },
+		);
 	}
 }
 
