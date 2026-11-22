@@ -63,6 +63,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							>
 								Źródła danych
 							</Link>
+							<Link
+								to="/materialy"
+								activeProps={{ className: "font-semibold underline" }}
+								className="text-muted-foreground hover:text-foreground"
+							>
+								Materiały
+							</Link>
+							<Link
+								to="/dokumentacja/wzorcowy-zakres-danych"
+								activeProps={{ className: "font-semibold underline" }}
+								className="text-muted-foreground hover:text-foreground"
+							>
+								Wzorcowy zakres
+							</Link>
 						</div>
 					</nav>
 				</header>

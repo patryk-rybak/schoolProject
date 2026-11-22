@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DodajAedRouteImport } from './routes/dodaj-aed'
+import { Route as MaterialyRouteImport } from './routes/materialy'
 import { Route as ApiPmtilesRouteImport } from './routes/api/pmtiles'
 import { Route as DataAedDotcsvRouteImport } from './routes/data/aed[.]csv'
 import { Route as DataAedDotgeojsonRouteImport } from './routes/data/aed[.]geojson'
+import { Route as DokumentacjaWzorcowyZakresDanychRouteImport } from './routes/dokumentacja/wzorcowy-zakres-danych'
 import { Route as HarvesterFeedDotmd5RouteImport } from './routes/harvester/feed[.]md5'
 import { Route as HarvesterFeedDotxmlRouteImport } from './routes/harvester/feed[.]xml'
 import { Route as ZrodlaIndexRouteImport } from './routes/zrodla/index'
@@ -28,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
 const DodajAedRoute = DodajAedRouteImport.update({
   id: '/dodaj-aed',
   path: '/dodaj-aed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaterialyRoute = MaterialyRouteImport.update({
+  id: '/materialy',
+  path: '/materialy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPmtilesRoute = ApiPmtilesRouteImport.update({
@@ -45,6 +52,12 @@ const DataAedDotgeojsonRoute = DataAedDotgeojsonRouteImport.update({
   path: '/data/aed.geojson',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DokumentacjaWzorcowyZakresDanychRoute =
+  DokumentacjaWzorcowyZakresDanychRouteImport.update({
+    id: '/dokumentacja/wzorcowy-zakres-danych',
+    path: '/dokumentacja/wzorcowy-zakres-danych',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HarvesterFeedDotmd5Route = HarvesterFeedDotmd5RouteImport.update({
   id: '/harvester/feed.md5',
   path: '/harvester/feed.md5',
@@ -74,9 +87,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
+  '/materialy': typeof MaterialyRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
+  '/dokumentacja/wzorcowy-zakres-danych': typeof DokumentacjaWzorcowyZakresDanychRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/zrodla/nowe': typeof ZrodlaNoweRoute
@@ -86,9 +101,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
+  '/materialy': typeof MaterialyRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
+  '/dokumentacja/wzorcowy-zakres-danych': typeof DokumentacjaWzorcowyZakresDanychRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/zrodla/nowe': typeof ZrodlaNoweRoute
@@ -99,9 +116,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
+  '/materialy': typeof MaterialyRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
+  '/dokumentacja/wzorcowy-zakres-danych': typeof DokumentacjaWzorcowyZakresDanychRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/zrodla/nowe': typeof ZrodlaNoweRoute
@@ -113,9 +132,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dodaj-aed'
+    | '/materialy'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
+    | '/dokumentacja/wzorcowy-zakres-danych'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
     | '/zrodla/nowe'
@@ -125,9 +146,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dodaj-aed'
+    | '/materialy'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
+    | '/dokumentacja/wzorcowy-zakres-danych'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
     | '/zrodla/nowe'
@@ -137,9 +160,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dodaj-aed'
+    | '/materialy'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
+    | '/dokumentacja/wzorcowy-zakres-danych'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
     | '/zrodla/nowe'
@@ -150,9 +175,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DodajAedRoute: typeof DodajAedRoute
+  MaterialyRoute: typeof MaterialyRoute
   ApiPmtilesRoute: typeof ApiPmtilesRoute
   DataAedDotcsvRoute: typeof DataAedDotcsvRoute
   DataAedDotgeojsonRoute: typeof DataAedDotgeojsonRoute
+  DokumentacjaWzorcowyZakresDanychRoute: typeof DokumentacjaWzorcowyZakresDanychRoute
   HarvesterFeedDotmd5Route: typeof HarvesterFeedDotmd5Route
   HarvesterFeedDotxmlRoute: typeof HarvesterFeedDotxmlRoute
   ZrodlaNoweRoute: typeof ZrodlaNoweRoute
@@ -176,6 +203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DodajAedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/materialy': {
+      id: '/materialy'
+      path: '/materialy'
+      fullPath: '/materialy'
+      preLoaderRoute: typeof MaterialyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/pmtiles': {
       id: '/api/pmtiles'
       path: '/api/pmtiles'
@@ -195,6 +229,13 @@ declare module '@tanstack/react-router' {
       path: '/data/aed.geojson'
       fullPath: '/data/aed.geojson'
       preLoaderRoute: typeof DataAedDotgeojsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dokumentacja/wzorcowy-zakres-danych': {
+      id: '/dokumentacja/wzorcowy-zakres-danych'
+      path: '/dokumentacja/wzorcowy-zakres-danych'
+      fullPath: '/dokumentacja/wzorcowy-zakres-danych'
+      preLoaderRoute: typeof DokumentacjaWzorcowyZakresDanychRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/harvester/feed.md5': {
@@ -238,9 +279,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DodajAedRoute: DodajAedRoute,
+  MaterialyRoute: MaterialyRoute,
   ApiPmtilesRoute: ApiPmtilesRoute,
   DataAedDotcsvRoute: DataAedDotcsvRoute,
   DataAedDotgeojsonRoute: DataAedDotgeojsonRoute,
+  DokumentacjaWzorcowyZakresDanychRoute: DokumentacjaWzorcowyZakresDanychRoute,
   HarvesterFeedDotmd5Route: HarvesterFeedDotmd5Route,
   HarvesterFeedDotxmlRoute: HarvesterFeedDotxmlRoute,
   ZrodlaNoweRoute: ZrodlaNoweRoute,

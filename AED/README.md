@@ -23,6 +23,22 @@ Minimalna aplikacja TanStack Start, która renderuje mapę Polski z MapLibre GL 
 17. [Deploy](#deploy)
 18. [AI Tooling](#ai-tooling)
 19. [Learn More](#learn-more)
+20. [Materiały konkursowe](#materiały-konkursowe)
+
+## Materiały konkursowe
+
+Gotowe materiały do zgłoszenia konkursowego znajdują się w `competition-assets/`.
+
+W uruchomionej aplikacji są one również dostępne przez klikalną stronę `/materialy` oraz dokumentację `/dokumentacja/wzorcowy-zakres-danych`.
+
+- `wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx`: wzorcowy zakres danych (5 arkuszy),
+- `logo/`: logo w formatach PNG, JPG i SVG (wersja monochromatyczna PNG),
+- `brand/brandbook.pdf` i `brand/dane-aed-razem-ksiega-znaku.pdf`: księga znaku (PDF),
+- `prezentacja/prezentacja.pdf` i `prezentacja/prezentacja.md`: prezentacja projektu w formacie PDF i jej źródło Markdown
+- `INSTRUKCJA-DLA-JURY.md`: instrukcja dla jury,
+- `screenshots/`: zrzuty ekranu aplikacji (logo, mapa, formularze).
+
+Materiały można odtworzyć poleceniem `bun scripts/generate-competition-assets.ts` (skrypt generuje XLSX, księgę znaku, JPG na podstawie PNG i prezentację PDF, a pozostałe pliki są przechowywane w repozytorium).
 
 ## Struktura repozytorium
 

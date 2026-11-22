@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" role="img" aria-label="Logo akcji Dane AED Razem">
+<rect width="1200" height="1200" fill="#0B1F3A"/>
+<circle cx="600" cy="520" r="340" fill="#FFFFFF"/>
+<path d="M600 290V750M370 520H830" stroke="#E63946" stroke-width="110" stroke-linecap="square"/>
+<text x="600" y="1010" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="72" font-weight="bold" fill="#FFFFFF">DANE AED RAZEM</text>
+</svg>
