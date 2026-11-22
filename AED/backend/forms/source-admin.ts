@@ -199,7 +199,7 @@ export async function previewSource(input: unknown): Promise<SourcePreview> {
 			`Nie udało się pobrać źródła: ${result.error ?? result.status}`,
 		);
 	}
-	const body = readFileSync(result.rawFile);
+	const body = readFileSync(resolve(rawDir, result.rawFile));
 	const text = new TextDecoder("utf-8").decode(body);
 	const parsedSource = parseRawSource(config, text, body);
 	const columns: string[] = [];
@@ -261,7 +261,7 @@ export async function importSource(
 			`Nie udało się pobrać źródła: ${result.error ?? result.status}`,
 		);
 	}
-	const body = readFileSync(result.rawFile);
+	const body = readFileSync(resolve(rawDir, result.rawFile));
 	const parsedSource = parseRawSource(
 		config,
 		new TextDecoder("utf-8").decode(body),

@@ -287,7 +287,11 @@ function NewSourcePage() {
 			connector: { family, parser },
 			parse: buildParse(),
 			records: { path: recordsPath() },
-			map: withMapping ? buildMap() : {},
+			map: withMapping
+				? buildMap()
+				: // Podgląd wymaga poprawnego configu, ale mapowanie wybieramy dopiero
+					// po jego wyniku. Schema wymaga co najmniej jednego pola.
+					{ name: { const: "" } },
 			validate:
 				withMapping && polandOnly
 					? { required: ["name"], coords: { bbox: [14, 49, 24.5, 55] } }
@@ -318,7 +322,8 @@ function NewSourcePage() {
 			const guess = (candidates: string[]): string => {
 				for (const candidate of candidates) {
 					const found = columns.find(
-						(column) => column.toLowerCase() === candidate,
+						(column) =>
+							column.toLowerCase().replace(/\s+/g, " ").trim() === candidate,
 					);
 					if (found) {
 						return found;
@@ -335,8 +340,27 @@ function NewSourcePage() {
 				address_text: guess(["address", "adres", "adres pełny", "lokalizacja"]),
 				description: guess(["description", "opis"]),
 			});
-			setLatColumn(guess(["lat", "latitude", "szerokosc", "szerokość"]));
-			setLonColumn(guess(["lon", "lng", "longitude", "dlugosc", "długość"]));
+			setLatColumn(
+				guess([
+					"lat",
+					"latitude",
+					"szerokosc",
+					"szerokość",
+					"szerokość geograficzna",
+					"szerokosc geograficzna",
+				]),
+			);
+			setLonColumn(
+				guess([
+					"lon",
+					"lng",
+					"longitude",
+					"dlugosc",
+					"długość",
+					"długość geograficzna",
+					"dlugosc geograficzna",
+				]),
+			);
 			setPairColumn(
 				guess(["coordinates", "wspolrzedne", "współrzędne", "lat,lon"]),
 			);
