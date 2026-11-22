@@ -43,17 +43,16 @@ afterEach(() => {
 });
 
 describe("datasources registry", () => {
-	test("loads 11 source configs from one file without errors", () => {
+	test("loads 5 source configs from one file without errors", () => {
 		const registry = loadSourceConfigsOrThrow({ force: true });
-		expect(registry.configs).toHaveLength(11);
+		expect(registry.configs).toHaveLength(5);
 		expect(registry.errors).toEqual([]);
-		expect(registry.byId.size).toBe(11);
-		expect(registry.summary.total).toBe(11);
-		expect(registry.summary.withCoordinates).toBe(11);
+		expect(registry.byId.size).toBe(5);
+		expect(registry.summary.total).toBe(5);
+		expect(registry.summary.withCoordinates).toBe(5);
 		expect(registry.summary.byParser["csv"]).toBe(2);
 		expect(registry.summary.byParser["json"]).toBe(2);
 		expect(registry.summary.byParser["geojson"]).toBe(1);
-		expect(registry.summary.byParser["kml"]).toBe(6);
 	});
 
 	test("resolves the canonical file by default", () => {
@@ -67,7 +66,7 @@ describe("datasources registry", () => {
 		process.env[DATASOURCES_CONFIG_ENV] = path;
 		const registry = loadSourceConfigs({ force: true });
 		expect(registry.configPath).toBe(path);
-		expect(registry.configs).toHaveLength(11);
+		expect(registry.configs).toHaveLength(5);
 	});
 
 	test("the checked-in registry validates against the generated JSON Schema", () => {
@@ -79,7 +78,7 @@ describe("datasources registry", () => {
 		if (!ok) {
 			throw new Error(JSON.stringify(validate.errors, null, 2));
 		}
-		expect((value["sources"] as unknown[]).length).toBe(11);
+		expect((value["sources"] as unknown[]).length).toBe(5);
 	});
 
 	test("exposes configs by id and filters disabled ones", () => {
@@ -98,7 +97,7 @@ describe("datasources registry", () => {
 		const second = loadSourceConfigs({ force: true });
 		expect(second.summary).toEqual(first.summary);
 		expect(second.loadedAt >= first.loadedAt).toBe(true);
-		expect(getSourceConfigSummary().total).toBe(11);
+		expect(getSourceConfigSummary().total).toBe(5);
 	});
 
 	test("reports file read, JSON parse and Zod errors without throwing", () => {
@@ -166,6 +165,8 @@ describe("datasources registry", () => {
 		expect(registry.errors.map((error) => error.issues[0]?.code)).toContain(
 			"duplicate_id",
 		);
-		expect(registry.errors[0]?.issues[0]?.path).toBe("sources.11.source.id");
+		expect(registry.errors[0]?.issues[0]?.path).toBe(
+			`sources.${sources.length - 1}.source.id`,
+		);
 	});
 });

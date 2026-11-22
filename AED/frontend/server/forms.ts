@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { z } from "zod";
-
+import { getAedDetail } from "../../backend/aed-detail.ts";
 import { auth } from "#backend/auth/auth.ts";
 import {
 	deleteUserAedDevice,
@@ -11,6 +11,8 @@ import type { AedDevice } from "#backend/store/schema.ts";
 import {
 	geocodeAddress,
 	geocodeRequestSchema,
+	reverseGeocode,
+	reverseGeocodeRequestSchema,
 } from "../../backend/forms/geocode.ts";
 import {
 	type ManualFormValues,
@@ -19,7 +21,6 @@ import {
 } from "../../backend/forms/manual-record.ts";
 import {
 	deleteSource,
-	importSource,
 	listSources,
 	previewSource,
 	SourceAdminError,
@@ -32,8 +33,11 @@ import {
  *
  * Errors are returned as `{ ok: false, message, issues }` instead of thrown
  * so the forms can render Polish validation messages per field.
+ *
+ * The /zrodla registry exposes list, save, preview and delete. Importing
+ * sources into the map is a separate scheduled ingest step, not a server
+ * function.
  */
-
 export interface FormIssue {
 	field: string;
 	message: string;
@@ -50,7 +54,7 @@ function failure(error: unknown): FormFailure {
 	if (error instanceof ManualRecordError) {
 		return {
 			ok: false,
-			message: "Popraw zaznaczone pola.",
+			message: "Popraw wskazane pola formularza.",
 			issues: [...error.issues],
 		};
 	}
@@ -70,6 +74,15 @@ function failure(error: unknown): FormFailure {
 		issues: [],
 	};
 }
+
+const aedDetailSchema = z.object({
+	id: z.string().regex(/^\d+$/u),
+});
+
+/** Reads one AED from the server store for the detail route loader. */
+export const getAedDetailFn = createServerFn({ method: "GET" })
+	.validator(aedDetailSchema)
+	.handler(({ data }) => getAedDetail(Number(data.id)));
 
 function unauthorized(message: string): FormFailure {
 	return { ok: false, code: "unauthorized", message, issues: [] };
@@ -241,6 +254,20 @@ export const geocodeAddressFn = createServerFn({ method: "POST" })
 		}
 	});
 
+export const reverseGeocodeFn = createServerFn({ method: "POST" })
+	.validator(reverseGeocodeRequestSchema)
+	.handler(async ({ data }) => {
+		if (!(await readSession())) {
+			return unauthorized("Zaloguj się, aby ustalić adres punktu.");
+		}
+		try {
+			const result = await reverseGeocode(data.lat, data.lon);
+			return { ok: true as const, ...result };
+		} catch (error) {
+			return failure(error);
+		}
+	});
+
 export const listSourcesFn = createServerFn({ method: "GET" }).handler(
 	async () => {
 		if (!(await readSession())) {
@@ -278,19 +305,6 @@ export const previewSourceFn = createServerFn({ method: "POST" })
 		}
 		try {
 			return { ok: true as const, preview: await previewSource(data) };
-		} catch (error) {
-			return failure(error);
-		}
-	});
-
-export const importSourceFn = createServerFn({ method: "POST" })
-	.validator(z.object({ sourceId: z.string().min(1) }))
-	.handler(async ({ data }) => {
-		if (!(await readSession())) {
-			return unauthorized("Zaloguj się, aby zaimportować źródło.");
-		}
-		try {
-			return { ok: true as const, result: await importSource(data.sourceId) };
 		} catch (error) {
 			return failure(error);
 		}

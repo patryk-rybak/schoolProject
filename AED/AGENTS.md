@@ -28,7 +28,7 @@ brief), `dane.gov.pl/` (published portal sources and their run guide), and
 - Vite 8 + Nitro 3 (`bun` preset) for dev, build, and preview
 - Drizzle ORM with `bun:sqlite` (WAL enabled)
 - better-auth for authentication
-- Tailwind CSS v4 + shadcn/ui (`new-york` style, Radix UI base; registry components: alert, badge, button, card, checkbox, field, input, label, select, separator, tabs, textarea)
+- Tailwind CSS v4 + shadcn/ui (`new-york` style, Radix UI base; registry components: accordion, alert, badge, button, card, checkbox, field, input, label, select, separator, tabs, textarea)
 - MapLibre GL JS 6.19.0 + Protomaps/PMTiles, centered on Poland with Polish labels
 - Biome for linting and formatting, TypeScript strict mode
 
@@ -68,6 +68,12 @@ brief), `dane.gov.pl/` (published portal sources and their run guide), and
 | Run all checks | `bun run verify` |
 | Auto-fix lint/format | `bun run check:write` |
 
+Tool scripts (`dev`, `build`, `typecheck`, `format`, `lint`, `check`, `db:*`) invoke
+package entry points directly with Bun (for example
+`bun node_modules/vite/bin/vite.js`); on Bun 1.4.5 `bunx --bun` still execs the
+`node_modules/.bin` shims through their Node shebang, so do not reintroduce it
+for installed tools.
+
 ## Agent Tooling
 
 - TanStack packages ship Agent Skills. `package.json#intent.skills` permits `@tanstack/*`, and the `intent-skills` block at the top of this file explains how to list and load them.
@@ -79,14 +85,16 @@ brief), `dane.gov.pl/` (published portal sources and their run guide), and
 
 ## Architecture
 
-- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `logowanie.tsx`, `dodaj-aed.tsx`, `moje-aed.tsx`, `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
+- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `logowanie.tsx`, `dodaj-aed.tsx`, `moje-aed.tsx`, `aed/$aedId.tsx` (detail page), `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
 - `frontend/lib/public-paths.ts`, `frontend/lib/auth-guard.ts` — public-route allowlist and the root session guard; only `/`, `/logowanie`, `/api/auth/*`, `/api/pmtiles`, `/data/*`, and `/harvester/*` are public, everything else redirects to `/logowanie`
 - `frontend/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
-- `frontend/components/ui/` — shadcn/ui components in use (`alert`, `badge`, `button`, `card`, `checkbox`, `field`, `input`, `label`, `select`, `separator`, `tabs`, `textarea`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
-- `frontend/server/forms.ts` — TanStack server functions for the AED forms; return `{ok:false,message,issues}` instead of throwing; source-admin and geocode functions require a session
-- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland; optional `onPick`/`picked` props turn it into a point picker, plain clicks open a „Dodaj AED tutaj” popup linking to `/dodaj-aed?lat&lon`, and `showLocateControl` enables the main-page „Moja lokalizacja” button (Geolocation API + blue marker)
+- `frontend/components/ui/` — shadcn/ui components in use (`accordion`, `alert`, `badge`, `button`, `card`, `checkbox`, `field`, `input`, `label`, `select`, `separator`, `tabs`, `textarea`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
+- `frontend/components/aed-form/` — manual AED form helpers: `model.ts` (field constants, types, initial values), `text-field.tsx` (labeled and read-only address inputs)
+- `frontend/components/aed-detail-content.tsx` — AED detail panel shared by the map popup and `/aed/$aedId`
+- `frontend/server/forms.ts` — TanStack server functions for the AED forms; return `{ok:false,message,issues}` instead of throwing; source-admin, geocode, and reverse-geocode functions require a session
+- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland; optional `onPick`/`picked` props turn it into a point picker, plain clicks open a „Dodaj AED tutaj” popup linking to `/dodaj-aed?lat&lon`
 - `backend/forms/` — server-only form logic: `manual-record.ts` (full canonical schema validation + save), `geocode.ts` (Nominatim, throttled, Polish errors), `source-admin.ts` (registry list/save/preview/import/delete)
-- `frontend/hooks/use-mobile.ts` — generated shadcn hook
+- `frontend/lib/aed-labels.ts` — shared Polish labels for access/status codes (`ACCESS_LABELS`, `STATUS_LABELS`, `displayValue`, `labelFor`); reuse in map popups and detail views
 - `backend/store/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`
 - `backend/store/schema.ts` — Drizzle schema
 - `backend/auth/auth.ts` — better-auth server config (Drizzle adapter, username plugin)
@@ -99,11 +107,10 @@ brief), `dane.gov.pl/` (published portal sources and their run guide), and
 - `drizzle.config.ts` — Drizzle Kit config
 - `vite.config.ts` — Vite, TanStack Start, Tailwind, and Nitro plugins
 - `frontend/scripts/fetch-poland-pmtiles.sh` — downloads a Protomaps extract for Poland
-- `frontend/scripts/copy-maplibre-worker.ts` — copies the MapLibre worker into `frontend/public/`; no `api/maplibre-worker.ts` route exists
 - `frontend/scripts/dev-tls-proxy.ts` — self-signed HTTPS proxy for testing against the local dane.gov.pl harvester
 - `backend/gov-api/` — dane.gov.pl feed builder (XML 1.13, MD5, CSV, GeoJSON) and vendored XSD
 - `frontend/routes/harvester/` — `/harvester/feed.xml` and `/harvester/feed.md5`
-- `frontend/routes/data/` — `/data/aed.csv` and `/data/aed.geojson`
+- `frontend/routes/data/` — `/data/aed.csv`, `/data/aed.geojson`, `/data/aed.points.geojson` (gzip-negotiated), and `/data/aed.xlsx`
 
 There is no `frontend/integrations/` directory and no `frontend/env.ts` validation module. Read server configuration from `process.env` and client `VITE_` variables from `import.meta.env`. There is no TanStack Query provider or devtools integration; use route loaders and server functions.
 
@@ -122,7 +129,7 @@ Non-default paths to keep in mind: Vite serves static files from `frontend/publi
 - The domain schema has three physical AED tables in `backend/store/schema.ts`: `aed_devices` (user-added, signed by `created_by_id`, verified), `aed_source_devices` (imports; wiped/refilled, unverified), and the materialized `aed_devices_combined` read model used by the map and dane.gov.pl. Access them through `backend/store/aed-store.ts`, not by importing `db` directly. User writes and every source refresh update the combined table transactionally; import code must never delete or update `aed_devices`. `/moje-aed` lists only `created_by_id = session.user.id` and deletes through `deleteUserAedDevice`, which removes the row from both `aed_devices` and `aed_devices_combined` after an ownership check.
 - All three AED tables require `lat`/`lon` and only accept `location_status` `point`/`geocoded`; records without a point are dropped by the importers. `aed_devices_combined` must be rebuilt from the two source tables whenever they change.
 - `frontend/public/poland.pmtiles` is generated locally and ignored by git. Run `bun run map:tiles` after cloning or when the map data is stale. The script defaults to `POLAND_MAXZOOM=15` (about 4 GB), `PMTILES_THREADS=12`, and `PMTILES_ATTEMPTS=3`; override with `POLAND_BBOX` or `PROTOMAPS_PLANET_URL` when needed. The map pins the source `maxzoom` to 15 and overzooms those tiles up to `maxZoom: 18`. The script keeps an existing archive untouched and extracts to a temporary file before swapping, so failed downloads and normal runs never re-download or destroy it; set `POLAND_FORCE=1` to regenerate. Before swapping, it flushes the temporary file with `sync` and validates it with `pmtiles verify`; if the temporary file disappears during the download (the `*.pmtiles.tmp.*` name is ignored, so `git clean -fdX` can unlink it), it retries the extraction.
-- `frontend/public/maplibre-gl-worker.mjs` is copied by `postinstall`/`predev`/`prebuild` and ignored by git. The map loads it as a static asset (`/maplibre-gl-worker.mjs?v=6.19.0`); keep the `?v=` query in sync with the `maplibre-gl` version so caches are invalidated. Do not serve the worker through a server route: Nitro's dev middleware routes `Sec-Fetch-Dest: worker` requests to static assets and skips API routes.
+- The MapLibre worker is bundled by Vite from `maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url`. `frontend/map/poland-map.tsx` configures its generated URL with `maplibregl.setWorkerUrl()` at module load in the browser. No copied public asset, manual cache-busting query, or server route is needed.
 - The PMTiles archive is served by `frontend/routes/api/pmtiles.ts` with HTTP byte-range support; static hosting does not provide the range responses PMTiles needs.
 
 The dane.gov.pl feed is deterministic per data version: `lastUpdateDate` comes
@@ -203,7 +210,7 @@ bun .output/server/index.mjs
 
 ## Definition of Done
 
-- [ ] `bunx tsc --noEmit` passes
+- [ ] `bun run typecheck` passes
 - [ ] `bun run check` passes
 - [ ] `bun run build` passes
 - [ ] `bun run lint` passes, or only pre-existing issues remain

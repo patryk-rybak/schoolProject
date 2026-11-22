@@ -6,12 +6,14 @@ import {
 } from "@tanstack/react-router";
 import {
 	CircleAlert,
+	CircleCheck,
 	Database,
-	FileSpreadsheet,
+	MapPinPlus,
 	Plus,
 	Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import { z } from "zod";
 
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 import { Badge } from "#/components/ui/badge";
@@ -23,9 +25,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card";
-import { deleteSourceFn, importSourceFn, listSourcesFn } from "#/server/forms";
+import { deleteSourceFn, listSourcesFn } from "#/server/forms";
+
+const searchSchema = z.object({
+	zapisano: z.string().min(1).optional(),
+});
 
 export const Route = createFileRoute("/zrodla/")({
+	validateSearch: searchSchema,
 	loader: async () => {
 		const data = await listSourcesFn();
 		if (!data.ok && data.code === "unauthorized") {
@@ -34,22 +41,13 @@ export const Route = createFileRoute("/zrodla/")({
 		return data;
 	},
 	component: SourcesPage,
-	head: () => ({ meta: [{ title: "Źródła danych — Mapa AED" }] }),
+	head: () => ({ meta: [{ title: "Rejestr źródeł danych — Mapa AED" }] }),
 });
-
-interface ImportSummary {
-	sourceId: string;
-	seen: number;
-	accepted: number;
-	rejected: number;
-	stored: number;
-	notes: string[];
-}
 
 function familyLabel(family: string): string {
 	switch (family) {
 		case "file_static":
-			return "plik (CSV/XLSX/JSON/KML)";
+			return "Plik (CSV/XLSX/JSON/KML)";
 		case "http_json":
 			return "HTTP JSON";
 		case "http_json_api":
@@ -73,30 +71,14 @@ function familyLabel(family: string): string {
 
 function SourcesPage() {
 	const data = Route.useLoaderData();
+	const { zapisano } = Route.useSearch();
 	const router = useRouter();
 	const [busy, setBusy] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [summary, setSummary] = useState<ImportSummary | null>(null);
 	const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-
-	async function runImport(sourceId: string) {
-		setBusy(sourceId);
-		setError(null);
-		setSummary(null);
-		try {
-			const result = await importSourceFn({ data: { sourceId } });
-			if (!result.ok) {
-				setError(result.message);
-				return;
-			}
-			setSummary(result.result);
-			await router.invalidate();
-		} catch (caught) {
-			setError(caught instanceof Error ? caught.message : String(caught));
-		} finally {
-			setBusy(null);
-		}
-	}
+	const [dismissedSaved, setDismissedSaved] = useState<string | null>(null);
+	const savedBanner =
+		zapisano !== undefined && zapisano !== dismissedSaved ? zapisano : null;
 
 	async function runDelete(sourceId: string) {
 		setBusy(sourceId);
@@ -108,7 +90,7 @@ function SourcesPage() {
 				return;
 			}
 			setConfirmDelete(null);
-			await router.invalidate();
+			await router.invalidate({ sync: true });
 		} catch (caught) {
 			setError(caught instanceof Error ? caught.message : String(caught));
 		} finally {
@@ -120,50 +102,53 @@ function SourcesPage() {
 		<main className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
 			<div className="flex flex-wrap items-end justify-between gap-4">
 				<div>
-					<h1 className="font-bold text-3xl">Źródła danych</h1>
+					<h1 className="font-bold text-3xl">Rejestr źródeł danych</h1>
 					<p className="mt-1 text-muted-foreground">
-						Rejestr konektorów zasilających wspólny zbiór AED.
+						Konektory zasilające wspólny zbiór AED. Podłącz nowe źródło
+						kolumnowe formularzem albo dodaj pojedynczy wpis AED ręcznie.
+						Zapisane źródła pobiera cykliczny import.
 					</p>
 				</div>
-				<div className="flex gap-3">
-					<Button asChild={true} variant="outline">
-						<Link to="/dodaj-aed">Dodaj rekord ręcznie</Link>
-					</Button>
+				<div className="flex flex-wrap gap-3">
 					<Button asChild={true}>
 						<Link to="/zrodla/nowe">
 							<Plus />
 							Nowe źródło
 						</Link>
 					</Button>
+					<Button asChild={true} variant="outline">
+						<Link to="/dodaj-aed">
+							<MapPinPlus />
+							Dodaj pojedynczy wpis AED
+						</Link>
+					</Button>
 				</div>
 			</div>
+
+			{savedBanner ? (
+				<Alert>
+					<CircleCheck />
+					<AlertTitle>Zapisano źródło „{savedBanner}”</AlertTitle>
+					<AlertDescription>
+						Źródło jest w rejestrze. Jego dane trafią na mapę przy najbliższym
+						cyklicznym imporcie.
+						<Button
+							className="mt-2"
+							size="sm"
+							variant="outline"
+							onClick={() => setDismissedSaved(zapisano ?? null)}
+						>
+							Zamknij
+						</Button>
+					</AlertDescription>
+				</Alert>
+			) : null}
 
 			{error ? (
 				<Alert variant="destructive">
 					<CircleAlert />
-					<AlertTitle>Operacja nie powiodła się</AlertTitle>
+					<AlertTitle>Nie udało się wykonać operacji</AlertTitle>
 					<AlertDescription>{error}</AlertDescription>
-				</Alert>
-			) : null}
-
-			{summary ? (
-				<Alert>
-					<FileSpreadsheet />
-					<AlertTitle>
-						Zaimportowano {summary.stored} rekordów ze źródła „
-						{summary.sourceId}”
-					</AlertTitle>
-					<AlertDescription>
-						Wczytano {summary.seen} wierszy, przyjęto {summary.accepted},
-						odrzucono {summary.rejected}.
-						{summary.notes.length > 0 ? (
-							<ul className="mt-2 list-disc pl-4">
-								{summary.notes.map((note) => (
-									<li key={note}>{note}</li>
-								))}
-							</ul>
-						) : null}
-					</AlertDescription>
 				</Alert>
 			) : null}
 
@@ -181,7 +166,7 @@ function SourcesPage() {
 									<Badge variant="outline">{familyLabel(source.family)}</Badge>
 									<Badge variant="outline">{source.parser}</Badge>
 									{source.enabled ? null : (
-										<Badge variant="destructive">wyłączone</Badge>
+										<Badge variant="destructive">Wyłączone</Badge>
 									)}
 								</CardDescription>
 							</CardHeader>
@@ -192,14 +177,6 @@ function SourcesPage() {
 									</p>
 								) : null}
 								<div className="flex flex-wrap gap-2">
-									<Button
-										size="sm"
-										variant="secondary"
-										disabled={busy !== null}
-										onClick={() => runImport(source.id)}
-									>
-										{busy === source.id ? "Importuję…" : "Importuj do mapy"}
-									</Button>
 									{confirmDelete === source.id ? (
 										<>
 											<Button
@@ -208,11 +185,12 @@ function SourcesPage() {
 												disabled={busy !== null}
 												onClick={() => runDelete(source.id)}
 											>
-												Potwierdź usunięcie
+												{busy === source.id ? "Usuwam…" : "Potwierdź usunięcie"}
 											</Button>
 											<Button
 												size="sm"
 												variant="outline"
+												disabled={busy !== null}
 												onClick={() => setConfirmDelete(null)}
 											>
 												Anuluj
@@ -237,7 +215,7 @@ function SourcesPage() {
 			) : (
 				<Alert variant="destructive">
 					<CircleAlert />
-					<AlertTitle>Nie udało się wczytać rejestru źródeł</AlertTitle>
+					<AlertTitle>Nie udało się pobrać rejestru źródeł</AlertTitle>
 					<AlertDescription>{data.message}</AlertDescription>
 				</Alert>
 			)}

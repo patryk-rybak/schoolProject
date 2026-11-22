@@ -4,7 +4,6 @@ node_modules
 *.db-shm
 *.pmtiles
 *.pmtiles.tmp.*
-frontend/public/maplibre-gl-worker.mjs
 .DS_Store
 dist
 dist-ssr

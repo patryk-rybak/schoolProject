@@ -41,7 +41,39 @@ describe("core parser and mapper", () => {
 	});
 
 	test("parses KML placemarks", () => {
-		const config = loadConfig("zielona-gora");
+		const config = parseSourceConfig({
+			source: { id: "kml-demo", name: "KML demo AED" },
+			connector: { family: "google_my_maps_kml", parser: "kml" },
+			fetch: {
+				url: "https://example.com/aed.kml",
+				method: "GET",
+				timeout_ms: 30000,
+			},
+			parse: { encoding: "utf-8", kml: { point_only: true } },
+			records: { path: "//Placemark" },
+			map: {
+				name: { field: "name" },
+				lat: {
+					coord: {
+						format: "kml",
+						from: "coordinates",
+						on_invalid: "reject",
+						pick: "lat",
+						precision_m: 15,
+					},
+				},
+				lon: {
+					coord: {
+						format: "kml",
+						from: "coordinates",
+						on_invalid: "reject",
+						pick: "lon",
+						precision_m: 15,
+					},
+				},
+			},
+			validate: { required: ["lat", "lon"] },
+		});
 		const kml = `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2"><Document>
 <Placemark><name>AED 1</name><Point><coordinates>15.50,51.93,0</coordinates></Point></Placemark>

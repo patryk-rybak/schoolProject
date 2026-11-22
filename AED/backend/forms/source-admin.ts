@@ -1,10 +1,6 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import {
-	type CanonicalAedRecord,
-	isMappable,
-	parseCanonicalAedRecord,
-} from "../../src/server/ingest/canonical.ts";
+import process from "node:process";
 import {
 	defaultDatasourcesConfigPath,
 	reloadSourceConfigs,
@@ -13,25 +9,19 @@ import {
 	type SourceConfigInput,
 	safeParseSourceConfig,
 } from "../../src/server/ingest/config/schema.ts";
-import { mapSourceRecords } from "../../src/server/ingest/core/map.ts";
 import { parseRawSource } from "../../src/server/ingest/core/parse.ts";
-import { validateCanonicalRecord } from "../../src/server/ingest/core/validate.ts";
 import { fetchSource } from "../../src/server/ingest/fetch/source-fetch.ts";
-import {
-	deleteSourceAedDevices,
-	replaceSourceAedDevices,
-} from "../store/aed-store.ts";
-import process from "node:process";
+import { deleteSourceAedDevices } from "../store/aed-store.ts";
 
 /**
  * Server-side admin operations behind the source forms (/zrodla):
  * list the registry, save a new connector config, preview its raw columns,
- * and run a single-source import into the dev store.
+ * and remove a source together with its stored rows.
  *
  * Saving rewrites `backend/ingest/datasources-config.json` atomically after
  * validating the merged registry, so a bad form submission can never corrupt
- * the file. Imports reuse the ingest pipeline (fetch -> parse -> map ->
- * validate) and replace the store rows of that source.
+ * the file. Ingesting the registered sources is a separate, scheduled step
+ * (`bun scripts/ingest-run.ts`); the UI never imports to the map directly.
  */
 
 export interface SourceListItem {
@@ -67,12 +57,12 @@ function readRegistryJson(): { version: 1; sources: unknown[] } {
 		parsed = JSON.parse(readFileSync(path, "utf8"));
 	} catch (error) {
 		throw new SourceAdminError(
-			`Nie można odczytać rejestru źródeł (${path}): ${error instanceof Error ? error.message : String(error)}`,
+			`Nie udało się odczytać rejestru źródeł (${path}): ${error instanceof Error ? error.message : String(error)}`,
 		);
 	}
 	const registry = parsed as { version?: unknown; sources?: unknown };
 	if (registry.version !== 1 || !Array.isArray(registry.sources)) {
-		throw new SourceAdminError("Rejestr źródeł ma nieoczekiwany format.");
+		throw new SourceAdminError("Rejestr źródeł ma nieprawidłowy format.");
 	}
 	return { version: 1, sources: registry.sources };
 }
@@ -93,7 +83,7 @@ export function listSources(): SourceListItem[] {
 	const registry = reloadSourceConfigs();
 	if (registry.errors.length > 0) {
 		throw new SourceAdminError(
-			`Rejestr źródeł zawiera błędy: ${registry.errors
+			`Rejestr źródeł zawiera błędy w konfiguracji: ${registry.errors
 				.flatMap((error) => error.issues.map((issue) => issue.message))
 				.join("; ")}`,
 		);
@@ -116,7 +106,7 @@ export function saveSourceConfig(input: unknown): SourceListItem {
 	const parsed = safeParseSourceConfig(input);
 	if (!parsed.success) {
 		throw new SourceAdminError(
-			"Konfiguracja źródła jest niepoprawna.",
+			"Konfiguracja źródła jest nieprawidłowa.",
 			parsed.error.issues.map((issue) => ({
 				path: issue.path.map(String).join("."),
 				message: issue.message,
@@ -131,8 +121,13 @@ export function saveSourceConfig(input: unknown): SourceListItem {
 	});
 	if (exists) {
 		throw new SourceAdminError(
-			`Źródło o identyfikatorze "${config.source.id}" już istnieje.`,
-			[{ path: "source.id", message: "Identyfikator musi być unikalny." }],
+			`Źródło o identyfikatorze "${config.source.id}" już istnieje w rejestrze.`,
+			[
+				{
+					path: "source.id",
+					message: "Identyfikator źródła musi być unikalny.",
+				},
+			],
 		);
 	}
 	writeRegistryJson([...registry.sources, config]);
@@ -180,7 +175,7 @@ export async function previewSource(input: unknown): Promise<SourcePreview> {
 	const parsed = safeParseSourceConfig(input);
 	if (!parsed.success) {
 		throw new SourceAdminError(
-			"Konfiguracja źródła jest niepoprawna.",
+			"Konfiguracja źródła jest nieprawidłowa.",
 			parsed.error.issues.map((issue) => ({
 				path: issue.path.map(String).join("."),
 				message: issue.message,
@@ -196,7 +191,7 @@ export async function previewSource(input: unknown): Promise<SourcePreview> {
 	});
 	if (!result.ok || result.rawFile === null) {
 		throw new SourceAdminError(
-			`Nie udało się pobrać źródła: ${result.error ?? result.status}`,
+			`Nie udało się pobrać danych źródła: ${result.error ?? result.status}`,
 		);
 	}
 	const body = readFileSync(resolve(rawDir, result.rawFile));
@@ -223,89 +218,6 @@ export async function previewSource(input: unknown): Promise<SourcePreview> {
 	};
 }
 
-export interface SourceImportResult {
-	sourceId: string;
-	seen: number;
-	accepted: number;
-	rejected: number;
-	withPoint: number;
-	stored: number;
-	notes: string[];
-}
-
-function rawDirFor(): string {
-	return resolve(process.cwd(), ".data/core/raw");
-}
-
-/**
- * Runs the single-source ingest pipeline and replaces that source's rows in
- * `aed_source_devices` inside one transaction. User-added records live in
- * `aed_devices` and are never touched. Records without a point are counted
- * but not stored: both canonical tables require lat/lon.
- */
-export async function importSource(
-	sourceId: string,
-): Promise<SourceImportResult> {
-	const registry = reloadSourceConfigs();
-	const config = registry.byId.get(sourceId);
-	if (!config) {
-		throw new SourceAdminError(`Nieznane źródło: ${sourceId}.`);
-	}
-	const rawDir = rawDirFor();
-	const result = await fetchSource(config, {
-		rawDir,
-		includeDisabled: true,
-		configSha256: configSha256(config),
-	});
-	if (!result.ok || result.rawFile === null) {
-		throw new SourceAdminError(
-			`Nie udało się pobrać źródła: ${result.error ?? result.status}`,
-		);
-	}
-	const body = readFileSync(resolve(rawDir, result.rawFile));
-	const parsedSource = parseRawSource(
-		config,
-		new TextDecoder("utf-8").decode(body),
-		body,
-	);
-	const mapped = mapSourceRecords(config, parsedSource.records);
-	const notes: string[] = [];
-	const accepted: CanonicalAedRecord[] = [];
-	let rejected = mapped.rejected.length;
-	for (const { record } of mapped.mapped) {
-		const validation = validateCanonicalRecord(config, record);
-		if (validation.action === "reject") {
-			rejected += 1;
-			if (notes.length < 5) {
-				notes.push(`Odrzucono ${record.record_id}: ${validation.reason}`);
-			}
-			continue;
-		}
-		accepted.push(parseCanonicalAedRecord(record));
-	}
-	const withPoint = accepted.filter(isMappable);
-	const skipped = accepted.length - withPoint.length;
-	if (skipped > 0) {
-		notes.push(`Pominięto ${skipped} rekordów bez współrzędnych.`);
-	}
-	const { deleted, inserted } = replaceSourceAedDevices(
-		config.source.id,
-		withPoint,
-	);
-	if (deleted > 0) {
-		notes.push(`Zastąpiono ${deleted} wcześniejszych rekordów tego źródła.`);
-	}
-	return {
-		sourceId: config.source.id,
-		seen: parsedSource.seen,
-		accepted: accepted.length,
-		rejected,
-		withPoint: withPoint.length,
-		stored: inserted,
-		notes,
-	};
-}
-
 /** Removes a source config and only its imported rows. */
 export function deleteSource(sourceId: string): { removedRows: number } {
 	const registry = readRegistryJson();
@@ -314,7 +226,7 @@ export function deleteSource(sourceId: string): { removedRows: number } {
 		return source?.id !== sourceId;
 	});
 	if (next.length === registry.sources.length) {
-		throw new SourceAdminError(`Nieznane źródło: ${sourceId}.`);
+		throw new SourceAdminError(`Nie znaleziono źródła: ${sourceId}.`);
 	}
 	writeRegistryJson(next);
 	return { removedRows: deleteSourceAedDevices(sourceId) };

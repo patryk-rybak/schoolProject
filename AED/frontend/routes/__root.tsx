@@ -4,7 +4,6 @@ import {
 	Link,
 	Scripts,
 } from "@tanstack/react-router";
-import { HeartPulse } from "lucide-react";
 
 import { SessionControls } from "#/auth-form/site-header";
 import { requireSession } from "#/lib/auth-guard";
@@ -25,7 +24,10 @@ export const Route = createRootRoute({
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
 			{ title: "Mapa AED" },
 		],
-		links: [{ rel: "stylesheet", href: appCss }],
+		links: [
+			{ rel: "icon", type: "image/png", href: "/favicon-128.png" },
+			{ rel: "stylesheet", href: appCss },
+		],
 	}),
 	shellComponent: RootDocument,
 });
@@ -47,7 +49,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							className="flex items-center gap-2 font-semibold"
 							activeOptions={{ exact: true }}
 						>
-							<HeartPulse className="size-5 text-red-600" aria-hidden="true" />
+							<img
+								src="/materialy/mascot-128.png"
+								alt="Symbol programu DANE AED RAZEM"
+								width={64}
+								height={64}
+								className="h-16 w-auto shrink-0"
+							/>
 							Mapa AED
 						</Link>
 						<div className="flex flex-wrap items-center gap-4 text-sm">
@@ -57,7 +65,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								activeProps={{ className: "font-semibold underline" }}
 								className="text-muted-foreground hover:text-foreground"
 							>
-								Mapa
+								Mapa AED
 							</Link>
 							<Link
 								to="/dodaj-aed"
