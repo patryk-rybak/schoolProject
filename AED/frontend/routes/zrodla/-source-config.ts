@@ -154,6 +154,8 @@ export function familyLabel(state: ConnectorState): string {
 			return "postgres_db";
 		case "s3":
 			return "s3_object";
+		default:
+			throw new Error(`Nieznany typ magazynu: ${String(state.storageKind)}`);
 	}
 }
 
