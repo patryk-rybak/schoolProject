@@ -10,7 +10,7 @@ const MD5_PATTERN = /^[0-9a-f]{32}$/u;
 
 const records: readonly FeedRecord[] = [
 	{
-		id: 1,
+		id: "source:1",
 		name: 'AED — Dworzec & "test" <Centralny>',
 		lat: 52.2285,
 		lon: 21.0031,
@@ -23,7 +23,7 @@ const records: readonly FeedRecord[] = [
 		verifiedAt: "2026-06-01",
 	},
 	{
-		id: 2,
+		id: "source:2",
 		name: "AED — Galeria Krakowska",
 		lat: 50.0682,
 		lon: 19.9476,

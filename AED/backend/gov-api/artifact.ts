@@ -1,5 +1,5 @@
-import { db } from "#backend/store/index.ts";
-import { aedDevices, type AedDevice } from "#backend/store/schema.ts";
+import { listCombinedAedDevices } from "#backend/store/aed-store.ts";
+import type { CombinedAedDevice } from "#backend/store/schema.ts";
 
 import { buildCsv } from "./csv";
 import { buildFeed } from "./feed";
@@ -12,6 +12,7 @@ import type { FeedArtifact, FeedRecord } from "./types";
  */
 const DEFAULT_PUBLIC_BASE_URL = "https://localhost:3443";
 const TRAILING_SLASHES = /\/+$/u;
+const PUBLISHED_LOCATION_STATUSES = ["point", "geocoded"] as const;
 
 export function publicBaseUrl(): string {
 	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket access.
@@ -26,23 +27,40 @@ export function publicBaseUrl(): string {
 	return base;
 }
 
+function isPublishedRow(row: CombinedAedDevice): boolean {
+	return (
+		row.lat !== null &&
+		row.lon !== null &&
+		PUBLISHED_LOCATION_STATUSES.some((status) => status === row.locationStatus)
+	);
+}
+
+/**
+ * Rows published to dane.gov.pl: the combined read model restricted to
+ * geolocated records. `created_by_id` and `origin` stay internal.
+ */
+function publishedRows(): FeedRecord[] {
+	return listCombinedAedDevices().filter(isPublishedRow).map(toFeedRecord);
+}
+
 export function getFeedArtifact(): FeedArtifact {
-	const rows = db.select().from(aedDevices).orderBy(aedDevices.id).all();
+	const rows = listCombinedAedDevices();
+	const records = rows.filter(isPublishedRow).map(toFeedRecord);
 
 	const latest = rows.reduce<Date | null>(
 		(acc, row) => (acc === null || row.updatedAt > acc ? row.updatedAt : acc),
 		null,
 	);
 
-	const key = `${rows.length}:${latest?.getTime() ?? "empty"}`;
+	const key = `${records.length}:${latest?.getTime() ?? "empty"}`;
 	if (cache !== null && cache.key === key) {
 		return cache.artifact;
 	}
 
-	const artifact = buildFeed(rows.map(toFeedRecord), {
+	const artifact = buildFeed(records, {
 		baseUrl: publicBaseUrl(),
 		updatedAt: latest ?? new Date(),
-		recordCount: rows.length,
+		recordCount: records.length,
 	});
 
 	cache = { key, artifact };
@@ -50,34 +68,48 @@ export function getFeedArtifact(): FeedArtifact {
 }
 
 export function getCsv(): string {
-	return buildCsv(readRecords());
+	return buildCsv(publishedRows());
 }
 
 export function getGeoJson(): string {
-	return buildGeoJson(readRecords());
+	return buildGeoJson(publishedRows());
 }
 
 /** Cached so `/feed.xml` and `/feed.md5` always serve the same bytes. */
 let cache: { readonly key: string; readonly artifact: FeedArtifact } | null =
 	null;
 
-function readRecords(): FeedRecord[] {
-	return db
-		.select()
-		.from(aedDevices)
-		.orderBy(aedDevices.id)
-		.all()
-		.map(toFeedRecord);
+function attributesOf(row: CombinedAedDevice): Record<string, unknown> {
+	if (row.attributes === null) {
+		return {};
+	}
+	try {
+		const parsed: unknown = JSON.parse(row.attributes);
+		return typeof parsed === "object" && parsed !== null
+			? (parsed as Record<string, unknown>)
+			: {};
+	} catch {
+		return {};
+	}
 }
 
-function toFeedRecord(row: AedDevice): FeedRecord {
+function attributeText(
+	attributes: Record<string, unknown>,
+	key: string,
+): string | null {
+	const value = attributes[key];
+	return typeof value === "string" && value !== "" ? value : null;
+}
+
+function toFeedRecord(row: CombinedAedDevice): FeedRecord {
+	const attributes = attributesOf(row);
 	return {
-		id: row.id,
-		name: row.name,
+		id: row.recordId,
+		name: row.name ?? `AED (${row.sourceId})`,
 		lat: row.lat,
 		lon: row.lon,
-		city: row.city,
-		access: row.access,
+		city: attributeText(attributes, "city"),
+		access: row.accessType,
 		status: row.status,
 		verificationStatus: row.verificationStatus,
 		verifiedBy: row.verifiedBy,
