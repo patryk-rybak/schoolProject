@@ -53,7 +53,7 @@ Cały kod aplikacji jest podzielony na dwie warstwy:
 ```text
 AED/
 ├── frontend/                 # routing, komponenty, hooki, style
-│   ├── routes/               # mapa, /logowanie, /dodaj-aed, /zrodla, /data, /harvester
+│   ├── routes/               # mapa, /logowanie, /dodaj-aed, /moje-aed, /zrodla, /data, /harvester
 │   ├── router.tsx            # fabryka routera
 │   ├── routeTree.gen.ts      # generowany — nie edytować ręcznie
 │   ├── components/ui/        # komponenty shadcn (rejestr)
@@ -81,6 +81,7 @@ Aliasy ścieżek: `#/*` → `frontend/*`, `#backend/*` → `backend/*`
 | --- | --- | --- | --- |
 | frontend | auth-form | działa | [Logowanie i rejestracja](#logowanie-i-rejestracja-auth-form) |
 | frontend | aed-form | działa (dev) | [Formularz AED](#formularz-aed-aed-form) |
+| frontend | my-aed | działa | [Moje AED](#moje-aed-my-aed) |
 | frontend | map | działa (mapa + wybór punktu) | [Mapa AED](#mapa-aed-map) |
 | frontend | social-media | planowane | [Propozycje postów](#propozycje-postów-social-media) |
 | backend | auth | działa | [Uwierzytelnianie](#uwierzytelnianie-auth) |
@@ -195,6 +196,8 @@ nowy rekord.
 - komunikaty błędów m.in. dla zajętej nazwy i błędnych danych logowania,
 - strona główna to nagłówek + mapa; w prawym górnym rogu nagłówka jest
   przycisk **„Zaloguj / Zarejestruj”** prowadzący do `/logowanie`,
+- w nawigacji jest link **„Moje AED”**; bez sesji prowadzi on do
+  `/logowanie`, a po zalogowaniu pokazuje własne rekordy użytkownika,
 - strona `/logowanie` ma wyśrodkowany panel z polami nazwa użytkownika i
   hasło oraz przyciskami **Zaloguj** i **Zarejestruj**,
 - pod formularzem na `/logowanie` jest **wyłączony** przycisk
@@ -254,6 +257,31 @@ historia zmian, deduplikacja łączonej tabeli.
 **Zależności:** [backend/store](#baza-danych-store) — zapis rekordów,
 `src/server/ingest/` — walidacja konfiguracji i pipeline importu,
 `frontend/map/` — wspólny komponent wyboru punktu na mapie.
+
+### Moje AED (my-aed)
+
+**Status:** działa · **Kod:** `frontend/routes/moje-aed.tsx`,
+`frontend/server/forms.ts`, `backend/store/aed-store.ts`
+
+**Cel:** pokazać użytkownikowi wyłącznie jego własne defibrylatory i pozwolić
+mu je usuwać.
+
+**Co działa:**
+
+- link **Moje AED** w nagłówku prowadzi do `/moje-aed`; bez sesji `beforeLoad`
+  przekierowuje na `/logowanie`, a server functions sprawdzają sesję ponownie,
+- lista zawiera tylko rekordy, których `created_by_id` równa się id
+  zalogowanego konta; rekordy innych użytkowników i importy są niewidoczne,
+- każdy wiersz pokazuje nazwę, adres/miasto, współrzędne, datę dodania i status
+  weryfikacji,
+- przycisk kosza wymaga potwierdzenia; usunięcie w jednej transakcji usuwa
+  rekord z `aed_devices` i z `aed_devices_combined` (dopasowanie po
+  `record_id`),
+- próba usunięcia cudzego rekordu jest odrzucana po stronie serwera,
+- przycisk **Dodaj AED** prowadzi do istniejącego formularza `/dodaj-aed`.
+
+**Czego jeszcze nie ma:** edycji istniejącego rekordu i przywracania usuniętych
+danych.
 
 ### Mapa AED (map)
 
@@ -590,6 +618,8 @@ Synchronizacja jest transakcyjna:
   `aed_devices_combined`,
 - `bun run db:seed` to pełny reset deweloperski wszystkich trzech tabel,
 - `refreshCombinedAedDevices()` pozwala jawnie przebudować tabelę łączoną,
+- usunięcie rekordu z `/moje-aed` usuwa go z `aed_devices` i
+  `aed_devices_combined` w jednej transakcji; tylko właściciel może to zrobić,
 - żadna ścieżka importu nie modyfikuje `aed_devices`.
 
 Tabela łączona udostępnia `created_by_id` (dla źródeł `NULL`) tylko do
@@ -613,6 +643,7 @@ import {
 	replaceAllSourceAedDevices,
 	// odczyt
 	listAedDevices,
+	listUserAedDevices,
 	listSourceAedDevices,
 	listCombinedAedDevices,
 	countAedDevices,
@@ -620,6 +651,7 @@ import {
 	countCombinedAedDevices,
 	// tabela łączona i porządki
 	refreshCombinedAedDevices,
+	deleteUserAedDevice,
 	deleteSourceAedDevices,
 	clearAllAedDevices,
 } from "#backend/store/aed-store";
@@ -1023,6 +1055,7 @@ Aktualne route'y:
 | `/` | strona główna: nagłówek + mapa AED |
 | `/logowanie` | rejestracja i logowanie nazwą użytkownika |
 | `/dodaj-aed` | formularz AED; wymaga sesji (`beforeLoad` + guard serwerowy) |
+| `/moje-aed` | lista własnych AED z usuwaniem; wymaga sesji |
 | `/zrodla` | rejestr źródeł, import i usuwanie |
 | `/zrodla/nowe` | kreator konektora i mapowania kolumn |
 | `/data/aed.csv` | eksport CSV |
@@ -1083,7 +1116,9 @@ na serwerze:
 
 | Funkcja | Metoda | Rola |
 | --- | --- | --- |
-| `getSessionUserFn` | GET | sprawdza sesję dla `beforeLoad` na `/dodaj-aed` |
+| `getSessionUserFn` | GET | sprawdza sesję dla `beforeLoad` na `/dodaj-aed` i `/moje-aed` |
+| `listMyAedFn` | GET | zwraca tylko rekordy zalogowanego użytkownika |
+| `deleteMyAedFn` | POST | usuwa własny rekord z `aed_devices` i tabeli łączonej |
 | `saveManualAedFn` | POST | waliduje formularz, wymaga sesji i zapisuje podpisany, zweryfikowany rekord w `aed_devices` |
 | `geocodeAddressFn` | POST | geokoduje adres przez Nominatim po stronie serwera |
 | `listSourcesFn` | GET | zwraca rejestr źródeł |
@@ -1195,6 +1230,7 @@ Zakres testów:
   rekordach źródłowych (`backend/store/aed-store.test.ts`),
 - zachowanie rekordów użytkownika i odtwarzanie tabeli łączonej przy
   ponownym imporcie źródła,
+- listowanie i usuwanie wyłącznie własnych rekordów użytkownika z obu tabel,
 - odrzucanie rekordów bez współrzędnych,
 - budowa rekordu ręcznego i metadata geokodowania (`backend/forms`).
 

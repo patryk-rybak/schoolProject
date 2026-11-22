@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DodajAedRouteImport } from './routes/dodaj-aed'
 import { Route as LogowanieRouteImport } from './routes/logowanie'
+import { Route as MojeAedRouteImport } from './routes/moje-aed'
 import { Route as ApiPmtilesRouteImport } from './routes/api/pmtiles'
 import { Route as DataAedDotcsvRouteImport } from './routes/data/aed[.]csv'
 import { Route as DataAedDotgeojsonRouteImport } from './routes/data/aed[.]geojson'
@@ -34,6 +35,11 @@ const DodajAedRoute = DodajAedRouteImport.update({
 const LogowanieRoute = LogowanieRouteImport.update({
   id: '/logowanie',
   path: '/logowanie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MojeAedRoute = MojeAedRouteImport.update({
+  id: '/moje-aed',
+  path: '/moje-aed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPmtilesRoute = ApiPmtilesRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
   '/logowanie': typeof LogowanieRoute
+  '/moje-aed': typeof MojeAedRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
   '/logowanie': typeof LogowanieRoute
+  '/moje-aed': typeof MojeAedRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
   '/logowanie': typeof LogowanieRoute
+  '/moje-aed': typeof MojeAedRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dodaj-aed'
     | '/logowanie'
+    | '/moje-aed'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dodaj-aed'
     | '/logowanie'
+    | '/moje-aed'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dodaj-aed'
     | '/logowanie'
+    | '/moje-aed'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DodajAedRoute: typeof DodajAedRoute
   LogowanieRoute: typeof LogowanieRoute
+  MojeAedRoute: typeof MojeAedRoute
   ApiPmtilesRoute: typeof ApiPmtilesRoute
   DataAedDotcsvRoute: typeof DataAedDotcsvRoute
   DataAedDotgeojsonRoute: typeof DataAedDotgeojsonRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/logowanie'
       fullPath: '/logowanie'
       preLoaderRoute: typeof LogowanieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moje-aed': {
+      id: '/moje-aed'
+      path: '/moje-aed'
+      fullPath: '/moje-aed'
+      preLoaderRoute: typeof MojeAedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/pmtiles': {
@@ -259,6 +279,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DodajAedRoute: DodajAedRoute,
   LogowanieRoute: LogowanieRoute,
+  MojeAedRoute: MojeAedRoute,
   ApiPmtilesRoute: ApiPmtilesRoute,
   DataAedDotcsvRoute: DataAedDotcsvRoute,
   DataAedDotgeojsonRoute: DataAedDotgeojsonRoute,
