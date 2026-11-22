@@ -6,6 +6,8 @@ import {
 } from "@tanstack/react-router";
 import { HeartPulse } from "lucide-react";
 
+import { SessionControls } from "#/auth-form/site-header";
+
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -77,6 +79,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							>
 								Wzorcowy zakres
 							</Link>
+						</div>
+						<div className="ml-auto">
+							<SessionControls />
 						</div>
 					</nav>
 				</header>

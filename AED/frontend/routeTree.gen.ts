@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DodajAedRouteImport } from './routes/dodaj-aed'
+import { Route as LogowanieRouteImport } from './routes/logowanie'
 import { Route as MaterialyRouteImport } from './routes/materialy'
 import { Route as ApiPmtilesRouteImport } from './routes/api/pmtiles'
 import { Route as DataAedDotcsvRouteImport } from './routes/data/aed[.]csv'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const DodajAedRoute = DodajAedRouteImport.update({
   id: '/dodaj-aed',
   path: '/dodaj-aed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogowanieRoute = LogowanieRouteImport.update({
+  id: '/logowanie',
+  path: '/logowanie',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MaterialyRoute = MaterialyRouteImport.update({
@@ -87,6 +93,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
+  '/logowanie': typeof LogowanieRoute
   '/materialy': typeof MaterialyRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
+  '/logowanie': typeof LogowanieRoute
   '/materialy': typeof MaterialyRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
+  '/logowanie': typeof LogowanieRoute
   '/materialy': typeof MaterialyRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dodaj-aed'
+    | '/logowanie'
     | '/materialy'
     | '/api/pmtiles'
     | '/data/aed.csv'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dodaj-aed'
+    | '/logowanie'
     | '/materialy'
     | '/api/pmtiles'
     | '/data/aed.csv'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dodaj-aed'
+    | '/logowanie'
     | '/materialy'
     | '/api/pmtiles'
     | '/data/aed.csv'
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DodajAedRoute: typeof DodajAedRoute
+  LogowanieRoute: typeof LogowanieRoute
   MaterialyRoute: typeof MaterialyRoute
   ApiPmtilesRoute: typeof ApiPmtilesRoute
   DataAedDotcsvRoute: typeof DataAedDotcsvRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/dodaj-aed'
       fullPath: '/dodaj-aed'
       preLoaderRoute: typeof DodajAedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logowanie': {
+      id: '/logowanie'
+      path: '/logowanie'
+      fullPath: '/logowanie'
+      preLoaderRoute: typeof LogowanieRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/materialy': {
@@ -279,6 +299,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DodajAedRoute: DodajAedRoute,
+  LogowanieRoute: LogowanieRoute,
   MaterialyRoute: MaterialyRoute,
   ApiPmtilesRoute: ApiPmtilesRoute,
   DataAedDotcsvRoute: DataAedDotcsvRoute,

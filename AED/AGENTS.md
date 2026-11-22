@@ -86,7 +86,9 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 - `frontend/hooks/use-mobile.ts` — generated shadcn hook
 - `backend/store/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`
 - `backend/store/schema.ts` — Drizzle schema
-- `backend/auth/auth.ts` — better-auth server config
+- `backend/auth/auth.ts` — better-auth server config (Drizzle adapter, username plugin)
+- `backend/auth/schema.ts` — better-auth tables (`user`, `session`, `account`, `verification`)
+- `frontend/auth-form/` — login/register panel and header with sign-out
 - `frontend/lib/auth-client.ts` — better-auth client
 - `frontend/styles.css` — Tailwind v4 theme and CSS variables
 - `drizzle.config.ts` — Drizzle Kit config
