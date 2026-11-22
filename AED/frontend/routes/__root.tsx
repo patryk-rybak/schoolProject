@@ -1,5 +1,7 @@
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
+import { SiteHeader } from "#/auth-form/site-header";
+
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -21,6 +23,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
+				<SiteHeader />
 				{children}
 				<Scripts />
 			</body>

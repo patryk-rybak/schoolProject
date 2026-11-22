@@ -27,7 +27,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 - Vite 8 + Nitro 3 (`bun` preset) for dev, build, and preview
 - Drizzle ORM with `bun:sqlite` (WAL enabled)
 - better-auth for authentication
-- Tailwind CSS v4 + shadcn/ui (`new-york` style, Radix UI base, native components only: alert, badge, button, card)
+- Tailwind CSS v4 + shadcn/ui (`new-york` style, Radix UI base, native components only: alert, badge, button, card, input, label)
 - MapLibre GL JS 6.19.0 + Protomaps/PMTiles, centered on Poland with Polish labels
 - Biome for linting and formatting, TypeScript strict mode
 
@@ -79,12 +79,14 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 
 - `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `api/auth/$.ts`, `api/pmtiles.ts`)
 - `frontend/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
-- `frontend/components/ui/` — the only shadcn/ui components in use (`alert`, `badge`, `button`, `card`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
+- `frontend/components/ui/` — the only shadcn/ui components in use (`alert`, `badge`, `button`, `card`, `input`, `label`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
 - `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland
 - `frontend/hooks/use-mobile.ts` — generated shadcn hook
 - `backend/store/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`
 - `backend/store/schema.ts` — Drizzle schema
-- `backend/auth/auth.ts` — better-auth server config
+- `backend/auth/auth.ts` — better-auth server config (Drizzle adapter, username plugin)
+- `backend/auth/schema.ts` — better-auth tables (`user`, `session`, `account`, `verification`)
+- `frontend/auth-form/` — login/register panel and header with sign-out
 - `frontend/lib/auth-client.ts` — better-auth client
 - `frontend/styles.css` — Tailwind v4 theme and CSS variables
 - `drizzle.config.ts` — Drizzle Kit config
@@ -130,7 +132,7 @@ Environment variables live in `.env.local` (never committed):
 ## UI Rules
 
 - Add components with `bunx --bun shadcn@latest add <component>`; do not hand-roll shadcn primitives.
-- Keep the component set to the native registry components `alert`, `badge`, `button`, and `card` unless the task explicitly needs more.
+- Keep the component set to the native registry components `alert`, `badge`, `button`, `card`, `input`, and `label` unless the task explicitly needs more.
 - Keep the generated components on their Radix UI base; do not swap in another primitive library.
 - Use the generated `cn` helper (from the `cn` package) or `#/lib/utils`.
 - Use `lucide-react` for icons.
