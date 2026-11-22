@@ -143,6 +143,8 @@ bun run dev
 
 Aplikacja działa pod http://localhost:3000.
 
+`bun run dev` (i `bun run preview`) uruchamia przed startem `bun run db:bootstrap`: migruje bazę i, jeśli tabela źródeł jest pusta albo zawiera tylko rekordy `db:seed`, ładuje punkty z gotowego `.data/core/core.json`. Dzięki temu świeży klon z pobranym datasetem core od razu pokazuje pełną mapę. Jeśli core nie został jeszcze zbudowany, uruchom `bun run ingest:run --all` (lub `bun run db:refresh-sources`).
+
 Worker MapLibre jest wbudowywany przez Vite bezpośrednio z pakietu `maplibre-gl`
 (`?worker&url`); nie jest kopiowany do `frontend/public/` i nie wymaga żadnych
 hooków instalacyjnych.
@@ -164,6 +166,7 @@ hooków instalacyjnych.
 | Podgląd builda | `bun run preview` |
 | Migracje | `bun run db:generate`, `bun run db:migrate`, `bun run db:push` |
 | Dane startowe (dev) | `bun run db:seed` |
+| Automatyczny rozruch bazy dev (migracje + core, gdy pusta) | `bun run db:bootstrap` |
 | Drizzle Studio | `bun run db:studio` |
 | Ingest źródeł i budowa core | `bun run ingest:run` |
 | Pełny refresh tabeli źródeł z gotowego core | `bun run db:load-core` |
@@ -763,7 +766,9 @@ import {
 **Uwagi:**
 
 - `dev.db` jest ignorowany przez git; migracje w `backend/store/drizzle/` są
-  wersjonowane.
+  wersjonowane. Przy starcie dev/preview `db:bootstrap` migruje bazę i ładuje
+  `.data/core/core.json` tylko wtedy, gdy nie ma jeszcze prawdziwych danych
+  źródłowych (tabela pusta lub same rekordy `db:seed`).
 - Baza zawiera trzy domenowe tabele AED (`aed_devices`, `aed_source_devices`,
   `aed_devices_combined`), cztery tabele better-auth oraz techniczną
   `__drizzle_migrations`.
