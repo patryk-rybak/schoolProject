@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -10,7 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card";
-import { PolandMap } from "#/map/poland-map";
+import { LazyPolandMap } from "#/map/lazy-poland-map";
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -20,11 +20,11 @@ function Home() {
 			<Card>
 				<CardHeader>
 					<CardTitle>
-						<h1 className="font-bold text-4xl">Mapa AED w Polsce</h1>
+						<h1 className="font-bold text-4xl">Mapa AED</h1>
 					</CardTitle>
 					<CardDescription className="flex flex-wrap items-center gap-2 text-lg">
-						Defibrylatory AED · Protomaps + MapLibre GL JS
-						<Badge variant="secondary">dane © OpenStreetMap</Badge>
+						Lokalizacje defibrylatorów AED w Polsce
+						<Badge variant="secondary">© OpenStreetMap</Badge>
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-4">
@@ -33,14 +33,22 @@ function Home() {
 							Kliknij mapę w dowolnym miejscu, aby dodać AED („Dodaj AED
 							tutaj”).
 						</p>
-						<Button asChild={true} size="sm">
-							<Link to="/dodaj-aed">
-								<Plus />
-								Dodaj AED
-							</Link>
-						</Button>
+						<div className="flex flex-wrap items-center gap-2">
+							<Button asChild={true} size="sm">
+								<Link to="/dodaj-aed">
+									<Plus />
+									Dodaj AED
+								</Link>
+							</Button>
+							<Button asChild={true} size="sm" variant="outline">
+								<a href="/data/aed.xlsx" download={true}>
+									<Download />
+									Pobierz dane XLSX
+								</a>
+							</Button>
+						</div>
 					</div>
-					<PolandMap />
+					<LazyPolandMap deferred={true} />
 				</CardContent>
 			</Card>
 		</main>

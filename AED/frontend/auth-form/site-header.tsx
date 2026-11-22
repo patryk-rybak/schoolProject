@@ -1,37 +1,50 @@
-import { Link } from "@tanstack/react-router";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { useHydrated } from "@tanstack/react-router";
 
 import { Button } from "#/components/ui/button";
-import { authClient } from "#/lib/auth-client";
+
+const AuthSessionControls = lazy(() =>
+	import("#/auth-form/auth-session-controls").then((module) => ({
+		default: module.AuthSessionControls,
+	})),
+);
 
 export function SessionControls() {
-	const { data: session } = authClient.useSession();
+	const hydrated = useHydrated();
+	const [showAuthControls, setShowAuthControls] = useState(false);
 
-	async function handleSignOut() {
-		await authClient.signOut();
-		globalThis.location.reload();
-	}
+	useEffect(() => {
+		if (!hydrated) {
+			return;
+		}
 
-	if (session) {
-		return (
-			<div className="flex items-center gap-3 text-sm">
-				<span className="text-muted-foreground">
-					Witaj <strong>{session.user.username ?? session.user.name}</strong>!
-				</span>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onClick={handleSignOut}
-				>
-					Wyloguj
-				</Button>
-			</div>
-		);
+		const idleCallback = globalThis.requestIdleCallback?.bind(globalThis);
+		if (idleCallback) {
+			const handle = idleCallback(() => setShowAuthControls(true), {
+				timeout: 2000,
+			});
+			return () => globalThis.cancelIdleCallback?.(handle);
+		}
+
+		const timeout = globalThis.setTimeout(() => setShowAuthControls(true), 0);
+		return () => globalThis.clearTimeout(timeout);
+	}, [hydrated]);
+
+	if (!(hydrated && showAuthControls)) {
+		return <SessionControlsPlaceholder />;
 	}
 
 	return (
+		<Suspense fallback={<SessionControlsPlaceholder />}>
+			<AuthSessionControls />
+		</Suspense>
+	);
+}
+
+function SessionControlsPlaceholder() {
+	return (
 		<Button asChild={true} size="sm">
-			<Link to="/logowanie">Zaloguj / Zarejestruj</Link>
+			<a href="/logowanie">Logowanie / Rejestracja</a>
 		</Button>
 	);
 }

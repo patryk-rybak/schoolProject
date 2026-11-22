@@ -11,74 +11,81 @@ import {
 
 /**
  * Development seed: full reset of all AED tables, then a few dummy records in
- * the external-source table (origin `seed`) and a rebuild of the combined
+ * the external-source table (origin `seed`, attributed to enabled IDs from
+ * `backend/ingest/datasources-config.json`) and a rebuild of the combined
  * table. Never used in production.
  */
 interface SeedSpec {
 	name: string;
 	lat: number;
 	lon: number;
-	address: string;
+	address: string | null;
 	city: string;
 	access: string;
 	status: string;
+	source: string;
 }
 
 const seed: SeedSpec[] = [
 	{
-		name: "AED — Dworzec Centralny",
-		lat: 52.2285,
-		lon: 21.0031,
-		address: "Al. Jerozolimskie 54",
-		city: "Warszawa",
-		access: "always",
-		status: "operational",
-	},
-	{
-		name: "AED — Galeria Krakowska",
-		lat: 50.0682,
-		lon: 19.9476,
-		address: "ul. Pawia 5",
-		city: "Kraków",
-		access: "business_hours",
-		status: "operational",
-	},
-	{
-		name: "AED — Dworzec Gdańsk Główny",
-		lat: 54.3562,
-		lon: 18.6441,
-		address: "ul. Podwale Grodzkie 1",
-		city: "Gdańsk",
-		access: "always",
-		status: "unknown",
-	},
-	{
-		name: "AED — Rynek we Wrocławiu",
-		lat: 51.1101,
-		lon: 17.0316,
-		address: "Rynek 1",
-		city: "Wrocław",
-		access: "business_hours",
-		status: "out_of_service",
-	},
-	{
-		name: "AED — Stary Rynek w Poznaniu",
-		lat: 52.4083,
-		lon: 16.9335,
-		address: "Stary Rynek 1",
-		city: "Poznań",
+		name: "AED — Ratusz w Krośnie",
+		lat: 49.7005,
+		lon: 21.4955,
+		address: "ul. Staszica 1",
+		city: "Krosno",
 		access: "unknown",
 		status: "unknown",
+		source: "krosno",
+	},
+	{
+		name: "AED — Urząd Miasta Marki",
+		lat: 52.3175,
+		lon: 21.1778,
+		address: "ul. Piłsudskiego 32",
+		city: "Marki",
+		access: "unknown",
+		status: "unknown",
+		source: "marki",
+	},
+	{
+		name: "AED — Obiekt publiczny (OSM)",
+		lat: 52.2297,
+		lon: 21.0122,
+		address: null,
+		city: "Warszawa",
+		access: "unknown",
+		status: "unknown",
+		source: "openaedmap",
+	},
+	{
+		name: "AED — Przystanek w Przemyślu",
+		lat: 49.7764,
+		lon: 22.7719,
+		address: null,
+		city: "Przemyśl",
+		access: "unknown",
+		status: "unknown",
+		source: "przemysl",
+	},
+	{
+		name: "AED — Urząd dzielnicy Warszawa",
+		lat: 52.2319,
+		lon: 21.0111,
+		address: null,
+		city: "Warszawa",
+		access: "unknown",
+		status: "unknown",
+		source: "warszawa",
 	},
 ];
 
 function toRecord(spec: SeedSpec, index: number): CanonicalAedRecord {
-	const recordId = `seed:${index + 1}`;
+	const recordId = `${spec.source}:seed-${index + 1}`;
 	return parseCanonicalAedRecord({
 		version: 1,
 		record_id: recordId,
-		source_id: "seed",
-		source_record_id: String(index + 1),
+		source_id: spec.source,
+		source_record_id: `seed-${index + 1}`,
 		source_url: null,
 		name: spec.name,
 		description: null,
@@ -98,7 +105,7 @@ function toRecord(spec: SeedSpec, index: number): CanonicalAedRecord {
 		location_status: "point",
 		geom_source: "registry",
 		address_text: spec.address,
-		address_kind: "building",
+		address_kind: spec.address === null ? "none" : "building",
 		address_source: "source",
 		address_confidence: null,
 		geocode_provider: null,
