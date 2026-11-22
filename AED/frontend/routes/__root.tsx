@@ -6,10 +6,18 @@ import {
 } from "@tanstack/react-router";
 
 import { SessionControls } from "#/auth-form/site-header";
+import { requireSession } from "#/lib/auth-guard";
+import { isPublicPath } from "#/lib/public-paths";
 
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
+	beforeLoad: async ({ location }) => {
+		if (isPublicPath(location.pathname)) {
+			return;
+		}
+		await requireSession();
+	},
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
