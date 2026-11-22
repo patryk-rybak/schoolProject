@@ -1,6 +1,7 @@
 import { and, count, desc, eq } from "drizzle-orm";
 
 import type { CanonicalAedRecord } from "../../src/server/ingest/canonical.ts";
+import { removeDuplicateAedDevices } from "./deduplicate.ts";
 import { db } from "./index.ts";
 import {
 	canonicalToSourceRow,
@@ -81,6 +82,8 @@ function rebuildCombined(tx: StoreTransaction): {
 	const sourceRows = tx.select().from(aedSourceDevices).all();
 	insertCombinedRows(tx, userRows.map(userRowToCombined));
 	insertCombinedRows(tx, sourceRows.map(sourceRowToCombined));
+	// Placeholder hook for the future deduplication pass.
+	removeDuplicateAedDevices();
 	return { userRows: userRows.length, sourceRows: sourceRows.length };
 }
 
@@ -102,6 +105,8 @@ export function addUserAedDevice(
 			throw new Error("addUserAedDevice: insert returned no row");
 		}
 		insertCombinedRows(tx, [userRowToCombined(row)]);
+		// Placeholder hook: also runs after a single insert into the combined table.
+		removeDuplicateAedDevices();
 		return row;
 	});
 }

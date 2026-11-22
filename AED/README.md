@@ -713,6 +713,10 @@ Synchronizacja jest transakcyjna:
 - `refreshCombinedAedDevices()` pozwala jawnie przebudować tabelę łączoną,
 - usunięcie rekordu z `/moje-aed` usuwa go z `aed_devices` i
   `aed_devices_combined` w jednej transakcji; tylko właściciel może to zrobić,
+- po każdym przebudowaniu tabeli łączonej i po każdym wstawieniu do niej
+  wiersza użytkownika wołany jest `removeDuplicateAedDevices()` z
+  `backend/store/deduplicate.ts`; obecnie jest to świadomy no-op (zwraca `0`),
+  przygotowany jako miejsce na przyszłą deduplikację,
 - żadna ścieżka importu nie modyfikuje `aed_devices`.
 
 Tabela łączona udostępnia `created_by_id` (dla źródeł `NULL`) tylko do
@@ -1336,6 +1340,7 @@ Zakres testów:
   rekordach źródłowych (`backend/store/aed-store.test.ts`),
 - zachowanie rekordów użytkownika i odtwarzanie tabeli łączonej przy
   ponownym imporcie źródła,
+- brak zmian danych przez placeholder deduplikacji,
 - listowanie i usuwanie wyłącznie własnych rekordów użytkownika z obu tabel,
 - odrzucanie rekordów bez współrzędnych,
 - budowa rekordu ręcznego i metadata geokodowania (`backend/forms`).
