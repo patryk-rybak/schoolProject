@@ -25,7 +25,7 @@ Nasze rozwiązanie:
 
 ### Źródła danych i provenance
 
-Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 5 źródeł, wszystkie z licencją umożliwiającą agregację: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Wpisy bez licencji (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) zostały usunięte z rejestru. Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
+Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
 
 | Identyfikator źródła | Nazwa | Status |
 | --- | --- | --- |
@@ -34,6 +34,12 @@ Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/d
 | `openaedmap` | OpenAEDMap — eksport krajowy PL | włączone |
 | `przemysl` | Otwarte Dane Przemyśl — defibrylatory AED | włączone |
 | `warszawa` | Lokalizacja defibrylatorów (AED) — m.st. Warszawa | włączone |
+| `belchatow` | Wykaz defibrylatorów AED na terenie Bełchatowa (KML) | wyłączone do decyzji licencyjnej |
+| `lodz` | Defibrylatory AED w Łodzi (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
+| `olsztyn` | Mapa ogólnodostępnych defibrylatorów AED w Olsztynie (KML) | wyłączone do decyzji licencyjnej |
+| `pawlowice` | Defibrylatory AED - Gmina Pawłowice (KML) | wyłączone do decyzji licencyjnej |
+| `tczew` | AED Tczew (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
+| `zielona-gora` | AED w Zielonej Górze (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
 
 Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`.
 

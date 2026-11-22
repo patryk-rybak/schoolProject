@@ -57,6 +57,11 @@ interface PointFeature {
 	readonly properties: Record<string, unknown>;
 }
 
+interface PointCollection {
+	readonly type: string;
+	readonly features: PointFeature[];
+}
+
 describe("compact AED points", () => {
 	test("returns one minimal point per record with [lon, lat] coordinates", () => {
 		const payload = buildPointsGeoJson(records);
@@ -106,5 +111,63 @@ describe("compact AED points", () => {
 		expect(
 			gzipSync(new TextEncoder().encode(points)).byteLength,
 		).toBeGreaterThan(0);
+	});
+
+	test("compact point payload is a valid GeoJSON FeatureCollection", () => {
+		const collection = JSON.parse(
+			buildPointsGeoJson(records),
+		) as PointCollection;
+
+		expect(collection.type).toBe("FeatureCollection");
+		expect(
+			collection.features.every(
+				(feature) =>
+					feature.type === "Feature" &&
+					feature.geometry.type === "Point" &&
+					Array.isArray(feature.geometry.coordinates) &&
+					feature.geometry.coordinates.length === 2,
+			),
+		).toBe(true);
+	});
+
+	test("point geometry keeps [longitude, latitude] order", () => {
+		const collection = JSON.parse(
+			buildPointsGeoJson([records[1] as FeedRecord]),
+		) as PointCollection;
+		const record = records[1] as FeedRecord;
+		const lon = record.lon;
+		const lat = record.lat;
+
+		expect(collection.features[0]?.geometry.coordinates).toEqual([lon, lat]);
+		expect(lat).not.toBe(lon);
+	});
+
+	test("points omit absent optional properties without null values", () => {
+		const base = records[1] as FeedRecord;
+		const collection = JSON.parse(
+			buildPointsGeoJson([
+				{ ...base, description: "", sourceUrl: null, city: null },
+			]),
+		) as PointCollection;
+		const properties = collection.features[0]?.properties ?? {};
+
+		expect(Object.values(properties).every((value) => value !== null)).toBe(
+			true,
+		);
+		expect(properties).not.toHaveProperty("description");
+		expect(properties).not.toHaveProperty("source_url");
+		expect(properties).not.toHaveProperty("city");
+	});
+
+	test("point properties carry the verification status used by circle colors", () => {
+		const collection = JSON.parse(
+			buildPointsGeoJson(records),
+		) as PointCollection;
+
+		expect(
+			collection.features.map(
+				(feature) => feature.properties["verification_status"],
+			),
+		).toEqual(records.map((record) => record.verificationStatus));
 	});
 });

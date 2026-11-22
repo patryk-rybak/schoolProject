@@ -94,7 +94,6 @@ const CANONICAL_LABELS: Record<string, string> = {
 	claimed_by: "Zgłaszający",
 	claimed_at: "Data zgłoszenia",
 	claim_note: "Uwagi zgłoszenia",
-	field_provenance: "Pochodzenie pól",
 	attributes: "Dodatkowe atrybuty",
 };
 
@@ -112,7 +111,7 @@ function CanonicalDetails({ canonical }: { canonical: unknown }) {
 	const rows: [string, string][] = [];
 	// Render primitive fields in canonical schema order.
 	for (const key of Object.keys(CANONICAL_LABELS)) {
-		if (key === "field_provenance" || key === "attributes") {
+		if (key === "attributes") {
 			continue;
 		}
 		const value = display(record[key]);
@@ -141,25 +140,6 @@ function CanonicalDetails({ canonical }: { canonical: unknown }) {
 		attributeRows.sort(([a], [b]) => a.localeCompare(b, "pl"));
 	}
 
-	let provenance = asRecord(record["field_provenance"]);
-	if (provenance === null && typeof record["field_provenance"] === "string") {
-		try {
-			provenance = asRecord(JSON.parse(record["field_provenance"] as string));
-		} catch {
-			provenance = null;
-		}
-	}
-	const provenanceRows: [string, string][] = [];
-	if (provenance) {
-		for (const [key, value] of Object.entries(provenance)) {
-			const text = display(value);
-			if (text !== "") {
-				provenanceRows.push([key, text]);
-			}
-		}
-		provenanceRows.sort(([a], [b]) => a.localeCompare(b, "pl"));
-	}
-
 	return (
 		<div className="flex flex-col gap-6">
 			<DetailList rows={rows} />
@@ -174,11 +154,6 @@ function CanonicalDetails({ canonical }: { canonical: unknown }) {
 						Otwórz źródło danych
 					</a>
 				</p>
-			) : null}
-			{provenanceRows.length > 0 ? (
-				<Section title="Pochodzenie pól">
-					<DetailList rows={provenanceRows} />
-				</Section>
 			) : null}
 			{attributeRows.length > 0 ? (
 				<Section title="Dodatkowe atrybuty">
