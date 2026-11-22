@@ -1,8 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-	canonicalToSourceRow,
-	canonicalToUserRow,
-} from "../store/aed-store.ts";
+import { canonicalToSourceRow, canonicalToUserRow } from "../store/rows.ts";
 import { geocodeAddress, reverseGeocode } from "./geocode.ts";
 import {
 	buildManualRecord,

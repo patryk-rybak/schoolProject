@@ -17,8 +17,8 @@ import {
 import {
 	type ManualFormValues,
 	ManualRecordError,
-	saveManualRecord,
 } from "../../backend/forms/manual-record.ts";
+import { saveManualRecord } from "../../backend/forms/manual-save.ts";
 import {
 	deleteSource,
 	listSources,

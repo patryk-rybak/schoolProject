@@ -92,7 +92,7 @@ for installed tools.
 - `frontend/components/aed-form/` — manual AED form helpers: `model.ts` (field constants, types, initial values), `text-field.tsx` (labeled and read-only address inputs)
 - `frontend/components/aed-detail-content.tsx` — AED detail panel shared by the map popup and `/aed/$aedId`
 - `frontend/server/forms.ts` — TanStack server functions for the AED forms; return `{ok:false,message,issues}` instead of throwing; source-admin, geocode, and reverse-geocode functions require a session
-- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland; optional `onPick`/`picked` props turn it into a point picker, plain clicks open a „Dodaj AED tutaj” popup linking to `/dodaj-aed?lat&lon`
+- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland; optional `onPick`/`picked` props turn it into a point picker, plain clicks open a „Dodaj AED tutaj” popup linking to `/dodaj-aed?lat&lon`, and `showLocateControl` enables the main-page „Moja lokalizacja” button (Geolocation API + blue marker)
 - `backend/forms/` — server-only form logic: `manual-record.ts` (full canonical schema validation + save), `geocode.ts` (Nominatim, throttled, Polish errors), `source-admin.ts` (registry list/save/preview/import/delete)
 - `frontend/lib/aed-labels.ts` — shared Polish labels for access/status codes (`ACCESS_LABELS`, `STATUS_LABELS`, `displayValue`, `labelFor`); reuse in map popups and detail views
 - `backend/store/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`
