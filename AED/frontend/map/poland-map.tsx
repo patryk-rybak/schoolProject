@@ -146,6 +146,7 @@ export function toAedMapPoint(
 		name: name || "AED",
 		city: prop("city") || null,
 		address: prop("address") || null,
+		description: prop("description") || null,
 		access: prop("access") || "unknown",
 		status: prop("status") || "unknown",
 		source: prop("source_id") || "Niepodano",
@@ -256,6 +257,9 @@ function AedPopup({ point }: { point: AedMapPoint }) {
 		<div className="flex max-w-72 flex-col gap-2 p-1">
 			<div className="flex flex-col gap-1">
 				<p className="font-semibold text-sm leading-snug">{point.name}</p>
+				{point.description !== null ? (
+					<p className="text-sm leading-snug">{point.description}</p>
+				) : null}
 				<p className="text-muted-foreground text-xs">
 					{location === "" ? "Brak danych adresowych" : location}
 				</p>
@@ -290,17 +294,9 @@ function AedPopup({ point }: { point: AedMapPoint }) {
 							<Maximize2 />
 							Więcej
 						</Button>
-						<Button asChild={true} size="sm" variant="outline">
-							<a
-								href={`/aed/${encodeURIComponent(String(point.id))}`}
-								onClick={(event) => event.stopPropagation()}
-							>
-								Zobacz szczegóły AED
-							</a>
-						</Button>
 					</div>
 					{detailOpen ? (
-						<AedDetailOverlay
+						<AedDetailDialog
 							id={point.id}
 							onClose={() => {
 								setDetailOpen(false);
@@ -314,17 +310,11 @@ function AedPopup({ point }: { point: AedMapPoint }) {
 }
 
 /**
- * Pełnoekranowy podgląd wszystkich danych AED. Portal do document.body, żeby
- * overlay nie był przycinany ani przesuwany przez kontener popupu MapLibre.
+ * Wyśrodkowany modal ze wszystkimi danymi AED. Portal do document.body, żeby
+ * dialog nie był przycinany ani przesuwany przez kontener popupu MapLibre.
  * Szczegóły są pobierane leniwie dopiero po kliknięciu „Więcej”.
  */
-function AedDetailOverlay({
-	id,
-	onClose,
-}: {
-	id: number;
-	onClose: () => void;
-}) {
+function AedDetailDialog({ id, onClose }: { id: number; onClose: () => void }) {
 	const [detail, setDetail] = useState<AedDetail | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -371,15 +361,22 @@ function AedDetailOverlay({
 	}, [onClose]);
 
 	return createPortal(
-		<div
-			className="fixed inset-0 z-50 overflow-y-auto bg-background"
-			role="dialog"
-			aria-modal={true}
-			aria-label="Szczegóły AED"
-		>
-			<div className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-4 p-4 sm:p-6">
-				<div className="flex items-center justify-between gap-4">
-					<h1 className="font-bold text-2xl">Szczegóły AED</h1>
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+			{/* Tło: kliknięcie poza dialogiem zamyka go. */}
+			<button
+				type="button"
+				className="absolute inset-0 cursor-default bg-black/50"
+				aria-label="Zamknij szczegóły AED"
+				onClick={onClose}
+			/>
+			<Card
+				role="dialog"
+				aria-modal={true}
+				aria-label="Szczegóły AED"
+				className="relative flex max-h-[80vh] w-full max-w-lg flex-col gap-0 overflow-hidden py-0 shadow-lg"
+			>
+				<div className="flex items-center justify-between gap-4 border-b p-4">
+					<h1 className="font-semibold text-lg">Szczegóły AED</h1>
 					<Button
 						variant="outline"
 						size="sm"
@@ -390,25 +387,23 @@ function AedDetailOverlay({
 						Zamknij
 					</Button>
 				</div>
-				{loading ? (
-					<p className="flex items-center gap-2 text-muted-foreground text-sm">
-						<LoaderCircle className="animate-spin" />
-						Wczytywanie danych AED…
-					</p>
-				) : error !== null ? (
-					<Alert variant="destructive">
-						<CircleAlert />
-						<AlertTitle>Nie udało się wczytać danych</AlertTitle>
-						<AlertDescription>{error}</AlertDescription>
-					</Alert>
-				) : detail !== null ? (
-					<Card>
-						<CardContent>
-							<AedDetailContent detail={detail} />
-						</CardContent>
-					</Card>
-				) : null}
-			</div>
+				<CardContent className="flex-1 overflow-y-auto p-4">
+					{loading ? (
+						<p className="flex items-center gap-2 text-muted-foreground text-sm">
+							<LoaderCircle className="animate-spin" />
+							Wczytywanie danych AED…
+						</p>
+					) : error !== null ? (
+						<Alert variant="destructive">
+							<CircleAlert />
+							<AlertTitle>Nie udało się wczytać danych</AlertTitle>
+							<AlertDescription>{error}</AlertDescription>
+						</Alert>
+					) : detail !== null ? (
+						<AedDetailContent detail={detail} />
+					) : null}
+				</CardContent>
+			</Card>
 		</div>,
 		globalThis.document.body,
 	);

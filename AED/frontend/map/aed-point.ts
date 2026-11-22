@@ -8,6 +8,8 @@ export interface AedMapPoint {
 	readonly name: string;
 	readonly city: string | null;
 	readonly address: string | null;
+	/** Location description („opis”), e.g. „Na ścianie remizy strażackiej.” */
+	readonly description: string | null;
 	readonly access: string;
 	readonly status: string;
 	readonly source: string;

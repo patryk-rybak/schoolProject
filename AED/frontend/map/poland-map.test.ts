@@ -10,6 +10,7 @@ describe("toAedMapPoint", () => {
 			name: "AED w urzędzie",
 			city: "Bełchatów",
 			address: "ul. Kościuszki 1, 97-400 Bełchatów",
+			description: "Na ścianie remizy strażackiej.",
 			access: "always",
 			status: "operational",
 			verification_status: "verified",
@@ -21,6 +22,7 @@ describe("toAedMapPoint", () => {
 			name: "AED w urzędzie",
 			city: "Bełchatów",
 			address: "ul. Kościuszki 1, 97-400 Bełchatów",
+			description: "Na ścianie remizy strażackiej.",
 			access: "always",
 			status: "operational",
 			source: "belchatow",
@@ -30,7 +32,8 @@ describe("toAedMapPoint", () => {
 	});
 
 	test("handles the minimal payload without optional keys", () => {
-		// buildPointsGeoJson omits null-valued keys (city, address, source_url).
+		// buildPointsGeoJson omits null-valued keys (city, address, description,
+		// source_url).
 		const point = toAedMapPoint({
 			id: 76_415,
 			source_id: "krosno",
@@ -43,6 +46,7 @@ describe("toAedMapPoint", () => {
 		expect(point?.id).toBe(76_415);
 		expect(point?.city).toBeNull();
 		expect(point?.address).toBeNull();
+		expect(point?.description).toBeNull();
 		expect(point?.sourceUrl).toBeNull();
 		expect(point?.verificationStatus).toBe("unverified");
 	});
