@@ -6,6 +6,8 @@
  */
 export interface FeedRecord {
 	readonly id: number;
+	/** Identifier of the upstream source, for example "manual" or "krosno". */
+	readonly sourceId: string;
 	readonly name: string;
 	readonly lat: number;
 	readonly lon: number;
@@ -16,6 +18,12 @@ export interface FeedRecord {
 	readonly verifiedBy: string | null;
 	readonly verifiedByKind: string | null;
 	readonly verifiedAt: string | null;
+	/** Stable identifier from the canonical record, when available. */
+	readonly recordId?: string | null;
+	readonly sourceRecordId?: string | null;
+	readonly sourceUrl?: string | null;
+	readonly locationStatus?: string | null;
+	readonly geomSource?: string | null;
 }
 
 export interface FeedArtifact {

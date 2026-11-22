@@ -11,6 +11,7 @@ const MD5_PATTERN = /^[0-9a-f]{32}$/u;
 const records: readonly FeedRecord[] = [
 	{
 		id: 1,
+		sourceId: "krosno",
 		name: 'AED — Dworzec & "test" <Centralny>',
 		lat: 52.2285,
 		lon: 21.0031,
@@ -21,9 +22,15 @@ const records: readonly FeedRecord[] = [
 		verifiedBy: "Urząd Miasta Stołecznego Warszawy",
 		verifiedByKind: "public_body",
 		verifiedAt: "2026-06-01",
+		recordId: "krosno:abc",
+		sourceRecordId: "krosno:12",
+		sourceUrl: "https://example.org/wykaz",
+		locationStatus: "point",
+		geomSource: "source",
 	},
 	{
 		id: 2,
+		sourceId: "manual",
 		name: "AED — Galeria Krakowska",
 		lat: 50.0682,
 		lon: 19.9476,
@@ -118,10 +125,14 @@ describe("published resources", () => {
 		const lines = csv.trimEnd().split("\n");
 
 		expect(lines[0]).toBe(
-			"id,name,lat,lon,city,access,status,verification_status,verified_by,verified_by_kind,verified_at",
+			"id,name,lat,lon,city,access,status,verification_status,verified_by,verified_by_kind,verified_at,record_id,source_id,source_record_id,source_url,location_status,geom_source",
 		);
 		expect(lines[1]).toContain('"AED — Dworzec & ""test"" <Centralny>"');
+		expect(lines[1]).toContain(
+			"krosno:abc,krosno,krosno:12,https://example.org/wykaz,point,source",
+		);
 		expect(lines[2]).toContain("Kraków");
+		expect(lines[2]).toContain(",,,,");
 	});
 
 	test("GeoJSON uses [longitude, latitude] coordinates", () => {
@@ -132,7 +143,10 @@ describe("published resources", () => {
 
 		const geojson = JSON.parse(buildGeoJson(records)) as {
 			type: string;
-			features: { geometry: { coordinates: [number, number] } }[];
+			features: {
+				geometry: { coordinates: [number, number] };
+				properties: Record<string, unknown>;
+			}[];
 		};
 
 		expect(geojson.type).toBe("FeatureCollection");
@@ -141,5 +155,13 @@ describe("published resources", () => {
 			warsaw.lon,
 			warsaw.lat,
 		]);
+		expect(geojson.features[0]?.properties).toMatchObject({
+			source_id: "krosno",
+			record_id: "krosno:abc",
+			source_record_id: "krosno:12",
+			source_url: "https://example.org/wykaz",
+			location_status: "point",
+			geom_source: "source",
+		});
 	});
 });

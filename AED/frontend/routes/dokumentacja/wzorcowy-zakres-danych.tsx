@@ -127,6 +127,7 @@ const sheets = [
 			"Stałe extIdent dla zbioru i zasobów w feedzie dane.gov.pl.",
 			"CSV: lat, lon. GeoJSON: [lon, lat] zgodnie z RFC 7946.",
 			"verified wymaga verified_by lub verified_at; inaczej unverified.",
+			"Provenance: source_id w obu formatach oraz record_id, source_record_id, source_url, location_status i geom_source, gdy rekord ma dane kanoniczne.",
 			"Licencja w metadanych zbioru; feed.xml i feed.md5 determinuje hash danych.",
 		],
 	},

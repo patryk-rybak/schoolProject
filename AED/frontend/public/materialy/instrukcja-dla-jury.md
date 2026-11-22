@@ -79,6 +79,8 @@ Feed XML używa oficjalnego schematu `urn:otwarte-dane:harvester:1.13`. Suma MD5
 
 ### Krok 6. Otwórz materiały konkursowe
 
+Materiały są również dostępne w uruchomionej aplikacji jako klikalna strona `/materialy` oraz strona dokumentacji `/dokumentacja/wzorcowy-zakres-danych`.
+
 | Wymaganie | Plik |
 | --- | --- |
 | Wzorcowy zakres danych (XLSX) | `competition-assets/wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx` |

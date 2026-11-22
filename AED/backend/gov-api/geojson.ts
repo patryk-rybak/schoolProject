@@ -19,6 +19,7 @@ export function buildGeoJson(records: readonly FeedRecord[]): string {
 			},
 			properties: {
 				id: record.id,
+				source_id: record.sourceId,
 				name: record.name,
 				city: record.city,
 				access: record.access,
@@ -27,6 +28,11 @@ export function buildGeoJson(records: readonly FeedRecord[]): string {
 				verified_by: record.verifiedBy,
 				verified_by_kind: record.verifiedByKind,
 				verified_at: record.verifiedAt,
+				record_id: record.recordId ?? null,
+				source_record_id: record.sourceRecordId ?? null,
+				source_url: record.sourceUrl ?? null,
+				location_status: record.locationStatus ?? null,
+				geom_source: record.geomSource ?? null,
 			},
 		})),
 	};

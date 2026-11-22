@@ -73,6 +73,7 @@ function readRecords(): FeedRecord[] {
 function toFeedRecord(row: AedDevice): FeedRecord {
 	return {
 		id: row.id,
+		sourceId: row.source,
 		name: row.name,
 		lat: row.lat,
 		lon: row.lon,
@@ -83,5 +84,54 @@ function toFeedRecord(row: AedDevice): FeedRecord {
 		verifiedBy: row.verifiedBy,
 		verifiedByKind: row.verifiedByKind,
 		verifiedAt: row.verifiedAt,
+		...canonicalExportFields(row.canonical),
 	};
+}
+
+interface CanonicalExportFields {
+	readonly recordId: string | null;
+	readonly sourceRecordId: string | null;
+	readonly sourceUrl: string | null;
+	readonly locationStatus: string | null;
+	readonly geomSource: string | null;
+}
+
+/** Reads provenance from the optional canonical JSON without trusting its shape. */
+function canonicalExportFields(raw: string | null): CanonicalExportFields {
+	const empty: CanonicalExportFields = {
+		recordId: null,
+		sourceRecordId: null,
+		sourceUrl: null,
+		locationStatus: null,
+		geomSource: null,
+	};
+	if (raw === null) {
+		return empty;
+	}
+
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(raw);
+	} catch {
+		return empty;
+	}
+	if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+		return empty;
+	}
+	const canonical = parsed as Record<string, unknown>;
+	return {
+		recordId: readText(canonical["record_id"]),
+		sourceRecordId: readText(canonical["source_record_id"]),
+		sourceUrl: readText(canonical["source_url"]),
+		locationStatus: readText(canonical["location_status"]),
+		geomSource: readText(canonical["geom_source"]),
+	};
+}
+
+function readText(value: unknown): string | null {
+	if (typeof value !== "string") {
+		return null;
+	}
+	const text = value.trim();
+	return text === "" ? null : text;
 }
