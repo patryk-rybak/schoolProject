@@ -5,6 +5,7 @@
  * verification fields but never `origin` or `created_by_id`.
  */
 export interface FeedRecord {
+	/** Internal numeric id used by map detail links; not exported as `id`. */
 	readonly id: number;
 	/** Identifier of the upstream source, for example "manual" or "krosno". */
 	readonly sourceId: string;
@@ -22,7 +23,7 @@ export interface FeedRecord {
 	readonly verifiedBy: string | null;
 	readonly verifiedByKind: string | null;
 	readonly verifiedAt: string | null;
-	/** System metadata, published under Polish canonical names in CSV/GeoJSON. */
+	/** Stable public UUID, exported as `id` in CSV, GeoJSON and XLSX. */
 	readonly uuid: string;
 	readonly createdAt: string;
 	readonly updatedAt: string;

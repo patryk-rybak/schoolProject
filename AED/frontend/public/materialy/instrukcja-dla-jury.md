@@ -25,7 +25,7 @@ Nasze rozwiązanie:
 
 ### Źródła danych i provenance
 
-Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
+Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje `zrodlo_danych`, `url_zrodla` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
 
 | Identyfikator źródła | Nazwa | Status |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/d
 | `tczew` | AED Tczew (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
 | `zielona-gora` | AED w Zielonej Górze (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
 
-Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`.
+Każdy rekord zachowuje `zrodlo_danych`, `url_zrodla` i `status_weryfikacji`.
 
 ## 3. Instrukcja krok po kroku dla jury
 
@@ -101,7 +101,7 @@ Feed XML używa oficjalnego schematu `urn:otwarte-dane:harvester:1.13`. Suma MD5
 
 ### Krok 6. Otwórz materiały konkursowe
 
-Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`) pobiera aktualną, pełną bazę AED znormalizowaną do wspólnego rekordu kanonicznego. To nie jest pusty arkusz wzorca: eksport ma jeden wiersz na urządzenie, a kolumny łączą nazwy pól kanonicznych, polskie aliasy i metadane dodawane przez system.
+Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`) pobiera aktualną, pełną bazę AED znormalizowaną do wspólnego rekordu kanonicznego. To nie jest pusty arkusz wzorca: eksport ma jeden wiersz na urządzenie, a kolumny używają wyłącznie polskich nazw pól oraz metadanych dodawanych przez system.
 
 | Wymaganie | Plik |
 | --- | --- |
@@ -116,7 +116,7 @@ Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`)
 
 ## 4. Eksport danych i wzorcowy zakres
 
-Przycisk **Pobierz dane XLSX** na stronie głównej (`/data/aed.xlsx`) pobiera pełną, aktualną bazę AED, a nie pusty wzorzec. Eksport jest tworzony z danych w bazie, ma jeden wiersz na urządzenie i następujące kolumny: `id` (klucz bazy), `id_uuid` (stabilny identyfikator kanoniczny), `name` / `nazwa_obiektu`, `lat` / `szerokosc_geo`, `lon` / `dlugosc_geo`, `city` / `miejscowosc`, `access` / `typ_dostepnosci`, `status`, `verification_status` / `status_weryfikacji`, `verified_by`, `verified_by_kind`, `verified_at`, `record_id`, `source_id` / `zrodlo_danych`, `source_record_id`, `source_url`, `location_status`, `geom_source`, `data_utworzenia` i `data_aktualizacji`. Te same nazwy pól są używane w CSV oraz jako klucze właściwości w GeoJSON.
+Przycisk **Pobierz dane XLSX** na stronie głównej (`/data/aed.xlsx`) pobiera pełną, aktualną bazę AED, a nie pusty wzorzec. Eksport jest tworzony z danych w bazie, ma jeden wiersz na urządzenie i następujące kolumny: `id` (stabilny UUID), `nazwa_obiektu`, `szerokosc_geo`, `dlugosc_geo`, `miejscowosc`, `typ_dostepnosci`, `status_sprawnosci`, `status_weryfikacji`, `zweryfikowane_przez`, `typ_weryfikatora`, `data_weryfikacji`, `identyfikator_kanoniczny`, `zrodlo_danych`, `identyfikator_w_zrodle`, `url_zrodla`, `status_lokalizacji`, `zrodlo_geometrii`, `data_utworzenia` i `data_aktualizacji`. Te same nazwy pól są używane w CSV oraz jako klucze właściwości w GeoJSON.
 
 Osobny, statyczny plik `competition-assets/wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx` pozostaje wyłącznie dokumentacją wzorca i nie jest pobierany przez przycisk na stronie głównej. Ma sześć kart:
 
@@ -133,14 +133,14 @@ Pola w karcie „Wzorcowy zakres” są podzielone na trzy poziomy zgodnie z pod
 - **Zalecane** (8): `ulica`, `nr_budynku`, `opis_lokalizacji`, `godziny_otwarcia`, `wewnatrz_zewnatrz`, `status_sprawnosci`, `opiekun_nazwa`, `opiekun_kontakt`,
 - **Opcjonalne** (5): `producent_model`, `elektrody_pediatryczne`, `data_waznosci_baterii`, `data_waznosci_elektrod`, `url_zdjecia`.
 
-W eksportach CSV, GeoJSON i XLSX system uwzględnia pola techniczne: `id` (klucz bazy), `id_uuid` (stabilny identyfikator kanoniczny), `data_utworzenia`, `data_aktualizacji`, `zrodlo_danych` (alias `source_id`) i `status_weryfikacji` (alias `verification_status`). Nie wymagamy ich od osoby zgłaszającej AED; pozwalają ocenić pochodzenie i weryfikację rekordu.
+W eksportach CSV, GeoJSON i XLSX system uwzględnia pola techniczne: `id` (stabilny UUID), `identyfikator_kanoniczny`, `data_utworzenia`, `data_aktualizacji`, `zrodlo_danych`, `identyfikator_w_zrodle`, `url_zrodla`, `status_lokalizacji`, `zrodlo_geometrii` i `status_weryfikacji`. Nie wymagamy ich od osoby zgłaszającej AED; pozwalają ocenić pochodzenie i weryfikację rekordu.
 
 Najważniejsze zasady:
 
-- współrzędne w WGS84; w CSV jako `lat,lon`, w GeoJSON jako `[lon,lat]`,
-- `location_status` informuje, czy punkt pochodzi ze źródła, geokodowania albo czy jest tylko adres,
-- `verification_status=verified` wymaga wskazania weryfikatora lub daty weryfikacji,
-- `source_id`, `source_record_id` i `source_url` zachowują provenance,
+- współrzędne w WGS84; w CSV jako `szerokosc_geo,dlugosc_geo`, w GeoJSON jako `[dlugosc_geo,szerokosc_geo]`,
+- `status_lokalizacji` informuje, czy punkt pochodzi ze źródła, geokodowania albo czy jest tylko adres,
+- `status_weryfikacji=verified` wymaga wskazania weryfikatora lub daty weryfikacji,
+- `zrodlo_danych`, `identyfikator_w_zrodle` i `url_zrodla` zachowują provenance,
 - licencja źródła jest deklarowana w metadanych; źródła bez licencji są wyłączone z agregacji.
 
 ## 5. Ograniczenia

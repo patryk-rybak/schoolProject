@@ -165,8 +165,8 @@ type Tier = "Wymagane" | "Zalecane" | "Opcjonalne";
 
 /**
  * Canonical submission schema for dane.gov.pl, grouped by the three tiers
- * requested by the competition task. `legacy` names are the existing
- * ingest/export fields still accepted for backward compatibility.
+ * requested by the competition task. `legacy` lists historical names for
+ * documentation only; the current public exports emit Polish names only.
  */
 const FIELDS: FieldRow[] = [
 	{
@@ -177,8 +177,8 @@ const FIELDS: FieldRow[] = [
 		values: "unikalny UUID wersji 4",
 		description: "Stały identyfikator rekordu w publicznym zbiorze; system generuje go deterministycznie z source:id i nie zmienia go przy aktualizacji.",
 		example: "2f8a6c34-3f2b-4b3e-9a11-7c9d1e0f4a55",
-		published: "Tak jako id_uuid (CSV, GeoJSON, XLSX)",
-		legacy: "record_id / uuid",
+		published: "Tak jako id (CSV, GeoJSON, XLSX)",
+		legacy: "uuid / record_id",
 	},
 	{
 		field: "nazwa_obiektu",
@@ -188,7 +188,7 @@ const FIELDS: FieldRow[] = [
 		values: "niepusty tekst",
 		description: "Czytelna nazwa obiektu lub lokalizacji urządzenia, np. ratusz, przystanek, urząd.",
 		example: "AED – Dworzec Centralny",
-		published: "Tak jako name / nazwa_obiektu",
+		published: "Tak jako nazwa_obiektu",
 		legacy: "name",
 	},
 	{
@@ -199,7 +199,7 @@ const FIELDS: FieldRow[] = [
 		values: "-90…90 (WGS84)",
 		description: "Szerokość geograficzna punktu w układzie WGS84.",
 		example: "52.228500",
-		published: "Tak jako lat / szerokosc_geo",
+		published: "Tak jako szerokosc_geo",
 		legacy: "lat",
 	},
 	{
@@ -210,7 +210,7 @@ const FIELDS: FieldRow[] = [
 		values: "-180…180 (WGS84)",
 		description: "Długość geograficzna punktu w układzie WGS84.",
 		example: "21.003100",
-		published: "Tak jako lon / dlugosc_geo",
+		published: "Tak jako dlugosc_geo",
 		legacy: "lon",
 	},
 	{
@@ -221,7 +221,7 @@ const FIELDS: FieldRow[] = [
 		values: "niepusty tekst",
 		description: "Miejscowość, w której znajduje się AED.",
 		example: "Warszawa",
-		published: "Tak jako city / miejscowosc",
+		published: "Tak jako miejscowosc",
 		legacy: "city",
 	},
 	{
@@ -232,7 +232,7 @@ const FIELDS: FieldRow[] = [
 		values: "always | business_hours | restricted | unknown",
 		description: "Informacja, czy AED jest dostępny bez klucza i poza godzinami pracy obiektu.",
 		example: "always",
-		published: "Tak jako access / typ_dostepnosci",
+		published: "Tak jako typ_dostepnosci",
 		legacy: "access_type / access",
 	},
 	{
@@ -309,7 +309,7 @@ const FIELDS: FieldRow[] = [
 		values: "operational | out_of_service | unknown",
 		description: "Aktualny stan techniczny urządzenia według dostawcy.",
 		example: "operational",
-		published: "Tak jako status",
+		published: "Tak jako status_sprawnosci",
 		legacy: "status",
 	},
 	{
@@ -320,7 +320,7 @@ const FIELDS: FieldRow[] = [
 		values: "nazwa osoby lub instytucji",
 		description: "Dysponent lub opiekun odpowiedzialny za konserwację urządzenia.",
 		example: "Urząd Miasta Stołecznego Warszawy",
-		published: "Częściowo jako verified_by",
+		published: "Częściowo jako zweryfikowane_przez",
 		legacy: "operator_name / verified_by",
 	},
 	{
@@ -412,7 +412,7 @@ const SYSTEM_FIELDS: FieldRow[] = [
 		values: "id z rejestru źródeł",
 		description: "Identyfikator dostawcy rekordu, zachowany jako provenance w każdym eksporcie.",
 		example: "warszawa",
-		published: "Tak jako source_id / zrodlo_danych",
+		published: "Tak jako zrodlo_danych",
 		legacy: "source_id / source",
 	},
 	{
@@ -423,7 +423,7 @@ const SYSTEM_FIELDS: FieldRow[] = [
 		values: "verified | unverified",
 		description: "Status weryfikacji ustawiany przez system; nie jest polem formularza obywatelskiego.",
 		example: "verified",
-		published: "Tak jako verification_status / status_weryfikacji",
+		published: "Tak jako status_weryfikacji",
 		legacy: "verification_status",
 	},
 ];
@@ -519,7 +519,7 @@ function buildWorkbook(): void {
 	const rules = [
 		["Reguła", "Opis"],
 		["Idempotencja", "Używaj stałego extIdent dla zbioru i zasobów w feedzie dane.gov.pl."],
-		["WGS84", "Współrzędne w CSV i XLSX jako szerokosc_geo / dlugosc_geo (aliasy lat/lon); w GeoJSON jako [lon, lat] (RFC 7946)."],
+		["WGS84", "Współrzędne w CSV i XLSX jako szerokosc_geo / dlugosc_geo; w GeoJSON jako [dlugosc_geo, szerokosc_geo] (RFC 7946)."],
 		["Weryfikacja", "verified wymaga verified_by lub verified_at; w przeciwnym razie unverified."],
 		["Lokalizacja", "point/geocoded wymaga lat i lon; address_only nie może mieć punktu."],
 		["Licencja", "Deklaruj licencję w metadanych zbioru; źródła bez deklaracji wyłącz z agregacji."],

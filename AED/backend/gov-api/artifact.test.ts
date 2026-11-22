@@ -88,7 +88,7 @@ describe("export artifacts", () => {
 		const rows = utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
 
 		expect(rows).toHaveLength(records.length + 1);
-		expect(rows[1]).toContain(records[0]?.id);
+		expect(rows[1]).toContain(records[0]?.uuid);
 		expect(rows[2]).toContain(records[1]?.uuid);
 	});
 
@@ -109,7 +109,7 @@ describe("published row filtering", () => {
 		expect(artifactSource).toMatch(publishedRowsFilterPattern);
 	});
 
-	test("published GeoJSON rows expose location_status and geom_source", () => {
+	test("published GeoJSON rows expose status_lokalizacji and zrodlo_geometrii", () => {
 		const [published] = records;
 		if (!published) {
 			throw new Error("fixture is missing the published record");
@@ -118,10 +118,10 @@ describe("published row filtering", () => {
 			features: { properties: Record<string, unknown> }[];
 		};
 
-		expect(collection.features[0]?.properties["location_status"]).toBe(
+		expect(collection.features[0]?.properties["status_lokalizacji"]).toBe(
 			published.locationStatus,
 		);
-		expect(collection.features[0]?.properties["geom_source"]).toBe(
+		expect(collection.features[0]?.properties["zrodlo_geometrii"]).toBe(
 			published.geomSource,
 		);
 	});

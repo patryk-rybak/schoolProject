@@ -64,7 +64,7 @@ Dowód: `../screenshots/02-dodaj-aed.png` (formularz z trzema otwartymi sekcjami
 
 ## Slajd 5. Pełny eksport XLSX i wzorcowy zakres
 
-Przycisk **Pobierz dane XLSX** na stronie głównej (`/data/aed.xlsx`) pobiera całą bazę AED znormalizowaną do wspólnego rekordu: jeden wiersz na urządzenie, kolumny z nazwami pól kanonicznych i polskimi aliasami (`name` / `nazwa_obiektu`, `lat` / `szerokosc_geo`, `lon` / `dlugosc_geo`, `city` / `miejscowosc`, `access` / `typ_dostepnosci`, `verification_status` / `status_weryfikacji`, `source_id` / `zrodlo_danych`) oraz metadane systemu (`id`, `id_uuid`, `data_utworzenia`, `data_aktualizacji`, `record_id`, `source_record_id`, `source_url`, `location_status`, `geom_source`, `verified_by`, `verified_by_kind`, `verified_at`, `status`).
+Przycisk **Pobierz dane XLSX** na stronie głównej (`/data/aed.xlsx`) pobiera całą bazę AED znormalizowaną do wspólnego rekordu: jeden wiersz na urządzenie, wyłącznie polskie nazwy kolumn: `id` (stabilny UUID), `nazwa_obiektu`, `szerokosc_geo`, `dlugosc_geo`, `miejscowosc`, `typ_dostepnosci`, `status_sprawnosci`, `status_weryfikacji`, `zweryfikowane_przez`, `typ_weryfikatora`, `data_weryfikacji`, `identyfikator_kanoniczny`, `zrodlo_danych`, `identyfikator_w_zrodle`, `url_zrodla`, `status_lokalizacji`, `zrodlo_geometrii`, `data_utworzenia` i `data_aktualizacji`.
 
 Osobny plik `../wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx` jest wyłącznie statyczną dokumentacją wzorca (6 kart), nie eksportem danych. Jego pola są uporządkowane według praktyki dane.gov.pl / DCAT-AP:
 
@@ -80,7 +80,7 @@ Takie rozdzielenie pozwala ocenić kompletność zgłoszenia bez karania obywate
 
 Pola obsługowe nie są wymagane od osoby zgłaszającej AED w formularzu, ale znajdują się w eksportach CSV, GeoJSON i XLSX:
 
-- `id` (klucz bazy) i `id_uuid` (stabilny identyfikator kanoniczny) to identyfikatory rekordu,
+- `id` to stabilny UUID rekordu,
 - `data_utworzenia` to data założenia rekordu,
 - `data_aktualizacji` to data ostatniej zmiany,
 - `zrodlo_danych` wskazuje pochodzenie danych i odpowiedzialnego dostawcę,
@@ -120,7 +120,7 @@ Dowód: `README.md` → „Test end-to-end: nasza aplikacja → lokalny dane.gov
 - Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`.
 - Konfiguracja obejmuje 11 źródeł; włączone są `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`.
 - Pozostałe wpisy konfiguracji pozostają wyłączone do decyzji licencyjnej.
-- Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`.
+- Każdy rekord zachowuje `zrodlo_danych`, `url_zrodla` i `status_weryfikacji`.
 
 Dowód: `README.md` → „Źródła danych i provenance”, `INSTRUKCJA-DLA-JURY.md`.
 
