@@ -27,6 +27,12 @@ import { Button } from "#/components/ui/button";
 import { Card, CardContent } from "#/components/ui/card";
 import { Separator } from "#/components/ui/separator";
 import { getAedDetailFn } from "#/server/forms";
+import {
+	ACCESS_LABELS,
+	displayValue,
+	labelFor,
+	STATUS_LABELS,
+} from "#/lib/aed-labels";
 import type { AedDetail } from "#backend/aed-detail.ts";
 
 import type { AedMapPoint } from "./aed-point.ts";
@@ -118,32 +124,6 @@ function addPolandMask(map: maplibregl.Map): void {
 // Punkty są wyróżniane wyłącznie według stanu weryfikacji.
 export const VERIFIED_COLOR = "#16a34a";
 export const UNVERIFIED_COLOR = "#9ca3af";
-
-const ACCESS_LABELS: Record<string, string> = {
-	always: "Dostępne cały czas",
-	business_hours: "Dostępne w godzinach pracy",
-	restricted: "Dostęp ograniczony",
-	unknown: "Dostępność nieznana",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-	operational: "Sprawny",
-	out_of_service: "Niesprawny",
-	unknown: "Stan nieznany",
-};
-
-function displayValue(value: unknown): string {
-	return typeof value === "number" || typeof value === "boolean"
-		? String(value)
-		: typeof value === "string"
-			? value.trim()
-			: "";
-}
-
-function labelFor(value: unknown, labels: Record<string, string>): string {
-	const key = displayValue(value);
-	return key === "" ? "Niepodano" : (labels[key] ?? key);
-}
 
 /** Converts untrusted GeoJSON properties into the popup's display model. */
 export function toAedMapPoint(
