@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 
-import { AuthPanel } from "#/auth-form/auth-panel";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -18,7 +17,6 @@ export const Route = createFileRoute("/")({ component: Home });
 function Home() {
 	return (
 		<main className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
-			<AuthPanel />
 			<Card>
 				<CardHeader>
 					<CardTitle>

@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 import { Button } from "#/components/ui/button";
 import { authClient } from "#/lib/auth-client";
 
@@ -9,19 +11,17 @@ export function SessionControls() {
 		globalThis.location.reload();
 	}
 
-	if (!session) {
-		return null;
-	}
-
-	return (
-		<div className="flex items-center gap-3 text-sm">
-			<span className="text-muted-foreground">
-				Zalogowano jako{" "}
-				<strong>{session.user.username ?? session.user.name}</strong>
-			</span>
+	if (session) {
+		return (
 			<Button type="button" variant="outline" size="sm" onClick={handleSignOut}>
 				Wyloguj
 			</Button>
-		</div>
+		);
+	}
+
+	return (
+		<Button asChild={true} size="sm">
+			<Link to="/logowanie">Zaloguj / Zarejestruj</Link>
+		</Button>
 	);
 }

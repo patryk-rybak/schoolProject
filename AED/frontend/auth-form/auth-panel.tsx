@@ -1,4 +1,5 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 import { Button } from "#/components/ui/button";
 import {
@@ -24,27 +25,31 @@ interface AuthError {
 }
 
 export function AuthPanel() {
-	const { data: session, isPending } = authClient.useSession();
+	const navigate = useNavigate();
+	const { data: session } = authClient.useSession();
+
+	useEffect(() => {
+		if (session) {
+			navigate({ to: "/", replace: true });
+		}
+	}, [navigate, session]);
+
+	if (session) {
+		return null;
+	}
 
 	return (
 		<Card>
 			<CardHeader>
 				<CardTitle>
-					<h2 className="font-bold text-2xl">Konto</h2>
+					<h1 className="font-bold text-2xl">Konto</h1>
 				</CardTitle>
 				<CardDescription>
-					Zaloguj się lub utwórz konto, aby później dodawać punkty AED.
+					Zaloguj się lub utwórz konto nazwą użytkownika i hasłem.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="grid gap-5">
-				{session ? (
-					<SignedInNotice
-						username={session.user.username ?? session.user.name}
-						userId={session.user.id}
-					/>
-				) : (
-					<AuthForm isPending={isPending} />
-				)}
+				<AuthForm />
 
 				<div className="grid gap-2 border-t pt-4">
 					<Button
@@ -63,17 +68,9 @@ export function AuthPanel() {
 	);
 }
 
-function SignedInNotice(props: { username: string; userId: string }) {
-	return (
-		<p className="text-sm">
-			Zalogowano jako <strong>{props.username}</strong>
-			<span className="ml-2 text-muted-foreground">(id: {props.userId})</span>
-		</p>
-	);
-}
-
 // biome-ignore lint/complexity/noExcessiveLinesPerFunction: keeping the form fields together is easier to review.
-function AuthForm(props: { isPending: boolean }) {
+function AuthForm() {
+	const navigate = useNavigate();
 	const formId = useId();
 	const [mode, setMode] = useState<Mode>("login");
 	const [username, setUsername] = useState("");
@@ -81,7 +78,6 @@ function AuthForm(props: { isPending: boolean }) {
 	const [confirmation, setConfirmation] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [pending, setPending] = useState(false);
-	const disabled = pending || props.isPending;
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -121,6 +117,7 @@ function AuthForm(props: { isPending: boolean }) {
 
 			setPassword("");
 			setConfirmation("");
+			await navigate({ to: "/", replace: true });
 		} finally {
 			setPending(false);
 		}
@@ -147,7 +144,7 @@ function AuthForm(props: { isPending: boolean }) {
 					required={true}
 					value={username}
 					onChange={(event) => setUsername(event.target.value)}
-					disabled={disabled}
+					disabled={pending}
 				/>
 			</div>
 
@@ -162,7 +159,7 @@ function AuthForm(props: { isPending: boolean }) {
 					required={true}
 					value={password}
 					onChange={(event) => setPassword(event.target.value)}
-					disabled={disabled}
+					disabled={pending}
 				/>
 			</div>
 
@@ -178,7 +175,7 @@ function AuthForm(props: { isPending: boolean }) {
 						required={true}
 						value={confirmation}
 						onChange={(event) => setConfirmation(event.target.value)}
-						disabled={disabled}
+						disabled={pending}
 					/>
 				</div>
 			) : null}
@@ -189,7 +186,7 @@ function AuthForm(props: { isPending: boolean }) {
 				</p>
 			) : null}
 
-			<Button type="submit" disabled={disabled}>
+			<Button type="submit" disabled={pending}>
 				{pending ? "Przetwarzanie…" : submitLabel(mode)}
 			</Button>
 		</form>

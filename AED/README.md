@@ -180,13 +180,18 @@ oraz hasłem, zanim w przyszłości dojdzie podpisywanie dodawanych punktów AED
 - walidacja po polsku: nazwa 3–30 znaków (`a-z`, `0-9`, `_`), hasło min. 8,
   potwierdzenie hasła przy rejestracji,
 - komunikaty błędów m.in. dla zajętej nazwy i błędnych danych logowania,
-- w prawym górnym rogu: nazwa zalogowanego użytkownika i przycisk
-  **Wyloguj**,
-- pod blokiem logowania: **wyłączony** przycisk **„Zaloguj z gov.pl”** —
-  placeholder, który nic nie robi.
+- strona główna to nagłówek + mapa; w prawym górnym rogu nagłówka jest
+  przycisk **„Zaloguj / Zarejestruj”** prowadzący do `/logowanie`,
+- strona `/logowanie` ma wyśrodkowany panel z polami nazwa użytkownika i
+  hasło oraz przyciskami **Zaloguj** i **Zarejestruj**,
+- pod formularzem na `/logowanie` jest **wyłączony** przycisk
+  **„Zaloguj z gov.pl”** — placeholder, który nic nie robi,
+- po udanym logowaniu lub rejestracji użytkownik wraca na stronę główną,
+  a w nagłówku zamiast „Zaloguj / Zarejestruj” pojawia się **Wyloguj**.
 
 **Pliki:** `frontend/auth-form/auth-panel.tsx` (formularze),
-`frontend/auth-form/site-header.tsx` (pasek z wylogowaniem),
+`frontend/auth-form/site-header.tsx` (przyciski w nagłówku),
+`frontend/routes/logowanie.tsx` (strona logowania),
 `frontend/lib/auth-client.ts` (klient z pluginem `username`).
 
 **Czego jeszcze nie ma:** dodawania punktów AED, podpisywania rekordów
