@@ -1,7 +1,8 @@
-import { getAedDevice } from "#backend/store/aed-store.ts";
+import { getCombinedAedDevice } from "#backend/store/aed-store.ts";
+import type { CombinedAedDevice } from "#backend/store/schema.ts";
 
 /**
- * Explicit JSON-safe shape for the optional canonical record. Keeping this
+ * Explicit JSON-safe shape for the canonical record. Keeping this
  * structural instead of reusing zod's inferred type avoids interface types
  * that TanStack Start's server-function serializer cannot validate.
  *
@@ -34,63 +35,103 @@ export interface AedDetail {
 	readonly canonical: CanonicalDetail | null;
 }
 
-/** Reads canonical JSON into a flat, JSON-safe detail object. */
-function toCanonicalDetail(parsed: unknown): CanonicalDetail {
-	if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+function parseAttributes(raw: string | null): Record<string, unknown> {
+	if (raw === null) {
 		return {};
 	}
-	const detail: Record<string, string | number | boolean | null> = {};
-	for (const [key, value] of Object.entries(
-		parsed as Record<string, unknown>,
-	)) {
-		if (value === null) {
-			detail[key] = null;
-		} else if (
-			typeof value === "string" ||
-			typeof value === "number" ||
-			typeof value === "boolean"
-		) {
-			detail[key] = value;
-		} else {
-			// Preserve nested objects/arrays as JSON text so no data is lost.
-			try {
-				detail[key] = JSON.stringify(value);
-			} catch {
-				detail[key] = null;
-			}
-		}
+	try {
+		const parsed: unknown = JSON.parse(raw);
+		return typeof parsed === "object" &&
+			parsed !== null &&
+			!Array.isArray(parsed)
+			? (parsed as Record<string, unknown>)
+			: {};
+	} catch {
+		return {};
 	}
-	return detail;
+}
+
+function attributeText(
+	attributes: Record<string, unknown>,
+	key: string,
+): string | null {
+	const value = attributes[key];
+	return typeof value === "string" && value !== "" ? value : null;
+}
+
+/** Builds a flat, JSON-safe canonical detail object from a combined store row. */
+function toCanonicalDetail(row: CombinedAedDevice): CanonicalDetail {
+	return {
+		version: row.version,
+		record_id: row.recordId,
+		source_id: row.sourceId,
+		source_record_id: row.sourceRecordId,
+		source_url: row.sourceUrl,
+		name: row.name,
+		description: row.description,
+		note: row.note,
+		facility_type: row.facilityType,
+		device_type: row.deviceType,
+		access_type: row.accessType,
+		status: row.status,
+		verification_status: row.verificationStatus,
+		verified_by: row.verifiedBy,
+		verified_by_kind: row.verifiedByKind,
+		verified_at: row.verifiedAt,
+		confidence: row.confidence,
+		lat: row.lat,
+		lon: row.lon,
+		coord_precision_m: row.coordPrecisionM,
+		location_status: row.locationStatus,
+		geom_source: row.geomSource,
+		address_text: row.addressText,
+		address_kind: row.addressKind,
+		address_source: row.addressSource,
+		address_confidence: row.addressConfidence,
+		geocode_provider: row.geocodeProvider,
+		geocode_version: row.geocodeVersion,
+		geocode_confidence: row.geocodeConfidence,
+		geocoded_at: row.geocodedAt,
+		geocode_input_sha256: row.geocodeInputSha256,
+		geocode_note: row.geocodeNote,
+		claim_status: row.claimStatus,
+		claimed_by: row.claimedBy,
+		claimed_at: row.claimedAt,
+		claim_note: row.claimNote,
+		field_provenance: row.fieldProvenance,
+		attributes: row.attributes,
+	};
 }
 
 export function getAedDetail(id: number): AedDetail | null {
-	const row = getAedDevice(id);
+	const row = getCombinedAedDevice(id);
 	if (!row) {
 		return null;
 	}
 
-	let canonical: CanonicalDetail | null = null;
-	if (row.canonical !== null) {
-		try {
-			canonical = toCanonicalDetail(JSON.parse(row.canonical));
-		} catch {
-			canonical = null;
-		}
-	}
+	const attributes = parseAttributes(row.attributes);
+	const street = attributeText(attributes, "street");
+	const houseNumber = attributeText(attributes, "house_number");
+	const attributeAddress = [street, houseNumber].filter(Boolean).join(" ");
+	const address =
+		row.addressText ??
+		(attributeAddress.length > 0
+			? attributeAddress
+			: attributeText(attributes, "address_text"));
 
 	return {
 		id: row.id,
-		name: row.name,
+		name: row.name ?? `AED (${row.sourceId})`,
 		latitude: row.lat,
 		longitude: row.lon,
-		address: row.address,
-		city: row.city,
-		access: row.access,
+		address,
+		city: attributeText(attributes, "city"),
+		access: row.accessType,
 		status: row.status,
-		source: row.source,
+		source: row.sourceId,
 		verificationStatus: row.verificationStatus,
 		verifiedBy: row.verifiedBy,
 		verifiedAt: row.verifiedAt,
-		canonical,
+		canonical: toCanonicalDetail(row),
 	};
 }

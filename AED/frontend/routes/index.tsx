@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Download } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Download, Plus } from "lucide-react";
 
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -28,8 +28,17 @@ function Home() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-4">
-					<div className="flex flex-wrap items-center justify-end gap-3">
+					<div className="flex flex-wrap items-center justify-between gap-3">
+						<p className="text-muted-foreground text-sm">
+							Kliknij mapę w dowolnym miejscu, aby dodać AED („Dodaj AED tutaj”).
+						</p>
 						<div className="flex flex-wrap items-center gap-2">
+							<Button asChild={true} size="sm">
+								<Link to="/dodaj-aed">
+									<Plus />
+									Dodaj AED
+								</Link>
+							</Button>
 							<Button asChild={true} size="sm" variant="outline">
 								<a href="/data/aed.xlsx" download={true}>
 									<Download />

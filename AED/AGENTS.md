@@ -18,7 +18,8 @@ Guidance for AI coding agents working in this repository. Keep this file current
 
 The application lives in `AED/`; all commands below run from that directory. The
 repository root keeps non-app material only: `task_description/` (challenge
-brief) and `dane.gov.pl/` (published portal sources and their run guide).
+brief), `dane.gov.pl/` (published portal sources and their run guide), and
+`docs/` (the static GitHub Pages share card).
 
 ## Project Snapshot
 
@@ -58,6 +59,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 | Apply migrations | `bun run db:migrate` |
 | Push schema to database | `bun run db:push` |
 | Seed development data | `bun run db:seed` |
+| Full daily source refresh (fetch + store) | `bun run db:refresh-sources` |
 | Open Drizzle Studio | `bun run db:studio` |
 | Add a shadcn component | `bunx --bun shadcn@latest add <name>` |
 | Generate Poland map tiles | `bun run map:tiles` |
@@ -83,7 +85,7 @@ for installed tools.
 
 ## Architecture
 
-- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `dodaj-aed.tsx`, `aed/$aedId.tsx` (detail page), `logowanie.tsx`, `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
+- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `logowanie.tsx`, `dodaj-aed.tsx`, `moje-aed.tsx`, `aed/$aedId.tsx` (detail page), `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
 - `frontend/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
 - `frontend/components/ui/` — shadcn/ui components in use (`accordion`, `alert`, `badge`, `button`, `card`, `checkbox`, `field`, `input`, `label`, `select`, `separator`, `tabs`, `textarea`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
 - `frontend/components/aed-form/` — manual AED form helpers: `model.ts` (field constants, types, initial values), `text-field.tsx` (labeled and read-only address inputs)
@@ -98,6 +100,8 @@ for installed tools.
 - `backend/auth/schema.ts` — better-auth tables (`user`, `session`, `account`, `verification`)
 - `frontend/auth-form/` — login/register panel and header with sign-out
 - `frontend/lib/auth-client.ts` — better-auth client
+- `frontend/lib/social-share.ts` — Facebook sharer URL and the post text copied after saving an AED; its landing-page URL must match `docs/share.html`
+- `docs/share.html`, `docs/razimy-dobrem.png` — static GitHub Pages campaign card published from `main` `/docs`; keep the canonical and `og:*` URLs in sync with `frontend/lib/social-share.ts`
 - `frontend/styles.css` — Tailwind v4 theme and CSS variables
 - `drizzle.config.ts` — Drizzle Kit config
 - `vite.config.ts` — Vite, TanStack Start, Tailwind, and Nitro plugins
@@ -121,7 +125,8 @@ Non-default paths to keep in mind: Vite serves static files from `frontend/publi
 - WAL mode is configured in `backend/store/index.ts`. Keep it.
 - Prefer Drizzle's synchronous APIs (`db.select().from(...).all()`) in Bun-native server code.
 - Schema changes require a generated migration and a corresponding `db:push` or `db:migrate`.
-- The development database has exactly one domain table, `aed_devices` (`backend/store/schema.ts`). Access it through `backend/store/aed-store.ts`, not by importing `db` directly. The table and its columns are temporary; the final AED model will replace it.
+- The domain schema has three physical AED tables in `backend/store/schema.ts`: `aed_devices` (user-added, signed by `created_by_id`, verified), `aed_source_devices` (imports; wiped/refilled, unverified), and the materialized `aed_devices_combined` read model used by the map and dane.gov.pl. Access them through `backend/store/aed-store.ts`, not by importing `db` directly. User writes and every source refresh update the combined table transactionally; import code must never delete or update `aed_devices`. `/moje-aed` lists only `created_by_id = session.user.id` and deletes through `deleteUserAedDevice`, which removes the row from both `aed_devices` and `aed_devices_combined` after an ownership check.
+- All three AED tables require `lat`/`lon` and only accept `location_status` `point`/`geocoded`; records without a point are dropped by the importers. `aed_devices_combined` must be rebuilt from the two source tables whenever they change.
 - `frontend/public/poland.pmtiles` is generated locally and ignored by git. Run `bun run map:tiles` after cloning or when the map data is stale. The script defaults to `POLAND_MAXZOOM=15` (about 4 GB), `PMTILES_THREADS=12`, and `PMTILES_ATTEMPTS=3`; override with `POLAND_BBOX` or `PROTOMAPS_PLANET_URL` when needed. The map pins the source `maxzoom` to 15 and overzooms those tiles up to `maxZoom: 18`. The script keeps an existing archive untouched and extracts to a temporary file before swapping, so failed downloads and normal runs never re-download or destroy it; set `POLAND_FORCE=1` to regenerate. Before swapping, it flushes the temporary file with `sync` and validates it with `pmtiles verify`; if the temporary file disappears during the download (the `*.pmtiles.tmp.*` name is ignored, so `git clean -fdX` can unlink it), it retries the extraction.
 - The MapLibre worker is bundled by Vite from `maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url`. `frontend/map/poland-map.tsx` configures its generated URL with `maplibregl.setWorkerUrl()` at module load in the browser. No copied public asset, manual cache-busting query, or server route is needed.
 - The PMTiles archive is served by `frontend/routes/api/pmtiles.ts` with HTTP byte-range support; static hosting does not provide the range responses PMTiles needs.
@@ -145,7 +150,7 @@ Environment variables live in `.env.local` (never committed):
 - Keep the generated components on their Radix UI base; do not swap in another primitive library.
 - Use the generated `cn` helper (from the `cn` package) or `#/lib/utils`.
 - Use `lucide-react` for icons.
-- Preserve the `new-york` style and CSS-variable theme in `components.json` and `frontend/styles.css`.
+- Preserve the `new-york` style and CSS-variable theme in `components.json` and `frontend/styles.css`. The Facebook share button intentionally uses Facebook brand blue (`#1877F2`); it is the only non-theme color in that card.
 
 ## Code Style
 

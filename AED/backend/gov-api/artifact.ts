@@ -1,5 +1,5 @@
-import { db } from "#backend/store/index.ts";
-import { type AedDevice, aedDevices } from "#backend/store/schema.ts";
+import { listCombinedAedDevices } from "#backend/store/aed-store.ts";
+import type { CombinedAedDevice } from "#backend/store/schema.ts";
 
 import { buildCsv } from "./csv";
 import { buildFeed } from "./feed";
@@ -14,6 +14,7 @@ import { buildXlsx } from "./xlsx";
  */
 const DEFAULT_PUBLIC_BASE_URL = "https://localhost:3443";
 const TRAILING_SLASHES = /\/+$/u;
+const PUBLISHED_LOCATION_STATUSES = ["point", "geocoded"] as const;
 
 export function publicBaseUrl(): string {
 	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket access.
@@ -40,26 +41,37 @@ export interface ExportSnapshot {
 	readonly feed: FeedArtifact;
 }
 
-let exportCache: ExportSnapshot | null = null;
+function isPublishedRow(row: CombinedAedDevice): boolean {
+	return (
+		row.lat !== null &&
+		row.lon !== null &&
+		PUBLISHED_LOCATION_STATUSES.some((status) => status === row.locationStatus)
+	);
+}
+
+let exportCache: {
+	readonly key: string;
+	readonly snapshot: ExportSnapshot;
+} | null = null;
 
 /**
  * Read all rows once per snapshot, build each artifact lazily on first use,
  * and keep the results until the ordered row content changes.
  *
  * Hashing the exported row tuples catches in-place edits within the same
- * second; a cheap count/max signal would miss them. Cache misses are rare
- * because exports are append-heavy and served from the same process.
+ * second; a cheap count/max signal would miss them.
  *
  * Artifact builders run behind memoized getters so hitting one endpoint
  * (e.g. the tiny harvester feed) never pays for the XLSX zip or the full
  * GeoJSON serialization.
  */
 export function getExportSnapshot(): ExportSnapshot {
-	if (exportCache !== null) {
-		return exportCache;
+	const rows = listCombinedAedDevices().filter(isPublishedRow);
+	const key = snapshotKey(rows);
+	if (exportCache !== null && exportCache.key === key) {
+		return exportCache.snapshot;
 	}
 
-	const rows = db.select().from(aedDevices).orderBy(aedDevices.id).all();
 	const records = rows.map(toFeedRecord);
 	const latest = rows.reduce<Date | null>(
 		(acc, row) => (acc === null || row.updatedAt > acc ? row.updatedAt : acc),
@@ -67,26 +79,12 @@ export function getExportSnapshot(): ExportSnapshot {
 	);
 	const latestMs = latest?.getTime() ?? Date.now();
 	const snapshot = {
-		key: snapshotKey(rows),
+		key,
 		latest: latestMs,
 	} as ExportSnapshot;
 	defineLazy(snapshot, "csv", () => buildCsv(records));
 	defineLazy(snapshot, "geojson", () => buildGeoJson(records));
-	defineLazy(snapshot, "points", () =>
-		// Description lives only in the canonical JSON; parse it lazily here so
-		// the harvester artifacts never pay for 19k JSON.parse calls. The
-		// verbose /data/aed.geojson contract stays unchanged.
-		buildPointsGeoJson(
-			rows.map((row, index) => {
-				const record = records[index];
-				if (record === undefined) {
-					throw new Error("Feed record missing for row");
-				}
-				const description = canonicalDescription(row.canonical);
-				return description === null ? record : { ...record, description };
-			}),
-		),
-	);
+	defineLazy(snapshot, "points", () => buildPointsGeoJson(records));
 	defineLazy(snapshot, "xlsx", () => buildXlsx(records));
 	defineLazy(snapshot, "feed", () =>
 		buildFeed(records, {
@@ -95,7 +93,7 @@ export function getExportSnapshot(): ExportSnapshot {
 			recordCount: records.length,
 		}),
 	);
-	exportCache = snapshot;
+	exportCache = { key, snapshot };
 	return snapshot;
 }
 
@@ -146,26 +144,64 @@ export function getXlsx(): ArrayBuffer {
 }
 
 /** Identity that changes on insertion, deletion and in-place row edits. */
-function snapshotKey(rows: readonly AedDevice[]): string {
+function snapshotKey(rows: readonly CombinedAedDevice[]): string {
 	const hash = new Bun.CryptoHasher("sha256");
 	for (const row of rows) {
 		hash.update(
-			`${row.id}\u0000${row.updatedAt.getTime()}\u0000${row.source}\u0000${row.canonical ?? ""}\u0000${row.name}\u0000${row.lat}\u0000${row.lon}\u0000${row.city ?? ""}\u0000${row.access}\u0000${row.status}\u0000${row.verificationStatus}\u0000${row.verifiedBy ?? ""}\u0000${row.verifiedByKind ?? ""}\u0000${row.verifiedAt ?? ""}\u0001`,
+			`${row.id}\u0000${row.updatedAt.getTime()}\u0000${row.recordId}\u0000${row.sourceId}\u0000${row.sourceRecordId}\u0000${row.sourceUrl ?? ""}\u0000${row.name ?? ""}\u0000${row.description ?? ""}\u0000${row.lat}\u0000${row.lon}\u0000${row.addressText ?? ""}\u0000${row.attributes ?? ""}\u0000${row.accessType}\u0000${row.status}\u0000${row.verificationStatus}\u0000${row.verifiedBy ?? ""}\u0000${row.verifiedByKind ?? ""}\u0000${row.verifiedAt ?? ""}\u0000${row.locationStatus}\u0000${row.geomSource}\u0001`,
 		);
 	}
 	return `${rows.length}:${hash.digest("hex")}`;
 }
 
-function toFeedRecord(row: AedDevice): FeedRecord {
+function attributesOf(row: CombinedAedDevice): Record<string, unknown> {
+	if (row.attributes === null) {
+		return {};
+	}
+	try {
+		const parsed: unknown = JSON.parse(row.attributes);
+		return typeof parsed === "object" &&
+			parsed !== null &&
+			!Array.isArray(parsed)
+			? (parsed as Record<string, unknown>)
+			: {};
+	} catch {
+		return {};
+	}
+}
+
+function attributeText(
+	attributes: Record<string, unknown>,
+	key: string,
+): string | null {
+	const value = attributes[key];
+	if (typeof value !== "string") {
+		return null;
+	}
+	const trimmed = value.trim();
+	return trimmed === "" ? null : trimmed;
+}
+
+function nonEmptyText(value: string | null): string | null {
+	if (value === null) {
+		return null;
+	}
+	const trimmed = value.trim();
+	return trimmed === "" ? null : trimmed;
+}
+
+function toFeedRecord(row: CombinedAedDevice): FeedRecord {
+	const attributes = attributesOf(row);
 	return {
 		id: row.id,
-		sourceId: row.source,
-		name: row.name,
+		sourceId: row.sourceId,
+		name: nonEmptyText(row.name) ?? `AED (${row.sourceId})`,
 		lat: row.lat,
 		lon: row.lon,
-		city: row.city,
-		address: row.address,
-		access: row.access,
+		city: attributeText(attributes, "city"),
+		address: nonEmptyText(row.addressText),
+		description: nonEmptyText(row.description),
+		access: row.accessType,
 		status: row.status,
 		verificationStatus: row.verificationStatus,
 		verifiedBy: row.verifiedBy,
@@ -174,20 +210,24 @@ function toFeedRecord(row: AedDevice): FeedRecord {
 		uuid: stableUuid(row),
 		createdAt: row.createdAt.toISOString(),
 		updatedAt: row.updatedAt.toISOString(),
-		...canonicalExportFields(row.canonical),
+		recordId: row.recordId,
+		sourceRecordId: row.sourceRecordId,
+		sourceUrl: nonEmptyText(row.sourceUrl),
+		locationStatus: row.locationStatus,
+		geomSource: row.geomSource,
 	};
 }
 
 /**
  * Deterministic UUID for rows without a native UUID column.
  *
- * The integer primary key is stable for a row's lifetime, but the public
- * contract needs a UUID-shaped identifier; hashing the `source:id` pair keeps
+ * The canonical `recordId` is stable across source refreshes, and the public
+ * contract needs a UUID-shaped identifier; hashing `sourceId:recordId` keeps
  * repeated exports of the same snapshot byte-identical.
  */
-function stableUuid(row: AedDevice): string {
+function stableUuid(row: CombinedAedDevice): string {
 	const hash = new Bun.CryptoHasher("sha256")
-		.update(`${row.source}:${row.id}`)
+		.update(`${row.sourceId}:${row.recordId}`)
 		.digest("hex");
 	// Keep a valid UUID v4 shape while preserving deterministic bits.
 	const variant = (
@@ -213,74 +253,3 @@ const UUID_NIBBLE_COUNT = 4;
 const UUID_VARIANT_BASE = 8;
 const UUID_VERSION_BASE = 4;
 const UUID_GROUP_STARTS = [0, 8, 12, 16, 24] as const;
-
-interface CanonicalExportFields {
-	readonly recordId: string | null;
-	readonly sourceRecordId: string | null;
-	readonly sourceUrl: string | null;
-	readonly locationStatus: string | null;
-	readonly geomSource: string | null;
-}
-
-/** Reads provenance from the optional canonical JSON without trusting its shape. */
-function canonicalExportFields(raw: string | null): CanonicalExportFields {
-	const empty: CanonicalExportFields = {
-		recordId: null,
-		sourceRecordId: null,
-		sourceUrl: null,
-		locationStatus: null,
-		geomSource: null,
-	};
-	if (raw === null) {
-		return empty;
-	}
-
-	let parsed: unknown;
-	try {
-		parsed = JSON.parse(raw);
-	} catch {
-		return empty;
-	}
-	if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-		return empty;
-	}
-	const canonical = parsed as Record<string, unknown>;
-	return {
-		// biome-ignore lint/complexity/useLiteralKeys: exported types require index-signature keys in bracket notation.
-		recordId: readText(canonical["record_id"]),
-		// biome-ignore lint/complexity/useLiteralKeys: exported types require index-signature keys in bracket notation.
-		sourceRecordId: readText(canonical["source_record_id"]),
-		// biome-ignore lint/complexity/useLiteralKeys: exported types require index-signature keys in bracket notation.
-		sourceUrl: readText(canonical["source_url"]),
-		// biome-ignore lint/complexity/useLiteralKeys: exported types require index-signature keys in bracket notation.
-		locationStatus: readText(canonical["location_status"]),
-		// biome-ignore lint/complexity/useLiteralKeys: exported types require index-signature keys in bracket notation.
-		geomSource: readText(canonical["geom_source"]),
-	};
-}
-
-function readText(value: unknown): string | null {
-	if (typeof value !== "string") {
-		return null;
-	}
-	const text = value.trim();
-	return text === "" ? null : text;
-}
-
-/** Reads the location description from canonical JSON without trusting it. */
-function canonicalDescription(raw: string | null): string | null {
-	if (raw === null) {
-		return null;
-	}
-	let parsed: unknown;
-	try {
-		parsed = JSON.parse(raw);
-	} catch {
-		return null;
-	}
-	if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-		return null;
-	}
-	// biome-ignore lint/complexity/useLiteralKeys: index-signature keys need bracket access.
-	return readText((parsed as Record<string, unknown>)["description"]);
-}

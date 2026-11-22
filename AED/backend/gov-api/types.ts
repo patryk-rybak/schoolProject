@@ -1,8 +1,8 @@
 /**
  * Minimal row shape published to dane.gov.pl.
  *
- * Deliberately smaller than the database model: the temporary dev table may
- * change, but the published contract should stay stable.
+ * Deliberately smaller than the database model: the published contract exposes
+ * verification fields but never `origin` or `created_by_id`.
  */
 export interface FeedRecord {
 	readonly id: number;

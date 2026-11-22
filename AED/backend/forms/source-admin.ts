@@ -11,7 +11,7 @@ import {
 } from "../../src/server/ingest/config/schema.ts";
 import { parseRawSource } from "../../src/server/ingest/core/parse.ts";
 import { fetchSource } from "../../src/server/ingest/fetch/source-fetch.ts";
-import { deleteAedDevicesBySource } from "../store/aed-store.ts";
+import { deleteSourceAedDevices } from "../store/aed-store.ts";
 
 /**
  * Server-side admin operations behind the source forms (/zrodla):
@@ -218,7 +218,7 @@ export async function previewSource(input: unknown): Promise<SourcePreview> {
 	};
 }
 
-/** Removes a source config from the registry and its rows from the store. */
+/** Removes a source config and only its imported rows. */
 export function deleteSource(sourceId: string): { removedRows: number } {
 	const registry = readRegistryJson();
 	const next = registry.sources.filter((entry) => {
@@ -229,5 +229,5 @@ export function deleteSource(sourceId: string): { removedRows: number } {
 		throw new SourceAdminError(`Nie znaleziono źródła: ${sourceId}.`);
 	}
 	writeRegistryJson(next);
-	return { removedRows: deleteAedDevicesBySource(sourceId) };
+	return { removedRows: deleteSourceAedDevices(sourceId) };
 }

@@ -1,5 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { CircleAlert, CircleCheck, MapPin, Search } from "lucide-react";
+import {
+	createFileRoute,
+	Link,
+	redirect,
+	useNavigate,
+} from "@tanstack/react-router";
+import {
+	CircleAlert,
+	CircleCheck,
+	Facebook,
+	MapPin,
+	Search,
+} from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { z } from "zod";
 
@@ -56,10 +67,12 @@ import {
 	SelectValue,
 } from "#/components/ui/select";
 import { Textarea } from "#/components/ui/textarea";
+import { buildFacebookPostText, FACEBOOK_SHARE_URL } from "#/lib/social-share";
 import { LazyPolandMap } from "#/map/lazy-poland-map";
 import {
 	type FormIssue,
 	geocodeAddressFn,
+	getSessionUserFn,
 	reverseGeocodeFn,
 	saveManualAedFn,
 } from "#/server/forms";
@@ -76,6 +89,12 @@ const searchSchema = z.object({
  */
 export const Route = createFileRoute("/dodaj-aed")({
 	validateSearch: searchSchema,
+	beforeLoad: async () => {
+		const session = await getSessionUserFn();
+		if (!session) {
+			throw redirect({ to: "/logowanie" });
+		}
+	},
 	component: AddAedPage,
 	head: () => ({ meta: [{ title: "Wpis AED — Mapa AED" }] }),
 });
@@ -102,7 +121,9 @@ function AddAedPage() {
 	const [saving, setSaving] = useState(false);
 	const [issues, setIssues] = useState<FormIssue[]>([]);
 	const [serverError, setServerError] = useState<string | null>(null);
-	const [saved, setSaved] = useState<{ id: number; name: string } | null>(null);
+	const [saved, setSaved] = useState<{ name: string } | null>(null);
+	const [copyFailed, setCopyFailed] = useState(false);
+	const navigate = useNavigate();
 
 	const lat = Number.parseFloat(values.lat ?? "");
 	const lon = Number.parseFloat(values.lon ?? "");
@@ -245,15 +266,28 @@ function AddAedPage() {
 				data: { values: payload, geocode },
 			});
 			if (!result.ok) {
+				if (result.code === "unauthorized") {
+					await navigate({ to: "/logowanie", replace: true });
+					return;
+				}
 				setIssues(result.issues);
 				setServerError(result.message);
 				return;
 			}
-			setSaved({ id: result.id, name: result.name });
+			setSaved({ name: result.name });
 		} catch (error) {
 			setServerError(error instanceof Error ? error.message : String(error));
 		} finally {
 			setSaving(false);
+		}
+	}
+
+	async function copyPostText(text: string) {
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopyFailed(false);
+		} catch {
+			setCopyFailed(true);
 		}
 	}
 
@@ -270,19 +304,63 @@ function AddAedPage() {
 		setReverseGeocoding(false);
 		setIssues([]);
 		setServerError(null);
+		setCopyFailed(false);
 	}
 
 	if (saved) {
+		const postText = buildFacebookPostText(saved.name);
+
 		return (
 			<main className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
 				<Alert>
 					<CircleCheck />
 					<AlertTitle>Zapisano zgłoszenie AED „{saved.name}”</AlertTitle>
 					<AlertDescription>
-						Rekord nr {saved.id} został dodany do mapy i jest dostępny w
-						eksportach danych.
+						Rekord jest już widoczny na mapie i w eksportach danych.
 					</AlertDescription>
 				</Alert>
+				<Card>
+					<CardHeader>
+						<CardTitle>⚡ Poraź dobrem</CardTitle>
+						<CardDescription>
+							Daj znać o nowym defibrylatorze! Udostępnij post jednym
+							kliknięciem i zachęć innych do akcji.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-3">
+						<Button
+							asChild={true}
+							className="w-fit bg-[#1877F2] text-white hover:bg-[#166FE5]"
+						>
+							<a
+								href={FACEBOOK_SHARE_URL}
+								onClick={() => {
+									copyPostText(postText);
+								}}
+								rel="noopener noreferrer"
+								target="_blank"
+							>
+								<Facebook aria-hidden="true" className="fill-current" />
+								Udostępnij na Facebooku
+							</a>
+						</Button>
+						{copyFailed ? (
+							<>
+								<p className="text-destructive text-sm" role="alert">
+									Nie udało się skopiować tekstu. Skopiuj go ręcznie z pola
+									poniżej.
+								</p>
+								<Textarea
+									aria-label="Tekst posta do skopiowania"
+									className="min-h-28"
+									onFocus={(event) => event.currentTarget.select()}
+									readOnly={true}
+									value={postText}
+								/>
+							</>
+						) : null}
+					</CardContent>
+				</Card>
 				<div className="flex flex-wrap gap-3">
 					<Button asChild={true}>
 						<Link to="/">Wyświetl na mapie</Link>

@@ -1,6 +1,9 @@
 # Mapa AED
 
-Minimalna aplikacja TanStack Start, która renderuje mapę Polski z MapLibre GL JS i kafelkami Protomaps oraz polskimi etykietami. To punkt wyjścia dla mapy AED (defibrylatorów).
+Otwarty rejestr AED dla Polski: mapa z MapLibre GL JS, dodawanie urządzeń
+przez zalogowanych użytkowników, import danych z zewnętrznych źródeł,
+kanoniczny schemat rekordów w SQLite oraz publikacja w dane.gov.pl. Aplikacja
+jest zbudowana na TanStack Start, Vite/Nitro i Bunie.
 
 ## Spis treści
 
@@ -63,6 +66,7 @@ zostają tylko materiały niezwiązane z uruchamianiem aplikacji:
 | Ścieżka | Zawartość |
 | --- | --- |
 | `AED/` | aplikacja: kod, konfiguracja, skrypty, dokumentacja techniczna |
+| `docs/` | statyczna strona kampanii „Poraź dobrem” publikowana przez GitHub Pages (`share.html`, obraz OG) |
 | `task_description/` | treść zadania konkursowego (PDF) |
 | `dane.gov.pl/` | opublikowane źródła portalu dane.gov.pl (archiwa) i instrukcja uruchomienia |
 
@@ -81,23 +85,20 @@ Cały kod aplikacji jest podzielony na dwie warstwy:
 ```text
 AED/
 ├── frontend/                 # routing, komponenty, hooki, style
-│   ├── routes/               # trasy TanStack (w tym /api/*)
+│   ├── routes/               # mapa, /logowanie, /dodaj-aed, /moje-aed, /aed/$aedId, /zrodla, /data, /harvester
 │   ├── router.tsx            # fabryka routera
 │   ├── routeTree.gen.ts      # generowany — nie edytować ręcznie
 │   ├── components/           # komponenty własne + ui/ (shadcn, rejestr)
 │   ├── map/                  # mapa AED (MapLibre + Protomaps)
-│   ├── lib/                  # helpery klienta (cn, etykiety AED, auth-client)
-│   ├── auth-form/            # moduł: logowanie/rejestracja
+│   ├── auth-form/            # logowanie/rejestracja
 │   ├── server/               # server functions (forms.ts)
-│   ├── aed-form/             # moduł: formularz AED
-│   └── social-media/         # moduł: propozycje postów
+│   └── hooks/, lib/          # hooki i helpery klienta (cn, etykiety AED, auth-client, social-share)
 ├── backend/                  # dane, uwierzytelnianie, integracje
 │   ├── auth/                 # better-auth (serwer)
 │   ├── forms/                # zapis ręczny AED, geokodowanie, admin źródeł
-│   ├── store/                # Drizzle + bun:sqlite, repozytorium AED
-│   ├── ingest/               # pobieranie źródeł i budowa rdzenia
-│   ├── normalize/            # standaryzacja danych
-│   └── gov-api/              # feed dla dane.gov.pl
+│   ├── store/                # Drizzle + bun:sqlite, tabele źródłowe + tabela łączona
+│   ├── ingest/               # rejestr źródeł (konfiguracja)
+│   └── gov-api/              # feed i eksporty dla dane.gov.pl
 ├── src/server/ingest/        # loader, schemat, fetch i core
 ├── SOURCES.md                # pełny inwentarz 79 źródeł danych
 └── scripts/                  # narzędzia deweloperskie
@@ -112,11 +113,13 @@ Aliasy ścieżek: `#/*` → `frontend/*`, `#backend/*` → `backend/*`
 | --- | --- | --- | --- |
 | frontend | auth-form | działa | [Logowanie i rejestracja](#logowanie-i-rejestracja-auth-form) |
 | frontend | aed-form | działa (dev) | [Formularz AED](#formularz-aed-aed-form) |
+| frontend | my-aed | działa | [Moje AED](#moje-aed-my-aed) |
 | frontend | map | działa (mapa + wybór punktu) | [Mapa AED](#mapa-aed-map) |
+| frontend | social-share | działa | [Udostępnianie na Facebooku](#udostępnianie-na-facebooku-social-share) |
 | frontend | social-media | planowane | [Propozycje postów](#propozycje-postów-social-media) |
-| backend | auth | działa (podstawy) | [Uwierzytelnianie](#uwierzytelnianie-auth) |
+| backend | auth | działa | [Uwierzytelnianie](#uwierzytelnianie-auth) |
 | backend | ingest | działa (dev) | [Pobieranie danych](#pobieranie-danych-ingest) |
-| backend | normalize | planowane | [Standaryzacja danych](#standaryzacja-danych-normalize) |
+| backend | normalize | częściowo działa | [Standaryzacja danych](#standaryzacja-danych-normalize) |
 | backend | store | działa (dev) | [Baza danych](#baza-danych-store) |
 | backend | gov-api | działa | [Integracja z dane.gov.pl](#integracja-z-danegovpl-gov-api) |
 
@@ -163,16 +166,28 @@ hooków instalacyjnych.
 | Dane startowe (dev) | `bun run db:seed` |
 | Drizzle Studio | `bun run db:studio` |
 | Ingest źródeł i budowa core | `bun run ingest:run` |
+| Pełny refresh tabeli źródeł z gotowego core | `bun run db:load-core` |
+| Dzienny refresh (fetch + zapis) | `bun run db:refresh-sources` |
 | Kafelki mapy | `bun run map:tiles` |
 | Nowy komponent shadcn | `bunx --bun shadcn@latest add <nazwa>` |
 
 ## Architektura i przepływ danych
 
 ```
-źródła → ingest → normalize → store → gov-api → dane.gov.pl
-                     ↑
-                frontend (mapa, formularze)
+źródła zewnętrzne ──ingest──> aed_source_devices ─┐
+                                                   ├──> aed_devices_combined ──> mapa / CSV / GeoJSON / feed
+użytkownik ──/dodaj-aed──> aed_devices ────────────┘
 ```
+
+Model danych ma dwa niezależne cykle życia:
+
+- `aed_devices` — rekordy dodane przez zalogowanego użytkownika; są trwałe,
+  podpisane jego identyfikatorem i od razu zweryfikowane,
+- `aed_source_devices` — rekordy z importów; cała tabela jest odświeżana,
+  a rekordy są zawsze niezweryfikowane,
+- `aed_devices_combined` — materializowana tabela łącząca oba źródła,
+  przebudowywana transakcyjnie; czytają z niej mapa, eksporty i dane.gov.pl,
+  a import nie może usunąć ani zmienić `aed_devices`.
 
 Zasady wspólne dla backendu:
 
@@ -219,7 +234,8 @@ hooki, style) oraz implementacje modułów.
 **Status:** działa · **Kod:** `frontend/auth-form/`, `backend/auth/`
 
 **Cel:** pozwolić użytkownikom założyć konto i zalogować się nazwą użytkownika
-oraz hasłem, zanim w przyszłości dojdzie podpisywanie dodawanych punktów AED.
+oraz hasłem. Sesja jest wymagana do dodania AED, a identyfikator konta podpisuje
+nowy rekord.
 
 **Co działa:**
 
@@ -235,21 +251,25 @@ oraz hasłem, zanim w przyszłości dojdzie podpisywanie dodawanych punktów AED
 - komunikaty błędów m.in. dla zajętej nazwy i błędnych danych logowania,
 - strona główna to nagłówek + mapa; w prawym górnym rogu nagłówka jest
   przycisk **„Zaloguj / Zarejestruj”** prowadzący do `/logowanie`,
+- w nawigacji jest link **„Moje AED”**; bez sesji prowadzi on do
+  `/logowanie`, a po zalogowaniu pokazuje własne rekordy użytkownika,
 - strona `/logowanie` ma wyśrodkowany panel z polami nazwa użytkownika i
   hasło oraz przyciskami **Zaloguj** i **Zarejestruj**,
 - pod formularzem na `/logowanie` jest **wyłączony** przycisk
   **„Zaloguj z gov.pl”** — placeholder, który nic nie robi,
 - po udanym logowaniu lub rejestracji użytkownik wraca na stronę główną,
   a w nagłówku zamiast „Zaloguj / Zarejestruj” pojawia się
-  **Witaj {nazwa}!** oraz **Wyloguj**.
+  **Witaj {nazwa}!** oraz **Wyloguj**,
+- identyfikator zalogowanego konta trafia do `aed_devices.created_by_id`
+  i jest jednocześnie zapisywany jako weryfikator rekordu.
 
 **Pliki:** `frontend/auth-form/auth-panel.tsx` (formularze),
 `frontend/auth-form/site-header.tsx` (przyciski w nagłówku),
 `frontend/routes/logowanie.tsx` (strona logowania),
 `frontend/lib/auth-client.ts` (klient z pluginem `username`).
 
-**Czego jeszcze nie ma:** dodawania punktów AED, podpisywania rekordów
-identyfikatorem użytkownika, ról i uprawnień, logowania przez gov.pl.
+**Czego jeszcze nie ma:** ról i uprawnień, limitowania prób logowania,
+weryfikacji e-maila, logowania przez gov.pl, zarządzania kontem.
 
 ### Formularz AED (aed-form)
 
@@ -262,16 +282,20 @@ bezpośrednio w aplikacji.
 
 **Co działa:**
 
+- `/dodaj-aed` wymaga zalogowania: bez sesji użytkownik jest przekierowany
+  na `/logowanie`, a zapis po stronie serwera i tak odrzuca brak sesji.
 - `/dodaj-aed` — formularz ręcznego rekordu obejmujący pełny schemat
-  kanoniczny (nazwa, adres, dostępność, urządzenie, przeglądy, opiekun,
-  weryfikacja). Punkt lokalizacji wybiera się klikając mapę albo wyznacza z
-  adresu przyciskiem „Wyznacz współrzędne z adresu” (geokodowanie Nominatim
-  po stronie serwera, `backend/forms/geocode.ts`, z limitem 1 żądania/s).
+  kanoniczny (nazwa, adres, dostępność, urządzenie, przeglądy, opiekun).
+  Punkt lokalizacji wybiera się klikając mapę albo wyznacza z adresu
+  przyciskiem „Wyznacz współrzędne z adresu” (geokodowanie Nominatim po
+  stronie serwera, `backend/forms/geocode.ts`, z limitem 1 żądania/s).
+- nowy rekord jest podpisany identyfikatorem konta (`created_by_id`) i od razu
+  oznaczony jako zweryfikowany przez dodającego użytkownika.
 - Kliknięcie dowolnego miejsca na mapie głównej otwiera popup „Dodaj AED
   tutaj” z linkiem do formularza z wypełnionymi współrzędnymi.
 - `/zrodla` — rejestr konektorów (`backend/ingest/datasources-config.json`)
   z akcjami „Importuj do mapy” (fetch → parse → map → validate → zapis do
-  dev store, zastępuje wiersze danego źródła) i „Usuń”.
+  `aed_source_devices`, zastępuje tylko wiersze danego źródła) i „Usuń”.
 - `/zrodla/nowe` — kreator konektora: plik kolumnowy po HTTPS (CSV, XLSX,
   JSON, GeoJSON, KML) albo magazyn danych (SQLite, PostgreSQL, S3). Podgląd
   kolumn i przykładowych wierszy, a następnie mapowanie kolumn na pola
@@ -284,28 +308,59 @@ bezpośrednio w aplikacji.
   tracą wpisanych danych przy błędzie.
 
 **Czego jeszcze nie ma:** edycja istniejących rekordów, moderacja zgłoszeń,
-historia zmian, powiązanie z kontami (auth).
+historia zmian, deduplikacja łączonej tabeli.
 
 **Zależności:** [backend/store](#baza-danych-store) — zapis rekordów,
 `src/server/ingest/` — walidacja konfiguracji i pipeline importu,
 `frontend/map/` — wspólny komponent wyboru punktu na mapie.
 
+### Moje AED (my-aed)
+
+**Status:** działa · **Kod:** `frontend/routes/moje-aed.tsx`,
+`frontend/server/forms.ts`, `backend/store/aed-store.ts`
+
+**Cel:** pokazać użytkownikowi wyłącznie jego własne defibrylatory i pozwolić
+mu je usuwać.
+
+**Co działa:**
+
+- link **Moje AED** w nagłówku prowadzi do `/moje-aed`; bez sesji `beforeLoad`
+  przekierowuje na `/logowanie`, a server functions sprawdzają sesję ponownie,
+- lista zawiera tylko rekordy, których `created_by_id` równa się id
+  zalogowanego konta; rekordy innych użytkowników i importy są niewidoczne,
+- każdy wiersz pokazuje nazwę, adres/miasto, współrzędne, datę dodania i status
+  weryfikacji,
+- przycisk kosza wymaga potwierdzenia; usunięcie w jednej transakcji usuwa
+  rekord z `aed_devices` i z `aed_devices_combined` (dopasowanie po
+  `record_id`),
+- próba usunięcia cudzego rekordu jest odrzucana po stronie serwera,
+- przycisk **Dodaj AED** prowadzi do istniejącego formularza `/dodaj-aed`.
+
+**Czego jeszcze nie ma:** edycji istniejącego rekordu i przywracania usuniętych
+danych.
+
 ### Mapa AED (map)
 
-**Status:** częściowo istnieje · **Kod:** `frontend/map/`, `frontend/routes/index.tsx`
+**Status:** działa (dev) · **Kod:** `frontend/map/`, `frontend/routes/index.tsx`
 
 **Cel:** pokazać, gdzie znajdują się defibrylatory, czy są dostępne i czy
 działają — tak szybko, jak to możliwe, również na telefonie.
 
-**Zakres:**
+**Co działa:**
 
-- znaczniki AED z kolorem zależnym od statusu i dostępności,
-- klastrowanie przy dużej liczbie rekordów,
-- panel szczegółów: nazwa, adres, dostępność, status, źródło danych, licencja,
-- „najbliższy AED” na podstawie geolokalizacji (z obsługą odmowy zgody),
-- filtry (dostępność 24/7, status, źródło),
-- alternatywa dostępna z klawiatury: ta sama lista rekordów jako tabela,
-- responsywność 360×640 → desktop.
+- strona główna to nagłówek + mapa Polski (MapLibre, kafelki Protomaps),
+- punkty AED pochodzą z `/data/aed.geojson`, czyli z tabeli
+  `aed_devices_combined`; publikowane są tylko rekordy `point`/`geocoded`,
+- kolor punktu pokazuje weryfikację: **zielony** = zweryfikowany (rekord
+  użytkownika), **szary** = niezweryfikowany (import/seed),
+- popup pokazuje nazwę, miasto i informację o weryfikacji,
+- kliknięcie w mapę otwiera popup „Dodaj AED tutaj” z linkiem do formularza
+  i wypełnionymi współrzędnymi,
+- ten sam komponent mapy służy w formularzu do wyboru punktu.
+
+**Czego jeszcze nie ma:** klastrowania, filtrów, panelu szczegółów z pełnym
+adresem i licencją, funkcji „najbliższy AED”, tabelarycznej alternatywy dla
+mapy oraz automatycznego odświeżania punktów bez przeładowania strony.
 
 **Zależności:** dane z [backend/store](#baza-danych-store) → API/loader,
 kafelki z `frontend/routes/api/pmtiles.ts` i `frontend/public/poland.pmtiles`
@@ -347,6 +402,35 @@ Worker MapLibre jest ładowany przez Vite jako zasób wygenerowany z
 `frontend/map/poland-map.tsx` ustawia jego adres przez `maplibregl.setWorkerUrl()`
 raz przy starcie w przeglądarce. Nie trzeba ręcznie dodawać parametru `?v=`,
 kopiować pliku do `public/` ani serwować workera przez route serwerowy.
+
+### Udostępnianie na Facebooku (social-share)
+
+**Status:** działa · **Kod:** `frontend/lib/social-share.ts`,
+`frontend/routes/dodaj-aed.tsx`, `docs/share.html`
+
+**Cel:** po zapisaniu AED pozwolić jednym kliknięciem udostępnić kampanię
+„Poraź dobrem” na Facebooku, bez publicznego wdrażania całej aplikacji.
+
+**Co działa:**
+
+- ekran sukcesu `/dodaj-aed` pokazuje kartę **Poraź dobrem** z przyciskiem
+  w kolorach Facebooka,
+- kliknięcie kopiuje tekst posta z nazwą zapisanego AED i otwiera
+  `https://www.facebook.com/sharer/sharer.php?u=…` w nowej karcie,
+- publiczna strona `https://patryk-rybak.github.io/schoolProject/share.html`
+  (GitHub Pages, folder `docs/`) udostępnia obraz i tagi Open Graph; aplikacja
+  nadal działa wyłącznie lokalnie,
+- jeśli schowek jest niedostępny, tekst posta pojawia się w polu do ręcznego
+  skopiowania.
+
+**Uwagi:**
+
+- podgląd linku na Facebooku jest stały (obraz, tytuł, opis); nazwa AED
+  znajduje się tylko w kopiowanym tekście,
+- po zmianie obrazu użyj nowej nazwy pliku albo odśwież podgląd w
+  [Sharing Debugger](https://developers.facebook.com/tools/debug/),
+- publiczna strona nie zawiera danych aplikacji ani bazy; publikowany jest
+  wyłącznie folder `docs/`.
 
 ### Propozycje postów (social-media)
 
@@ -393,10 +477,10 @@ uwierzytelnianie, ingest, integracja z dane.gov.pl).
 
 ### Uwierzytelnianie (auth)
 
-**Status:** działa (podstawy) · **Kod:** `backend/auth/`, `frontend/auth-form/`
+**Status:** działa · **Kod:** `backend/auth/`, `frontend/auth-form/`
 
-**Cel:** wiedzieć, kto korzysta z aplikacji, i przygotować grunt pod
-podpisywanie danych identyfikatorem użytkownika.
+**Cel:** wiedzieć, kto korzysta z aplikacji, chronić dodawanie danych i podpisywać
+rekordy identyfikatorem konta.
 
 **Co działa:**
 
@@ -408,7 +492,11 @@ podpisywanie danych identyfikatorem użytkownika.
 - każdy użytkownik ma unikalne `user.id` (string generowany przez better-auth),
 - sesja w cookie HttpOnly, ważna 7 dni; wylogowanie unieważnia sesję,
 - rejestracja nie wymaga e-maila — UI tworzy techniczny adres
-  `<nazwa>@users.local`.
+  `<nazwa>@users.local`,
+- `session.user.id` jest przekazywany wyłącznie po stronie serwera do zapisu
+  ręcznego AED; klient nie może go podmienić,
+- `/dodaj-aed` sprawdza sesję w `beforeLoad`, a `saveManualAedFn` powtarza
+  sprawdzenie przed zapisem (obrona w głąb).
 
 **Pliki:** `backend/auth/auth.ts` (konfiguracja + adapter),
 `backend/auth/schema.ts` (tabele), `frontend/lib/auth-client.ts` (klient),
@@ -425,7 +513,7 @@ Sekret wygenerujesz przez `openssl rand -hex 32` (albo
 `bunx --bun @better-auth/cli secret`).
 
 **Czego jeszcze nie ma:** ról i uprawnień, limitowania prób logowania,
-weryfikacji e-maila, logowania przez gov.pl, podpisywania rekordów.
+weryfikacji e-maila, logowania przez gov.pl, zarządzania kontem.
 
 ### Pobieranie danych (ingest)
 
@@ -479,41 +567,87 @@ bun run core:build
 bun run ingest:run -- --no-fetch
 ```
 
-**Zależności:** [baza danych](#baza-danych-store) (docelowy zapis przebiegów
-pobierania) oraz `src/server/ingest/core/` (parsowanie, mapowanie, walidacja i
-zapis wspólnego zbioru).
+**Zapis do bazy:** `bun run db:load-core` bierze punktowe rekordy z
+`.data/core/core.json` i w jednej transakcji zastępuje całą tabelę
+`aed_source_devices`. Tabela użytkowników `aed_devices` nie jest przy tym
+dotykana. Pojedyncze źródło można też zaimportować z panelu `/zrodla`.
+
+**Zależności:** [baza danych](#baza-danych-store) — zapis rekordów źródłowych,
+`src/server/ingest/core/` — parsowanie, mapowanie i walidacja,
+[kanoniczny rekord AED](#kanoniczny-rekord-aed-canonical) — wspólny format.
 
 ### Standaryzacja danych (normalize)
 
-**Status:** planowane · **Kod:** brak
+**Status:** częściowo zaimplementowane · **Kod:** `src/server/ingest/canonical.ts`,
+`src/server/ingest/core/`, `backend/store/schema.ts`
 
 **Cel:** sprowadzić dane z wszystkich źródeł do jednego, porównywalnego
 formatu — tak, aby mapa i portal dane.gov.pl pokazywały ten sam zestaw pól
 niezależnie od źródła.
 
-**Zakres:**
+**Co już działa:**
 
-- mapowanie pól każdego źródła na wspólny model rekordu AED,
-- walidacja współrzędnych (obszar Polski) i odrzucanie błędnych rekordów
-  z czytelnym powodem,
-- normalizacja adresów i przypisanie TERYT (gmina/powiat/województwo),
-- interpretacja dostępności i statusu urządzenia (bez zgadywania),
-- deduplikacja tych samych urządzeń z różnych źródeł,
-- deterministyczne identyfikatory rekordów,
-- raport przyjętych i odrzuconych rekordów.
+- jeden kanoniczny schemat Zod (`canonical.ts`) dla importu i formularza,
+- mapowanie pól źródeł (`core/map.ts`) i walidacja reguł (`core/validate.ts`),
+- kanoniczne kolumny w SQLite oraz `field_provenance` i `attributes`,
+- obowiązkowe współrzędne: rekordy `address_only`/`unresolved`/`conflict`
+  są raportowane, ale nie trafiają do bazy,
+- deterministyczne `record_id` dla źródeł i unikalny identyfikator dla
+  rekordów użytkownika,
+- pola pewności, geokodowania i claimów w schemacie (jeszcze niewykorzystane
+  przez UI).
+
+**Czego jeszcze nie ma:** normalizacji adresów i przypisania TERYT,
+deduplikacji tych samych urządzeń z różnych źródeł, kolejki kwarantanny i
+ręcznej moderacji oraz pełnej historii zmian rekordu.
 
 **Zależności:** [pobieranie danych](#pobieranie-danych-ingest) — dane wejściowe,
+[kanoniczny rekord AED](#kanoniczny-rekord-aed-canonical) — wspólny format,
 [baza danych](#baza-danych-store) — zapis wyniku.
 
-**Stan obecny:** brak kodu. Reguły walidacji, cykl życia rekordu, pewność i
-kwarantanna nie zostały jeszcze zaimplementowane.
+### Kanoniczny rekord AED (canonical)
+
+**Status:** działa · **Źródło prawdy:** `src/server/ingest/canonical.ts`
+
+Każdy rekord — niezależnie od tego, czy pochodzi z importu, czy z formularza —
+ma ten sam kształt:
+
+| Grupa | Pola |
+| --- | --- |
+| tożsamość | `version`, `record_id`, `source_id`, `source_record_id`, `source_url` |
+| treść | `name`, `description`, `note`, `facility_type`, `device_type`, `access_type`, `status` |
+| weryfikacja | `verification_status`, `verified_by`, `verified_by_kind`, `verified_at`, `confidence` |
+| lokalizacja | `lat`, `lon`, `coord_precision_m`, `location_status`, `geom_source` |
+| adres i geokodowanie | `address_text`, `address_kind`, `address_source`, `address_confidence`, `geocode_*` |
+| claimy | `claim_status`, `claimed_by`, `claimed_at`, `claim_note` |
+| dodatkowe | `field_provenance`, `attributes` (JSON) |
+
+`location_status` opisuje jakość lokalizacji:
+
+| Wartość | Znaczenie | Zapis w bazie |
+| --- | --- | --- |
+| `point` | punkt podany przez źródło lub wskazany ręcznie | tak, publikowany |
+| `geocoded` | punkt wyznaczony z adresu | tak, publikowany |
+| `address_only` | znany tylko adres, brak punktu | nie |
+| `unresolved` | nie udało się ustalić lokalizacji | nie |
+| `conflict` | sprzeczne lokalizacje w źródłach | nie |
+
+Wszystkie tabele AED wymagają `lat`/`lon`, dlatego trzy ostatnie statusy są
+pomijane przy zapisie i liczone w raporcie importu. Mogą zostać później
+zgeokodowane i zapisane jako `geocoded`.
+
+W bazie dochodzą kolumny spoza schematu kanonicznego: `origin`
+(`user`/`source`/`seed`) oraz `created_by_id` (identyfikator autora rekordu
+użytkownika; `NULL` dla rekordów źródłowych, także w tabeli łączonej). SQLite
+`CHECK` pilnuje, żeby cykli życia i pól weryfikacji nie dało się pomylić.
 
 ### Baza danych (store)
 
-**Status:** częściowo istnieje (wersja deweloperska) · **Kod:** `backend/store/`
+**Status:** działa (wersja deweloperska) · **Kod:** `backend/store/`
 
-**Cel:** trzymać jeden, spójny zbiór defibrylatorów i udostępniać go reszcie
-aplikacji: mapie, formularzom i integracji z dane.gov.pl.
+**Cel:** trzymać kanoniczne rekordy AED w dwóch cyklach życia (użytkownik vs
+import), udostępniać jedną materializowaną tabelę łączoną mapie i eksportom
+oraz zagwarantować, że odświeżenie źródeł nigdy nie usunie danych użytkowników.
 
 Aplikacja używa natywnego sterownika SQLite Buna przez
 `drizzle-orm/bun-sqlite`. Plik bazy pochodzi z `DATABASE_URL` (domyślnie
@@ -524,19 +658,61 @@ Schemat jest podzielony na dwa pliki: `backend/store/schema.ts` (dane AED) i
 `backend/auth/schema.ts` (tabele better-auth). `drizzle.config.ts` wskazuje oba,
 więc migracje obejmują całość.
 
-W wersji deweloperskiej istnieje jedna tabela domenowa `aed_devices` (tymczasowa,
-kolumny mogą się zmieniać):
+Dane AED są przechowywane w trzech fizycznych tabelach o tym samym schemacie
+kanonicznym (`src/server/ingest/canonical.ts`):
 
-| Kolumna | Typ | Uwagi |
+| Tabela | Zawartość | Cykl życia |
 | --- | --- | --- |
-| `id` | integer PK | autoincrement |
-| `name` | text | wymagane |
-| `lat`, `lon` | real | wymagane |
-| `address`, `city` | text | opcjonalne |
-| `access` | text | `always` / `business_hours` / `restricted` / `unknown` |
-| `status` | text | `operational` / `out_of_service` / `unknown` |
-| `source` | text | skąd rekord (`seed`, `manual`, …) |
-| `created_at`, `updated_at` | integer | znaczniki czasu |
+| `aed_devices` | rekordy dodane przez zalogowanego użytkownika | trwałe; importy nigdy ich nie usuwają |
+| `aed_source_devices` | rekordy z importów zewnętrznych źródeł i seeda | czyszczone i wypełniane ponownie przy odświeżeniu źródeł |
+| `aed_devices_combined` | materiał źródłowy + użytkownicy | przebudowywana przy każdym zapisie użytkownika i odświeżeniu źródeł; czyta z niej mapa, eksporty i dane.gov.pl |
+
+Kolumny odwzorowują schemat kanoniczny: `record_id`, `source_id`,
+`source_record_id`, `source_url`, `name`, `description`, `note`,
+`facility_type`, `device_type`, `access_type`, `status`, pola weryfikacji,
+`lat`, `lon`, `coord_precision_m`, `location_status`, `geom_source`,
+`address_*`, `geocode_*`, `claim_*` oraz `field_provenance` i `attributes`
+zapisywane jako JSON. `lat`/`lon` są wymagane we wszystkich trzech tabelach.
+
+**Podpis i weryfikacja:**
+
+- `aed_devices.created_by_id` to klucz obcy do `user.id` (`NOT NULL`);
+  `origin='user'`.
+- rekord użytkownika jest od razu zweryfikowany: `verification_status='verified'`,
+  `verified_by=created_by_id`, `verified_by_kind='person'`, `verified_at`.
+- `aed_source_devices` nie ma kolumny twórcy; `origin` to `source` albo `seed`,
+  a rekordy są zawsze `unverified` z `verified_by = NULL`.
+- formularz nie może ustawić weryfikacji: serwer bierze `created_by_id`
+  wyłącznie z sesji i wymusza pola weryfikacji.
+- ograniczenia `CHECK` w SQLite pilnują obu reguł na poziomie bazy.
+
+**Tabela łączona:** `aed_devices_combined` jest fizyczną, materializowaną
+tabelą. Mapa, CSV, GeoJSON i feed dane.gov.pl czytają właśnie z niej.
+
+Synchronizacja jest transakcyjna:
+
+- dodanie rekordu przez użytkownika zapisuje go do `aed_devices` i od razu
+  dopisuje odpowiadający wiersz do `aed_devices_combined` w tej samej
+  transakcji,
+- import jednego źródła (`/zrodla`) w jednej transakcji usuwa tylko wiersze
+  tego `source_id` z `aed_source_devices`, wstawia nowe i przebudowuje
+  `aed_devices_combined` z obu tabel,
+- pełny refresh (`bun run db:refresh-sources` = `ingest:run` + `db:load-core`)
+  czyści całą `aed_source_devices`, wstawia nowy zbiór i przebudowuje
+  `aed_devices_combined`,
+- `bun run db:seed` to pełny reset deweloperski wszystkich trzech tabel,
+- `refreshCombinedAedDevices()` pozwala jawnie przebudować tabelę łączoną,
+- usunięcie rekordu z `/moje-aed` usuwa go z `aed_devices` i
+  `aed_devices_combined` w jednej transakcji; tylko właściciel może to zrobić,
+- żadna ścieżka importu nie modyfikuje `aed_devices`.
+
+Tabela łączona udostępnia `created_by_id` (dla źródeł `NULL`) tylko do
+wewnętrznego przetwarzania; eksporty go nie publikują. W przyszłości to właśnie
+tutaj będzie uruchamiana deduplikacja i scalanie.
+
+Rekordy kanoniczne bez punktu (`location_status` = `address_only`,
+`unresolved` albo `conflict`) nie są zapisywane, bo projekt publikuje wyłącznie
+zgeolokalizowane AED. Są liczone w raporcie importu jako pominięte.
 
 Tabele uwierzytelniania: `user`, `session`, `account`, `verification`
 (szczegóły w sekcji [Uwierzytelnianie](#uwierzytelnianie-auth)).
@@ -545,42 +721,50 @@ Funkcje dla innych modułów (`backend/store/aed-store.ts`):
 
 ```ts
 import {
-	addAedDevice,
-	addAedDevices,
+	// zapis
+	addUserAedDevice,
+	replaceSourceAedDevices,
+	replaceAllSourceAedDevices,
+	// odczyt
 	listAedDevices,
-	getAedDevice,
+	listUserAedDevices,
+	listSourceAedDevices,
+	listCombinedAedDevices,
 	countAedDevices,
-	clearAedDevices,
+	countSourceAedDevices,
+	countCombinedAedDevices,
+	// tabela łączona i porządki
+	refreshCombinedAedDevices,
+	deleteUserAedDevice,
+	deleteSourceAedDevices,
+	clearAllAedDevices,
 } from "#backend/store/aed-store";
 ```
 
-```bash
-bun run db:generate
-bun run db:migrate
-bun run db:push
-bun run db:seed      # 5 przykładowych rekordów do dev.db
-bun run db:studio
-```
+**Co już jest:**
 
-Drizzle Kit działa na Bunie. `@libsql/client` jest zależnością deweloperską,
-ponieważ CLI Drizzle Kit potrzebuje klienta SQLite; aplikacja w runtime używa
-`bun:sqlite`.
+- pełny schemat kanoniczny w Drizzle dla obu tabel źródłowych i tabeli łączonej,
+- podpisywanie i wymuszona weryfikacja rekordów użytkownika,
+- `CHECK`-y blokujące weryfikację rekordów źródłowych i rekordy bez punktu,
+- indeksy na `record_id`, `source_id` i współrzędnych,
+- transakcyjne zastępowanie jednego źródła i całej tabeli źródeł,
+- funkcje odczytu dla mapy i eksportów przez `aed_devices_combined`.
 
 **Docelowy zakres:**
 
-- schemat Drizzle: rekordy AED, źródła, przebiegi synchronizacji,
-- zapis idempotentny (upsert) po identyfikatorze źródła,
-- zapytania: po obszarze (bbox), najbliższe urządzenia, po identyfikatorze,
+- historia przebiegów synchronizacji i błędów per źródło,
+- zapytania przestrzenne (bbox, najbliższe urządzenia),
 - paginacja i filtry dla interfejsu,
-- indeksy na współrzędnych i identyfikatorach,
-- historia zmian rekordu (kto, kiedy, co).
+- historia zmian rekordu (kto, kiedy, co),
+- deduplikacja i scalanie rekordów w tabeli łączonej.
 
 **Uwagi:**
 
 - `dev.db` jest ignorowany przez git; migracje w `backend/store/drizzle/` są
   wersjonowane.
-- `db:migrate` tworzy dodatkowo techniczną tabelę `__drizzle_migrations`
-  (księgowość migracji), więc w bazie są dwie tabele: domena + techniczna.
+- Baza zawiera trzy domenowe tabele AED (`aed_devices`, `aed_source_devices`,
+  `aed_devices_combined`), cztery tabele better-auth oraz techniczną
+  `__drizzle_migrations`.
 
 ### Integracja z dane.gov.pl (gov-api)
 
@@ -632,8 +816,17 @@ istniejących zbiorach AED na portalu:
 | zasób CSV | `aed-pl-open-csv` | `availability=local` |
 | zasób GeoJSON | `aed-pl-open-geojson` | `availability=local` |
 
-Kolumny zasobów: `id, name, lat, lon, city, access, status`.
-W GeoJSON `lat`/`lon` stają się geometrią `[lon, lat]` (kolejność RFC 7946).
+Źródłem eksportów jest tabela `aed_devices_combined`, ograniczona do rekordów
+`location_status` = `point`/`geocoded`. Eksporty pokazują pola weryfikacji, ale
+**nie publikują** `origin` ani `created_by_id`.
+
+Kolumny CSV:
+`id, name, lat, lon, city, access, status, verification_status, verified_by,
+verified_by_kind, verified_at`.
+
+W GeoJSON te same wartości trafiają do `properties`, a `lat`/`lon` stają się
+geometrią `[lon, lat]` (kolejność RFC 7946). `id` to kanoniczny `record_id`
+(string, unikalny w obu tabelach).
 
 `extIdent` jest kluczem idempotencji — **nigdy go nie zmieniaj**.
 
@@ -657,8 +850,7 @@ komputera wystarczy przejść kroki 1–6.
 
 #### 0. Wymagania
 
-- kod z tym modułem (`main` po scaleniu zmian; wcześniej gałąź
-  `feat/dane-gov-harvester-feed`),
+- kod z gałęzi `main`,
 - zainstalowane zależności i dane w bazie,
 - uruchomiony lokalny portal według `../dane.gov.pl/RUNNING.md`,
 - reguła `ufw` zezwalająca kontenerom na port 3443,
@@ -669,7 +861,7 @@ komputera wystarczy przejść kroki 1–6.
 cd ~/Documents/schoolProject/AED
 bun install
 bun run db:migrate
-bun run db:seed              # kończy się "Total rows: 5"
+bun run db:seed              # kończy się "combined rows: 5"
 
 sudo ufw allow from 172.18.18.0/24 to any port 3443 proto tcp
 ```
@@ -925,7 +1117,9 @@ w `feed.ts` i dopisz atrybucję do opisu zbioru.
 
 #### Ograniczenia
 
-- dane w bazie są tymczasowe (dev), bez TERYT i bez pól producenta/modelu,
+- dane źródłowe w `aed_source_devices` są odświeżane i mogą pochodzić z
+  różnych licencji; rekordy użytkowników są trwałe i zweryfikowane,
+- brak TERYT i pól producenta/modelu,
 - brak DCAT-AP i brak osobnych zbiorów per region,
 - certyfikat `dev:tls` jest self-signed i służy wyłącznie do testów lokalnych,
 - adres `*.sslip.io` zależy od publicznego DNS i jest tylko obejściem
@@ -938,6 +1132,25 @@ Routing jest plikowy i oparty na TanStack Router. Pliki w `frontend/routes/`
 tworzą route'y, a `frontend/router.tsx` buduje router z `routeTree.gen.ts`.
 Nie edytuj `frontend/routeTree.gen.ts` ręcznie; generuje go `bun run dev` lub
 `bun run build`.
+
+Aktualne route'y:
+
+| Route | Zawartość |
+| --- | --- |
+| `/` | strona główna: nagłówek + mapa AED |
+| `/logowanie` | rejestracja i logowanie nazwą użytkownika |
+| `/dodaj-aed` | formularz AED; wymaga sesji (`beforeLoad` + guard serwerowy) |
+| `/moje-aed` | lista własnych AED z usuwaniem; wymaga sesji |
+| `/aed/$aedId` | strona szczegółów pojedynczego urządzenia AED |
+| `/zrodla` | rejestr źródeł, import i usuwanie |
+| `/zrodla/nowe` | kreator konektora i mapowania kolumn |
+| `/data/aed.csv` | eksport CSV |
+| `/data/aed.geojson` | eksport GeoJSON |
+| `/data/aed.points.geojson` | lekki eksport punktów GeoJSON dla mapy (negocjacja gzip) |
+| `/data/aed.xlsx` | eksport pełnej bazy AED w formacie XLSX |
+| `/harvester/feed.xml`, `/harvester/feed.md5` | feed i suma MD5 dla dane.gov.pl |
+| `/api/auth/$` | handler better-auth |
+| `/api/pmtiles` | kafelki PMTiles z obsługą `Range` |
 
 Aby dodać route, dodaj plik w `frontend/routes/`:
 
@@ -984,6 +1197,29 @@ export const Route = createFileRoute("/api/hello")({
 });
 ```
 
+### Server functions w tym projekcie
+
+Wszystkie funkcje są w `frontend/server/forms.ts` i wykonują logikę wyłącznie
+na serwerze:
+
+| Funkcja | Metoda | Rola |
+| --- | --- | --- |
+| `getSessionUserFn` | GET | sprawdza sesję dla `beforeLoad` na `/dodaj-aed` i `/moje-aed` |
+| `listMyAedFn` | GET | zwraca tylko rekordy zalogowanego użytkownika |
+| `deleteMyAedFn` | POST | usuwa własny rekord z `aed_devices` i tabeli łączonej |
+| `saveManualAedFn` | POST | waliduje formularz, wymaga sesji i zapisuje podpisany, zweryfikowany rekord w `aed_devices` |
+| `geocodeAddressFn` | POST | geokoduje adres przez Nominatim po stronie serwera |
+| `listSourcesFn` | GET | zwraca rejestr źródeł |
+| `saveSourceFn` | POST | waliduje i dopisuje konfigurację źródła |
+| `previewSourceFn` | POST | pobiera próbkę źródła i zwraca kolumny do mapowania |
+| `importSourceFn` | POST | uruchamia import i zastępuje wiersze tylko tego źródła |
+| `deleteSourceFn` | POST | usuwa konfigurację i wiersze tylko tego źródła |
+
+`saveManualAedFn` nie przyjmuje `created_by_id` ani pól weryfikacji z klienta.
+Bierze `session.user.id` z nagłówków żądania, a przy braku sesji zwraca
+`{ ok: false, code: "unauthorized" }` bez dotykania bazy. Importy nigdy nie
+dotykają tabeli `aed_devices`.
+
 ## Data Fetching
 
 Dane ładuj przez `loader` TanStack Router lub przez server functions. Aplikacja
@@ -1013,6 +1249,15 @@ function Osoby() {
 	);
 }
 ```
+
+W tym projekcie:
+
+- mapa ładuje `/data/aed.geojson` i `/api/pmtiles` po stronie klienta,
+- `/zrodla` korzysta z loadera `listSourcesFn`,
+- formularze wysyłają dane przez server functions (`saveManualAedFn`,
+  `importSourceFn`, …),
+- eksporty CSV/GeoJSON i feed są budowane na serwerze z tabeli
+  `aed_devices_combined`.
 
 ## Environment Variables
 
@@ -1064,6 +1309,18 @@ bun test
 bun run typecheck
 bun run check
 ```
+
+Zakres testów:
+
+- walidacja kanonicznego schematu i reguł importu (`src/server/ingest`),
+- kontrakt feedu XML, MD5, CSV i GeoJSON (`backend/gov-api`),
+- podpisywanie i weryfikacja rekordów użytkownika oraz brak twórcy przy
+  rekordach źródłowych (`backend/store/aed-store.test.ts`),
+- zachowanie rekordów użytkownika i odtwarzanie tabeli łączonej przy
+  ponownym imporcie źródła,
+- listowanie i usuwanie wyłącznie własnych rekordów użytkownika z obu tabel,
+- odrzucanie rekordów bez współrzędnych,
+- budowa rekordu ręcznego i metadata geokodowania (`backend/forms`).
 
 Test XSD feedu wymaga `xmllint` (pakiet `libxml2-utils`); bez niego test
 wypisuje ostrzeżenie i jest pomijany. W CI `xmllint` jest instalowany, więc
