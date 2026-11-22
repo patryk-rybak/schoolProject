@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseCanonicalAedRecord } from "../canonical";
 import { getSourceConfig } from "../config/loader";
+import { parseSourceConfig } from "../config/schema";
 import { mapSourceRecord } from "./map";
 import { parseRawSource } from "./parse";
 import { RawSnapshotError, loadRawSnapshot } from "./raw";
@@ -35,7 +36,7 @@ describe("core parser and mapper", () => {
 		expect(record.lat).toBeCloseTo(21.12);
 		expect(record.lon).toBeCloseTo(52.3);
 		expect(record.location_status).toBe("point");
-		expect(record.verification_status).toBe("unverified");
+		expect(record.verification_status).toBe("verified");
 		expect(parseCanonicalAedRecord(record)).toBeTruthy();
 	});
 
@@ -63,5 +64,77 @@ describe("core parser and mapper", () => {
 		expect(() => loadRawSnapshot(dir, loadConfig("marki"))).toThrow(
 			RawSnapshotError,
 		);
+	});
+
+	test("marks registry rows as verified by the public body", () => {
+		const config = loadConfig("marki");
+		const csv = [
+			"Nazwa,Lokalizacja,Adres,Numer Id,Długość geograficzna,Szerokość geograficzna",
+			"AED,AED Marki Centrum,Rynek 1,1,21.12,52.30",
+		].join("\n");
+		const parsed = parseRawSource(config, csv);
+		const { record } = mapSourceRecord(config, parsed.records[0]!, 0);
+		expect(record.verification_status).toBe("verified");
+		expect(record.verified_by).toBe("Urząd Miasta Marki");
+		expect(record.verified_by_kind).toBe("public_body");
+		expect(record.verified_at).toBe("2025-07-10");
+	});
+
+	test("marks OSM rows with check_date as community-verified", () => {
+		const config = loadConfig("openaedmap");
+		const row = {
+			"@osm_id": "node/1",
+			check_date: "2024-03-01",
+			operator: "PTTK",
+			lat: 52.23,
+			lon: 21.01,
+		};
+		const { record } = mapSourceRecord(config, row, 0);
+		expect(record.verification_status).toBe("verified");
+		expect(record.verified_by).toBe("PTTK");
+		expect(record.verified_by_kind).toBe("community");
+		expect(record.verified_at).toBe("2024-03-01");
+	});
+
+	test("leaves OSM rows without check_date unverified", () => {
+		const config = loadConfig("openaedmap");
+		const row = { "@osm_id": "node/2", lat: 52.23, lon: 21.01 };
+		const { record } = mapSourceRecord(config, row, 0);
+		expect(record.verification_status).toBe("unverified");
+		expect(record.verified_by).toBeNull();
+		expect(record.verified_at).toBeNull();
+	});
+
+	test("maps sqlite connection rows with null source_url fallback", () => {
+		const config = parseSourceConfig({
+			source: { id: "sqlite-demo", name: "SQLite demo AED" },
+			connector: { family: "sqlite_db", parser: "json" },
+			connection: {
+				kind: "sqlite",
+				path: ".data/aed.db",
+				query: "SELECT * FROM aed",
+			},
+			parse: {},
+			records: { path: "$" },
+			map: {
+				name: { field: "name" },
+				lat: { field: "lat" },
+				lon: { field: "lon" },
+			},
+			validate: {},
+		});
+		const parsed = parseRawSource(
+			config,
+			JSON.stringify([{ id: 7, lat: 52.2, lon: 21.0, name: "AED Rynek" }]),
+		);
+		expect(parsed.records).toHaveLength(1);
+		const { record } = mapSourceRecord(config, parsed.records[0]!, 0);
+		expect(record.source_id).toBe("sqlite-demo");
+		expect(record.name).toBe("AED Rynek");
+		expect(record.lat).toBeCloseTo(52.2);
+		expect(record.lon).toBeCloseTo(21.0);
+		// Connection sources have no fetch.url, so source_url falls back to null.
+		expect(record.source_url).toBeNull();
+		expect(parseCanonicalAedRecord(record)).toBeTruthy();
 	});
 });

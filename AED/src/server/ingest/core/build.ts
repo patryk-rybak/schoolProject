@@ -65,7 +65,7 @@ export function buildCoreDataset(options: BuildCoreOptions): CoreDataset {
 	for (const config of selected) {
 		try {
 			const snapshot = loadRawSnapshot(options.rawDir, config);
-			const parsed = parseRawSource(config, snapshot.text);
+			const parsed = parseRawSource(config, snapshot.text, snapshot.body);
 			const mapped = mapSourceRecords(config, parsed.records);
 			const accepted: CoreDataset["records"] = [];
 			let rejected = mapped.rejected.length;

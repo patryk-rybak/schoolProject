@@ -1,5 +1,6 @@
 import { count, eq } from "drizzle-orm";
 
+import type { CanonicalAedRecord } from "../../src/server/ingest/canonical.ts";
 import { db } from "./index.ts";
 import { aedDevices, type AedDevice, type NewAedDevice } from "./schema.ts";
 
@@ -30,6 +31,44 @@ export function addAedDevices(inputs: readonly NewAedDevice[]): AedDevice[] {
 		.all();
 }
 
+/**
+ * Flattened store columns for a canonical record. The full record is kept as
+ * JSON in `canonical`; the flat columns feed the map and the gov-api exports.
+ */
+export function canonicalToRow(
+	record: CanonicalAedRecord,
+	source?: string,
+): NewAedDevice {
+	if (record.lat === null || record.lon === null) {
+		throw new Error(
+			"canonicalToRow: rekord bez punktu nie trafia do tabeli mapy.",
+		);
+	}
+	const attributes = record.attributes ?? {};
+	const attributeText = (key: string): string | null => {
+		const value = attributes[key];
+		return typeof value === "string" && value !== "" ? value : null;
+	};
+	const streetAddress = [attributeText("street"), attributeText("house_number")]
+		.filter(Boolean)
+		.join(" ");
+	return {
+		name: record.name ?? `AED (${record.source_id})`,
+		lat: record.lat,
+		lon: record.lon,
+		address: record.address_text ?? (streetAddress || null),
+		city: attributeText("city"),
+		access: record.access_type ?? "unknown",
+		status: record.status ?? "unknown",
+		verificationStatus: record.verification_status ?? "unverified",
+		verifiedBy: record.verified_by,
+		verifiedByKind: record.verified_by_kind,
+		verifiedAt: record.verified_at,
+		source: source ?? record.source_id,
+		canonical: JSON.stringify(record),
+	};
+}
+
 export function listAedDevices(): AedDevice[] {
 	return db.select().from(aedDevices).all();
 }
@@ -42,6 +81,15 @@ export function getAedDevice(id: number): AedDevice | null {
 
 export function countAedDevices(): number {
 	return db.select({ value: count() }).from(aedDevices).get()?.value ?? 0;
+}
+
+/** Remove all rows ingested from one source (used before re-importing). */
+export function deleteAedDevicesBySource(source: string): number {
+	return db
+		.delete(aedDevices)
+		.where(eq(aedDevices.source, source))
+		.returning({ id: aedDevices.id })
+		.all().length;
 }
 
 /** Development helper: wipe the table before seeding or resetting a demo. */

@@ -114,4 +114,32 @@ describe("canonical AED record", () => {
 		});
 		expect(result.success).toBe(false);
 	});
+
+	test("accepts a verified record with verifier and date", () => {
+		const record = parseCanonicalAedRecord({
+			...pointRecord(),
+			verification_status: "verified",
+			verified_by: "kontakt@example.org",
+			verified_by_kind: "email",
+			verified_at: "2026-05-12",
+		});
+		expect(record.verified_by).toBe("kontakt@example.org");
+		expect(record.verified_by_kind).toBe("email");
+		expect(record.verified_at).toBe("2026-05-12");
+	});
+
+	test("rejects verified without verifier or date", () => {
+		const result = canonicalAedRecordSchema.safeParse({
+			...pointRecord(),
+			verification_status: "verified",
+		});
+		expect(result.success).toBe(false);
+	});
+
+	test("defaults verification fields to null", () => {
+		const record = parseCanonicalAedRecord(pointRecord());
+		expect(record.verified_by).toBeNull();
+		expect(record.verified_by_kind).toBeNull();
+		expect(record.verified_at).toBeNull();
+	});
 });

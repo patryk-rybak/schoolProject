@@ -1,7 +1,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
-import type { SourceConfig } from "../config/schema";
+import {
+	NON_HTTP_CONNECTOR_FAMILIES,
+	type HttpSourceConfig,
+	type SourceConfig,
+} from "../config/schema";
 import { resolveJsonPath } from "../parsers";
+import { fetchNonHttpSource } from "./db-s3-fetch";
 
 /**
  * Fetches one declarative source and writes a raw-first snapshot:
@@ -106,7 +111,7 @@ function sha256Hex(value: Uint8Array | string): string {
 	return hasher.digest("hex");
 }
 
-function asExtension(config: SourceConfig, contentType: string | null): string {
+function asExtension(config: HttpSourceConfig, contentType: string | null): string {
 	const parser = config.connector.parser;
 	switch (parser) {
 		case "csv":
@@ -142,7 +147,7 @@ function asExtension(config: SourceConfig, contentType: string | null): string {
 }
 
 function authFromConfig(
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	env: Env,
 ): { headers: Record<string, string>; missing: string | null } {
 	const auth = config.fetch.auth;
@@ -185,7 +190,7 @@ function authFromConfig(
 }
 
 function buildHeaders(
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	authHeaders: Record<string, string>,
 ): Record<string, string> {
 	const headers: Record<string, string> = {
@@ -204,7 +209,7 @@ function buildHeaders(
 	return headers;
 }
 
-function buildBody(config: SourceConfig): string | undefined {
+function buildBody(config: HttpSourceConfig): string | undefined {
 	if (config.fetch.method !== "POST" || config.fetch.body === undefined) {
 		return undefined;
 	}
@@ -212,7 +217,7 @@ function buildBody(config: SourceConfig): string | undefined {
 }
 
 function buildUrl(
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	params: Record<string, string | number> = {},
 ): string {
 	const url = new URL(config.fetch.url);
@@ -361,7 +366,7 @@ function shouldRetry(spec: ResponseSpec): boolean {
 
 async function requestWithRetries(
 	spec: RequestSpec,
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	options: RequestOptions,
 ): Promise<ResponseSpec> {
 	const retries = config.fetch.retries;
@@ -392,7 +397,7 @@ async function requestWithRetries(
 	);
 }
 
-function countJsonRecords(config: SourceConfig, root: unknown): number | null {
+function countJsonRecords(config: HttpSourceConfig, root: unknown): number | null {
 	try {
 		const selected = resolveJsonPath(root, config.records.path);
 		if (Array.isArray(selected)) return selected.length;
@@ -426,7 +431,7 @@ function decode(body: Uint8Array): string {
 }
 
 function countRecordsCheap(
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	body: Uint8Array,
 ): number | null {
 	const parser = config.connector.parser;
@@ -496,7 +501,7 @@ function setAtPath(root: unknown, path: string, value: unknown): void {
 }
 
 function mergeJsonPages(
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	pages: Uint8Array[],
 ): Uint8Array {
 	const roots = pages.map(parseJson);
@@ -527,7 +532,7 @@ function mergeJsonPages(
 }
 
 function mergeTextPages(
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	pages: Uint8Array[],
 ): Uint8Array {
 	const parser = config.connector.parser;
@@ -549,7 +554,7 @@ function mergeTextPages(
 }
 
 function mergePages(
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	pages: Uint8Array[],
 ): Uint8Array {
 	if (pages.length === 1) return pages[0]!;
@@ -571,7 +576,7 @@ function writeMeta(
 }
 
 function baseMeta(
-	config: SourceConfig,
+	config: HttpSourceConfig,
 	options: SourceFetchOptions,
 	status: SourceFetchStatus,
 ): SourceFetchMeta {
@@ -592,6 +597,20 @@ function baseMeta(
 
 export async function fetchSource(
 	config: SourceConfig,
+	options: SourceFetchOptions,
+): Promise<SourceFetchResult> {
+	if (
+		(NON_HTTP_CONNECTOR_FAMILIES as readonly string[]).includes(
+			config.connector.family,
+		)
+	) {
+		return fetchNonHttpSource(config, options);
+	}
+	return fetchHttpSource(config as HttpSourceConfig, options);
+}
+
+async function fetchHttpSource(
+	config: HttpSourceConfig,
 	options: SourceFetchOptions,
 ): Promise<SourceFetchResult> {
 	const sourceId = config.source.id;

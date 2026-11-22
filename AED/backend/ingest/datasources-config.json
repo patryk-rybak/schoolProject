@@ -79,6 +79,12 @@
 				},
 				"source_url": {
 					"const": "https://belchatow.pl/mapa-defibrylatorow-aed/"
+				},
+				"verified_by": {
+					"const": "Urząd Miasta Bełchatowa"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
@@ -171,6 +177,15 @@
 				},
 				"source_updated_at": {
 					"const": "2024-02-19"
+				},
+				"verified_at": {
+					"const": "2024-02-19"
+				},
+				"verified_by": {
+					"const": "Urząd Miasta Krosna"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
@@ -293,6 +308,12 @@
 				},
 				"source_url": {
 					"const": "https://www.lodz.pl/artykul/defibrylatory-na-ulicach-lodzi-jak-ich-uzywac-gdzie-je-znajdziesz-mapa-58563/"
+				},
+				"verified_by": {
+					"const": "Urząd Miasta Łodzi"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
@@ -387,6 +408,15 @@
 				},
 				"source_updated_at": {
 					"const": "2025-07-10"
+				},
+				"verified_at": {
+					"const": "2025-07-10"
+				},
+				"verified_by": {
+					"const": "Urząd Miasta Marki"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
@@ -469,6 +499,12 @@
 				},
 				"source_url": {
 					"const": "https://olsztyn.eu/urzad-miasta/zdrowie/defibrylatory-na-terenie-olsztyna.html"
+				},
+				"verified_by": {
+					"const": "Urząd Miasta Olsztyna"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
@@ -736,6 +772,35 @@
 				"street": {
 					"field": "addr:street"
 				},
+				"verified_by": {
+					"when": {
+						"op": "exists",
+						"left": {
+							"field": "check_date"
+						}
+					},
+					"then": {
+						"coalesce": [
+							{
+								"field": "operator"
+							},
+							{
+								"const": "Społeczność OpenStreetMap"
+							}
+						]
+					},
+					"else": null
+				},
+				"verified_by_kind": {
+					"when": {
+						"op": "exists",
+						"left": {
+							"field": "check_date"
+						}
+					},
+					"then": "community",
+					"else": null
+				},
 				"website": {
 					"coalesce": [
 						{
@@ -853,6 +918,12 @@
 				},
 				"source_url": {
 					"const": "https://www.pawlowice.pl/mieszkaniec/zdrowie/mapa-defibrylatorow-aed"
+				},
+				"verified_by": {
+					"const": "Urząd Gminy Pawłowice"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
@@ -993,6 +1064,15 @@
 				"street": {
 					"field": "street"
 				},
+				"verified_at": {
+					"const": "2024-11-05"
+				},
+				"verified_by": {
+					"const": "Urząd Miasta Przemyśla"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
+				},
 				"website": {
 					"args": [
 						{
@@ -1082,6 +1162,12 @@
 				},
 				"source_url": {
 					"const": "https://tczew.pl/aed/"
+				},
+				"verified_by": {
+					"const": "Urząd Miasta Tczewa"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
@@ -1260,6 +1346,15 @@
 				},
 				"street": {
 					"field": "properties.location_street"
+				},
+				"verified_at": {
+					"const": "2026-06-01"
+				},
+				"verified_by": {
+					"const": "m.st. Warszawa (API UM)"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
@@ -1342,6 +1437,12 @@
 				},
 				"source_url": {
 					"const": "https://www.zielona-gora.pl/mapa-lokalizacji-automatycznych-defibrylatorow-w-zielonej-gorze/"
+				},
+				"verified_by": {
+					"const": "Urząd Miasta Zielona Góra"
+				},
+				"verified_by_kind": {
+					"const": "public_body"
 				}
 			},
 			"validate": {
