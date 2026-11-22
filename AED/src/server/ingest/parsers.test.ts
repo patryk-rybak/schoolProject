@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { zipSync } from "fflate";
 import {
 	decodeHtmlEntities,
 	decodeText,
@@ -9,6 +10,7 @@ import {
 	parseHtmlList,
 	parseHtmlTables,
 	parseKml,
+	parseXlsx,
 	readField,
 	resolveJsonPath,
 } from "./parsers";
@@ -264,5 +266,129 @@ describe("mapping DSL subset", () => {
 				"lat",
 			).value,
 		).toBe(52.2);
+	});
+});
+
+describe("xlsx parser", () => {
+	const encoder = new TextEncoder();
+
+	function sheetXml(rows: string): string {
+		return `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${rows}</sheetData></worksheet>`;
+	}
+
+	function buildWorkbook(): Uint8Array {
+		const sharedStrings =
+			'<?xml version="1.0" encoding="UTF-8"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="7" uniqueCount="7">' +
+			'<si><t xml:space="preserve">  Nazwa </t></si>' +
+			"<si><t>Lat</t></si>" +
+			"<si><t>Lon</t></si>" +
+			"<si><t>Aktywny</t></si>" +
+			"<si><t>AED &amp; Szkoła</t></si>" +
+			"<si><r><t>AED </t></r><r><rPr><b/></rPr><t>Centrum</t></r></si>" +
+			"<si><t>Uwagi</t></si>" +
+			"</sst>";
+		const sheet1 = sheetXml(
+			'<row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1" t="s"><v>1</v></c><c r="C1" t="s"><v>2</v></c><c r="D1" t="s"><v>3</v></c><c r="E1" t="s"><v>6</v></c></row>' +
+				'<row r="2"><c r="A2" t="s"><v>4</v></c><c r="B2"><v>52.2</v></c><c r="C2"><v>21.000</v></c><c r="D2" t="b"><v>1</v></c><c r="E2" t="inlineStr"><is><t>notatka</t></is></c></row>' +
+				'<row r="3"><c r="A3" t="s"><v>5</v></c><c r="C3"><v>21.5</v></c><c r="D3" t="b"><v>0</v></c><c r="E3" t="str"><f>LEN(A3)</f><v>wynik</v></c></row>',
+		);
+		const sheet2 = sheetXml(
+			'<row r="1"><c r="A1" t="inlineStr"><is><t>Tytuł</t></is></c></row>' +
+				'<row r="2"><c r="A2" t="inlineStr"><is><t>Name</t></is></c><c r="B2" t="inlineStr"><is><t>X</t></is></c></row>' +
+				'<row r="3"><c r="A3" t="inlineStr"><is><t>AED 2</t></is></c><c r="B3"><v>1e3</v></c></row>',
+		);
+		return zipSync({
+			"[Content_Types].xml": encoder.encode(
+				'<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+			),
+			"xl/_rels/workbook.xml.rels": encoder.encode(
+				'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/></Relationships>',
+			),
+			"xl/sharedStrings.xml": encoder.encode(sharedStrings),
+			"xl/workbook.xml": encoder.encode(
+				'<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="AED" sheetId="1" r:id="rId1"/><sheet name="Drugi" sheetId="2" r:id="rId2"/></sheets></workbook>',
+			),
+			"xl/worksheets/sheet1.xml": encoder.encode(sheet1),
+			"xl/worksheets/sheet2.xml": encoder.encode(sheet2),
+		});
+	}
+
+	test("parses shared strings, numbers, booleans and inline strings", () => {
+		const result = parseXlsx(buildWorkbook());
+		expect(result.headers).toEqual(["Nazwa", "Lat", "Lon", "Aktywny", "Uwagi"]);
+		expect(result.rows).toHaveLength(2);
+		expect(result.records[0]).toEqual({
+			Aktywny: "true",
+			Lat: "52.2",
+			Lon: "21",
+			Nazwa: "AED & Szkoła",
+			Uwagi: "notatka",
+		});
+	});
+
+	test("positions sparse cells by A1 refs and nulls empty values", () => {
+		const result = parseXlsx(buildWorkbook());
+		expect(result.rows[1]).toEqual([
+			"AED Centrum",
+			"",
+			"21.5",
+			"false",
+			"wynik",
+		]);
+		expect(result.records[1]).toEqual({
+			Aktywny: "false",
+			Lat: null,
+			Lon: "21.5",
+			Nazwa: "AED Centrum",
+			Uwagi: "wynik",
+		});
+	});
+
+	test("emptyAsNull false keeps empty strings", () => {
+		const result = parseXlsx(buildWorkbook(), { emptyAsNull: false });
+		expect(result.records[1]?.["Lat"]).toBe("");
+	});
+
+	test("trimHeaders false keeps raw header text", () => {
+		const result = parseXlsx(buildWorkbook(), { trimHeaders: false });
+		expect(result.headers[0]).toBe("  Nazwa ");
+	});
+
+	test("selects sheet by name and 1-based index with headerRow", () => {
+		const byName = parseXlsx(buildWorkbook(), { headerRow: 1, sheet: "Drugi" });
+		const byIndex = parseXlsx(buildWorkbook(), { headerRow: 1, sheet: 2 });
+		expect(byName.headers).toEqual(["Name", "X"]);
+		expect(byName.records).toEqual([{ Name: "AED 2", X: "1000" }]);
+		expect(byIndex.records).toEqual(byName.records);
+	});
+
+	test("rejects unknown sheet name or index with Polish error", () => {
+		expect(() => parseXlsx(buildWorkbook(), { sheet: "Brak" })).toThrow(
+			/nie ma arkusza o nazwie/,
+		);
+		expect(() => parseXlsx(buildWorkbook(), { sheet: 9 })).toThrow(
+			/nie ma arkusza o numerze 9/,
+		);
+	});
+
+	test("rejects bytes that are not a zip archive", () => {
+		expect(() => parseXlsx(encoder.encode("to nie jest xlsx"))).toThrow(
+			/Nie można odczytać pliku XLSX/,
+		);
+	});
+
+	test("falls back to worksheet parts without workbook.xml", () => {
+		const bytes = zipSync({
+			"[Content_Types].xml": encoder.encode(
+				'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+			),
+			"xl/worksheets/sheet1.xml": encoder.encode(
+				sheetXml(
+					'<row r="1"><c r="A1" t="inlineStr"><is><t>name</t></is></c></row><row r="2"><c r="A2" t="inlineStr"><is><t>AED fallback</t></is></c></row>',
+				),
+			),
+		});
+		const result = parseXlsx(bytes);
+		expect(result.records).toEqual([{ name: "AED fallback" }]);
 	});
 });

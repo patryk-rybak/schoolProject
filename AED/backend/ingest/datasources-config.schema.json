@@ -43,64 +43,22 @@
                 "$ref": "#/$defs/__schema1"
               },
               "parse": {
-                "type": "object",
-                "properties": {
-                  "encoding": {
-                    "$ref": "#/$defs/__schema5"
-                  },
-                  "trim_headers": {
-                    "$ref": "#/$defs/__schema6"
-                  },
-                  "csv": {
-                    "type": "object",
-                    "properties": {
-                      "delimiter": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 1
-                      },
-                      "quote": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 1
-                      },
-                      "skip_rows": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 9007199254740991
-                      },
-                      "header": {
-                        "type": "boolean"
-                      },
-                      "unwrap_outer_quotes": {
-                        "type": "boolean"
-                      },
-                      "repair_double_quotes": {
-                        "type": "boolean"
-                      },
-                      "empty_as_null": {
-                        "type": "boolean"
-                      }
-                    },
-                    "additionalProperties": false
-                  }
-                },
-                "additionalProperties": false
+                "$ref": "#/$defs/__schema5"
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -144,54 +102,22 @@
                 "$ref": "#/$defs/__schema1"
               },
               "parse": {
-                "type": "object",
-                "properties": {
-                  "encoding": {
-                    "$ref": "#/$defs/__schema5"
-                  },
-                  "trim_headers": {
-                    "$ref": "#/$defs/__schema6"
-                  },
-                  "xlsx": {
-                    "type": "object",
-                    "properties": {
-                      "sheet": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          }
-                        ]
-                      },
-                      "header_row": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 9007199254740991
-                      }
-                    },
-                    "additionalProperties": false
-                  }
-                },
-                "additionalProperties": false
+                "$ref": "#/$defs/__schema22"
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -239,34 +165,22 @@
                 "$ref": "#/$defs/__schema1"
               },
               "parse": {
-                "type": "object",
-                "properties": {
-                  "encoding": {
-                    "$ref": "#/$defs/__schema5"
-                  },
-                  "trim_headers": {
-                    "$ref": "#/$defs/__schema6"
-                  },
-                  "json": {
-                    "$ref": "#/$defs/__schema21"
-                  }
-                },
-                "additionalProperties": false
+                "$ref": "#/$defs/__schema23"
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -310,34 +224,22 @@
                 "$ref": "#/$defs/__schema1"
               },
               "parse": {
-                "type": "object",
-                "properties": {
-                  "encoding": {
-                    "$ref": "#/$defs/__schema5"
-                  },
-                  "trim_headers": {
-                    "$ref": "#/$defs/__schema6"
-                  },
-                  "json": {
-                    "$ref": "#/$defs/__schema21"
-                  }
-                },
-                "additionalProperties": false
+                "$ref": "#/$defs/__schema25"
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -385,10 +287,10 @@
                 "type": "object",
                 "properties": {
                   "encoding": {
-                    "$ref": "#/$defs/__schema5"
+                    "$ref": "#/$defs/__schema6"
                   },
                   "trim_headers": {
-                    "$ref": "#/$defs/__schema6"
+                    "$ref": "#/$defs/__schema7"
                   },
                   "kml": {
                     "type": "object",
@@ -406,19 +308,19 @@
                 "additionalProperties": false
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -465,31 +367,31 @@
                 "type": "object",
                 "properties": {
                   "encoding": {
-                    "$ref": "#/$defs/__schema5"
-                  },
-                  "trim_headers": {
                     "$ref": "#/$defs/__schema6"
                   },
+                  "trim_headers": {
+                    "$ref": "#/$defs/__schema7"
+                  },
                   "json": {
-                    "$ref": "#/$defs/__schema21"
+                    "$ref": "#/$defs/__schema24"
                   }
                 },
                 "additionalProperties": false
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -536,10 +438,10 @@
                 "type": "object",
                 "properties": {
                   "encoding": {
-                    "$ref": "#/$defs/__schema5"
+                    "$ref": "#/$defs/__schema6"
                   },
                   "trim_headers": {
-                    "$ref": "#/$defs/__schema6"
+                    "$ref": "#/$defs/__schema7"
                   },
                   "html_table": {
                     "type": "object",
@@ -646,19 +548,19 @@
                 "additionalProperties": false
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -705,10 +607,10 @@
                 "type": "object",
                 "properties": {
                   "encoding": {
-                    "$ref": "#/$defs/__schema5"
+                    "$ref": "#/$defs/__schema6"
                   },
                   "trim_headers": {
-                    "$ref": "#/$defs/__schema6"
+                    "$ref": "#/$defs/__schema7"
                   },
                   "html_list": {
                     "type": "object",
@@ -807,25 +709,25 @@
                     "additionalProperties": false
                   },
                   "json": {
-                    "$ref": "#/$defs/__schema21"
+                    "$ref": "#/$defs/__schema24"
                   }
                 },
                 "additionalProperties": false
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -872,10 +774,10 @@
                 "type": "object",
                 "properties": {
                   "encoding": {
-                    "$ref": "#/$defs/__schema5"
+                    "$ref": "#/$defs/__schema6"
                   },
                   "trim_headers": {
-                    "$ref": "#/$defs/__schema6"
+                    "$ref": "#/$defs/__schema7"
                   },
                   "pdf_table": {
                     "type": "object",
@@ -885,7 +787,7 @@
                         "maxItems": 2,
                         "type": "array",
                         "items": {
-                          "$ref": "#/$defs/__schema22"
+                          "$ref": "#/$defs/__schema26"
                         }
                       },
                       "require_text_layer": {
@@ -909,7 +811,7 @@
                         "minItems": 1,
                         "type": "array",
                         "items": {
-                          "$ref": "#/$defs/__schema23"
+                          "$ref": "#/$defs/__schema27"
                         }
                       },
                       "row_anchor": {
@@ -979,19 +881,19 @@
                 "additionalProperties": false
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
@@ -1070,25 +972,405 @@
                 "additionalProperties": false
               },
               "records": {
-                "$ref": "#/$defs/__schema7"
+                "$ref": "#/$defs/__schema8"
               },
               "map": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema9"
+                  "$ref": "#/$defs/__schema10"
                 }
               },
               "validate": {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             },
             "required": [
               "source",
               "connector",
               "fetch",
+              "parse",
+              "records",
+              "map",
+              "validate"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "connector": {
+                "type": "object",
+                "properties": {
+                  "family": {
+                    "type": "string",
+                    "const": "sqlite_db"
+                  },
+                  "parser": {
+                    "type": "string",
+                    "const": "json"
+                  }
+                },
+                "required": [
+                  "family",
+                  "parser"
+                ],
+                "additionalProperties": false
+              },
+              "connection": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "sqlite"
+                  },
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "query": {
+                    "$ref": "#/$defs/__schema28"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "path",
+                  "query"
+                ],
+                "additionalProperties": false
+              },
+              "parse": {
+                "$ref": "#/$defs/__schema23"
+              },
+              "records": {
+                "$ref": "#/$defs/__schema8"
+              },
+              "map": {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/__schema9"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              },
+              "validate": {
+                "$ref": "#/$defs/__schema21"
+              }
+            },
+            "required": [
+              "source",
+              "connector",
+              "connection",
+              "parse",
+              "records",
+              "map",
+              "validate"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "connector": {
+                "type": "object",
+                "properties": {
+                  "family": {
+                    "type": "string",
+                    "const": "postgres_db"
+                  },
+                  "parser": {
+                    "type": "string",
+                    "const": "json"
+                  }
+                },
+                "required": [
+                  "family",
+                  "parser"
+                ],
+                "additionalProperties": false
+              },
+              "connection": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "$ref": "#/$defs/__schema29"
+                  },
+                  "url": {
+                    "$ref": "#/$defs/__schema30"
+                  },
+                  "env": {
+                    "$ref": "#/$defs/__schema31"
+                  },
+                  "query": {
+                    "$ref": "#/$defs/__schema28"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "query"
+                ],
+                "additionalProperties": false
+              },
+              "parse": {
+                "$ref": "#/$defs/__schema23"
+              },
+              "records": {
+                "$ref": "#/$defs/__schema8"
+              },
+              "map": {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/__schema9"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              },
+              "validate": {
+                "$ref": "#/$defs/__schema21"
+              }
+            },
+            "required": [
+              "source",
+              "connector",
+              "connection",
+              "parse",
+              "records",
+              "map",
+              "validate"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "connector": {
+                "type": "object",
+                "properties": {
+                  "family": {
+                    "type": "string",
+                    "const": "s3_object"
+                  },
+                  "parser": {
+                    "type": "string",
+                    "const": "csv"
+                  }
+                },
+                "required": [
+                  "family",
+                  "parser"
+                ],
+                "additionalProperties": false
+              },
+              "connection": {
+                "$ref": "#/$defs/__schema32"
+              },
+              "parse": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "records": {
+                "$ref": "#/$defs/__schema8"
+              },
+              "map": {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/__schema9"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              },
+              "validate": {
+                "$ref": "#/$defs/__schema21"
+              }
+            },
+            "required": [
+              "source",
+              "connector",
+              "connection",
+              "parse",
+              "records",
+              "map",
+              "validate"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "connector": {
+                "type": "object",
+                "properties": {
+                  "family": {
+                    "type": "string",
+                    "const": "s3_object"
+                  },
+                  "parser": {
+                    "type": "string",
+                    "const": "xlsx"
+                  }
+                },
+                "required": [
+                  "family",
+                  "parser"
+                ],
+                "additionalProperties": false
+              },
+              "connection": {
+                "$ref": "#/$defs/__schema32"
+              },
+              "parse": {
+                "$ref": "#/$defs/__schema22"
+              },
+              "records": {
+                "$ref": "#/$defs/__schema8"
+              },
+              "map": {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/__schema9"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              },
+              "validate": {
+                "$ref": "#/$defs/__schema21"
+              }
+            },
+            "required": [
+              "source",
+              "connector",
+              "connection",
+              "parse",
+              "records",
+              "map",
+              "validate"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "connector": {
+                "type": "object",
+                "properties": {
+                  "family": {
+                    "type": "string",
+                    "const": "s3_object"
+                  },
+                  "parser": {
+                    "type": "string",
+                    "const": "json"
+                  }
+                },
+                "required": [
+                  "family",
+                  "parser"
+                ],
+                "additionalProperties": false
+              },
+              "connection": {
+                "$ref": "#/$defs/__schema32"
+              },
+              "parse": {
+                "$ref": "#/$defs/__schema23"
+              },
+              "records": {
+                "$ref": "#/$defs/__schema8"
+              },
+              "map": {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/__schema9"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              },
+              "validate": {
+                "$ref": "#/$defs/__schema21"
+              }
+            },
+            "required": [
+              "source",
+              "connector",
+              "connection",
+              "parse",
+              "records",
+              "map",
+              "validate"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "connector": {
+                "type": "object",
+                "properties": {
+                  "family": {
+                    "type": "string",
+                    "const": "s3_object"
+                  },
+                  "parser": {
+                    "type": "string",
+                    "const": "geojson"
+                  }
+                },
+                "required": [
+                  "family",
+                  "parser"
+                ],
+                "additionalProperties": false
+              },
+              "connection": {
+                "$ref": "#/$defs/__schema32"
+              },
+              "parse": {
+                "$ref": "#/$defs/__schema25"
+              },
+              "records": {
+                "$ref": "#/$defs/__schema8"
+              },
+              "map": {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/__schema9"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              },
+              "validate": {
+                "$ref": "#/$defs/__schema21"
+              }
+            },
+            "required": [
+              "source",
+              "connector",
+              "connection",
               "parse",
               "records",
               "map",
@@ -1461,6 +1743,51 @@
       "type": "string"
     },
     "__schema5": {
+      "type": "object",
+      "properties": {
+        "encoding": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "trim_headers": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "csv": {
+          "type": "object",
+          "properties": {
+            "delimiter": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1
+            },
+            "quote": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1
+            },
+            "skip_rows": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "header": {
+              "type": "boolean"
+            },
+            "unwrap_outer_quotes": {
+              "type": "boolean"
+            },
+            "repair_double_quotes": {
+              "type": "boolean"
+            },
+            "empty_as_null": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema6": {
       "type": "string",
       "enum": [
         "utf-8",
@@ -1468,10 +1795,10 @@
         "iso-8859-2"
       ]
     },
-    "__schema6": {
+    "__schema7": {
       "type": "boolean"
     },
-    "__schema7": {
+    "__schema8": {
       "type": "object",
       "properties": {
         "path": {
@@ -1484,7 +1811,7 @@
       ],
       "additionalProperties": false
     },
-    "__schema8": {
+    "__schema9": {
       "type": "string",
       "enum": [
         "public_code",
@@ -1536,6 +1863,9 @@
         "status",
         "status_reason",
         "verification_status",
+        "verified_by",
+        "verified_by_kind",
+        "verified_at",
         "confidence",
         "last_verified_at",
         "last_seen_at",
@@ -1555,19 +1885,19 @@
         "geom_source"
       ]
     },
-    "__schema9": {
+    "__schema10": {
       "anyOf": [
         {
-          "$ref": "#/$defs/__schema10"
+          "$ref": "#/$defs/__schema11"
         },
         {
           "type": "object",
           "properties": {
             "value": {
-              "$ref": "#/$defs/__schema10"
+              "$ref": "#/$defs/__schema11"
             },
             "default": {
-              "$ref": "#/$defs/__schema11"
+              "$ref": "#/$defs/__schema12"
             }
           },
           "required": [
@@ -1577,7 +1907,7 @@
         }
       ]
     },
-    "__schema10": {
+    "__schema11": {
       "anyOf": [
         {
           "type": "string"
@@ -1639,7 +1969,7 @@
           "type": "object",
           "properties": {
             "const": {
-              "$ref": "#/$defs/__schema11"
+              "$ref": "#/$defs/__schema12"
             }
           },
           "required": [
@@ -1657,7 +1987,7 @@
             "args": {
               "type": "array",
               "items": {
-                "$ref": "#/$defs/__schema10"
+                "$ref": "#/$defs/__schema11"
               }
             }
           },
@@ -1674,7 +2004,7 @@
               "minItems": 1,
               "type": "array",
               "items": {
-                "$ref": "#/$defs/__schema10"
+                "$ref": "#/$defs/__schema11"
               }
             }
           },
@@ -1696,7 +2026,7 @@
                 "type": "string"
               },
               "additionalProperties": {
-                "$ref": "#/$defs/__schema10"
+                "$ref": "#/$defs/__schema11"
               }
             }
           },
@@ -1712,7 +2042,7 @@
               "type": "object",
               "properties": {
                 "in": {
-                  "$ref": "#/$defs/__schema10"
+                  "$ref": "#/$defs/__schema11"
                 },
                 "pattern": {
                   "type": "string",
@@ -1746,7 +2076,7 @@
               "type": "object",
               "properties": {
                 "value": {
-                  "$ref": "#/$defs/__schema10"
+                  "$ref": "#/$defs/__schema11"
                 },
                 "cases": {
                   "type": "object",
@@ -1754,11 +2084,11 @@
                     "type": "string"
                   },
                   "additionalProperties": {
-                    "$ref": "#/$defs/__schema11"
+                    "$ref": "#/$defs/__schema12"
                   }
                 },
                 "default": {
-                  "$ref": "#/$defs/__schema11"
+                  "$ref": "#/$defs/__schema12"
                 }
               },
               "required": [
@@ -1798,17 +2128,17 @@
                   ]
                 },
                 "left": {
-                  "$ref": "#/$defs/__schema10"
+                  "$ref": "#/$defs/__schema11"
                 },
                 "right": {
                   "anyOf": [
                     {
-                      "$ref": "#/$defs/__schema11"
+                      "$ref": "#/$defs/__schema12"
                     },
                     {
                       "type": "array",
                       "items": {
-                        "$ref": "#/$defs/__schema11"
+                        "$ref": "#/$defs/__schema12"
                       }
                     }
                   ]
@@ -1821,10 +2151,10 @@
               "additionalProperties": false
             },
             "then": {
-              "$ref": "#/$defs/__schema10"
+              "$ref": "#/$defs/__schema11"
             },
             "else": {
-              "$ref": "#/$defs/__schema10"
+              "$ref": "#/$defs/__schema11"
             }
           },
           "required": [
@@ -1844,16 +2174,16 @@
                     "from": {
                       "anyOf": [
                         {
-                          "$ref": "#/$defs/__schema10"
+                          "$ref": "#/$defs/__schema11"
                         },
                         {
                           "type": "array",
                           "prefixItems": [
                             {
-                              "$ref": "#/$defs/__schema10"
+                              "$ref": "#/$defs/__schema11"
                             },
                             {
-                              "$ref": "#/$defs/__schema10"
+                              "$ref": "#/$defs/__schema11"
                             }
                           ],
                           "items": false,
@@ -1863,34 +2193,34 @@
                       ]
                     },
                     "lat": {
-                      "$ref": "#/$defs/__schema10"
+                      "$ref": "#/$defs/__schema11"
                     },
                     "lon": {
-                      "$ref": "#/$defs/__schema10"
+                      "$ref": "#/$defs/__schema11"
                     },
                     "format": {
-                      "$ref": "#/$defs/__schema12"
-                    },
-                    "order": {
                       "$ref": "#/$defs/__schema13"
                     },
-                    "delimiter": {
+                    "order": {
                       "$ref": "#/$defs/__schema14"
                     },
-                    "pick": {
+                    "delimiter": {
                       "$ref": "#/$defs/__schema15"
                     },
-                    "unwrap_single": {
+                    "pick": {
                       "$ref": "#/$defs/__schema16"
                     },
-                    "precision_m": {
+                    "unwrap_single": {
                       "$ref": "#/$defs/__schema17"
                     },
-                    "axis_policy": {
+                    "precision_m": {
                       "$ref": "#/$defs/__schema18"
                     },
-                    "on_invalid": {
+                    "axis_policy": {
                       "$ref": "#/$defs/__schema19"
+                    },
+                    "on_invalid": {
+                      "$ref": "#/$defs/__schema20"
                     }
                   },
                   "required": [
@@ -1905,16 +2235,16 @@
                     "from": {
                       "anyOf": [
                         {
-                          "$ref": "#/$defs/__schema10"
+                          "$ref": "#/$defs/__schema11"
                         },
                         {
                           "type": "array",
                           "prefixItems": [
                             {
-                              "$ref": "#/$defs/__schema10"
+                              "$ref": "#/$defs/__schema11"
                             },
                             {
-                              "$ref": "#/$defs/__schema10"
+                              "$ref": "#/$defs/__schema11"
                             }
                           ],
                           "items": false,
@@ -1924,34 +2254,34 @@
                       ]
                     },
                     "lat": {
-                      "$ref": "#/$defs/__schema10"
+                      "$ref": "#/$defs/__schema11"
                     },
                     "lon": {
-                      "$ref": "#/$defs/__schema10"
+                      "$ref": "#/$defs/__schema11"
                     },
                     "format": {
-                      "$ref": "#/$defs/__schema12"
-                    },
-                    "order": {
                       "$ref": "#/$defs/__schema13"
                     },
-                    "delimiter": {
+                    "order": {
                       "$ref": "#/$defs/__schema14"
                     },
-                    "pick": {
+                    "delimiter": {
                       "$ref": "#/$defs/__schema15"
                     },
-                    "unwrap_single": {
+                    "pick": {
                       "$ref": "#/$defs/__schema16"
                     },
-                    "precision_m": {
+                    "unwrap_single": {
                       "$ref": "#/$defs/__schema17"
                     },
-                    "axis_policy": {
+                    "precision_m": {
                       "$ref": "#/$defs/__schema18"
                     },
-                    "on_invalid": {
+                    "axis_policy": {
                       "$ref": "#/$defs/__schema19"
+                    },
+                    "on_invalid": {
+                      "$ref": "#/$defs/__schema20"
                     }
                   },
                   "required": [
@@ -1973,7 +2303,7 @@
           "type": "object",
           "properties": {
             "json": {
-              "$ref": "#/$defs/__schema10"
+              "$ref": "#/$defs/__schema11"
             }
           },
           "required": [
@@ -1985,7 +2315,7 @@
           "type": "object",
           "properties": {
             "first": {
-              "$ref": "#/$defs/__schema10"
+              "$ref": "#/$defs/__schema11"
             }
           },
           "required": [
@@ -2004,10 +2334,10 @@
                   "minLength": 1
                 },
                 "key": {
-                  "$ref": "#/$defs/__schema10"
+                  "$ref": "#/$defs/__schema11"
                 },
                 "default": {
-                  "$ref": "#/$defs/__schema11"
+                  "$ref": "#/$defs/__schema12"
                 }
               },
               "required": [
@@ -2024,7 +2354,7 @@
         }
       ]
     },
-    "__schema11": {
+    "__schema12": {
       "anyOf": [
         {
           "type": "string"
@@ -2040,7 +2370,7 @@
         }
       ]
     },
-    "__schema12": {
+    "__schema13": {
       "type": "string",
       "enum": [
         "geojson",
@@ -2050,17 +2380,17 @@
         "wkt"
       ]
     },
-    "__schema13": {
+    "__schema14": {
       "type": "string",
       "enum": [
         "lat_lon",
         "lon_lat"
       ]
     },
-    "__schema14": {
+    "__schema15": {
       "type": "string"
     },
-    "__schema15": {
+    "__schema16": {
       "type": "string",
       "enum": [
         "lat",
@@ -2068,10 +2398,10 @@
         "both"
       ]
     },
-    "__schema16": {
+    "__schema17": {
       "type": "boolean"
     },
-    "__schema17": {
+    "__schema18": {
       "anyOf": [
         {
           "type": "number"
@@ -2081,7 +2411,7 @@
         }
       ]
     },
-    "__schema18": {
+    "__schema19": {
       "type": "string",
       "enum": [
         "declared",
@@ -2089,7 +2419,7 @@
         "swap_if_invalid"
       ]
     },
-    "__schema19": {
+    "__schema20": {
       "type": "string",
       "enum": [
         "reject",
@@ -2097,13 +2427,13 @@
         "null"
       ]
     },
-    "__schema20": {
+    "__schema21": {
       "type": "object",
       "properties": {
         "required": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/__schema8"
+            "$ref": "#/$defs/__schema9"
           }
         },
         "coords": {
@@ -2143,7 +2473,57 @@
       },
       "additionalProperties": false
     },
-    "__schema21": {
+    "__schema22": {
+      "type": "object",
+      "properties": {
+        "encoding": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "trim_headers": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "xlsx": {
+          "type": "object",
+          "properties": {
+            "sheet": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              ]
+            },
+            "header_row": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema23": {
+      "type": "object",
+      "properties": {
+        "encoding": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "trim_headers": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "json": {
+          "$ref": "#/$defs/__schema24"
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema24": {
       "type": "object",
       "properties": {
         "unwrap_string": {
@@ -2152,12 +2532,27 @@
       },
       "additionalProperties": false
     },
-    "__schema22": {
+    "__schema25": {
+      "type": "object",
+      "properties": {
+        "encoding": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "trim_headers": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "json": {
+          "$ref": "#/$defs/__schema24"
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema26": {
       "type": "integer",
       "minimum": 1,
       "maximum": 9007199254740991
     },
-    "__schema23": {
+    "__schema27": {
       "type": "object",
       "properties": {
         "key": {
@@ -2177,6 +2572,105 @@
         "x_max"
       ],
       "additionalProperties": false
+    },
+    "__schema28": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema29": {
+      "type": "string",
+      "const": "postgres"
+    },
+    "__schema30": {
+      "type": "string",
+      "format": "uri"
+    },
+    "__schema31": {
+      "$ref": "#/$defs/__schema3"
+    },
+    "__schema32": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/__schema33"
+        },
+        "bucket": {
+          "$ref": "#/$defs/__schema34"
+        },
+        "key": {
+          "$ref": "#/$defs/__schema35"
+        },
+        "region": {
+          "$ref": "#/$defs/__schema36"
+        },
+        "endpoint": {
+          "$ref": "#/$defs/__schema37"
+        },
+        "access_key_id": {
+          "$ref": "#/$defs/__schema38"
+        },
+        "secret_access_key": {
+          "$ref": "#/$defs/__schema39"
+        },
+        "session_token": {
+          "$ref": "#/$defs/__schema40"
+        },
+        "access_key_id_env": {
+          "$ref": "#/$defs/__schema41"
+        },
+        "secret_access_key_env": {
+          "$ref": "#/$defs/__schema42"
+        },
+        "session_token_env": {
+          "$ref": "#/$defs/__schema43"
+        }
+      },
+      "required": [
+        "kind",
+        "bucket",
+        "key"
+      ],
+      "additionalProperties": false
+    },
+    "__schema33": {
+      "type": "string",
+      "const": "s3"
+    },
+    "__schema34": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema35": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema36": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema37": {
+      "$ref": "#/$defs/__schema2"
+    },
+    "__schema38": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema39": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema40": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema41": {
+      "$ref": "#/$defs/__schema3"
+    },
+    "__schema42": {
+      "$ref": "#/$defs/__schema3"
+    },
+    "__schema43": {
+      "$ref": "#/$defs/__schema3"
     }
   }
 }

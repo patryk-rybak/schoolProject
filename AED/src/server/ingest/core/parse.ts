@@ -5,6 +5,7 @@ import {
 	parseCsv,
 	parseJsonRecords,
 	parseKml,
+	parseXlsx,
 } from "../parsers";
 
 export type ParsedSource = {
@@ -22,6 +23,8 @@ function asRecord(value: unknown): RecordValue {
 export function parseRawSource(
 	config: SourceConfig,
 	text: string,
+	// Raw bytes for binary parsers (xlsx); text parsers ignore them.
+	body?: Uint8Array,
 ): ParsedSource {
 	const parser = config.connector.parser;
 	const parse = config.parse as Record<string, unknown>;
@@ -38,6 +41,29 @@ export function parseRawSource(
 				typeof options["skip_rows"] === "number" ? options["skip_rows"] : undefined,
 			trimHeaders: parse["trim_headers"] !== false,
 			unwrapOuterQuotes: options["unwrap_outer_quotes"] === true,
+		});
+		return { parser, records: result.records, seen: result.rows.length };
+	}
+
+	if (parser === "xlsx") {
+		if (body === undefined) {
+			throw new Error(
+				"Parser xlsx wymaga surowych bajtów pliku (snapshot.body); sam tekst nie wystarczy.",
+			);
+		}
+		const options = asRecord(parse["xlsx"]);
+		const sheet = options["sheet"];
+		const result = parseXlsx(body, {
+			emptyAsNull: true,
+			headerRow:
+				typeof options["header_row"] === "number"
+					? options["header_row"]
+					: undefined,
+			sheet:
+				typeof sheet === "string" || typeof sheet === "number"
+					? sheet
+					: undefined,
+			trimHeaders: parse["trim_headers"] !== false,
 		});
 		return { parser, records: result.records, seen: result.rows.length };
 	}
@@ -77,6 +103,6 @@ export function parseRawSource(
 	}
 
 	throw new Error(
-		`Parser ${parser} nie jest obsługiwany przez core buildera. Aktywne źródła powinny być CSV/JSON/GeoJSON/KML.`,
+		`Parser ${parser} nie jest obsługiwany przez core buildera. Aktywne źródła powinny być CSV/XLSX/JSON/GeoJSON/KML.`,
 	);
 }

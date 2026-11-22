@@ -48,11 +48,22 @@ export const CLAIM_STATUSES = [
 	"rejected",
 ] as const;
 
+export const VERIFIER_KINDS = [
+	"person",
+	"email",
+	"company",
+	"organization",
+	"public_body",
+	"community",
+	"unknown",
+] as const;
+
 export type LocationStatus = (typeof LOCATION_STATUSES)[number];
 export type GeomSource = (typeof GEOM_SOURCES)[number];
 export type AddressKind = (typeof ADDRESS_KINDS)[number];
 export type AddressSource = (typeof ADDRESS_SOURCES)[number];
 export type ClaimStatus = (typeof CLAIM_STATUSES)[number];
+export type VerifierKind = (typeof VERIFIER_KINDS)[number];
 
 const nullableText = z.string().nullable();
 const nullableConfidence = z.number().min(0).max(1).nullable();
@@ -72,6 +83,9 @@ export const canonicalAedRecordSchema = z
 		access_type: nullableText,
 		status: nullableText,
 		verification_status: nullableText,
+		verified_by: nullableText.default(null),
+		verified_by_kind: z.enum(VERIFIER_KINDS).nullable().default(null),
+		verified_at: nullableText.default(null),
 		confidence: nullableConfidence,
 		lat: z.number().min(-90).max(90).nullable(),
 		lon: z.number().min(-180).max(180).nullable(),
@@ -147,6 +161,18 @@ export const canonicalAedRecordSchema = z
 				code: "custom",
 				path: ["geocode_provider"],
 				message: "location_status=geocoded wymaga geocode_provider.",
+			});
+		}
+		if (
+			record.verification_status === "verified" &&
+			record.verified_by === null &&
+			record.verified_at === null
+		) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["verification_status"],
+				message:
+					"verification_status=verified wymaga verified_by albo verified_at.",
 			});
 		}
 	});

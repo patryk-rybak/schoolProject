@@ -31,9 +31,22 @@ export const CONNECTOR_FAMILIES = [
 	"html_list",
 	"pdf_table",
 	"manual",
+	"sqlite_db",
+	"postgres_db",
+	"s3_object",
 ] as const;
 
 export type ConnectorFamily = (typeof CONNECTOR_FAMILIES)[number];
+
+/** Connector families that use `connection` instead of HTTP `fetch`. */
+export const NON_HTTP_CONNECTOR_FAMILIES = [
+	"sqlite_db",
+	"postgres_db",
+	"s3_object",
+] as const satisfies readonly ConnectorFamily[];
+
+export type NonHttpConnectorFamily =
+	(typeof NON_HTTP_CONNECTOR_FAMILIES)[number];
 
 export const PARSERS = [
 	"csv",
@@ -62,6 +75,9 @@ export const CONNECTOR_PARSER_MATRIX = {
 	html_list: ["html_list"],
 	pdf_table: ["pdf_table"],
 	manual: ["manual"],
+	sqlite_db: ["json"],
+	postgres_db: ["json"],
+	s3_object: ["csv", "xlsx", "json", "geojson"],
 } as const satisfies Record<ConnectorFamily, readonly Parser[]>;
 
 export const CANONICAL_FIELDS = [
@@ -114,6 +130,9 @@ export const CANONICAL_FIELDS = [
 	"status",
 	"status_reason",
 	"verification_status",
+	"verified_by",
+	"verified_by_kind",
+	"verified_at",
 	"confidence",
 	"last_verified_at",
 	"last_seen_at",
@@ -483,6 +502,144 @@ export const fetchSchema = z.strictObject({
 });
 
 // ---------------------------------------------------------------------------
+// Non-HTTP connections (sqlite_db, postgres_db, s3_object)
+// ---------------------------------------------------------------------------
+
+const FORBIDDEN_SQL_KEYWORDS = [
+	"INSERT",
+	"UPDATE",
+	"DELETE",
+	"DROP",
+	"ALTER",
+	"CREATE",
+	"ATTACH",
+	"DETACH",
+	"PRAGMA",
+	"REPLACE",
+	"TRUNCATE",
+	"GRANT",
+	"REVOKE",
+	"VACUUM",
+	"REINDEX",
+	"EXEC",
+	"EXECUTE",
+	"CALL",
+	"COPY",
+	"MERGE",
+	"SET",
+] as const;
+
+/**
+ * SELECT-only guard for connector queries. Accepts a single SELECT/WITH
+ * statement with an optional trailing semicolon; rejects stacked statements
+ * and write/DDL keywords anywhere outside quoted literals and comments.
+ */
+function selectOnlyProblem(query: string): string | null {
+	const trimmed = query.trim();
+	if (!/^(SELECT|WITH)\b/i.test(trimmed)) {
+		return "Zapytanie musi zaczynać się od SELECT albo WITH.";
+	}
+	const withoutTrailing = trimmed.replace(/;\s*$/, "");
+	// Strip quoted literals/identifiers and comments before keyword checks so
+	// that e.g. WHERE note = 'DROP' does not trigger a false positive.
+	const stripped = withoutTrailing
+		.replace(/'(?:[^']|'')*'/g, "''")
+		.replace(/"(?:[^"]|"")*"/g, '""')
+		.replace(/--[^\n]*/g, " ")
+		.replace(/\/\*[\s\S]*?\*\//g, " ");
+	if (stripped.includes(";")) {
+		return "Zapytanie musi być pojedynczą instrukcją (dozwolony tylko końcowy ';').";
+	}
+	for (const keyword of FORBIDDEN_SQL_KEYWORDS) {
+		if (new RegExp(`\\b${keyword}\\b`, "i").test(stripped)) {
+			return `Zapytanie zawiera zabronione słowo kluczowe ${keyword}; dozwolone są tylko zapytania SELECT.`;
+		}
+	}
+	return null;
+}
+
+const selectQuerySchema = z
+	.string()
+	.min(1)
+	.superRefine((query, ctx) => {
+		const problem = selectOnlyProblem(query);
+		if (problem !== null) {
+			ctx.addIssue({ code: "custom", message: problem });
+		}
+	});
+
+const postgresUrlSchema = z.url({ protocol: /^postgres(ql)?$/ });
+
+export const sqliteConnectionSchema = z.strictObject({
+	kind: z.literal("sqlite"),
+	path: z.string().min(1),
+	query: selectQuerySchema,
+});
+
+export const postgresConnectionSchema = z
+	.strictObject({
+		kind: z.literal("postgres"),
+		url: postgresUrlSchema.optional(),
+		env: envNameSchema.optional(),
+		query: selectQuerySchema,
+	})
+	.refine((value) => (value.url === undefined) !== (value.env === undefined), {
+		message:
+			"Połączenie postgres wymaga dokładnie jednego z pól: url albo env.",
+		path: ["url"],
+	});
+
+export const s3ConnectionSchema = z
+	.strictObject({
+		kind: z.literal("s3"),
+		bucket: z.string().min(1),
+		key: z.string().min(1),
+		region: z.string().min(1).optional(),
+		endpoint: httpsUrlSchema.optional(),
+		access_key_id: z.string().min(1).optional(),
+		secret_access_key: z.string().min(1).optional(),
+		session_token: z.string().min(1).optional(),
+		access_key_id_env: envNameSchema.optional(),
+		secret_access_key_env: envNameSchema.optional(),
+		session_token_env: envNameSchema.optional(),
+	})
+	.superRefine((value, ctx) => {
+		const inlineAny =
+			value.access_key_id !== undefined ||
+			value.secret_access_key !== undefined ||
+			value.session_token !== undefined;
+		const envAny =
+			value.access_key_id_env !== undefined ||
+			value.secret_access_key_env !== undefined ||
+			value.session_token_env !== undefined;
+		const inlinePair =
+			value.access_key_id !== undefined &&
+			value.secret_access_key !== undefined;
+		const envPair =
+			value.access_key_id_env !== undefined &&
+			value.secret_access_key_env !== undefined;
+		if ((inlineAny || envAny) && !inlinePair && !envPair) {
+			ctx.addIssue({
+				code: "custom",
+				message:
+					"Poświadczenia S3 wymagają kompletnej pary access_key_id/secret_access_key albo access_key_id_env/secret_access_key_env (albo żadnych dla dostępu publicznego).",
+				path: ["access_key_id"],
+			});
+		}
+	});
+
+export const connectionSchema = z.discriminatedUnion("kind", [
+	sqliteConnectionSchema,
+	postgresConnectionSchema,
+	s3ConnectionSchema,
+]);
+
+export type SqliteConnection = z.infer<typeof sqliteConnectionSchema>;
+export type PostgresConnection = z.infer<typeof postgresConnectionSchema>;
+export type S3Connection = z.infer<typeof s3ConnectionSchema>;
+export type Connection = z.infer<typeof connectionSchema>;
+
+// ---------------------------------------------------------------------------
 // Parser-specific parse configs
 // ---------------------------------------------------------------------------
 
@@ -717,8 +874,12 @@ export const validateSchema = z.strictObject({
 // ---------------------------------------------------------------------------
 
 function buildSourceVariant<P extends Parser>(parser: P) {
-	const families = CONNECTOR_FAMILIES.filter((family) =>
-		(CONNECTOR_PARSER_MATRIX[family] as readonly Parser[]).includes(parser),
+	const families = CONNECTOR_FAMILIES.filter(
+		(family) =>
+			!(NON_HTTP_CONNECTOR_FAMILIES as readonly ConnectorFamily[]).includes(
+				family,
+			) &&
+			(CONNECTOR_PARSER_MATRIX[family] as readonly Parser[]).includes(parser),
 	) as [ConnectorFamily, ...ConnectorFamily[]];
 	return z.strictObject({
 		source: sourceSchema,
@@ -727,6 +888,43 @@ function buildSourceVariant<P extends Parser>(parser: P) {
 			parser: z.literal(parser),
 		}),
 		fetch: fetchSchema,
+		parse: PARSER_PARSE_SCHEMAS[parser],
+		records: recordsSchema,
+		map: z.partialRecord(canonicalFieldSchema, fieldSpecSchema),
+		validate: validateSchema,
+	});
+}
+
+/** Variant for DB connectors: query rows are snapshotted as a JSON array. */
+function buildDbSourceVariant(
+	family: "sqlite_db" | "postgres_db",
+	connection: typeof sqliteConnectionSchema | typeof postgresConnectionSchema,
+) {
+	return z.strictObject({
+		source: sourceSchema,
+		connector: z.strictObject({
+			family: z.literal(family),
+			parser: z.literal("json"),
+		}),
+		connection,
+		parse: PARSER_PARSE_SCHEMAS.json,
+		records: recordsSchema,
+		map: z.partialRecord(canonicalFieldSchema, fieldSpecSchema),
+		validate: validateSchema,
+	});
+}
+
+/** Variant for S3 objects: one per supported parser, raw bytes unchanged. */
+function buildS3SourceVariant<P extends "csv" | "xlsx" | "json" | "geojson">(
+	parser: P,
+) {
+	return z.strictObject({
+		source: sourceSchema,
+		connector: z.strictObject({
+			family: z.literal("s3_object"),
+			parser: z.literal(parser),
+		}),
+		connection: s3ConnectionSchema,
 		parse: PARSER_PARSE_SCHEMAS[parser],
 		records: recordsSchema,
 		map: z.partialRecord(canonicalFieldSchema, fieldSpecSchema),
@@ -747,6 +945,21 @@ export const SOURCE_CONFIG_VARIANTS = {
 	manual: buildSourceVariant("manual"),
 } as const;
 
+export const SQLITE_SOURCE_CONFIG_VARIANT = buildDbSourceVariant(
+	"sqlite_db",
+	sqliteConnectionSchema,
+);
+export const POSTGRES_SOURCE_CONFIG_VARIANT = buildDbSourceVariant(
+	"postgres_db",
+	postgresConnectionSchema,
+);
+export const S3_SOURCE_CONFIG_VARIANTS = {
+	csv: buildS3SourceVariant("csv"),
+	xlsx: buildS3SourceVariant("xlsx"),
+	json: buildS3SourceVariant("json"),
+	geojson: buildS3SourceVariant("geojson"),
+} as const;
+
 /** Structural schema. Semantic, cross-field checks live in `sourceConfigSchema`. */
 export const sourceConfigBaseSchema = z.union([
 	SOURCE_CONFIG_VARIANTS.csv,
@@ -759,9 +972,18 @@ export const sourceConfigBaseSchema = z.union([
 	SOURCE_CONFIG_VARIANTS.html_list,
 	SOURCE_CONFIG_VARIANTS.pdf_table,
 	SOURCE_CONFIG_VARIANTS.manual,
+	SQLITE_SOURCE_CONFIG_VARIANT,
+	POSTGRES_SOURCE_CONFIG_VARIANT,
+	S3_SOURCE_CONFIG_VARIANTS.csv,
+	S3_SOURCE_CONFIG_VARIANTS.xlsx,
+	S3_SOURCE_CONFIG_VARIANTS.json,
+	S3_SOURCE_CONFIG_VARIANTS.geojson,
 ]);
 
 export type SourceConfigBase = z.infer<typeof sourceConfigBaseSchema>;
+
+/** The HTTP subset: variants that carry `fetch` instead of `connection`. */
+export type HttpSourceConfig = Extract<SourceConfigBase, { fetch: unknown }>;
 
 // ---------------------------------------------------------------------------
 // Semantic refinements
@@ -911,44 +1133,46 @@ function refineSourceConfig(
 		}
 	}
 
-	const headers = value.fetch.headers ?? {};
-	for (const name of Object.keys(headers)) {
-		if (FORBIDDEN_HEADERS.includes(name.toLowerCase())) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["fetch", "headers", name],
-				message: `Nagłówek ${name} jest zabroniony w konfiguracji.`,
-			});
+	if ("fetch" in value) {
+		const headers = value.fetch.headers ?? {};
+		for (const name of Object.keys(headers)) {
+			if (FORBIDDEN_HEADERS.includes(name.toLowerCase())) {
+				ctx.addIssue({
+					code: "custom",
+					path: ["fetch", "headers", name],
+					message: `Nagłówek ${name} jest zabroniony w konfiguracji.`,
+				});
+			}
 		}
-	}
 
-	const auth = value.fetch.auth;
-	if (auth?.type === "bearer" && !auth.env && !auth.token) {
-		ctx.addIssue({
-			code: "custom",
-			path: ["fetch", "auth"],
-			message: "Auth bearer wymaga env albo token.",
-		});
-	}
-	if (auth?.type === "header" && !auth.env && !auth.token) {
-		ctx.addIssue({
-			code: "custom",
-			path: ["fetch", "auth"],
-			message: "Auth header wymaga env albo token.",
-		});
-	}
-	if (auth?.type === "basic") {
-		const hasUserPair = Boolean(
-			(auth.user_env && auth.password_env) || (auth.user && auth.password),
-		);
-		const hasEnvPair = Boolean(auth.env && auth.password_env);
-		if (!hasUserPair && !hasEnvPair) {
+		const auth = value.fetch.auth;
+		if (auth?.type === "bearer" && !auth.env && !auth.token) {
 			ctx.addIssue({
 				code: "custom",
 				path: ["fetch", "auth"],
-				message:
-					"Auth basic wymaga password_env oraz user_env albo env, albo pary user/password.",
+				message: "Auth bearer wymaga env albo token.",
 			});
+		}
+		if (auth?.type === "header" && !auth.env && !auth.token) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["fetch", "auth"],
+				message: "Auth header wymaga env albo token.",
+			});
+		}
+		if (auth?.type === "basic") {
+			const hasUserPair = Boolean(
+				(auth.user_env && auth.password_env) || (auth.user && auth.password),
+			);
+			const hasEnvPair = Boolean(auth.env && auth.password_env);
+			if (!hasUserPair && !hasEnvPair) {
+				ctx.addIssue({
+					code: "custom",
+					path: ["fetch", "auth"],
+					message:
+						"Auth basic wymaga password_env oraz user_env albo env, albo pary user/password.",
+				});
+			}
 		}
 	}
 

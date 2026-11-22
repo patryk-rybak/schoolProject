@@ -10,16 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DodajAedRouteImport } from './routes/dodaj-aed'
 import { Route as ApiPmtilesRouteImport } from './routes/api/pmtiles'
 import { Route as DataAedDotcsvRouteImport } from './routes/data/aed[.]csv'
 import { Route as DataAedDotgeojsonRouteImport } from './routes/data/aed[.]geojson'
 import { Route as HarvesterFeedDotmd5RouteImport } from './routes/harvester/feed[.]md5'
 import { Route as HarvesterFeedDotxmlRouteImport } from './routes/harvester/feed[.]xml'
+import { Route as ZrodlaIndexRouteImport } from './routes/zrodla/index'
+import { Route as ZrodlaNoweRouteImport } from './routes/zrodla/nowe'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DodajAedRoute = DodajAedRouteImport.update({
+  id: '/dodaj-aed',
+  path: '/dodaj-aed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPmtilesRoute = ApiPmtilesRouteImport.update({
@@ -47,6 +55,16 @@ const HarvesterFeedDotxmlRoute = HarvesterFeedDotxmlRouteImport.update({
   path: '/harvester/feed.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZrodlaIndexRoute = ZrodlaIndexRouteImport.update({
+  id: '/zrodla/',
+  path: '/zrodla/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZrodlaNoweRoute = ZrodlaNoweRouteImport.update({
+  id: '/zrodla/nowe',
+  path: '/zrodla/nowe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -55,69 +73,90 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dodaj-aed': typeof DodajAedRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
+  '/zrodla/nowe': typeof ZrodlaNoweRoute
+  '/zrodla/': typeof ZrodlaIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dodaj-aed': typeof DodajAedRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
+  '/zrodla/nowe': typeof ZrodlaNoweRoute
+  '/zrodla': typeof ZrodlaIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dodaj-aed': typeof DodajAedRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
+  '/zrodla/nowe': typeof ZrodlaNoweRoute
+  '/zrodla/': typeof ZrodlaIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dodaj-aed'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
+    | '/zrodla/nowe'
+    | '/zrodla/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dodaj-aed'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
+    | '/zrodla/nowe'
+    | '/zrodla'
     | '/api/auth/$'
   id:
     | '__root__'
     | '/'
+    | '/dodaj-aed'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
+    | '/zrodla/nowe'
+    | '/zrodla/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DodajAedRoute: typeof DodajAedRoute
   ApiPmtilesRoute: typeof ApiPmtilesRoute
   DataAedDotcsvRoute: typeof DataAedDotcsvRoute
   DataAedDotgeojsonRoute: typeof DataAedDotgeojsonRoute
   HarvesterFeedDotmd5Route: typeof HarvesterFeedDotmd5Route
   HarvesterFeedDotxmlRoute: typeof HarvesterFeedDotxmlRoute
+  ZrodlaNoweRoute: typeof ZrodlaNoweRoute
+  ZrodlaIndexRoute: typeof ZrodlaIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -128,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dodaj-aed': {
+      id: '/dodaj-aed'
+      path: '/dodaj-aed'
+      fullPath: '/dodaj-aed'
+      preLoaderRoute: typeof DodajAedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/pmtiles': {
@@ -165,6 +211,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HarvesterFeedDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zrodla/': {
+      id: '/zrodla/'
+      path: '/zrodla'
+      fullPath: '/zrodla/'
+      preLoaderRoute: typeof ZrodlaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zrodla/nowe': {
+      id: '/zrodla/nowe'
+      path: '/zrodla/nowe'
+      fullPath: '/zrodla/nowe'
+      preLoaderRoute: typeof ZrodlaNoweRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -177,11 +237,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DodajAedRoute: DodajAedRoute,
   ApiPmtilesRoute: ApiPmtilesRoute,
   DataAedDotcsvRoute: DataAedDotcsvRoute,
   DataAedDotgeojsonRoute: DataAedDotgeojsonRoute,
   HarvesterFeedDotmd5Route: HarvesterFeedDotmd5Route,
   HarvesterFeedDotxmlRoute: HarvesterFeedDotxmlRoute,
+  ZrodlaNoweRoute: ZrodlaNoweRoute,
+  ZrodlaIndexRoute: ZrodlaIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

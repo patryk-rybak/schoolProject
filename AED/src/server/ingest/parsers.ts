@@ -5,7 +5,11 @@
  * fetch shaping, field extraction and mapping of live source payloads.
  *
  * They are deliberately pure: no network, no filesystem, no environment.
+ * (parseXlsx uses fflate, a pure-JS zip implementation, to read the OOXML
+ * container in memory.)
  */
+
+import { unzipSync } from "fflate";
 
 export type RecordValue = Record<string, unknown>;
 
@@ -1029,6 +1033,226 @@ export function parseCsv(text: string, options: CsvOptions = {}): CsvResult {
 		return record;
 	});
 	return { headers, records, rows: dataRows };
+}
+
+// ---------------------------------------------------------------------------
+// XLSX (OOXML) parsing via fflate
+// ---------------------------------------------------------------------------
+
+export type XlsxOptions = {
+	/** Sheet name or 1-based sheet index. Defaults to the first sheet. */
+	sheet?: string | number | undefined;
+	/** 0-based row index (among non-empty rows) holding the header. */
+	headerRow?: number | undefined;
+	trimHeaders?: boolean | undefined;
+	emptyAsNull?: boolean | undefined;
+};
+
+function columnIndexFromRef(ref: string): number | null {
+	const letters = /^([A-Z]+)/i.exec(ref)?.[1];
+	if (!letters) return null;
+	let index = 0;
+	for (const char of letters.toUpperCase()) {
+		index = index * 26 + (char.charCodeAt(0) - 64);
+	}
+	return index - 1;
+}
+
+/** Concatenates all <t> descendants, covering rich-text <r><t> runs. */
+function xmlTextContent(fragment: string): string {
+	let text = "";
+	for (const match of fragment.matchAll(/<(?:[\w.-]+:)?t\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?t\s*>/g)) {
+		text += match[1] ?? "";
+	}
+	return decodeHtmlEntities(text);
+}
+
+function readSharedStrings(xml: string | null): string[] {
+	if (xml === null) return [];
+	const strings: string[] = [];
+	for (const match of xml.matchAll(/<(?:[\w.-]+:)?si\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?si\s*>/g)) {
+		strings.push(xmlTextContent(match[1] ?? ""));
+	}
+	return strings;
+}
+
+type XlsxSheet = { name: string; path: string };
+
+function resolveXlsxSheets(files: Record<string, Uint8Array>): XlsxSheet[] {
+	const decoder = new TextDecoder("utf-8");
+	const workbookEntry = files["xl/workbook.xml"];
+	if (workbookEntry) {
+		const workbook = decoder.decode(workbookEntry);
+		const relsEntry = files["xl/_rels/workbook.xml.rels"];
+		const targets = new Map<string, string>();
+		if (relsEntry) {
+			const rels = decoder.decode(relsEntry);
+			for (const match of rels.matchAll(/<Relationship\b[^>]*>/g)) {
+				const attributes = parseAttributes(match[0]);
+				const id = attributes["id"];
+				const target = attributes["target"];
+				if (!id || !target) continue;
+				const path = target.startsWith("/")
+					? target.slice(1)
+					: `xl/${target.replace(/^\.\//, "")}`;
+				targets.set(id, path);
+			}
+		}
+		const sheets: XlsxSheet[] = [];
+		for (const match of workbook.matchAll(/<(?:[\w.-]+:)?sheet\b[^>]*>/g)) {
+			const attributes = parseAttributes(match[0]);
+			const name = decodeHtmlEntities(attributes["name"] ?? "");
+			const relId = attributes["r:id"] ?? attributes["id"];
+			const path =
+				(relId !== undefined ? targets.get(relId) : undefined) ??
+				`xl/worksheets/sheet${sheets.length + 1}.xml`;
+			sheets.push({ name, path });
+		}
+		if (sheets.length > 0) return sheets;
+	}
+	// Fallback: enumerate worksheet parts from [Content_Types].xml.
+	const contentTypesEntry = files["[Content_Types].xml"];
+	const paths: string[] = [];
+	if (contentTypesEntry) {
+		const contentTypes = decoder.decode(contentTypesEntry);
+		for (const match of contentTypes.matchAll(/<Override\b[^>]*>/g)) {
+			const attributes = parseAttributes(match[0]);
+			if (
+				(attributes["contenttype"] ?? "").endsWith(
+					"spreadsheetml.worksheet+xml",
+				)
+			) {
+				const partName = attributes["partname"];
+				if (partName?.startsWith("/")) paths.push(partName.slice(1));
+			}
+		}
+	}
+	if (paths.length === 0) {
+		paths.push(
+			...Object.keys(files)
+				.filter((name) => /^xl\/worksheets\/sheet\d+\.xml$/.test(name))
+				.sort(),
+		);
+	}
+	return paths.map((path, index) => ({ name: `Sheet${index + 1}`, path }));
+}
+
+function parseXlsxSheetRows(xml: string, sharedStrings: string[]): string[][] {
+	const rows: string[][] = [];
+	for (const rowMatch of xml.matchAll(/<(?:[\w.-]+:)?row\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?row\s*>/g)) {
+		const cells: string[] = [];
+		let nextColumn = 0;
+		const cellPattern =
+			/<(?:[\w.-]+:)?c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/(?:[\w.-]+:)?c\s*>)/g;
+		for (const cellMatch of (rowMatch[1] ?? "").matchAll(cellPattern)) {
+			const attributes = parseAttributes(cellMatch[1] ?? "");
+			const inner = cellMatch[2] ?? "";
+			const ref = attributes["r"];
+			const column =
+				(ref !== undefined ? columnIndexFromRef(ref) : null) ?? nextColumn;
+			nextColumn = column + 1;
+			const type = attributes["t"] ?? "n";
+			const valueMatch = /<(?:[\w.-]+:)?v\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?v\s*>/.exec(inner);
+			const rawValue = valueMatch?.[1] ?? "";
+			let value = "";
+			if (type === "s") {
+				const index = Number.parseInt(rawValue, 10);
+				value = Number.isFinite(index) ? (sharedStrings[index] ?? "") : "";
+			} else if (type === "inlineStr") {
+				const isMatch = /<(?:[\w.-]+:)?is\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?is\s*>/.exec(inner);
+				value = xmlTextContent(isMatch?.[1] ?? inner);
+			} else if (type === "b") {
+				value = rawValue.trim() === "1" ? "true" : "false";
+			} else if (type === "e") {
+				// Excel error cells (#DIV/0!, #N/A...) count as empty values.
+				value = "";
+			} else {
+				// "n", "str" and the default: numeric cells become String(number).
+				// LIMITATION: date-formatted cells stay numeric Excel serials; no
+				// styles.xml number-format detection is performed.
+				const decoded = decodeHtmlEntities(rawValue);
+				const numeric = Number(decoded);
+				value =
+					type !== "str" && decoded.trim() !== "" && Number.isFinite(numeric)
+						? String(numeric)
+						: decoded;
+			}
+			while (cells.length < column) cells.push("");
+			cells[column] = value;
+		}
+		rows.push(cells);
+	}
+	return rows;
+}
+
+/**
+ * Parses an XLSX workbook snapshot into the same shape as parseCsv.
+ * Supports shared strings (incl. rich text runs), inline strings, formula
+ * string results, booleans and numeric cells; sparse cells are positioned by
+ * their A1 references. Date cells remain numeric serials (see above).
+ */
+export function parseXlsx(bytes: Uint8Array, options: XlsxOptions = {}): CsvResult {
+	let files: Record<string, Uint8Array>;
+	try {
+		files = unzipSync(bytes);
+	} catch (cause) {
+		throw new Error(
+			`Nie można odczytać pliku XLSX (nieprawidłowe archiwum ZIP): ${cause instanceof Error ? cause.message : String(cause)}`,
+		);
+	}
+	const decoder = new TextDecoder("utf-8");
+	const sheets = resolveXlsxSheets(files);
+	if (sheets.length === 0) {
+		throw new Error("Plik XLSX nie zawiera żadnych arkuszy.");
+	}
+	let sheet: XlsxSheet | undefined;
+	if (typeof options.sheet === "number") {
+		sheet = sheets[options.sheet - 1];
+		if (!sheet) {
+			throw new Error(
+				`Plik XLSX nie ma arkusza o numerze ${options.sheet} (arkuszy: ${sheets.length}).`,
+			);
+		}
+	} else if (typeof options.sheet === "string") {
+		sheet = sheets.find((entry) => entry.name === options.sheet);
+		if (!sheet) {
+			throw new Error(`Plik XLSX nie ma arkusza o nazwie "${options.sheet}".`);
+		}
+	} else {
+		sheet = sheets[0];
+	}
+	if (!sheet) {
+		throw new Error("Plik XLSX nie zawiera żadnych arkuszy.");
+	}
+	const sheetEntry = files[sheet.path];
+	if (!sheetEntry) {
+		throw new Error(`Plik XLSX nie zawiera części arkusza: ${sheet.path}.`);
+	}
+	const sharedStringsEntry = files["xl/sharedStrings.xml"];
+	const sharedStrings = readSharedStrings(
+		sharedStringsEntry ? decoder.decode(sharedStringsEntry) : null,
+	);
+	const allRows = parseXlsxSheetRows(decoder.decode(sheetEntry), sharedStrings).filter(
+		(row) => row.some((cell) => cell.trim() !== ""),
+	);
+	const headerRowIndex = options.headerRow ?? 0;
+	const rawHeaders = allRows[headerRowIndex] ?? [];
+	const headers = rawHeaders.map((header) =>
+		options.trimHeaders === false ? header : normalizeHeader(header),
+	);
+	const rows = allRows.slice(headerRowIndex + 1);
+	const records = rows.map((cells) => {
+		const record: RecordValue = {};
+		for (let index = 0; index < headers.length; index += 1) {
+			const header = headers[index];
+			if (!header) continue;
+			const value = (cells[index] ?? "").trim();
+			record[header] =
+				options.emptyAsNull !== false && value === "" ? null : value;
+		}
+		return record;
+	});
+	return { headers, records, rows };
 }
 
 type PathToken = { key: string } | { index: number };
