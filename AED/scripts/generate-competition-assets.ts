@@ -535,39 +535,136 @@ function buildWorkbook(): void {
 async function buildBrandPdf(): Promise<void> {
 	mkdirSync(resolve(OUT_DIR, "brand"), { recursive: true });
 	mkdirSync(PUBLIC_DIR, { recursive: true });
-	const doc = new PDFDocument({ size: "A4", margin: 50 });
+	const doc = new PDFDocument({ size: "A4", margin: 0, autoFirstPage: true });
 	const output = resolve(OUT_DIR, "brand", "dane-aed-razem-ksiega-znaku.pdf");
 	const stream = createWriteStream(output);
 	doc.pipe(stream);
 	doc.registerFont("DejaVu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
 	doc.registerFont("DejaVu-Bold", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf");
-	doc.rect(0, 0, 595, 842).fill("#0B1F3A");
-	doc.image(MASCOT_SOURCE, 190, 50, { fit: [215, 215] });
-	doc.fillColor("#FFD166").fontSize(28).font("DejaVu-Bold").text("DANE AED RAZEM", 50, 280);
-	doc.fontSize(14).font("DejaVu").text("Hasło: Dane darują minuty", 50, 320);
-	doc.fontSize(11).font("DejaVu");
-	const text = `Księga znaku - maskotka (5 zdań)
-1. Nazwa akcji „DANE AED RAZEM” wskazuje, że dane o defibrylatorach mają wspólny dom w dane.gov.pl.
-2. Hasło „Dane darują minuty” łączy udostępnienie danych z czasem potrzebnym do ratowania życia.
-3. Maskotka to uśmiechnięty defibrylator z kredkowymi elektrodami, który personifikuje ratownictwo i otwarte dane.
-4. Czerwień oznacza pilność ratunku, żółć energię, granat zaufanie instytucji, a biel czystość przekazu.
-5. Znak jest przeznaczony do kampanii zachęcającej dysponentów do publikacji zbiorów AED.
+	const W = 595.28;
+	const H = 841.89;
+	const NAVY = "#0B1F3A";
+	const RED = "#E63946";
+	const YELLOW = "#FFD166";
+	const WHITE = "#FFFFFF";
+	const MUTED = "#5A6B82";
 
-Kolorystyka
-Czerwień #E63946, żółć #FFD166, granat #0B1F3A, biel #FFFFFF. Kolory kredkowe są inspirowane plikiem źródłowym i nie są separacją drukarską.
+	/** Shared page header used by every page of the brandbook. */
+	function pageHeader(title: string, kicker: string): void {
+		doc.rect(0, 0, W, 112).fill(NAVY);
+		doc.fillColor(YELLOW).font("DejaVu-Bold").fontSize(9).text(kicker, 50, 30);
+		doc.fillColor(WHITE).fontSize(23).text(title, 50, 48, { width: 495 });
+	}
 
-Pole ochronne
-Pole ochronne ma szerokość połowy wysokości litery „A” wokół całego znaku.
+	function pageFooter(page: number): void {
+		doc.fillColor(MUTED).font("DejaVu").fontSize(8)
+			.text("DANE AED RAZEM  |  Księga znaku  |  wersja 1.0", 50, H - 36, { width: 300 });
+		doc.text(String(page).padStart(2, "0"), 500, H - 36, { width: 45, align: "right" });
+	}
 
-Minimalna wielkość
-24 mm w druku, 96 px w interfejsach cyfrowych.
+	// --- Page 1: concept and primary lockup ---------------------------------
+	pageHeader("Księga znaku", "DANE AED RAZEM  /  TOŻSAMOŚĆ WIZUALNA");
+	doc.fillColor(NAVY).font("DejaVu-Bold").fontSize(25)
+		.text("Dane darują minuty", 50, 140, { width: 495 });
+	doc.fillColor(MUTED).font("DejaVu").fontSize(11)
+		.text("Koncepcja w 5 zdaniach", 50, 184);
+	const concept = [
+		"1. Nazwa akcji „DANE AED RAZEM” wskazuje, że dane o defibrylatorach mają wspólny dom w dane.gov.pl.",
+		"2. Hasło „Dane darują minuty” łączy udostępnienie danych z czasem potrzebnym do ratowania życia.",
+		"3. Maskotka to uśmiechnięty defibrylator z kredkowymi elektrodami, który personifikuje ratownictwo i otwarte dane.",
+		"4. Czerwień oznacza pilność ratunku, żółć energię, granat zaufanie instytucji, a biel czystość przekazu.",
+		"5. Znak jest przeznaczony do kampanii zachęcającej dysponentów do publikacji zbiorów AED.",
+	];
+	doc.fillColor(NAVY).fontSize(10.5).text(concept.join("\n\n"), 50, 206, {
+		width: 495,
+		lineGap: 1,
+	});
+	doc.roundedRect(50, 430, 495, 315, 10).fill("#F3F6FA");
+	doc.image(MASCOT_SOURCE, 195, 446, { fit: [205, 205] });
+	doc.fillColor(RED).font("DejaVu-Bold").fontSize(19)
+		.text("DANE AED RAZEM", 50, 665, { width: 495, align: "center" });
+	doc.fillColor(NAVY).font("DejaVu").fontSize(12)
+		.text("Dane darują minuty", 50, 695, { width: 495, align: "center" });
+	pageFooter(1);
 
-Niedozwolone wykorzystywanie
-Rozciąganie, zmiana proporcji i kolorów, dodawanie cieni, obracanie, umieszczanie na ruchomych tłach.
+	// --- Page 2: clear space and minimum size -------------------------------
+	doc.addPage();
+	pageHeader("Pole ochronne i wielkość", "ZASADY UŻYCIA  /  ZNAK");
+	doc.fillColor(NAVY).font("DejaVu-Bold").fontSize(13).text("Pole ochronne", 50, 142);
+	doc.fillColor(MUTED).font("DejaVu").fontSize(10)
+		.text("Zostaw wokół znaku wolny margines o szerokości połowy wysokości litery „A” (0,5×A).", 50, 166, { width: 495 });
+	doc.rect(70, 205, 200, 200).fill("#F3F6FA");
+	doc.rect(70, 205, 200, 200).strokeColor(RED).dash(4, { space: 3 }).stroke();
+	doc.undash();
+	doc.image(MASCOT_SOURCE, 92, 227, { fit: [156, 156] });
+	doc.fillColor(NAVY).font("DejaVu-Bold").fontSize(11).text("0,5×A", 280, 208);
+	doc.fillColor(MUTED).font("DejaVu").fontSize(9)
+		.text("Pole mierzone od skrajnych krawędzi maskotki i logotypu.", 280, 230, { width: 265 });
+	doc.fillColor(NAVY).font("DejaVu-Bold").fontSize(13)
+		.text("Minimalna wielkość", 50, 445);
+	doc.fillColor(MUTED).font("DejaVu").fontSize(10)
+		.text("Poniżej tych wymiarów znak traci czytelność. Nie skaluj go mniejszym.", 50, 469, { width: 495 });
+	doc.rect(70, 505, 120, 120).fill("#F3F6FA");
+	doc.image(MASCOT_SOURCE, 78, 513, { fit: [104, 104] });
+	doc.fillColor(NAVY).font("DejaVu-Bold").fontSize(10).text("24 mm", 70, 640, { width: 120, align: "center" });
+	doc.fillColor(MUTED).font("DejaVu").fontSize(9).text("druk", 70, 656, { width: 120, align: "center" });
+	doc.rect(240, 505, 120, 120).fill("#F3F6FA");
+	doc.image(MASCOT_SOURCE, 248, 513, { fit: [104, 104] });
+	doc.fillColor(NAVY).font("DejaVu-Bold").fontSize(10).text("96 px", 240, 640, { width: 120, align: "center" });
+	doc.fillColor(MUTED).font("DejaVu").fontSize(9).text("ekran", 240, 656, { width: 120, align: "center" });
+	doc.fillColor(MUTED).font("DejaVu").fontSize(9)
+		.text("Wersje: pełna (maskotka + nazwa), symbol (sam defibrylator) oraz mono do tła jednokolorowego.", 50, 710, { width: 495 });
+	pageFooter(2);
 
-Plik źródłowy i licencja
-Autorem maskotki jest Zdzisław. Materiał dostarczony na potrzeby zgłoszenia konkursowego; dalsze użycie wymaga ustalenia licencji z autorem.`;
-	doc.text(text, 50, 350, { width: 495, lineGap: 4 });
+	// --- Page 3: palette ----------------------------------------------------
+	doc.addPage();
+	pageHeader("Kolorystyka", "SYSTEM BARW  /  WARTOŚCI HEX");
+	const palette: [string, string, string][] = [
+		["Czerwień ratunku", RED, "#E63946"],
+		["Żółć energii", YELLOW, "#FFD166"],
+		["Granat zaufania", NAVY, "#0B1F3A"],
+		["Biel czystości", WHITE, "#FFFFFF"],
+	];
+	palette.forEach(([label, hex, value], index) => {
+		const y = 145 + index * 130;
+		doc.roundedRect(50, y, 130, 96, 8).fill(hex);
+		if (hex === WHITE) {
+			doc.roundedRect(50, y, 130, 96, 8).strokeColor("#D5DCE6").stroke();
+		}
+		doc.fillColor(NAVY).font("DejaVu-Bold").fontSize(14).text(label, 205, y + 12);
+		doc.fillColor(MUTED).font("DejaVu").fontSize(11).text(value, 205, y + 38);
+		doc.fontSize(9).text(index === 0 ? "Pilność i działanie ratunkowe." : index === 1 ? "Optymizm i widoczność w ruchu." : index === 2 ? "Stabilność instytucji i danych." : "Tło i oddech kompozycji.", 205, y + 62, { width: 340 });
+	});
+	doc.fillColor(MUTED).font("DejaVu").fontSize(9)
+		.text("Barwy kredkowe są inspirowane plikiem źródłowym i nie są separacją drukarską. Na tle ciemnym użyj wersji mono lub białej.", 50, 700, { width: 495 });
+	pageFooter(3);
+
+	// --- Page 4: misuse -----------------------------------------------------
+	doc.addPage();
+	pageHeader("Niedozwolone wykorzystywanie", "ZASADY UŻYCIA  /  ZAKAZY");
+	const misuses: [string, string][] = [
+		["Rozciąganie", "Nigdy nie zmieniaj proporcji znaku."],
+		["Zmiana kolorów", "Nie używaj innych barw niż paleta."],
+		["Cienie i efekty", "Nie dodawaj cieni, poświat ani gradientów."],
+		["Obrót", "Znak zawsze stoi prosto."],
+		["Ruchome tło", "Nie umieszczaj na animowanym tle."],
+		["Wersja mono", "Nie mieszaj wersji mono z kolorową."],
+	];
+	misuses.forEach(([title, description], index) => {
+		const column = index % 2;
+		const row = Math.floor(index / 2);
+		const x = 50 + column * 255;
+		const y = 145 + row * 175;
+		doc.roundedRect(x, y, 240, 150, 8).fill("#F3F6FA");
+		doc.fillColor(RED).font("DejaVu-Bold").fontSize(18).text(`0${index + 1}`, x + 18, y + 16);
+		doc.fillColor(NAVY).fontSize(13).text(title, x + 18, y + 48, { width: 205 });
+		doc.fillColor(MUTED).font("DejaVu").fontSize(9.5)
+			.text(description, x + 18, y + 76, { width: 205 });
+	});
+	doc.fillColor(MUTED).font("DejaVu").fontSize(9)
+		.text("Autorem maskotki jest Zdzisław. Materiał dostarczony na potrzeby zgłoszenia konkursowego; dalsze użycie wymaga ustalenia licencji z autorem.", 50, 720, { width: 495 });
+	pageFooter(4);
+
 	doc.end();
 	await new Promise<void>((done, fail) => {
 		stream.on("finish", done);
