@@ -1,4 +1,5 @@
 import { layers, namedFlavor } from "@protomaps/basemaps";
+import { Link, RouterContextProvider, useRouter } from "@tanstack/react-router";
 import {
 	CircleAlert,
 	LoaderCircle,
@@ -231,10 +232,15 @@ const COORD_DECIMALS = 6;
 function AddHerePopup({ lat, lon }: { lat: number; lon: number }) {
 	return (
 		<div className="flex flex-col gap-2 p-1">
-			<p className="font-medium text-sm">Brak zgłoszonego AED w tym miejscu</p>
+			<p className="font-medium text-sm">Dodać AED w tym miejscu?</p>
 			<p className="text-muted-foreground text-xs">
 				{lat.toFixed(COORD_DECIMALS)}, {lon.toFixed(COORD_DECIMALS)}
 			</p>
+			<Button asChild={true} size="sm">
+				<Link to="/dodaj-aed" search={{ lat, lon }}>
+					Dodaj AED tutaj
+				</Link>
+			</Button>
 		</div>
 	);
 }
@@ -477,6 +483,13 @@ export function PolandMap({
 	const markerRef = useRef<maplibregl.Marker | null>(null);
 	const pickRef = useRef<((lat: number, lon: number) => void) | null>(null);
 	const popupRef = useRef<ActivePopup | null>(null);
+	// Popupy żyją w osobnych korzeniach React (createRoot), więc kontekst
+	// routera nie dociera do nich automatycznie. Przechwytujemy instancję
+	// routera i owijamy treść popupu w RouterContextProvider, żeby Link
+	// w „Dodaj AED tutaj” działał (nawigacja kliencka zamiast przeładowania).
+	const router = useRouter();
+	const routerRef = useRef(router);
+	routerRef.current = router;
 	const [error, setError] = useState<string | null>(null);
 	pickRef.current = onPick ?? null;
 
@@ -539,7 +552,11 @@ export function PolandMap({
 			showPopup({
 				map,
 				lngLat: event.lngLat,
-				content: <AddHerePopup lat={lat} lon={lng} />,
+				content: (
+					<RouterContextProvider router={routerRef.current}>
+						<AddHerePopup lat={lat} lon={lng} />
+					</RouterContextProvider>
+				),
 				popupRef,
 			});
 		});
