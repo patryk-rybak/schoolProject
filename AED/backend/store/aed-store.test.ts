@@ -7,6 +7,7 @@ import { join } from "node:path";
 
 import type { CanonicalAedRecord } from "../../src/server/ingest/canonical.ts";
 import { parseCanonicalAedRecord } from "../../src/server/ingest/canonical.ts";
+import { removeDuplicateAedDevices } from "./deduplicate.ts";
 
 /**
  * Store tests run against a throwaway SQLite file. `DATABASE_URL` must be set
@@ -186,6 +187,14 @@ describe("canonical store", () => {
 		);
 		expect(origins).toEqual(new Set(["user", "source"]));
 		expect(store.countCombinedAedDevices()).toBe(EXPECTED_COMBINED_ROWS);
+	});
+
+	test("deduplication placeholder is a no-op", () => {
+		const before = store.listCombinedAedDevices().map((row) => row.recordId);
+		expect(removeDuplicateAedDevices()).toBe(0);
+		expect(store.listCombinedAedDevices().map((row) => row.recordId)).toEqual(
+			before,
+		);
 	});
 
 	test("deleting a source refreshes only its combined rows", () => {
