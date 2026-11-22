@@ -143,7 +143,7 @@ Environment variables live in `.env.local` (never committed):
 - Keep the generated components on their Radix UI base; do not swap in another primitive library.
 - Use the generated `cn` helper (from the `cn` package) or `#/lib/utils`.
 - Use `lucide-react` for icons.
-- Preserve the `new-york` style and CSS-variable theme in `components.json` and `frontend/styles.css`. The Facebook share button intentionally uses Facebook brand blue (`#1877F2`); it is the only non-theme color in that card.
+- Preserve the `new-york` style and CSS-variable theme in `components.json` and `frontend/styles.css`. The Facebook share card intentionally uses Facebook brand blue (`#1877F2`) and a decorative animated rainbow border; these are the only non-theme colors in that card. Keep the reduced-motion fallback in `frontend/styles.css`.
 
 ## Code Style
 

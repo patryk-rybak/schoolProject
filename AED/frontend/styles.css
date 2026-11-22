@@ -121,3 +121,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes share-rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-share-rainbow {
+  animation: share-rainbow 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-share-rainbow {
+    animation: none;
+  }
+}

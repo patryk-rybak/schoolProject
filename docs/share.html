@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Poraź dobrem — Mapa AED</title>
+		<title>raziMY dobrem — Mapa AED</title>
 		<meta
 			name="description"
 			content="Dołącz do ogólnopolskiej mapy AED. Dodaj defibrylator, który znasz, i pomóż ratować życie."
@@ -17,7 +17,7 @@
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content="Mapa AED" />
 		<meta property="og:locale" content="pl_PL" />
-		<meta property="og:title" content="Poraź dobrem — mapa AED" />
+		<meta property="og:title" content="raziMY dobrem — mapa AED" />
 		<meta
 			property="og:description"
 			content="Dołącz do ogólnopolskiej mapy AED. Dodaj defibrylator, który znasz, i pomóż ratować życie."
@@ -36,7 +36,7 @@
 		<meta property="og:image:alt" content="Rysunek defibrylatora z hasłem raziMY dobrem" />
 
 		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content="Poraź dobrem — mapa AED" />
+		<meta name="twitter:title" content="raziMY dobrem — mapa AED" />
 		<meta
 			name="twitter:description"
 			content="Dołącz do ogólnopolskiej mapy AED. Dodaj defibrylator, który znasz, i pomóż ratować życie."
@@ -94,28 +94,31 @@
 				padding: 24px 12px 12px;
 			}
 
-			.eyebrow {
-				margin: 0 0 6px;
-				color: #d7262e;
-				font-size: 0.8rem;
-				font-weight: 800;
-				letter-spacing: 0.14em;
-				text-transform: uppercase;
-			}
-
 			h1 {
 				margin: 0;
-				font-size: clamp(1.9rem, 5vw, 2.8rem);
+				font-size: clamp(2rem, 6vw, 3.1rem);
 				letter-spacing: -0.03em;
 				line-height: 1.05;
 			}
 
+			.accent {
+				color: #d7262e;
+			}
+
 			.lead {
-				margin: 14px 0 22px;
+				margin: 14px 0 10px;
 				max-width: 58ch;
 				color: #454545;
 				font-size: clamp(1rem, 2.5vw, 1.1rem);
 				line-height: 1.6;
+			}
+
+			.note {
+				margin: 0 0 22px;
+				max-width: 58ch;
+				color: #6b6b6b;
+				font-size: 0.875rem;
+				line-height: 1.55;
 			}
 
 			.link {
@@ -156,11 +159,14 @@
 				alt="Rysunek defibrylatora z hasłem raziMY dobrem"
 			/>
 			<div class="content">
-				<p class="eyebrow">raziMY dobrem</p>
-				<h1>Poraź dobrem</h1>
+				<h1><span>razi</span><span class="accent">MY dobrem</span></h1>
 				<p class="lead">
 					Dołącz do ogólnopolskiej mapy AED. Dodaj defibrylator, który znasz, i pomóż
 					ratować życie.
+				</p>
+				<p class="note">
+					Gdyby aplikacja działała w środowisku produkcyjnym, ten link prowadziłby do
+					mapy z nowo dodanym defibrylatorem.
 				</p>
 				<a class="link" href="https://github.com/patryk-rybak/schoolProject">
 					Zobacz projekt na GitHubie <span aria-hidden="true">→</span>
