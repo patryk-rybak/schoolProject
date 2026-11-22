@@ -29,16 +29,31 @@ Minimalna aplikacja TanStack Start, która renderuje mapę Polski z MapLibre GL 
 
 Gotowe materiały do zgłoszenia konkursowego znajdują się w `competition-assets/`.
 
-W uruchomionej aplikacji są one również dostępne przez klikalną stronę `/materialy` oraz dokumentację `/dokumentacja/wzorcowy-zakres-danych`.
+Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`) pobiera aktualną, pełną bazę AED w formacie XLSX, znormalizowaną do wspólnego rekordu kanonicznego. To nie jest pusty arkusz wzorca: eksport ma jeden wiersz na urządzenie, nagłówki z nazwami pól kanonicznych i polskimi aliasami oraz metadane dodawane przez system.
 
-- `wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx`: wzorcowy zakres danych (5 arkuszy),
-- `logo/`: logo w formatach PNG, JPG i SVG (wersja monochromatyczna PNG),
+Eksport XLSX (tak jak CSV i GeoJSON) udostępnia m.in. `id` (klucz bazy), `id_uuid` (stabilny identyfikator kanoniczny), `name` / `nazwa_obiektu`, `lat` / `szerokosc_geo`, `lon` / `dlugosc_geo`, `city` / `miejscowosc`, `access` / `typ_dostepnosci`, `status`, `verification_status` / `status_weryfikacji`, `verified_by`, `verified_by_kind`, `verified_at`, `record_id`, `source_id` / `zrodlo_danych`, `source_record_id`, `source_url`, `location_status`, `geom_source` oraz pola techniczne `data_utworzenia` i `data_aktualizacji`.
+
+Formularz dodawania AED pokazuje trzy sekcje główne rozwinięte: **Podstawowe informacje**, **Lokalizacja/Adres** i **Dostępność**. **Typ dostępu** jest obowiązkowy (24/7 publiczny, w godzinach otwarcia, ograniczony/na klucz, nieznany), a godziny otwarcia pojawiają się tylko dla dostępu w godzinach otwarcia. Współrzędne pochodzą z kliknięcia na mapie lub geokodowania adresu; kod pocztowy, województwo i powiat są uzupełniane automatycznie. Sekcje **Cechy dostępności**, **Urządzenie i przeglądy** oraz **Opiekun** są zwinięte i opcjonalne, więc zgłoszenie nie wymaga od mieszkańca znajomości dat ważności baterii czy elektrod.
+
+Wzorcowy XLSX (statyczny plik `wzorcowy-zakres-danych-aed.xlsx`) jest zgodny z ujęciem dane.gov.pl/DCAT-AP i dzieli pola na trzy poziomy. To dokumentacja wzorca, nie dane z bazy:
+
+- **Wymagane** (7): `id`, `nazwa_obiektu`, `szerokosc_geo` (WGS84), `dlugosc_geo` (WGS84), `miejscowosc`, `typ_dostepnosci`, `data_aktualizacji`,
+- **Zalecane** (8): `ulica`, `nr_budynku`, `opis_lokalizacji`, `godziny_otwarcia`, `wewnatrz_zewnatrz`, `status_sprawnosci`, `opiekun_nazwa`, `opiekun_kontakt`,
+- **Opcjonalne** (5): `producent_model`, `elektrody_pediatryczne`, `data_waznosci_baterii`, `data_waznosci_elektrod`, `url_zdjecia`.
+
+W eksportach CSV, GeoJSON i XLSX system uwzględnia pola techniczne: `id` (klucz bazy), `id_uuid` (stabilny identyfikator kanoniczny), `data_utworzenia`, `data_aktualizacji`, `zrodlo_danych` i `status_weryfikacji` (wraz z angielskim `verification_status`). Nie są one wpisywane ręcznie w formularzu; pozwalają jury i dostawcom prześledzić pochodzenie i weryfikację rekordu.
+
+Statyczny plik `wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx` pozostaje wyłącznie dokumentacją wzorca (6 arkuszy). Nie zawiera danych z bazy i nie jest plikiem pobieranym przez przycisk na stronie głównej (`/data/aed.xlsx`).
+
+- `wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx`: wzorcowy zakres danych (6 arkuszy, dokumentacja),
+- `logo/`: logo z maskotką AED w formatach PNG, JPG i SVG (wersja monochromatyczna PNG),
+- `brand/cheerful-crayon-aed-mascot.png`: kanoniczny plik źródłowy maskotki dostarczony przez Zdzisława,
 - `brand/brandbook.pdf` i `brand/dane-aed-razem-ksiega-znaku.pdf`: księga znaku (PDF),
 - `prezentacja/prezentacja.pdf` i `prezentacja/prezentacja.md`: prezentacja projektu w formacie PDF i jej źródło Markdown
 - `INSTRUKCJA-DLA-JURY.md`: instrukcja dla jury,
 - `screenshots/`: zrzuty ekranu aplikacji (logo, mapa, formularze).
 
-Materiały można odtworzyć poleceniem `bun scripts/generate-competition-assets.ts` (skrypt generuje XLSX, księgę znaku, JPG na podstawie PNG i prezentację PDF, a pozostałe pliki są przechowywane w repozytorium).
+Materiały można odtworzyć poleceniem `bun scripts/generate-competition-assets.ts` (skrypt generuje XLSX, księgę znaku, pliki loga na podstawie maskotki i prezentację PDF, a pozostałe pliki są przechowywane w repozytorium). Canonicalny jest plik PNG: SVG osadza ten sam raster jako dane base64, a nie wektorowy odrys. Maskotka została dostarczona na potrzeby zgłoszenia przez Zdzisława; dalsze użycie wymaga ustalenia licencji z autorem.
 
 ## Struktura repozytorium
 
@@ -69,9 +84,9 @@ AED/
 │   ├── routes/               # trasy TanStack (w tym /api/*)
 │   ├── router.tsx            # fabryka routera
 │   ├── routeTree.gen.ts      # generowany — nie edytować ręcznie
-│   ├── components/ui/        # komponenty shadcn (rejestr)
+│   ├── components/           # komponenty własne + ui/ (shadcn, rejestr)
 │   ├── map/                  # mapa AED (MapLibre + Protomaps)
-│   ├── hooks/, lib/          # hooki i helpery klienta
+│   ├── lib/                  # helpery klienta (cn, etykiety AED, auth-client)
 │   ├── auth-form/            # moduł: logowanie/rejestracja
 │   ├── server/               # server functions (forms.ts)
 │   ├── aed-form/             # moduł: formularz AED
@@ -125,7 +140,9 @@ bun run dev
 
 Aplikacja działa pod http://localhost:3000.
 
-`bun install` uruchamia `frontend/scripts/copy-maplibre-worker.ts`, który kopiuje worker MapLibre do `frontend/public/maplibre-gl-worker.mjs`.
+Worker MapLibre jest wbudowywany przez Vite bezpośrednio z pakietu `maplibre-gl`
+(`?worker&url`); nie jest kopiowany do `frontend/public/` i nie wymaga żadnych
+hooków instalacyjnych.
 
 ## Skrypty
 
@@ -163,6 +180,26 @@ Zasady wspólne dla backendu:
 - brak sekretów w repozytorium (`.env.local`),
 - każda zmiana schematu = migracja,
 - kod serwerowy nie trafia do komponentów klienckich.
+
+### Źródła danych i provenance
+
+Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
+
+| Identyfikator źródła | Nazwa | Status |
+| --- | --- | --- |
+| `krosno` | Defibrylatory w Krośnie | włączone |
+| `marki` | Defibrylatory w Markach | włączone |
+| `openaedmap` | OpenAEDMap — eksport krajowy PL | włączone |
+| `przemysl` | Otwarte Dane Przemyśl — defibrylatory AED | włączone |
+| `warszawa` | Lokalizacja defibrylatorów (AED) — m.st. Warszawa | włączone |
+| `belchatow` | Wykaz defibrylatorów AED na terenie Bełchatowa (KML) | wyłączone do decyzji licencyjnej |
+| `lodz` | Defibrylatory AED w Łodzi (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
+| `olsztyn` | Mapa ogólnodostępnych defibrylatorów AED w Olsztynie (KML) | wyłączone do decyzji licencyjnej |
+| `pawlowice` | Defibrylatory AED - Gmina Pawłowice (KML) | wyłączone do decyzji licencyjnej |
+| `tczew` | AED Tczew (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
+| `zielona-gora` | AED w Zielonej Górze (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
+
+Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`.
 
 Zasady wspólne dla frontendu:
 
@@ -217,7 +254,8 @@ identyfikatorem użytkownika, ról i uprawnień, logowania przez gov.pl.
 ### Formularz AED (aed-form)
 
 **Status:** działa (dev) · **Kod:** `frontend/routes/dodaj-aed.tsx`,
-`frontend/routes/zrodla/`, `backend/forms/`, `frontend/server/forms.ts`
+`frontend/components/aed-form/`, `frontend/routes/zrodla/`, `backend/forms/`,
+`frontend/server/forms.ts`
 
 **Cel:** umożliwić dodanie nowego defibrylatora oraz podłączenie źródeł danych
 bezpośrednio w aplikacji.
@@ -304,12 +342,11 @@ synchronizowany (`sync`) i weryfikowany przez `pmtiles verify`; jeśli zniknie w
 trakcie pobierania (np. przez `git clean -fdX`, bo pasuje do ignorowanego wzorca
 `*.pmtiles.tmp.*`), skrypt ponawia wyciąg.
 
-Worker MapLibre jest ładowany jako statyczny zasób z
-`/maplibre-gl-worker.mjs?v=6.19.0`. Utrzymuj parametr `?v=` w
-`frontend/map/poland-map.tsx` zgodny z wersją `maplibre-gl`, aby unieważniać
-cache po aktualizacji. Nie serwuj workera przez route serwerowy: middleware
-Nitro w trybie dev kieruje żądania z `Sec-Fetch-Dest: worker` do plików
-statycznych i pomija route API.
+Worker MapLibre jest ładowany przez Vite jako zasób wygenerowany z
+`maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url`. Plik
+`frontend/map/poland-map.tsx` ustawia jego adres przez `maplibregl.setWorkerUrl()`
+raz przy starcie w przeglądarce. Nie trzeba ręcznie dodawać parametru `?v=`,
+kopiować pliku do `public/` ani serwować workera przez route serwerowy.
 
 ### Propozycje postów (social-media)
 
@@ -561,6 +598,7 @@ wykonuje żądania HTTP do naszych endpointów.
 | `/harvester/feed.md5` | `GET`, `HEAD` | MD5 dokładnie tych samych bajtów XML | `text/plain; charset=utf-8` |
 | `/data/aed.csv` | `GET`, `HEAD` | rejestr AED, po jednym urządzeniu w wierszu | `text/csv; charset=utf-8` |
 | `/data/aed.geojson` | `GET`, `HEAD` | rejestr AED jako `FeatureCollection` | `application/geo+json; charset=utf-8` |
+| `/data/aed.xlsx` | `GET` | pełny rejestr AED jako XLSX, jeden wiersz na urządzenie (pobiera przycisk na stronie głównej) | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
 
 #### Jak portal to pobiera
 
