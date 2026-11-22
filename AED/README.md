@@ -187,7 +187,8 @@ oraz hasłem, zanim w przyszłości dojdzie podpisywanie dodawanych punktów AED
 - pod formularzem na `/logowanie` jest **wyłączony** przycisk
   **„Zaloguj z gov.pl”** — placeholder, który nic nie robi,
 - po udanym logowaniu lub rejestracji użytkownik wraca na stronę główną,
-  a w nagłówku zamiast „Zaloguj / Zarejestruj” pojawia się **Wyloguj**.
+  a w nagłówku zamiast „Zaloguj / Zarejestruj” pojawia się
+  **Witaj {nazwa}!** oraz **Wyloguj**.
 
 **Pliki:** `frontend/auth-form/auth-panel.tsx` (formularze),
 `frontend/auth-form/site-header.tsx` (przyciski w nagłówku),
