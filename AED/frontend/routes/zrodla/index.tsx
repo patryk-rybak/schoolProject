@@ -1,4 +1,9 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	redirect,
+	useRouter,
+} from "@tanstack/react-router";
 import {
 	CircleAlert,
 	CircleCheck,
@@ -28,7 +33,13 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/zrodla/")({
 	validateSearch: searchSchema,
-	loader: () => listSourcesFn(),
+	loader: async () => {
+		const data = await listSourcesFn();
+		if (!data.ok && data.code === "unauthorized") {
+			throw redirect({ to: "/logowanie" });
+		}
+		return data;
+	},
 	component: SourcesPage,
 	head: () => ({ meta: [{ title: "Rejestr źródeł danych — Mapa AED" }] }),
 });

@@ -1,9 +1,4 @@
-import {
-	createFileRoute,
-	Link,
-	redirect,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	CircleAlert,
 	CircleCheck,
@@ -72,7 +67,6 @@ import { LazyPolandMap } from "#/map/lazy-poland-map";
 import {
 	type FormIssue,
 	geocodeAddressFn,
-	getSessionUserFn,
 	reverseGeocodeFn,
 	saveManualAedFn,
 } from "#/server/forms";
@@ -89,12 +83,6 @@ const searchSchema = z.object({
  */
 export const Route = createFileRoute("/dodaj-aed")({
 	validateSearch: searchSchema,
-	beforeLoad: async () => {
-		const session = await getSessionUserFn();
-		if (!session) {
-			throw redirect({ to: "/logowanie" });
-		}
-	},
 	component: AddAedPage,
 	head: () => ({ meta: [{ title: "Wpis AED — Mapa AED" }] }),
 });

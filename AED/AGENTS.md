@@ -86,11 +86,12 @@ for installed tools.
 ## Architecture
 
 - `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `logowanie.tsx`, `dodaj-aed.tsx`, `moje-aed.tsx`, `aed/$aedId.tsx` (detail page), `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
+- `frontend/lib/public-paths.ts`, `frontend/lib/auth-guard.ts` — public-route allowlist and the root session guard; only `/`, `/logowanie`, `/api/auth/*`, `/api/pmtiles`, `/data/*`, and `/harvester/*` are public, everything else redirects to `/logowanie`
 - `frontend/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
 - `frontend/components/ui/` — shadcn/ui components in use (`accordion`, `alert`, `badge`, `button`, `card`, `checkbox`, `field`, `input`, `label`, `select`, `separator`, `tabs`, `textarea`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
 - `frontend/components/aed-form/` — manual AED form helpers: `model.ts` (field constants, types, initial values), `text-field.tsx` (labeled and read-only address inputs)
 - `frontend/components/aed-detail-content.tsx` — AED detail panel shared by the map popup and `/aed/$aedId`
-- `frontend/server/forms.ts` — TanStack server functions for the AED forms; return `{ok:false,message,issues}` instead of throwing
+- `frontend/server/forms.ts` — TanStack server functions for the AED forms; return `{ok:false,message,issues}` instead of throwing; source-admin, geocode, and reverse-geocode functions require a session
 - `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland; optional `onPick`/`picked` props turn it into a point picker, plain clicks open a „Dodaj AED tutaj” popup linking to `/dodaj-aed?lat&lon`
 - `backend/forms/` — server-only form logic: `manual-record.ts` (full canonical schema validation + save), `geocode.ts` (Nominatim, throttled, Polish errors), `source-admin.ts` (registry list/save/preview/import/delete)
 - `frontend/lib/aed-labels.ts` — shared Polish labels for access/status codes (`ACCESS_LABELS`, `STATUS_LABELS`, `displayValue`, `labelFor`); reuse in map popups and detail views
