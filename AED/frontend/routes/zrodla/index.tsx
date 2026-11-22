@@ -1,4 +1,9 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	redirect,
+	useRouter,
+} from "@tanstack/react-router";
 import {
 	CircleAlert,
 	Database,
@@ -21,7 +26,13 @@ import {
 import { deleteSourceFn, importSourceFn, listSourcesFn } from "#/server/forms";
 
 export const Route = createFileRoute("/zrodla/")({
-	loader: () => listSourcesFn(),
+	loader: async () => {
+		const data = await listSourcesFn();
+		if (!data.ok && data.code === "unauthorized") {
+			throw redirect({ to: "/logowanie" });
+		}
+		return data;
+	},
 	component: SourcesPage,
 	head: () => ({ meta: [{ title: "Źródła danych — Mapa AED" }] }),
 });

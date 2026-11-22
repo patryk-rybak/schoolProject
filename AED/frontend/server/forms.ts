@@ -71,6 +71,14 @@ function failure(error: unknown): FormFailure {
 	};
 }
 
+function unauthorized(message: string): FormFailure {
+	return { ok: false, code: "unauthorized", message, issues: [] };
+}
+
+function readSession() {
+	return auth.api.getSession({ headers: getRequestHeaders() });
+}
+
 const manualValuesSchema = z.record(
 	z.string(),
 	z.union([z.string(), z.boolean(), z.null()]),
@@ -143,9 +151,7 @@ function toMyAedItem(row: AedDevice): MyAedItem {
 /** Minimal session probe used by route guards; never returns secrets. */
 export const getSessionUserFn = createServerFn({ method: "GET" }).handler(
 	async () => {
-		const session = await auth.api.getSession({
-			headers: getRequestHeaders(),
-		});
+		const session = await readSession();
 		if (!session) {
 			return null;
 		}
@@ -158,9 +164,7 @@ export const getSessionUserFn = createServerFn({ method: "GET" }).handler(
 
 export const listMyAedFn = createServerFn({ method: "GET" }).handler(
 	async () => {
-		const session = await auth.api.getSession({
-			headers: getRequestHeaders(),
-		});
+		const session = await readSession();
 		if (!session) {
 			return {
 				ok: false as const,
@@ -179,9 +183,7 @@ export const listMyAedFn = createServerFn({ method: "GET" }).handler(
 export const deleteMyAedFn = createServerFn({ method: "POST" })
 	.validator(z.object({ id: z.number().int().positive() }))
 	.handler(async ({ data }) => {
-		const session = await auth.api.getSession({
-			headers: getRequestHeaders(),
-		});
+		const session = await readSession();
 		if (!session) {
 			return {
 				ok: false as const,
@@ -204,9 +206,7 @@ export const deleteMyAedFn = createServerFn({ method: "POST" })
 export const saveManualAedFn = createServerFn({ method: "POST" })
 	.validator(saveManualSchema)
 	.handler(async ({ data }) => {
-		const session = await auth.api.getSession({
-			headers: getRequestHeaders(),
-		});
+		const session = await readSession();
 		if (!session) {
 			return {
 				ok: false as const,
@@ -230,6 +230,9 @@ export const saveManualAedFn = createServerFn({ method: "POST" })
 export const geocodeAddressFn = createServerFn({ method: "POST" })
 	.validator(geocodeRequestSchema)
 	.handler(async ({ data }) => {
+		if (!(await readSession())) {
+			return unauthorized("Zaloguj się, aby wyszukać adres.");
+		}
 		try {
 			const result = await geocodeAddress(data.query);
 			return { ok: true as const, ...result };
@@ -238,20 +241,28 @@ export const geocodeAddressFn = createServerFn({ method: "POST" })
 		}
 	});
 
-export const listSourcesFn = createServerFn({ method: "GET" }).handler(() => {
-	try {
-		return { ok: true as const, sources: listSources() };
-	} catch (error) {
-		return failure(error);
-	}
-});
+export const listSourcesFn = createServerFn({ method: "GET" }).handler(
+	async () => {
+		if (!(await readSession())) {
+			return unauthorized("Zaloguj się, aby zobaczyć źródła danych.");
+		}
+		try {
+			return { ok: true as const, sources: listSources() };
+		} catch (error) {
+			return failure(error);
+		}
+	},
+);
 
 /** Connector configs are validated server-side by the ingest Zod schema. */
 const configSchema = z.record(z.string(), z.unknown());
 
 export const saveSourceFn = createServerFn({ method: "POST" })
 	.validator(configSchema)
-	.handler(({ data }) => {
+	.handler(async ({ data }) => {
+		if (!(await readSession())) {
+			return unauthorized("Zaloguj się, aby dodać źródło danych.");
+		}
 		try {
 			return { ok: true as const, source: saveSourceConfig(data) };
 		} catch (error) {
@@ -262,6 +273,9 @@ export const saveSourceFn = createServerFn({ method: "POST" })
 export const previewSourceFn = createServerFn({ method: "POST" })
 	.validator(configSchema)
 	.handler(async ({ data }) => {
+		if (!(await readSession())) {
+			return unauthorized("Zaloguj się, aby pobrać podgląd źródła.");
+		}
 		try {
 			return { ok: true as const, preview: await previewSource(data) };
 		} catch (error) {
@@ -272,6 +286,9 @@ export const previewSourceFn = createServerFn({ method: "POST" })
 export const importSourceFn = createServerFn({ method: "POST" })
 	.validator(z.object({ sourceId: z.string().min(1) }))
 	.handler(async ({ data }) => {
+		if (!(await readSession())) {
+			return unauthorized("Zaloguj się, aby zaimportować źródło.");
+		}
 		try {
 			return { ok: true as const, result: await importSource(data.sourceId) };
 		} catch (error) {
@@ -281,7 +298,10 @@ export const importSourceFn = createServerFn({ method: "POST" })
 
 export const deleteSourceFn = createServerFn({ method: "POST" })
 	.validator(z.object({ sourceId: z.string().min(1) }))
-	.handler(({ data }) => {
+	.handler(async ({ data }) => {
+		if (!(await readSession())) {
+			return unauthorized("Zaloguj się, aby usunąć źródło.");
+		}
 		try {
 			return { ok: true as const, ...deleteSource(data.sourceId) };
 		} catch (error) {

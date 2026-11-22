@@ -80,10 +80,11 @@ brief), `dane.gov.pl/` (published portal sources and their run guide), and
 ## Architecture
 
 - `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `logowanie.tsx`, `dodaj-aed.tsx`, `moje-aed.tsx`, `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
+- `frontend/lib/public-paths.ts`, `frontend/lib/auth-guard.ts` — public-route allowlist and the root session guard; only `/`, `/logowanie`, `/api/auth/*`, `/api/pmtiles`, `/data/*`, and `/harvester/*` are public, everything else redirects to `/logowanie`
 - `frontend/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
 - `frontend/components/ui/` — shadcn/ui components in use (`alert`, `badge`, `button`, `card`, `checkbox`, `field`, `input`, `label`, `select`, `separator`, `tabs`, `textarea`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
-- `frontend/server/forms.ts` — TanStack server functions for the AED forms; return `{ok:false,message,issues}` instead of throwing
-- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland; optional `onPick`/`picked` props turn it into a point picker, plain clicks open a „Dodaj AED tutaj” popup linking to `/dodaj-aed?lat&lon`
+- `frontend/server/forms.ts` — TanStack server functions for the AED forms; return `{ok:false,message,issues}` instead of throwing; source-admin and geocode functions require a session
+- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland; optional `onPick`/`picked` props turn it into a point picker, plain clicks open a „Dodaj AED tutaj” popup linking to `/dodaj-aed?lat&lon`, and `showLocateControl` enables the main-page „Moja lokalizacja” button (Geolocation API + blue marker)
 - `backend/forms/` — server-only form logic: `manual-record.ts` (full canonical schema validation + save), `geocode.ts` (Nominatim, throttled, Polish errors), `source-admin.ts` (registry list/save/preview/import/delete)
 - `frontend/hooks/use-mobile.ts` — generated shadcn hook
 - `backend/store/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`

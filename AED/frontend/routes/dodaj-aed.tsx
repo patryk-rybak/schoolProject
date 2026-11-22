@@ -1,9 +1,4 @@
-import {
-	createFileRoute,
-	Link,
-	redirect,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	CircleAlert,
 	CircleCheck,
@@ -48,7 +43,6 @@ import { PolandMap } from "#/map/poland-map";
 import {
 	type FormIssue,
 	geocodeAddressFn,
-	getSessionUserFn,
 	saveManualAedFn,
 } from "#/server/forms";
 
@@ -59,12 +53,6 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/dodaj-aed")({
 	validateSearch: searchSchema,
-	beforeLoad: async () => {
-		const session = await getSessionUserFn();
-		if (!session) {
-			throw redirect({ to: "/logowanie" });
-		}
-	},
 	component: AddAedPage,
 	head: () => ({ meta: [{ title: "Dodaj AED — Mapa AED" }] }),
 });
