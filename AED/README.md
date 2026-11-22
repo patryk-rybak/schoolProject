@@ -130,6 +130,7 @@ Aplikacja działa pod http://localhost:3000.
 | Dane startowe (dev) | `bun run db:seed` |
 | Drizzle Studio | `bun run db:studio` |
 | Ingest źródeł i budowa core | `bun run ingest:run` |
+| Pełny refresh tabeli źródeł | `bun run db:load-core` |
 | Kafelki mapy | `bun run map:tiles` |
 | Nowy komponent shadcn | `bunx --bun shadcn@latest add <nazwa>` |
 
@@ -208,16 +209,20 @@ bezpośrednio w aplikacji.
 
 **Co działa:**
 
+- `/dodaj-aed` wymaga zalogowania: bez sesji użytkownik jest przekierowany
+  na `/logowanie`, a zapis po stronie serwera i tak odrzuca brak sesji.
 - `/dodaj-aed` — formularz ręcznego rekordu obejmujący pełny schemat
-  kanoniczny (nazwa, adres, dostępność, urządzenie, przeglądy, opiekun,
-  weryfikacja). Punkt lokalizacji wybiera się klikając mapę albo wyznacza z
-  adresu przyciskiem „Wyznacz współrzędne z adresu” (geokodowanie Nominatim
-  po stronie serwera, `backend/forms/geocode.ts`, z limitem 1 żądania/s).
+  kanoniczny (nazwa, adres, dostępność, urządzenie, przeglądy, opiekun).
+  Punkt lokalizacji wybiera się klikając mapę albo wyznacza z adresu
+  przyciskiem „Wyznacz współrzędne z adresu” (geokodowanie Nominatim po
+  stronie serwera, `backend/forms/geocode.ts`, z limitem 1 żądania/s).
+- nowy rekord jest podpisany identyfikatorem konta (`created_by_id`) i od razu
+  oznaczony jako zweryfikowany przez dodającego użytkownika.
 - Kliknięcie dowolnego miejsca na mapie głównej otwiera popup „Dodaj AED
   tutaj” z linkiem do formularza z wypełnionymi współrzędnymi.
 - `/zrodla` — rejestr konektorów (`backend/ingest/datasources-config.json`)
   z akcjami „Importuj do mapy” (fetch → parse → map → validate → zapis do
-  dev store, zastępuje wiersze danego źródła) i „Usuń”.
+  `aed_source_devices`, zastępuje tylko wiersze danego źródła) i „Usuń”.
 - `/zrodla/nowe` — kreator konektora: plik kolumnowy po HTTPS (CSV, XLSX,
   JSON, GeoJSON, KML) albo magazyn danych (SQLite, PostgreSQL, S3). Podgląd
   kolumn i przykładowych wierszy, a następnie mapowanie kolumn na pola
@@ -230,7 +235,7 @@ bezpośrednio w aplikacji.
   tracą wpisanych danych przy błędzie.
 
 **Czego jeszcze nie ma:** edycja istniejących rekordów, moderacja zgłoszeń,
-historia zmian, powiązanie z kontami (auth).
+historia zmian, deduplikacja łączonego widoku.
 
 **Zależności:** [backend/store](#baza-danych-store) — zapis rekordów,
 `src/server/ingest/` — walidacja konfiguracji i pipeline importu,
@@ -471,19 +476,50 @@ Schemat jest podzielony na dwa pliki: `backend/store/schema.ts` (dane AED) i
 `backend/auth/schema.ts` (tabele better-auth). `drizzle.config.ts` wskazuje oba,
 więc migracje obejmują całość.
 
-W wersji deweloperskiej istnieje jedna tabela domenowa `aed_devices` (tymczasowa,
-kolumny mogą się zmieniać):
+Dane AED są przechowywane w dwóch fizycznych tabelach o tym samym schemacie
+kanonicznym (`src/server/ingest/canonical.ts`):
 
-| Kolumna | Typ | Uwagi |
+| Tabela | Zawartość | Cykl życia |
 | --- | --- | --- |
-| `id` | integer PK | autoincrement |
-| `name` | text | wymagane |
-| `lat`, `lon` | real | wymagane |
-| `address`, `city` | text | opcjonalne |
-| `access` | text | `always` / `business_hours` / `restricted` / `unknown` |
-| `status` | text | `operational` / `out_of_service` / `unknown` |
-| `source` | text | skąd rekord (`seed`, `manual`, …) |
-| `created_at`, `updated_at` | integer | znaczniki czasu |
+| `aed_devices` | rekordy dodane przez zalogowanego użytkownika | trwałe; importy nigdy ich nie usuwają |
+| `aed_source_devices` | rekordy z importów zewnętrznych źródeł i seeda | czyszczone i wypełniane ponownie przy odświeżeniu źródeł |
+
+Kolumny odwzorowują schemat kanoniczny: `record_id`, `source_id`,
+`source_record_id`, `source_url`, `name`, `description`, `note`,
+`facility_type`, `device_type`, `access_type`, `status`, pola weryfikacji,
+`lat`, `lon`, `coord_precision_m`, `location_status`, `geom_source`,
+`address_*`, `geocode_*`, `claim_*` oraz `field_provenance` i `attributes`
+zapisywane jako JSON. `lat`/`lon` są wymagane w obu tabelach.
+
+**Podpis i weryfikacja:**
+
+- `aed_devices.created_by_id` to klucz obcy do `user.id` (`NOT NULL`);
+  `origin='user'`.
+- rekord użytkownika jest od razu zweryfikowany: `verification_status='verified'`,
+  `verified_by=created_by_id`, `verified_by_kind='person'`, `verified_at`.
+- `aed_source_devices` nie ma kolumny twórcy; `origin` to `source` albo `seed`,
+  a rekordy są zawsze `unverified` z `verified_by = NULL`.
+- formularz nie może ustawić weryfikacji: serwer bierze `created_by_id`
+  wyłącznie z sesji i wymusza pola weryfikacji.
+- ograniczenia `CHECK` w SQLite pilnują obu reguł na poziomie bazy.
+
+**Widok łączony:** `aed_devices_combined` to `UNION ALL` obu tabel. Mapa,
+CSV, GeoJSON i feed dane.gov.pl czytają właśnie z niego. Widok udostępnia
+`created_by_id` (dla źródeł `NULL`) tylko do wewnętrznego przetwarzania;
+eksporty go nie publikują.
+
+**Odświeżanie źródeł:**
+
+- import jednego źródła (`/zrodla`) w jednej transakcji usuwa tylko wiersze
+  tego `source_id` z `aed_source_devices` i wstawia nowe,
+- pełny refresh (`bun run db:load-core`) czyści całą `aed_source_devices`
+  i wstawia nowy zbiór,
+- `bun run db:seed` to pełny reset deweloperski obu tabel,
+- żadna ścieżka importu nie modyfikuje `aed_devices`.
+
+Rekordy kanoniczne bez punktu (`location_status` = `address_only`,
+`unresolved` albo `conflict`) nie są zapisywane, bo projekt publikuje wyłącznie
+zgeolokalizowane AED. Są liczone w raporcie importu jako pominięte.
 
 Tabele uwierzytelniania: `user`, `session`, `account`, `verification`
 (szczegóły w sekcji [Uwierzytelnianie](#uwierzytelnianie-auth)).
@@ -492,26 +528,22 @@ Funkcje dla innych modułów (`backend/store/aed-store.ts`):
 
 ```ts
 import {
-	addAedDevice,
-	addAedDevices,
+	// zapis
+	addUserAedDevice,
+	replaceSourceAedDevices,
+	replaceAllSourceAedDevices,
+	// odczyt
 	listAedDevices,
-	getAedDevice,
+	listSourceAedDevices,
+	listCombinedAedDevices,
 	countAedDevices,
-	clearAedDevices,
+	countSourceAedDevices,
+	countCombinedAedDevices,
+	// porządki
+	deleteSourceAedDevices,
+	clearAllAedDevices,
 } from "#backend/store/aed-store";
 ```
-
-```bash
-bun run db:generate
-bun run db:migrate
-bun run db:push
-bun run db:seed      # 5 przykładowych rekordów do dev.db
-bun run db:studio
-```
-
-Drizzle Kit działa na Bunie. `@libsql/client` jest zależnością deweloperską,
-ponieważ CLI Drizzle Kit potrzebuje klienta SQLite; aplikacja w runtime używa
-`bun:sqlite`.
 
 **Docelowy zakres:**
 
@@ -615,7 +647,7 @@ komputera wystarczy przejść kroki 1–6.
 cd ~/Documents/schoolProject/AED
 bun install
 bun run db:migrate
-bun run db:seed              # kończy się "Total rows: 5"
+bun run db:seed              # kończy się "combined rows: 5"
 
 sudo ufw allow from 172.18.18.0/24 to any port 3443 proto tcp
 ```

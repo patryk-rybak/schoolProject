@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
 	type CanonicalAedRecord,
+	isMappable,
 	parseCanonicalAedRecord,
 } from "../../src/server/ingest/canonical.ts";
 import {
@@ -17,9 +18,8 @@ import { parseRawSource } from "../../src/server/ingest/core/parse.ts";
 import { validateCanonicalRecord } from "../../src/server/ingest/core/validate.ts";
 import { fetchSource } from "../../src/server/ingest/fetch/source-fetch.ts";
 import {
-	addAedDevices,
-	canonicalToRow,
-	deleteAedDevicesBySource,
+	deleteSourceAedDevices,
+	replaceSourceAedDevices,
 } from "../store/aed-store.ts";
 import process from "node:process";
 
@@ -238,9 +238,10 @@ function rawDirFor(): string {
 }
 
 /**
- * Runs the single-source ingest pipeline and replaces the source's rows in
- * the dev store. Records without a point are counted but not stored (the dev
- * table requires lat/lon); the full canonical record is kept per row.
+ * Runs the single-source ingest pipeline and replaces that source's rows in
+ * `aed_source_devices` inside one transaction. User-added records live in
+ * `aed_devices` and are never touched. Records without a point are counted
+ * but not stored: both canonical tables require lat/lon.
  */
 export async function importSource(
 	sourceId: string,
@@ -282,28 +283,30 @@ export async function importSource(
 		}
 		accepted.push(parseCanonicalAedRecord(record));
 	}
-	const withPoint = accepted.filter(
-		(record) => record.lat !== null && record.lon !== null,
-	);
-	const removed = deleteAedDevicesBySource(config.source.id);
-	if (removed > 0) {
-		notes.push(`Zastąpiono ${removed} wcześniejszych rekordów tego źródła.`);
+	const withPoint = accepted.filter(isMappable);
+	const skipped = accepted.length - withPoint.length;
+	if (skipped > 0) {
+		notes.push(`Pominięto ${skipped} rekordów bez współrzędnych.`);
 	}
-	const stored = addAedDevices(
-		withPoint.map((record) => canonicalToRow(record, config.source.id)),
-	).length;
+	const { deleted, inserted } = replaceSourceAedDevices(
+		config.source.id,
+		withPoint,
+	);
+	if (deleted > 0) {
+		notes.push(`Zastąpiono ${deleted} wcześniejszych rekordów tego źródła.`);
+	}
 	return {
 		sourceId: config.source.id,
 		seen: parsedSource.seen,
 		accepted: accepted.length,
 		rejected,
 		withPoint: withPoint.length,
-		stored,
+		stored: inserted,
 		notes,
 	};
 }
 
-/** Removes a source config from the registry and its rows from the store. */
+/** Removes a source config and only its imported rows. */
 export function deleteSource(sourceId: string): { removedRows: number } {
 	const registry = readRegistryJson();
 	const next = registry.sources.filter((entry) => {
@@ -314,5 +317,5 @@ export function deleteSource(sourceId: string): { removedRows: number } {
 		throw new SourceAdminError(`Nieznane źródło: ${sourceId}.`);
 	}
 	writeRegistryJson(next);
-	return { removedRows: deleteAedDevicesBySource(sourceId) };
+	return { removedRows: deleteSourceAedDevices(sourceId) };
 }

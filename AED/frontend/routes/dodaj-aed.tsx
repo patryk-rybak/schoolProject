@@ -1,4 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	redirect,
+	useNavigate,
+} from "@tanstack/react-router";
 import { CircleAlert, CircleCheck, MapPin, Search } from "lucide-react";
 import { useId, useState } from "react";
 import { z } from "zod";
@@ -36,6 +41,7 @@ import { PolandMap } from "#/map/poland-map";
 import {
 	type FormIssue,
 	geocodeAddressFn,
+	getSessionUserFn,
 	saveManualAedFn,
 } from "#/server/forms";
 
@@ -46,6 +52,12 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/dodaj-aed")({
 	validateSearch: searchSchema,
+	beforeLoad: async () => {
+		const session = await getSessionUserFn();
+		if (!session) {
+			throw redirect({ to: "/logowanie" });
+		}
+	},
 	component: AddAedPage,
 	head: () => ({ meta: [{ title: "Dodaj AED — Mapa AED" }] }),
 });
@@ -97,11 +109,6 @@ const FACILITY_OPTIONS = [
 	"inne",
 ];
 
-const VERIFICATION_OPTIONS = [
-	{ value: "unverified", label: "Niezweryfikowany" },
-	{ value: "verified", label: "Zweryfikowany" },
-];
-
 const BOOLEAN_FIELDS = [
 	{ key: "indoor", label: "Urządzenie wewnątrz budynku" },
 	{ key: "is_24_7", label: "Dostępne 24/7" },
@@ -121,7 +128,6 @@ function AddAedPage() {
 	const [values, setValues] = useState<Values>(() => ({
 		access_type: "unknown",
 		status: "unknown",
-		verification_status: "unverified",
 		facility_type: "unknown",
 		...(search.lat !== undefined ? { lat: String(search.lat) } : {}),
 		...(search.lon !== undefined ? { lon: String(search.lon) } : {}),
@@ -134,7 +140,8 @@ function AddAedPage() {
 	const [saving, setSaving] = useState(false);
 	const [issues, setIssues] = useState<FormIssue[]>([]);
 	const [serverError, setServerError] = useState<string | null>(null);
-	const [saved, setSaved] = useState<{ id: number; name: string } | null>(null);
+	const [saved, setSaved] = useState<{ name: string } | null>(null);
+	const navigate = useNavigate();
 
 	const lat = Number.parseFloat(values.lat ?? "");
 	const lon = Number.parseFloat(values.lon ?? "");
@@ -231,11 +238,15 @@ function AddAedPage() {
 				data: { values: payload, geocode },
 			});
 			if (!result.ok) {
+				if (result.code === "unauthorized") {
+					await navigate({ to: "/logowanie", replace: true });
+					return;
+				}
 				setIssues(result.issues);
 				setServerError(result.message);
 				return;
 			}
-			setSaved({ id: result.id, name: result.name });
+			setSaved({ name: result.name });
 		} catch (error) {
 			setServerError(error instanceof Error ? error.message : String(error));
 		} finally {
@@ -248,7 +259,6 @@ function AddAedPage() {
 		setValues({
 			access_type: "unknown",
 			status: "unknown",
-			verification_status: "unverified",
 			facility_type: "unknown",
 		});
 		setFlags({});
@@ -265,8 +275,7 @@ function AddAedPage() {
 					<CircleCheck />
 					<AlertTitle>Zapisano AED „{saved.name}”</AlertTitle>
 					<AlertDescription>
-						Rekord nr {saved.id} jest już widoczny na mapie i w eksportach
-						danych.
+						Rekord jest już widoczny na mapie i w eksportach danych.
 					</AlertDescription>
 				</Alert>
 				<div className="flex flex-wrap gap-3">
@@ -860,46 +869,6 @@ function AddAedPage() {
 												type="url"
 												value={values["website"] ?? ""}
 												onChange={(event) => set("website", event.target.value)}
-											/>
-										</Field>
-									</div>
-									<div className="grid gap-4 sm:grid-cols-2">
-										<Field>
-											<FieldLabel htmlFor={idFor("verification_status")}>
-												Weryfikacja
-											</FieldLabel>
-											<Select
-												value={values["verification_status"] ?? "unverified"}
-												onValueChange={(value) =>
-													set("verification_status", value)
-												}
-											>
-												<SelectTrigger
-													id={idFor("verification_status")}
-													className="w-full"
-												>
-													<SelectValue />
-												</SelectTrigger>
-												<SelectContent>
-													{VERIFICATION_OPTIONS.map((option) => (
-														<SelectItem key={option.value} value={option.value}>
-															{option.label}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("last_verified_at")}>
-												Data weryfikacji
-											</FieldLabel>
-											<Input
-												id={idFor("last_verified_at")}
-												type="date"
-												value={values["last_verified_at"] ?? ""}
-												onChange={(event) =>
-													set("last_verified_at", event.target.value)
-												}
 											/>
 										</Field>
 									</div>

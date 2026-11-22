@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { canonicalToRow } from "../store/aed-store.ts";
+import {
+	canonicalToSourceRow,
+	canonicalToUserRow,
+} from "../store/aed-store.ts";
 import { geocodeAddress } from "./geocode.ts";
 import {
 	buildManualRecord,
@@ -9,6 +12,7 @@ import {
 
 const TEST_LAT = 52.2297;
 const TEST_LON = 21.0122;
+const TEST_USER_ID = "test-user-id";
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 
 const baseValues = {
@@ -28,7 +32,10 @@ const baseValues = {
 
 describe("buildManualRecord", () => {
 	test("buduje rekord kanoniczny z punktem", () => {
-		const record = buildManualRecord({ values: baseValues });
+		const record = buildManualRecord({
+			values: baseValues,
+			createdById: TEST_USER_ID,
+		});
 		expect(record.source_id).toBe(MANUAL_SOURCE_ID);
 		expect(record.location_status).toBe("point");
 		expect(record.geom_source).toBe("survey");
@@ -47,6 +54,7 @@ describe("buildManualRecord", () => {
 	test("oznacza rekord geokodowany metadanymi", () => {
 		const record = buildManualRecord({
 			values: baseValues,
+			createdById: TEST_USER_ID,
 			geocode: {
 				provider: "nominatim",
 				displayName: "Dworzec Centralny, Warszawa",
@@ -62,10 +70,16 @@ describe("buildManualRecord", () => {
 
 	test("odrzuca brak nazwy i punktu", () => {
 		expect(() =>
-			buildManualRecord({ values: { address_text: "Warszawa" } }),
+			buildManualRecord({
+				values: { address_text: "Warszawa" },
+				createdById: TEST_USER_ID,
+			}),
 		).toThrow(ManualRecordError);
 		try {
-			buildManualRecord({ values: { address_text: "Warszawa" } });
+			buildManualRecord({
+				values: { address_text: "Warszawa" },
+				createdById: TEST_USER_ID,
+			});
 		} catch (error) {
 			const { issues } = error as ManualRecordError;
 			expect(issues.map((issue) => issue.field)).toContain("name");
@@ -75,23 +89,51 @@ describe("buildManualRecord", () => {
 
 	test("odrzuca współrzędne poza zakresem i samotną oś", () => {
 		expect(() =>
-			buildManualRecord({ values: { ...baseValues, lat: "95" } }),
+			buildManualRecord({
+				values: { ...baseValues, lat: "95" },
+				createdById: TEST_USER_ID,
+			}),
 		).toThrow(ManualRecordError);
 		expect(() =>
-			buildManualRecord({ values: { ...baseValues, lon: "" } }),
+			buildManualRecord({
+				values: { ...baseValues, lon: "" },
+				createdById: TEST_USER_ID,
+			}),
 		).toThrow(ManualRecordError);
 	});
 
-	test("canonicalToRow zachowuje pełny rekord JSON", () => {
-		const record = buildManualRecord({ values: baseValues });
-		const row = canonicalToRow(record);
-		expect(row.source).toBe(MANUAL_SOURCE_ID);
-		expect(row.city).toBe("Warszawa");
-		expect(row.address).toBe("Al. Jerozolimskie 54, Warszawa");
-		expect(JSON.parse(row.canonical ?? "{}")).toMatchObject({
-			record_id: record.record_id,
-			version: 1,
+	test("oznacza rekord użytkownika jako podpisany i zweryfikowany", () => {
+		const record = buildManualRecord({
+			values: baseValues,
+			createdById: TEST_USER_ID,
 		});
+		expect(record.verification_status).toBe("verified");
+		expect(record.verified_by).toBe(TEST_USER_ID);
+		expect(record.verified_by_kind).toBe("person");
+		expect(record.verified_at).not.toBeNull();
+
+		const row = canonicalToUserRow(record, TEST_USER_ID);
+		expect(row.origin).toBe("user");
+		expect(row.createdById).toBe(TEST_USER_ID);
+		expect(row.verificationStatus).toBe("verified");
+		expect(row.verifiedBy).toBe(TEST_USER_ID);
+		expect(row.recordId).toBe(record.record_id);
+		expect(JSON.parse(row.attributes ?? "{}")).toMatchObject({
+			city: "Warszawa",
+		});
+		expect(row.addressText).toBe("Al. Jerozolimskie 54, Warszawa");
+	});
+
+	test("rekord źródłowy nigdy nie jest podpisany ani zweryfikowany", () => {
+		const record = buildManualRecord({
+			values: baseValues,
+			createdById: TEST_USER_ID,
+		});
+		const row = canonicalToSourceRow(record);
+		expect(row.origin).toBe("source");
+		expect(row.verificationStatus).toBe("unverified");
+		expect(row.verifiedBy).toBeNull();
+		expect(row.verifiedAt).toBeNull();
 	});
 });
 

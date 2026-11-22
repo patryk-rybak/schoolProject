@@ -1,5 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import { z } from "zod";
+
+import { auth } from "#backend/auth/auth.ts";
 import {
 	geocodeAddress,
 	geocodeRequestSchema,
@@ -34,6 +37,8 @@ export interface FormFailure {
 	ok: false;
 	message: string;
 	issues: FormIssue[];
+	/** Set when the caller has to be signed in (HTTP-equivalent 401). */
+	code?: "unauthorized";
 }
 
 function failure(error: unknown): FormFailure {
@@ -78,15 +83,43 @@ const saveManualSchema = z.object({
 	geocode: geocodeInfoSchema.nullish(),
 });
 
+/** Minimal session probe used by route guards; never returns secrets. */
+export const getSessionUserFn = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const session = await auth.api.getSession({
+			headers: getRequestHeaders(),
+		});
+		if (!session) {
+			return null;
+		}
+		return {
+			id: session.user.id,
+			username: session.user.username ?? session.user.name,
+		};
+	},
+);
+
 export const saveManualAedFn = createServerFn({ method: "POST" })
 	.validator(saveManualSchema)
-	.handler(({ data }) => {
+	.handler(async ({ data }) => {
+		const session = await auth.api.getSession({
+			headers: getRequestHeaders(),
+		});
+		if (!session) {
+			return {
+				ok: false as const,
+				code: "unauthorized" as const,
+				message: "Zaloguj się, aby dodać AED.",
+				issues: [],
+			};
+		}
 		try {
 			const row = saveManualRecord({
 				values: data.values as ManualFormValues,
 				geocode: data.geocode ?? null,
+				createdById: session.user.id,
 			});
-			return { ok: true as const, id: row.id, name: row.name };
+			return { ok: true as const, name: row.name ?? "AED" };
 		} catch (error) {
 			return failure(error);
 		}

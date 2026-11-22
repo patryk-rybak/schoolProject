@@ -1,0 +1,161 @@
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { Database } from "bun:sqlite";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
+import { rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import type { CanonicalAedRecord } from "../../src/server/ingest/canonical.ts";
+import { parseCanonicalAedRecord } from "../../src/server/ingest/canonical.ts";
+
+/**
+ * Store tests run against a throwaway SQLite file. `DATABASE_URL` must be set
+ * before `backend/store/index.ts` is imported, hence the dynamic imports.
+ */
+const TEST_DB = join(tmpdir(), `aed-store-${crypto.randomUUID()}.db`);
+const USER_ID = "store-test-user";
+const WARSAW: readonly [number, number] = [52.23, 21.01];
+const KRAKOW: readonly [number, number] = [50.06, 19.94];
+const GDANSK: readonly [number, number] = [54.35, 18.64];
+const WROCLAW: readonly [number, number] = [51.11, 17.03];
+const EXPECTED_COMBINED_ROWS = 3;
+
+// biome-ignore lint/complexity/useLiteralKeys: Bun.env is an index signature.
+Bun.env["DATABASE_URL"] = TEST_DB;
+
+const { db } = await import("./index.ts");
+const store = await import("./aed-store.ts");
+
+migrate(db, { migrationsFolder: join(import.meta.dir, "drizzle") });
+const seedClient = new Database(TEST_DB);
+seedClient
+	.query(
+		`INSERT INTO user (id, name, email, email_verified, created_at, updated_at)
+		 VALUES (?, ?, ?, 0, unixepoch(), unixepoch())`,
+	)
+	.run(USER_ID, "store-test", "store-test@users.local");
+seedClient.close();
+
+function record(
+	sourceId: string,
+	recordId: string,
+	lat: number,
+	lon: number,
+): CanonicalAedRecord {
+	return parseCanonicalAedRecord({
+		version: 1,
+		record_id: recordId,
+		source_id: sourceId,
+		source_record_id: recordId,
+		source_url: null,
+		name: `AED ${recordId}`,
+		description: null,
+		note: null,
+		facility_type: null,
+		device_type: null,
+		access_type: "always",
+		status: "operational",
+		verification_status: "unverified",
+		verified_by: null,
+		verified_by_kind: null,
+		verified_at: null,
+		confidence: null,
+		lat,
+		lon,
+		coord_precision_m: null,
+		location_status: "point",
+		geom_source: "source",
+		address_text: null,
+		address_kind: "none",
+		address_source: "source",
+		address_confidence: null,
+		geocode_provider: null,
+		geocode_version: null,
+		geocode_confidence: null,
+		geocoded_at: null,
+		geocode_input_sha256: null,
+		geocode_note: null,
+		claim_status: "unclaimed",
+		claimed_by: null,
+		claimed_at: null,
+		claim_note: null,
+		attributes: { city: "Warszawa" },
+	});
+}
+
+afterAll(() => {
+	for (const suffix of ["", "-wal", "-shm"]) {
+		rmSync(`${TEST_DB}${suffix}`, { force: true });
+	}
+});
+
+// biome-ignore lint/complexity/noExcessiveLinesPerFunction: keeping related store cases together is easier to review.
+describe("canonical store", () => {
+	beforeAll(() => {
+		store.clearAllAedDevices();
+	});
+
+	test("user record is signed and verified by its author", () => {
+		const row = store.addUserAedDevice(
+			record("manual", "user:one", ...WARSAW),
+			USER_ID,
+		);
+		expect(row.createdById).toBe(USER_ID);
+		expect(row.origin).toBe("user");
+		expect(row.verificationStatus).toBe("verified");
+		expect(row.verifiedBy).toBe(USER_ID);
+		expect(row.verifiedByKind).toBe("person");
+		expect(store.countAedDevices()).toBe(1);
+	});
+
+	test("source import never touches user rows", () => {
+		store.replaceSourceAedDevices("source-a", [
+			record("source-a", "source-a:one", ...KRAKOW),
+		]);
+		expect(store.countAedDevices()).toBe(1);
+		expect(store.countSourceAedDevices()).toBe(1);
+
+		const [sourceRow] = store.listSourceAedDevices();
+		expect(sourceRow?.origin).toBe("source");
+		expect(sourceRow?.verificationStatus).toBe("unverified");
+		expect(sourceRow?.verifiedBy).toBeNull();
+		expect(sourceRow?.verifiedAt).toBeNull();
+	});
+
+	test("re-import replaces only that source", () => {
+		store.replaceSourceAedDevices("source-b", [
+			record("source-b", "source-b:one", ...GDANSK),
+		]);
+		const result = store.replaceSourceAedDevices("source-a", [
+			record("source-a", "source-a:two", ...WROCLAW),
+		]);
+		expect(result.deleted).toBe(1);
+		expect(result.inserted).toBe(1);
+		expect(store.countAedDevices()).toBe(1);
+		expect(
+			store.listSourceAedDevices().filter((row) => row.sourceId === "source-a"),
+		).toHaveLength(1);
+	});
+
+	test("combined view exposes user and source rows", () => {
+		const origins = new Set(
+			store.listCombinedAedDevices().map((row) => row.origin),
+		);
+		expect(origins).toEqual(new Set(["user", "source"]));
+		expect(store.countCombinedAedDevices()).toBe(EXPECTED_COMBINED_ROWS);
+	});
+
+	test("records without a point are rejected", () => {
+		const addressOnly = parseCanonicalAedRecord({
+			...record("source-c", "source-c:one", ...WARSAW),
+			lat: null,
+			lon: null,
+			location_status: "address_only",
+			address_text: "ul. Testowa 1, Warszawa",
+		});
+		expect(
+			() => store.replaceSourceAedDevices("source-c", [addressOnly]),
+			// biome-ignore lint/security/noSecrets: assertion text, not a credential.
+		).toThrow("nie ma współrzędnych");
+	});
+});

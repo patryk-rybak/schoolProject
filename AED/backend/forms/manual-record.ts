@@ -3,7 +3,7 @@ import {
 	parseCanonicalAedRecord,
 } from "../../src/server/ingest/canonical.ts";
 import type { CanonicalField } from "../../src/server/ingest/config/schema.ts";
-import { addAedDevice, canonicalToRow } from "../store/aed-store.ts";
+import { addUserAedDevice } from "../store/aed-store.ts";
 import type { AedDevice } from "../store/schema.ts";
 
 /**
@@ -15,10 +15,15 @@ import type { AedDevice } from "../store/schema.ts";
  * field semantics as the ingest mapper (core/map.ts), builds a canonical
  * record and stores it with source_id "manual".
  *
+ * Every manual record is signed by the authenticated account that submitted
+ * it: `createdById` is taken from the session (never from the form), stored in
+ * `created_by_id`, and copied to the verification fields. This is the only
+ * path that can create verified records.
+ *
  * Coordinates come either from the map picker / typed lat+lon
  * (location_status=point) or from address geocoding
  * (location_status=geocoded, see geocode.ts). Address-only submissions
- * without a point are rejected for now: the dev store requires lat/lon.
+ * without a point are rejected because the store requires lat/lon.
  */
 
 export const MANUAL_SOURCE_ID = "manual";
@@ -48,6 +53,10 @@ const SYSTEM_FIELDS = new Set<CanonicalField>([
 	"address_confidence",
 	"location_status",
 	"geom_source",
+	"verification_status",
+	"verified_by",
+	"verified_by_kind",
+	"verified_at",
 ]);
 
 export type ManualFormValues = Partial<
@@ -111,6 +120,8 @@ function toBoolean(value: string | boolean | null | undefined): boolean | null {
 
 export interface ManualRecordInput {
 	values: ManualFormValues;
+	/** Signed-in account id from the server session; never from the form. */
+	createdById: string;
 	/** Set when lat/lon were resolved from the address instead of picked. */
 	geocode?: GeocodeInfo | null;
 	/** Stable id for repeated submissions of the same device (upsert key). */
@@ -167,6 +178,12 @@ export function buildManualRecord(
 				"Wybierz punkt na mapie, wpisz współrzędne albo wyznacz je z adresu.",
 		});
 	}
+	if (input.createdById.trim() === "") {
+		issues.push({
+			field: "record",
+			message: "Brak zalogowanego użytkownika.",
+		});
+	}
 
 	for (const field of NUMBER_FIELDS) {
 		if (SYSTEM_FIELDS.has(field)) {
@@ -199,10 +216,6 @@ export function buildManualRecord(
 		device_type: setBase("device_type", text(values.device_type)),
 		access_type: setBase("access_type", text(values.access_type)),
 		status: setBase("status", text(values.status)),
-		verification_status: setBase(
-			"verification_status",
-			text(values.verification_status),
-		),
 		confidence: setBase("confidence", toNumber(text(values.confidence))),
 		coord_precision_m: setBase(
 			"coord_precision_m",
@@ -238,15 +251,22 @@ export function buildManualRecord(
 		text(input.recordKey ?? null) ??
 		sha256Hex(`${name ?? ""}|${lat}|${lon}|${addressText ?? ""}`).slice(0, 16);
 	const isGeocoded = hasPoint && geocode !== null && geocode !== undefined;
+	const createdAt = new Date().toISOString();
 
 	try {
 		return parseCanonicalAedRecord({
 			version: 1,
-			record_id: `${MANUAL_SOURCE_ID}:${recordKey}`,
+			// Random id: the same device may be entered by different accounts and
+			// duplicates are resolved later from the combined view.
+			record_id: `user:${crypto.randomUUID()}`,
 			source_id: MANUAL_SOURCE_ID,
 			source_record_id: recordKey,
 			source_url: null,
 			...base,
+			verification_status: "verified",
+			verified_by: input.createdById,
+			verified_by_kind: "person",
+			verified_at: createdAt,
 			lat,
 			lon,
 			location_status: isGeocoded ? "geocoded" : "point",
@@ -279,5 +299,5 @@ export function buildManualRecord(
 /** Validates and stores one manual AED record; returns the stored row. */
 export function saveManualRecord(input: ManualRecordInput): AedDevice {
 	const record = buildManualRecord(input);
-	return addAedDevice(canonicalToRow(record, MANUAL_SOURCE_ID));
+	return addUserAedDevice(record, input.createdById);
 }
