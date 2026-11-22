@@ -327,7 +327,7 @@ mu je usuwać.
 
 **Co działa:**
 
-- link **Moje AED** w nagłówku prowadzi do `/moje-aed`; bez sesji `beforeLoad`
+- link **Moje AED** w nagłówku prowadzi do `/moje-aed`; bez sesji root guard
   przekierowuje na `/logowanie`, a server functions sprawdzają sesję ponownie,
 - lista zawiera tylko rekordy, których `created_by_id` równa się id
   zalogowanego konta; rekordy innych użytkowników i importy są niewidoczne,
@@ -357,9 +357,16 @@ działają — tak szybko, jak to możliwe, również na telefonie.
 - kolor punktu pokazuje weryfikację: **zielony** = zweryfikowany (rekord
   użytkownika), **szary** = niezweryfikowany (import/seed),
 - popup pokazuje nazwę, miasto i informację o weryfikacji,
+- przycisk **„Moja lokalizacja”** (na stronie głównej) pobiera bieżącą pozycję
+  przez Geolocation API, przybliża mapę i pokazuje niebieską kropkę z etykietą
+  „Twoja lokalizacja”; błędy uprawnień są komunikowane w alercie,
 - kliknięcie w mapę otwiera popup „Dodaj AED tutaj” z linkiem do formularza
   i wypełnionymi współrzędnymi,
 - ten sam komponent mapy służy w formularzu do wyboru punktu.
+
+Geolokalizacja wymaga bezpiecznego kontekstu: działa na `localhost` oraz pod
+HTTPS. Przy dostępie przez zwykłe HTTP z adresu LAN przeglądarka zablokuje
+`navigator.geolocation`.
 
 **Czego jeszcze nie ma:** klastrowania, filtrów, panelu szczegółów z pełnym
 adresem i licencją, funkcji „najbliższy AED”, tabelarycznej alternatywy dla
@@ -500,8 +507,8 @@ rekordy identyfikatorem konta.
   `<nazwa>@users.local`,
 - `session.user.id` jest przekazywany wyłącznie po stronie serwera do zapisu
   ręcznego AED; klient nie może go podmienić,
-- `/dodaj-aed` sprawdza sesję w `beforeLoad`, a `saveManualAedFn` powtarza
-  sprawdzenie przed zapisem (obrona w głąb).
+- `/dodaj-aed` jest chroniony przez `beforeLoad` w root route, a
+  `saveManualAedFn` powtarza sprawdzenie przed zapisem (obrona w głąb).
 
 **Pliki:** `backend/auth/auth.ts` (konfiguracja + adapter),
 `backend/auth/schema.ts` (tabele), `frontend/lib/auth-client.ts` (klient),
@@ -709,6 +716,10 @@ Synchronizacja jest transakcyjna:
 - `refreshCombinedAedDevices()` pozwala jawnie przebudować tabelę łączoną,
 - usunięcie rekordu z `/moje-aed` usuwa go z `aed_devices` i
   `aed_devices_combined` w jednej transakcji; tylko właściciel może to zrobić,
+- po każdym przebudowaniu tabeli łączonej i po każdym wstawieniu do niej
+  wiersza użytkownika wołany jest `removeDuplicateAedDevices()` z
+  `backend/store/deduplicate.ts`; obecnie jest to świadomy no-op (zwraca `0`),
+  przygotowany jako miejsce na przyszłą deduplikację,
 - żadna ścieżka importu nie modyfikuje `aed_devices`.
 
 Tabela łączona udostępnia `created_by_id` (dla źródeł `NULL`) tylko do
@@ -1142,22 +1153,29 @@ Nie edytuj `frontend/routeTree.gen.ts` ręcznie; generuje go `bun run dev` lub
 
 Aktualne route'y:
 
-| Route | Zawartość |
-| --- | --- |
-| `/` | strona główna: nagłówek + mapa AED |
-| `/logowanie` | rejestracja i logowanie nazwą użytkownika |
-| `/dodaj-aed` | formularz AED; wymaga sesji (`beforeLoad` + guard serwerowy) |
-| `/moje-aed` | lista własnych AED z usuwaniem; wymaga sesji |
-| `/aed/$aedId` | strona szczegółów pojedynczego urządzenia AED |
-| `/zrodla` | rejestr źródeł, import i usuwanie |
-| `/zrodla/nowe` | kreator konektora i mapowania kolumn |
-| `/data/aed.csv` | eksport CSV |
-| `/data/aed.geojson` | eksport GeoJSON |
-| `/data/aed.points.geojson` | lekki eksport punktów GeoJSON dla mapy (negocjacja gzip) |
-| `/data/aed.xlsx` | eksport pełnej bazy AED w formacie XLSX |
-| `/harvester/feed.xml`, `/harvester/feed.md5` | feed i suma MD5 dla dane.gov.pl |
-| `/api/auth/$` | handler better-auth |
-| `/api/pmtiles` | kafelki PMTiles z obsługą `Range` |
+| Route | Zawartość | Dostęp |
+| --- | --- | --- |
+| `/` | strona główna: nagłówek + mapa AED | publiczny |
+| `/logowanie` | rejestracja i logowanie nazwą użytkownika | publiczny |
+| `/dodaj-aed` | formularz AED | wymaga sesji |
+| `/moje-aed` | lista własnych AED z usuwaniem | wymaga sesji |
+| `/aed/$aedId` | strona szczegółów pojedynczego urządzenia AED | wymaga sesji |
+| `/zrodla` | rejestr źródeł i usuwanie | wymaga sesji |
+| `/zrodla/nowe` | kreator konektora i mapowania kolumn | wymaga sesji |
+| `/data/aed.csv` | eksport CSV | publiczny (dane.gov.pl) |
+| `/data/aed.geojson` | eksport GeoJSON | publiczny (dane.gov.pl) |
+| `/data/aed.points.geojson` | lekki eksport punktów GeoJSON dla mapy (negocjacja gzip) | publiczny (mapa) |
+| `/data/aed.xlsx` | eksport pełnej bazy AED w formacie XLSX | publiczny (eksport) |
+| `/harvester/feed.xml`, `/harvester/feed.md5` | feed i suma MD5 dla dane.gov.pl | publiczny (dane.gov.pl) |
+| `/api/auth/$` | handler better-auth | publiczny (logowanie) |
+| `/api/pmtiles` | kafelki PMTiles z obsługą `Range` | publiczny (mapa) |
+
+Publiczna jest tylko strona główna, logowanie oraz techniczne endpointy potrzebne
+mapie i portalowi dane.gov.pl (`/api/auth/*`, `/api/pmtiles`, `/data/*`,
+`/harvester/*`). O tym, czy route wymaga sesji, decyduje
+`beforeLoad` w `frontend/routes/__root.tsx` i allowlista w
+`frontend/lib/public-paths.ts`; nowe strony są domyślnie chronione. Server
+functions źródeł, geokodowania i reverse-geocodingu także sprawdzają sesję.
 
 Aby dodać route, dodaj plik w `frontend/routes/`:
 
@@ -1211,21 +1229,23 @@ na serwerze:
 
 | Funkcja | Metoda | Rola |
 | --- | --- | --- |
-| `getSessionUserFn` | GET | sprawdza sesję dla `beforeLoad` na `/dodaj-aed` i `/moje-aed` |
+| `getSessionUserFn` | GET | sprawdza sesję dla root guardu tras |
+| `getAedDetailFn` | GET | czyta szczegóły jednego AED dla mapy i `/aed/$aedId`; publiczna |
 | `listMyAedFn` | GET | zwraca tylko rekordy zalogowanego użytkownika |
 | `deleteMyAedFn` | POST | usuwa własny rekord z `aed_devices` i tabeli łączonej |
 | `saveManualAedFn` | POST | waliduje formularz, wymaga sesji i zapisuje podpisany, zweryfikowany rekord w `aed_devices` |
-| `geocodeAddressFn` | POST | geokoduje adres przez Nominatim po stronie serwera |
-| `listSourcesFn` | GET | zwraca rejestr źródeł |
-| `saveSourceFn` | POST | waliduje i dopisuje konfigurację źródła |
-| `previewSourceFn` | POST | pobiera próbkę źródła i zwraca kolumny do mapowania |
-| `importSourceFn` | POST | uruchamia import i zastępuje wiersze tylko tego źródła |
-| `deleteSourceFn` | POST | usuwa konfigurację i wiersze tylko tego źródła |
+| `geocodeAddressFn` | POST | geokoduje adres przez Nominatim po stronie serwera; wymaga sesji |
+| `reverseGeocodeFn` | POST | ustala adres z punktu przez Nominatim; wymaga sesji |
+| `listSourcesFn` | GET | zwraca rejestr źródeł; wymaga sesji |
+| `saveSourceFn` | POST | waliduje i dopisuje konfigurację źródła; wymaga sesji |
+| `previewSourceFn` | POST | pobiera próbkę źródła i zwraca kolumny do mapowania; wymaga sesji |
+| `deleteSourceFn` | POST | usuwa konfigurację i wiersze tylko tego źródła; wymaga sesji |
 
 `saveManualAedFn` nie przyjmuje `created_by_id` ani pól weryfikacji z klienta.
 Bierze `session.user.id` z nagłówków żądania, a przy braku sesji zwraca
-`{ ok: false, code: "unauthorized" }` bez dotykania bazy. Importy nigdy nie
-dotykają tabeli `aed_devices`.
+`{ ok: false, code: "unauthorized" }` bez dotykania bazy. Funkcje źródeł,
+geokodowania i reverse-geocodingu robią to samo. Importy nigdy nie dotykają
+tabeli `aed_devices`.
 
 ## Data Fetching
 
@@ -1325,6 +1345,7 @@ Zakres testów:
   rekordach źródłowych (`backend/store/aed-store.test.ts`),
 - zachowanie rekordów użytkownika i odtwarzanie tabeli łączonej przy
   ponownym imporcie źródła,
+- brak zmian danych przez placeholder deduplikacji,
 - listowanie i usuwanie wyłącznie własnych rekordów użytkownika z obu tabel,
 - odrzucanie rekordów bez współrzędnych,
 - budowa rekordu ręcznego i metadata geokodowania (`backend/forms`).

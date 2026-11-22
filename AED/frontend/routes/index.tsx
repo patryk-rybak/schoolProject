@@ -48,7 +48,7 @@ function Home() {
 							</Button>
 						</div>
 					</div>
-					<LazyPolandMap deferred={true} />
+					<LazyPolandMap deferred={true} showLocateControl={true} />
 				</CardContent>
 			</Card>
 		</main>
