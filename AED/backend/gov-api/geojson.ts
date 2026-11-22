@@ -19,23 +19,33 @@ export function buildGeoJson(records: readonly FeedRecord[]): string {
 			},
 			properties: {
 				id: record.id,
+				id_uuid: record.uuid,
 				source_id: record.sourceId,
 				name: record.name,
+				nazwa_obiektu: record.name,
 				city: record.city,
+				miejscowosc: record.city,
+				szerokosc_geo: record.lat,
+				dlugosc_geo: record.lon,
 				access: record.access,
+				typ_dostepnosci: record.access,
 				status: record.status,
 				verification_status: record.verificationStatus,
+				status_weryfikacji: record.verificationStatus,
 				verified_by: record.verifiedBy,
 				verified_by_kind: record.verifiedByKind,
 				verified_at: record.verifiedAt,
 				record_id: record.recordId ?? null,
+				zrodlo_danych: record.sourceId,
 				source_record_id: record.sourceRecordId ?? null,
 				source_url: record.sourceUrl ?? null,
 				location_status: record.locationStatus ?? null,
 				geom_source: record.geomSource ?? null,
+				data_utworzenia: record.createdAt,
+				data_aktualizacji: record.updatedAt,
 			},
 		})),
 	};
 
-	return `${JSON.stringify(collection, null, 2)}\n`;
+	return `${JSON.stringify(collection)}\n`;
 }

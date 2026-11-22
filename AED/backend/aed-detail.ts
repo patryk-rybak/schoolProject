@@ -4,6 +4,10 @@ import { getAedDevice } from "#backend/store/aed-store.ts";
  * Explicit JSON-safe shape for the optional canonical record. Keeping this
  * structural instead of reusing zod's inferred type avoids interface types
  * that TanStack Start's server-function serializer cannot validate.
+ *
+ * Primitive fields stay as primitives; nested objects (`attributes`,
+ * `field_provenance`) are preserved as JSON strings so the UI can render them
+ * without losing data.
  */
 export interface CanonicalDetail {
 	readonly [key: string]: string | number | boolean | null;
@@ -30,20 +34,30 @@ export interface AedDetail {
 	readonly canonical: CanonicalDetail | null;
 }
 
-/** Reads only JSON primitives from stored canonical JSON. Nested objects are omitted. */
+/** Reads canonical JSON into a flat, JSON-safe detail object. */
 function toCanonicalDetail(parsed: unknown): CanonicalDetail {
 	if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
 		return {};
 	}
 	const detail: Record<string, string | number | boolean | null> = {};
-	for (const [key, value] of Object.entries(parsed)) {
-		if (
-			value === null ||
+	for (const [key, value] of Object.entries(
+		parsed as Record<string, unknown>,
+	)) {
+		if (value === null) {
+			detail[key] = null;
+		} else if (
 			typeof value === "string" ||
 			typeof value === "number" ||
 			typeof value === "boolean"
 		) {
 			detail[key] = value;
+		} else {
+			// Preserve nested objects/arrays as JSON text so no data is lost.
+			try {
+				detail[key] = JSON.stringify(value);
+			} catch {
+				detail[key] = null;
+			}
 		}
 	}
 	return detail;

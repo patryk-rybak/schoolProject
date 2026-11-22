@@ -24,11 +24,22 @@ export function addAedDevices(inputs: readonly NewAedDevice[]): AedDevice[] {
 	if (inputs.length === 0) {
 		return [];
 	}
-	return db
-		.insert(aedDevices)
-		.values([...inputs])
-		.returning()
-		.all();
+	// SQLite limits the number of bound variables per statement (default 999
+	// in older builds, 32766 in newer ones). Chunking keeps bulk ingest working
+	// even with the extra `canonical` JSON column on every row.
+	const CHUNK_SIZE = 100;
+	const inserted: AedDevice[] = [];
+	for (let offset = 0; offset < inputs.length; offset += CHUNK_SIZE) {
+		const chunk = inputs.slice(offset, offset + CHUNK_SIZE);
+		inserted.push(
+			...db
+				.insert(aedDevices)
+				.values([...chunk])
+				.returning()
+				.all(),
+		);
+	}
+	return inserted;
 }
 
 /**

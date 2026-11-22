@@ -8,6 +8,8 @@ Hasło akcji: **Dane darują minuty**.
 
 Identyfikacja wizualna (logo w formatach PNG, JPG, SVG i księga znaku PDF) znajduje się w `competition-assets/`.
 
+Logotyp przedstawia uśmiechniętą maskotkę AED w kredkowej stylistyce. Plikiem źródłowym jest `competition-assets/brand/cheerful-crayon-aed-mascot.png` (autor: Zdzisław); formaty PNG i JPG są kanoniczne, a SVG osadza PNG jako dane base64. Dalsze użycie maskotki poza zgłoszeniem wymaga ustalenia licencji z autorem.
+
 ## 2. Problem i podejście
 
 Dane o AED w Polsce są rozproszone, niepełne i często niezweryfikowane. Istnieją pojedyncze rejestry samorządowe i baza OpenStreetMap, ale nie ma jednej, wiarygodnej listy. Portal dane.gov.pl nie pozwala na dowolne „wrzucanie” danych przez każdą osobę. Wymagany jest dostawca, który bierze odpowiedzialność za jakość zbioru.
@@ -20,6 +22,26 @@ Nasze rozwiązanie:
 4. odrzuca rekordy błędne i oznacza status lokalizacji, weryfikacji oraz licencję,
 5. udostępnia dane przez interfejs mapy i formularze (`/`, `/dodaj-aed`, `/zrodla`, `/zrodla/nowe`),
 6. publikuje zbiór w formacie zgodnym z harvesterem dane.gov.pl 1.13 (`/harvester/feed.xml`, `/harvester/feed.md5`, `/data/aed.csv`, `/data/aed.geojson`).
+
+### Źródła danych i provenance
+
+Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
+
+| Identyfikator źródła | Nazwa | Status |
+| --- | --- | --- |
+| `krosno` | Defibrylatory w Krośnie | włączone |
+| `marki` | Defibrylatory w Markach | włączone |
+| `openaedmap` | OpenAEDMap — eksport krajowy PL | włączone |
+| `przemysl` | Otwarte Dane Przemyśl — defibrylatory AED | włączone |
+| `warszawa` | Lokalizacja defibrylatorów (AED) — m.st. Warszawa | włączone |
+| `belchatow` | Wykaz defibrylatorów AED na terenie Bełchatowa (KML) | wyłączone do decyzji licencyjnej |
+| `lodz` | Defibrylatory AED w Łodzi (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
+| `olsztyn` | Mapa ogólnodostępnych defibrylatorów AED w Olsztynie (KML) | wyłączone do decyzji licencyjnej |
+| `pawlowice` | Defibrylatory AED - Gmina Pawłowice (KML) | wyłączone do decyzji licencyjnej |
+| `tczew` | AED Tczew (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
+| `zielona-gora` | AED w Zielonej Górze (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
+
+Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`.
 
 ## 3. Instrukcja krok po kroku dla jury
 
@@ -46,10 +68,10 @@ Na stronie głównej sprawdź:
 
 Przejdź na `/dodaj-aed`:
 
-1. wybierz punkt na mapie lub wpisz współrzędne,
-2. uzupełnij nazwę, adres, dostępność i status,
-3. użyj geokodowania, jeśli znasz tylko adres,
-4. zapisz formularz.
+1. rozwinięte są sekcje **Podstawowe informacje**, **Lokalizacja/Adres** i **Dostępność**; **Cechy dostępności**, **Urządzenie i przeglądy** oraz **Opiekun** pozostają zwinięte,
+2. wybierz punkt na mapie lub wpisz adres i geokoduj go; kod pocztowy, województwo i powiat uzupełnia się automatycznie,
+3. uzupełnij nazwę obiektu oraz obowiązkowy **Typ dostępu** (24/7 publiczny, w godzinach otwarcia, ograniczony/na klucz, nieznany); godziny otwarcia pojawiają się tylko przy dostępie w godzinach otwarcia,
+4. zapisz formularz; pozostałe pola są opcjonalne i nie blokują zgłoszenia.
 
 Formularz waliduje dane po stronie serwera i zwraca komunikaty przy konkretnych polach.
 
@@ -79,11 +101,12 @@ Feed XML używa oficjalnego schematu `urn:otwarte-dane:harvester:1.13`. Suma MD5
 
 ### Krok 6. Otwórz materiały konkursowe
 
-Materiały są również dostępne w uruchomionej aplikacji jako klikalna strona `/materialy` oraz strona dokumentacji `/dokumentacja/wzorcowy-zakres-danych`.
+Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`) pobiera aktualną, pełną bazę AED znormalizowaną do wspólnego rekordu kanonicznego. To nie jest pusty arkusz wzorca: eksport ma jeden wiersz na urządzenie, a kolumny łączą nazwy pól kanonicznych, polskie aliasy i metadane dodawane przez system.
 
 | Wymaganie | Plik |
 | --- | --- |
-| Wzorcowy zakres danych (XLSX) | `competition-assets/wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx` |
+| Pełny rejestr AED (dynamiczny XLSX) | `/data/aed.xlsx` — przycisk **Pobierz dane XLSX** na stronie głównej obok mapy |
+| Wzorcowy zakres danych (statyczny XLSX, dokumentacja) | `competition-assets/wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx` |
 | Logotyp PNG | `competition-assets/logo/dane-aed-razem.png` |
 | Logotyp JPG | `competition-assets/logo/dane-aed-razem.jpg` |
 | Logotyp SVG (format otwarty) | `competition-assets/logo/dane-aed-razem.svg` |
@@ -91,15 +114,26 @@ Materiały są również dostępne w uruchomionej aplikacji jako klikalna strona
 | Prezentacja | `competition-assets/prezentacja/prezentacja.md` |
 | Zrzuty ekranu | `competition-assets/screenshots/` |
 
-## 4. Wzorcowy zakres danych
+## 4. Eksport danych i wzorcowy zakres
 
-Plik XLSX ma pięć kart:
+Przycisk **Pobierz dane XLSX** na stronie głównej (`/data/aed.xlsx`) pobiera pełną, aktualną bazę AED, a nie pusty wzorzec. Eksport jest tworzony z danych w bazie, ma jeden wiersz na urządzenie i następujące kolumny: `id` (klucz bazy), `id_uuid` (stabilny identyfikator kanoniczny), `name` / `nazwa_obiektu`, `lat` / `szerokosc_geo`, `lon` / `dlugosc_geo`, `city` / `miejscowosc`, `access` / `typ_dostepnosci`, `status`, `verification_status` / `status_weryfikacji`, `verified_by`, `verified_by_kind`, `verified_at`, `record_id`, `source_id` / `zrodlo_danych`, `source_record_id`, `source_url`, `location_status`, `geom_source`, `data_utworzenia` i `data_aktualizacji`. Te same nazwy pól są używane w CSV oraz jako klucze właściwości w GeoJSON.
+
+Osobny, statyczny plik `competition-assets/wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx` pozostaje wyłącznie dokumentacją wzorca i nie jest pobierany przez przycisk na stronie głównej. Ma sześć kart:
 
 1. **Informacje** — cel, wersja i zasada odpowiedzialności dostawcy,
 2. **Wzorcowy zakres** — pola rekordu, typy, wymagalność, wartości, opisy i przykłady,
-3. **Źródła i zakresy** — 11 źródeł z zakresem terytorialnym, formatem i licencją,
-4. **Przykład rekordu** — pełny przykładowy wiersz,
-5. **Zasady publikacji** — ID, WGS84, weryfikacja, lokalizacja i licencja.
+3. **Pola systemowe** — metadane dodawane automatycznie do eksportów, nieumieszczane w formularzu obywatelskim,
+4. **Źródła i zakresy** — 11 źródeł z zakresem terytorialnym, formatem i licencją,
+5. **Przykład rekordu** — pełny przykładowy wiersz,
+6. **Zasady publikacji** — ID, WGS84, weryfikacja, lokalizacja i licencja.
+
+Pola w karcie „Wzorcowy zakres” są podzielone na trzy poziomy zgodnie z podejściem dane.gov.pl/DCAT-AP:
+
+- **Wymagane** (7): `id`, `nazwa_obiektu`, `szerokosc_geo` (WGS84), `dlugosc_geo` (WGS84), `miejscowosc`, `typ_dostepnosci`, `data_aktualizacji`,
+- **Zalecane** (8): `ulica`, `nr_budynku`, `opis_lokalizacji`, `godziny_otwarcia`, `wewnatrz_zewnatrz`, `status_sprawnosci`, `opiekun_nazwa`, `opiekun_kontakt`,
+- **Opcjonalne** (5): `producent_model`, `elektrody_pediatryczne`, `data_waznosci_baterii`, `data_waznosci_elektrod`, `url_zdjecia`.
+
+W eksportach CSV, GeoJSON i XLSX system uwzględnia pola techniczne: `id` (klucz bazy), `id_uuid` (stabilny identyfikator kanoniczny), `data_utworzenia`, `data_aktualizacji`, `zrodlo_danych` (alias `source_id`) i `status_weryfikacji` (alias `verification_status`). Nie wymagamy ich od osoby zgłaszającej AED; pozwalają ocenić pochodzenie i weryfikację rekordu.
 
 Najważniejsze zasady:
 
@@ -125,4 +159,4 @@ cd AED
 bun scripts/generate-competition-assets.ts
 ```
 
-Skrypt generuje XLSX i księgę znaku PDF. Logotypy są wersjonowane w katalogu `competition-assets/logo/`.
+Skrypt generuje XLSX, księgę znaku PDF oraz wersje logotypu PNG, JPG, SVG i mono z pliku źródłowego maskotki. Logotypy są wersjonowane w katalogu `competition-assets/logo/`.

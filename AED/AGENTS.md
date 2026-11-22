@@ -66,6 +66,12 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 | Run all checks | `bun run verify` |
 | Auto-fix lint/format | `bun run check:write` |
 
+Tool scripts (`dev`, `build`, `typecheck`, `format`, `lint`, `check`, `db:*`) invoke
+package entry points directly with Bun (for example
+`bun node_modules/vite/bin/vite.js`); on Bun 1.4.5 `bunx --bun` still execs the
+`node_modules/.bin` shims through their Node shebang, so do not reintroduce it
+for installed tools.
+
 ## Agent Tooling
 
 - TanStack packages ship Agent Skills. `package.json#intent.skills` permits `@tanstack/*`, and the `intent-skills` block at the top of this file explains how to list and load them.
@@ -77,7 +83,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 
 ## Architecture
 
-- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `dodaj-aed.tsx`, `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
+- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `dodaj-aed.tsx`, `aed/$aedId.tsx` (detail page), `logowanie.tsx`, `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
 - `frontend/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
 - `frontend/components/ui/` — shadcn/ui components in use (`accordion`, `alert`, `badge`, `button`, `card`, `checkbox`, `field`, `input`, `label`, `select`, `separator`, `tabs`, `textarea`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
 - `frontend/components/aed-form/` — manual AED form helpers: `model.ts` (field constants, types, initial values), `text-field.tsx` (labeled and read-only address inputs)
@@ -99,7 +105,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 - `frontend/scripts/dev-tls-proxy.ts` — self-signed HTTPS proxy for testing against the local dane.gov.pl harvester
 - `backend/gov-api/` — dane.gov.pl feed builder (XML 1.13, MD5, CSV, GeoJSON) and vendored XSD
 - `frontend/routes/harvester/` — `/harvester/feed.xml` and `/harvester/feed.md5`
-- `frontend/routes/data/` — `/data/aed.csv` and `/data/aed.geojson`
+- `frontend/routes/data/` — `/data/aed.csv`, `/data/aed.geojson`, `/data/aed.points.geojson` (gzip-negotiated), and `/data/aed.xlsx`
 
 There is no `frontend/integrations/` directory and no `frontend/env.ts` validation module. Read server configuration from `process.env` and client `VITE_` variables from `import.meta.env`. There is no TanStack Query provider or devtools integration; use route loaders and server functions.
 
@@ -198,7 +204,7 @@ bun .output/server/index.mjs
 
 ## Definition of Done
 
-- [ ] `bunx tsc --noEmit` passes
+- [ ] `bun run typecheck` passes
 - [ ] `bun run check` passes
 - [ ] `bun run build` passes
 - [ ] `bun run lint` passes, or only pre-existing issues remain

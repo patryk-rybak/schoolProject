@@ -12,11 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DodajAedRouteImport } from './routes/dodaj-aed'
 import { Route as LogowanieRouteImport } from './routes/logowanie'
-import { Route as MaterialyRouteImport } from './routes/materialy'
+import { Route as AedAedIdRouteImport } from './routes/aed/$aedId'
 import { Route as ApiPmtilesRouteImport } from './routes/api/pmtiles'
 import { Route as DataAedDotcsvRouteImport } from './routes/data/aed[.]csv'
 import { Route as DataAedDotgeojsonRouteImport } from './routes/data/aed[.]geojson'
-import { Route as DokumentacjaWzorcowyZakresDanychRouteImport } from './routes/dokumentacja/wzorcowy-zakres-danych'
+import { Route as DataAedDotpointsDotgeojsonRouteImport } from './routes/data/aed[.]points[.]geojson'
+import { Route as DataAedDotxlsxRouteImport } from './routes/data/aed[.]xlsx'
 import { Route as HarvesterFeedDotmd5RouteImport } from './routes/harvester/feed[.]md5'
 import { Route as HarvesterFeedDotxmlRouteImport } from './routes/harvester/feed[.]xml'
 import { Route as ZrodlaIndexRouteImport } from './routes/zrodla/index'
@@ -38,9 +39,9 @@ const LogowanieRoute = LogowanieRouteImport.update({
   path: '/logowanie',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MaterialyRoute = MaterialyRouteImport.update({
-  id: '/materialy',
-  path: '/materialy',
+const AedAedIdRoute = AedAedIdRouteImport.update({
+  id: '/aed/$aedId',
+  path: '/aed/$aedId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPmtilesRoute = ApiPmtilesRouteImport.update({
@@ -58,12 +59,17 @@ const DataAedDotgeojsonRoute = DataAedDotgeojsonRouteImport.update({
   path: '/data/aed.geojson',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DokumentacjaWzorcowyZakresDanychRoute =
-  DokumentacjaWzorcowyZakresDanychRouteImport.update({
-    id: '/dokumentacja/wzorcowy-zakres-danych',
-    path: '/dokumentacja/wzorcowy-zakres-danych',
+const DataAedDotpointsDotgeojsonRoute =
+  DataAedDotpointsDotgeojsonRouteImport.update({
+    id: '/data/aed.points.geojson',
+    path: '/data/aed.points.geojson',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DataAedDotxlsxRoute = DataAedDotxlsxRouteImport.update({
+  id: '/data/aed.xlsx',
+  path: '/data/aed.xlsx',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HarvesterFeedDotmd5Route = HarvesterFeedDotmd5RouteImport.update({
   id: '/harvester/feed.md5',
   path: '/harvester/feed.md5',
@@ -94,11 +100,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
   '/logowanie': typeof LogowanieRoute
-  '/materialy': typeof MaterialyRoute
+  '/aed/$aedId': typeof AedAedIdRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
-  '/dokumentacja/wzorcowy-zakres-danych': typeof DokumentacjaWzorcowyZakresDanychRoute
+  '/data/aed.points.geojson': typeof DataAedDotpointsDotgeojsonRoute
+  '/data/aed.xlsx': typeof DataAedDotxlsxRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/zrodla/nowe': typeof ZrodlaNoweRoute
@@ -109,11 +116,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
   '/logowanie': typeof LogowanieRoute
-  '/materialy': typeof MaterialyRoute
+  '/aed/$aedId': typeof AedAedIdRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
-  '/dokumentacja/wzorcowy-zakres-danych': typeof DokumentacjaWzorcowyZakresDanychRoute
+  '/data/aed.points.geojson': typeof DataAedDotpointsDotgeojsonRoute
+  '/data/aed.xlsx': typeof DataAedDotxlsxRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/zrodla/nowe': typeof ZrodlaNoweRoute
@@ -125,11 +133,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dodaj-aed': typeof DodajAedRoute
   '/logowanie': typeof LogowanieRoute
-  '/materialy': typeof MaterialyRoute
+  '/aed/$aedId': typeof AedAedIdRoute
   '/api/pmtiles': typeof ApiPmtilesRoute
   '/data/aed.csv': typeof DataAedDotcsvRoute
   '/data/aed.geojson': typeof DataAedDotgeojsonRoute
-  '/dokumentacja/wzorcowy-zakres-danych': typeof DokumentacjaWzorcowyZakresDanychRoute
+  '/data/aed.points.geojson': typeof DataAedDotpointsDotgeojsonRoute
+  '/data/aed.xlsx': typeof DataAedDotxlsxRoute
   '/harvester/feed.md5': typeof HarvesterFeedDotmd5Route
   '/harvester/feed.xml': typeof HarvesterFeedDotxmlRoute
   '/zrodla/nowe': typeof ZrodlaNoweRoute
@@ -142,11 +151,12 @@ export interface FileRouteTypes {
     | '/'
     | '/dodaj-aed'
     | '/logowanie'
-    | '/materialy'
+    | '/aed/$aedId'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
-    | '/dokumentacja/wzorcowy-zakres-danych'
+    | '/data/aed.points.geojson'
+    | '/data/aed.xlsx'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
     | '/zrodla/nowe'
@@ -157,11 +167,12 @@ export interface FileRouteTypes {
     | '/'
     | '/dodaj-aed'
     | '/logowanie'
-    | '/materialy'
+    | '/aed/$aedId'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
-    | '/dokumentacja/wzorcowy-zakres-danych'
+    | '/data/aed.points.geojson'
+    | '/data/aed.xlsx'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
     | '/zrodla/nowe'
@@ -172,11 +183,12 @@ export interface FileRouteTypes {
     | '/'
     | '/dodaj-aed'
     | '/logowanie'
-    | '/materialy'
+    | '/aed/$aedId'
     | '/api/pmtiles'
     | '/data/aed.csv'
     | '/data/aed.geojson'
-    | '/dokumentacja/wzorcowy-zakres-danych'
+    | '/data/aed.points.geojson'
+    | '/data/aed.xlsx'
     | '/harvester/feed.md5'
     | '/harvester/feed.xml'
     | '/zrodla/nowe'
@@ -188,11 +200,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DodajAedRoute: typeof DodajAedRoute
   LogowanieRoute: typeof LogowanieRoute
-  MaterialyRoute: typeof MaterialyRoute
+  AedAedIdRoute: typeof AedAedIdRoute
   ApiPmtilesRoute: typeof ApiPmtilesRoute
   DataAedDotcsvRoute: typeof DataAedDotcsvRoute
   DataAedDotgeojsonRoute: typeof DataAedDotgeojsonRoute
-  DokumentacjaWzorcowyZakresDanychRoute: typeof DokumentacjaWzorcowyZakresDanychRoute
+  DataAedDotpointsDotgeojsonRoute: typeof DataAedDotpointsDotgeojsonRoute
+  DataAedDotxlsxRoute: typeof DataAedDotxlsxRoute
   HarvesterFeedDotmd5Route: typeof HarvesterFeedDotmd5Route
   HarvesterFeedDotxmlRoute: typeof HarvesterFeedDotxmlRoute
   ZrodlaNoweRoute: typeof ZrodlaNoweRoute
@@ -223,11 +236,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LogowanieRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/materialy': {
-      id: '/materialy'
-      path: '/materialy'
-      fullPath: '/materialy'
-      preLoaderRoute: typeof MaterialyRouteImport
+    '/aed/$aedId': {
+      id: '/aed/$aedId'
+      path: '/aed/$aedId'
+      fullPath: '/aed/$aedId'
+      preLoaderRoute: typeof AedAedIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/pmtiles': {
@@ -251,11 +264,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DataAedDotgeojsonRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dokumentacja/wzorcowy-zakres-danych': {
-      id: '/dokumentacja/wzorcowy-zakres-danych'
-      path: '/dokumentacja/wzorcowy-zakres-danych'
-      fullPath: '/dokumentacja/wzorcowy-zakres-danych'
-      preLoaderRoute: typeof DokumentacjaWzorcowyZakresDanychRouteImport
+    '/data/aed.points.geojson': {
+      id: '/data/aed.points.geojson'
+      path: '/data/aed.points.geojson'
+      fullPath: '/data/aed.points.geojson'
+      preLoaderRoute: typeof DataAedDotpointsDotgeojsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data/aed.xlsx': {
+      id: '/data/aed.xlsx'
+      path: '/data/aed.xlsx'
+      fullPath: '/data/aed.xlsx'
+      preLoaderRoute: typeof DataAedDotxlsxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/harvester/feed.md5': {
@@ -300,11 +320,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DodajAedRoute: DodajAedRoute,
   LogowanieRoute: LogowanieRoute,
-  MaterialyRoute: MaterialyRoute,
+  AedAedIdRoute: AedAedIdRoute,
   ApiPmtilesRoute: ApiPmtilesRoute,
   DataAedDotcsvRoute: DataAedDotcsvRoute,
   DataAedDotgeojsonRoute: DataAedDotgeojsonRoute,
-  DokumentacjaWzorcowyZakresDanychRoute: DokumentacjaWzorcowyZakresDanychRoute,
+  DataAedDotpointsDotgeojsonRoute: DataAedDotpointsDotgeojsonRoute,
+  DataAedDotxlsxRoute: DataAedDotxlsxRoute,
   HarvesterFeedDotmd5Route: HarvesterFeedDotmd5Route,
   HarvesterFeedDotxmlRoute: HarvesterFeedDotxmlRoute,
   ZrodlaNoweRoute: ZrodlaNoweRoute,

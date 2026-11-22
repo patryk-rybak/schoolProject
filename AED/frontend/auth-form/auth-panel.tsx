@@ -42,10 +42,10 @@ export function AuthPanel() {
 		<Card>
 			<CardHeader>
 				<CardTitle>
-					<h1 className="font-bold text-2xl">Konto</h1>
+					<h1 className="font-bold text-2xl">Konto użytkownika</h1>
 				</CardTitle>
 				<CardDescription>
-					Zaloguj się lub utwórz konto nazwą użytkownika i hasłem.
+					Logowanie lub rejestracja przy użyciu nazwy użytkownika i hasła.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="grid gap-5">
@@ -57,11 +57,13 @@ export function AuthPanel() {
 						variant="outline"
 						className="w-full"
 						disabled={true}
-						title="Wkrótce"
+						title="Funkcja niedostępna"
 					>
-						Zaloguj z gov.pl
+						Logowanie przez gov.pl
 					</Button>
-					<p className="text-muted-foreground text-xs">Wkrótce</p>
+					<p className="text-muted-foreground text-xs">
+						Logowanie przez gov.pl jest obecnie niedostępne.
+					</p>
 				</div>
 			</CardContent>
 		</Card>
@@ -165,7 +167,9 @@ function AuthForm() {
 
 			{mode === "register" ? (
 				<div className="grid gap-2">
-					<Label htmlFor={`${formId}-password-confirm`}>Powtórz hasło</Label>
+					<Label htmlFor={`${formId}-password-confirm`}>
+						Potwierdzenie hasła
+					</Label>
 					<Input
 						id={`${formId}-password-confirm`}
 						name="password-confirmation"
@@ -187,7 +191,7 @@ function AuthForm() {
 			) : null}
 
 			<Button type="submit" disabled={pending}>
-				{pending ? "Przetwarzanie…" : submitLabel(mode)}
+				{pending ? "Trwa przetwarzanie…" : submitLabel(mode)}
 			</Button>
 		</form>
 	);
@@ -201,14 +205,14 @@ function ModeButtons(props: { mode: Mode; onChange: (mode: Mode) => void }) {
 				variant={props.mode === "login" ? "default" : "outline"}
 				onClick={() => props.onChange("login")}
 			>
-				Zaloguj
+				Logowanie
 			</Button>
 			<Button
 				type="button"
 				variant={props.mode === "register" ? "default" : "outline"}
 				onClick={() => props.onChange("register")}
 			>
-				Zarejestruj
+				Rejestracja
 			</Button>
 		</div>
 	);
@@ -223,39 +227,41 @@ interface Credentials {
 
 function validateCredentials(credentials: Credentials): string | null {
 	if (!USERNAME_PATTERN.test(credentials.username)) {
-		return "Nazwa użytkownika musi mieć 3–30 znaków: litery, cyfry lub _.";
+		return "Nazwa użytkownika musi zawierać od 3 do 30 znaków: litery, cyfry lub znak podkreślenia (_).";
 	}
 	if (credentials.password.length < MIN_PASSWORD_LENGTH) {
-		return `Hasło musi mieć co najmniej ${MIN_PASSWORD_LENGTH} znaków.`;
+		return `Hasło musi składać się z co najmniej ${MIN_PASSWORD_LENGTH} znaków.`;
 	}
 	if (
 		credentials.mode === "register" &&
 		credentials.password !== credentials.confirmation
 	) {
-		return "Hasła nie są identyczne.";
+		return "Podane hasła nie są identyczne.";
 	}
 	return null;
 }
 
 function submitLabel(mode: Mode): string {
-	return mode === "login" ? "Zaloguj się" : "Utwórz konto";
+	return mode === "login" ? "Logowanie" : "Rejestracja";
 }
 
 function authErrorMessage(error: AuthError): string {
 	switch (error.code) {
 		case "USERNAME_IS_ALREADY_TAKEN":
-			return "Ta nazwa użytkownika jest już zajęta.";
+			return "Nazwa użytkownika jest już zajęta.";
 		case "INVALID_USERNAME_OR_PASSWORD":
 			return "Nieprawidłowa nazwa użytkownika lub hasło.";
 		case "USERNAME_TOO_SHORT":
-			return "Nazwa użytkownika jest za krótka.";
+			return "Nazwa użytkownika jest zbyt krótka.";
 		case "USERNAME_TOO_LONG":
-			return "Nazwa użytkownika jest za długa.";
+			return "Nazwa użytkownika jest zbyt długa.";
 		case "INVALID_USERNAME":
 			return "Nazwa użytkownika zawiera niedozwolone znaki.";
 		case "PASSWORD_TOO_SHORT":
-			return `Hasło musi mieć co najmniej ${MIN_PASSWORD_LENGTH} znaków.`;
+			return `Hasło musi składać się z co najmniej ${MIN_PASSWORD_LENGTH} znaków.`;
 		default:
-			return error.message ?? "Coś poszło nie tak. Spróbuj ponownie.";
+			return (
+				error.message ?? "Nie udało się wykonać operacji. Spróbuj ponownie."
+			);
 	}
 }

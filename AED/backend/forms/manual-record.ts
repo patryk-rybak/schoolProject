@@ -132,7 +132,17 @@ export function buildManualRecord(
 
 	const name = text(values.name);
 	if (name === null) {
-		issues.push({ field: "name", message: "Nazwa jest wymagana." });
+		issues.push({ field: "name", message: "Nazwa urządzenia jest wymagana." });
+	}
+
+	const accessType = text(values.access_type) ?? "unknown";
+	const status = text(values.status) ?? "unknown";
+	const verificationStatus = text(values.verification_status) ?? "unverified";
+	if (text(values.access_type) === null) {
+		issues.push({
+			field: "access_type",
+			message: "Wybierz typ dostępu.",
+		});
 	}
 
 	const latRaw = text(values.lat);
@@ -142,20 +152,34 @@ export function buildManualRecord(
 	if ((latRaw === null) !== (lonRaw === null)) {
 		issues.push({
 			field: "lat",
-			message: "Podaj obie współrzędne albo żadną.",
+			message: "Należy podać obie współrzędne lub pozostawić oba pola puste.",
 		});
 	}
 	if (latRaw !== null && lat === null) {
-		issues.push({ field: "lat", message: "Szerokość musi być liczbą." });
+		issues.push({
+			field: "lat",
+			message: "Szerokość geograficzna musi być liczbą.",
+		});
 	}
 	if (lonRaw !== null && lon === null) {
-		issues.push({ field: "lon", message: "Długość musi być liczbą." });
+		issues.push({
+			field: "lon",
+			message: "Długość geograficzna musi być liczbą.",
+		});
 	}
 	if (lat !== null && (lat < -90 || lat > 90)) {
-		issues.push({ field: "lat", message: "Szerokość poza zakresem -90..90." });
+		issues.push({
+			field: "lat",
+			message:
+				"Szerokość geograficzna musi mieścić się w zakresie od -90 do 90.",
+		});
 	}
 	if (lon !== null && (lon < -180 || lon > 180)) {
-		issues.push({ field: "lon", message: "Długość poza zakresem -180..180." });
+		issues.push({
+			field: "lon",
+			message:
+				"Długość geograficzna musi mieścić się w zakresie od -180 do 180.",
+		});
 	}
 
 	const addressText = text(values.address_text);
@@ -164,7 +188,7 @@ export function buildManualRecord(
 		issues.push({
 			field: "lat",
 			message:
-				"Wybierz punkt na mapie, wpisz współrzędne albo wyznacz je z adresu.",
+				"Należy wskazać lokalizację na mapie, podać współrzędne lub wyznaczyć je na podstawie adresu.",
 		});
 	}
 
@@ -197,12 +221,9 @@ export function buildManualRecord(
 		note: setBase("note", text(values.note)),
 		facility_type: setBase("facility_type", text(values.facility_type)),
 		device_type: setBase("device_type", text(values.device_type)),
-		access_type: setBase("access_type", text(values.access_type)),
-		status: setBase("status", text(values.status)),
-		verification_status: setBase(
-			"verification_status",
-			text(values.verification_status),
-		),
+		access_type: setBase("access_type", accessType),
+		status: setBase("status", status),
+		verification_status: setBase("verification_status", verificationStatus),
 		confidence: setBase("confidence", toNumber(text(values.confidence))),
 		coord_precision_m: setBase(
 			"coord_precision_m",

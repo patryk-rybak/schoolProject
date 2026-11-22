@@ -2,59 +2,60 @@ import { addAedDevices, clearAedDevices, listAedDevices } from "./aed-store.ts";
 import type { NewAedDevice } from "./schema.ts";
 
 /**
- * Development seed: replaces the contents of `aed_devices` with a few dummy
- * records so the map/API work can start before real ingestion exists.
+ * Development seed: replaces the contents of `aed_devices` with neutral sample
+ * records attributed to enabled IDs from `backend/ingest/datasources-config.json`.
+ * Do not use this seed as evidence of a legal obligation or a verified device.
  */
 const seed: NewAedDevice[] = [
 	{
-		name: "AED — Dworzec Centralny",
-		lat: 52.2285,
-		lon: 21.0031,
-		address: "Al. Jerozolimskie 54",
-		city: "Warszawa",
-		access: "always",
-		status: "operational",
-		source: "seed",
-	},
-	{
-		name: "AED — Galeria Krakowska",
-		lat: 50.0682,
-		lon: 19.9476,
-		address: "ul. Pawia 5",
-		city: "Kraków",
-		access: "business_hours",
-		status: "operational",
-		source: "seed",
-	},
-	{
-		name: "AED — Dworzec Gdańsk Główny",
-		lat: 54.3562,
-		lon: 18.6441,
-		address: "ul. Podwale Grodzkie 1",
-		city: "Gdańsk",
-		access: "always",
-		status: "unknown",
-		source: "seed",
-	},
-	{
-		name: "AED — Rynek we Wrocławiu",
-		lat: 51.1101,
-		lon: 17.0316,
-		address: "Rynek 1",
-		city: "Wrocław",
-		access: "business_hours",
-		status: "out_of_service",
-		source: "seed",
-	},
-	{
-		name: "AED — Stary Rynek w Poznaniu",
-		lat: 52.4083,
-		lon: 16.9335,
-		address: "Stary Rynek 1",
-		city: "Poznań",
+		name: "AED — Ratusz w Krośnie",
+		lat: 49.7005,
+		lon: 21.4955,
+		address: "ul. Staszica 1",
+		city: "Krosno",
 		access: "unknown",
 		status: "unknown",
-		source: "seed",
+		source: "krosno",
+	},
+	{
+		name: "AED — Urząd Miasta Marki",
+		lat: 52.3175,
+		lon: 21.1778,
+		address: "ul. Piłsudskiego 32",
+		city: "Marki",
+		access: "unknown",
+		status: "unknown",
+		source: "marki",
+	},
+	{
+		name: "AED — Obiekt publiczny (OSM)",
+		lat: 52.2297,
+		lon: 21.0122,
+		address: null,
+		city: "Warszawa",
+		access: "unknown",
+		status: "unknown",
+		source: "openaedmap",
+	},
+	{
+		name: "AED — Przystanek w Przemyślu",
+		lat: 49.7764,
+		lon: 22.7719,
+		address: null,
+		city: "Przemyśl",
+		access: "unknown",
+		status: "unknown",
+		source: "przemysl",
+	},
+	{
+		name: "AED — Urząd dzielnicy Warszawa",
+		lat: 52.2319,
+		lon: 21.0111,
+		address: null,
+		city: "Warszawa",
+		access: "unknown",
+		status: "unknown",
+		source: "warszawa",
 	},
 ];
 

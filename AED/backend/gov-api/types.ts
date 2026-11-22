@@ -12,12 +12,20 @@ export interface FeedRecord {
 	readonly lat: number;
 	readonly lon: number;
 	readonly city: string | null;
+	/** Street address, used by the compact map payload only. */
+	readonly address?: string | null;
+	/** Location description from the canonical record; compact map payload only. */
+	readonly description?: string | null;
 	readonly access: string;
 	readonly status: string;
 	readonly verificationStatus: string;
 	readonly verifiedBy: string | null;
 	readonly verifiedByKind: string | null;
 	readonly verifiedAt: string | null;
+	/** System metadata, published under Polish canonical names in CSV/GeoJSON. */
+	readonly uuid: string;
+	readonly createdAt: string;
+	readonly updatedAt: string;
 	/** Stable identifier from the canonical record, when available. */
 	readonly recordId?: string | null;
 	readonly sourceRecordId?: string | null;

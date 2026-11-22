@@ -54,6 +54,7 @@ for (const record of dataset) {
 		verifiedByKind: record.verified_by_kind,
 		verifiedAt: record.verified_at,
 		source: record.source_id,
+		canonical: JSON.stringify(record),
 	});
 }
 

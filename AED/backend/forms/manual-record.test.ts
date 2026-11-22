@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { canonicalToRow } from "../store/aed-store.ts";
-import { geocodeAddress } from "./geocode.ts";
+import { geocodeAddress, reverseGeocode } from "./geocode.ts";
 import {
 	buildManualRecord,
 	MANUAL_SOURCE_ID,
@@ -82,6 +82,28 @@ describe("buildManualRecord", () => {
 		).toThrow(ManualRecordError);
 	});
 
+	test("wymaga typu dostępu i domyślnie oznacza pola opcjonalne", () => {
+		try {
+			buildManualRecord({
+				values: { name: "AED", lat: String(TEST_LAT), lon: String(TEST_LON) },
+			});
+			expect.unreachable();
+		} catch (error) {
+			const { issues } = error as ManualRecordError;
+			expect(issues.map((issue) => issue.field)).toContain("access_type");
+		}
+		const record = buildManualRecord({
+			values: {
+				name: "AED",
+				lat: String(TEST_LAT),
+				lon: String(TEST_LON),
+				access_type: "always",
+			},
+		});
+		expect(record.status).toBe("unknown");
+		expect(record.verification_status).toBe("unverified");
+	});
+
 	test("canonicalToRow zachowuje pełny rekord JSON", () => {
 		const record = buildManualRecord({ values: baseValues });
 		const row = canonicalToRow(record);
@@ -123,5 +145,30 @@ describe("geocodeAddress", () => {
 				fetchImpl: async () => new Response("no", { status: 429 }),
 			}),
 		).rejects.toThrow("HTTP 429");
+	});
+});
+
+describe("reverseGeocode", () => {
+	test("mapuje dane administracyjne z Nominatim", async () => {
+		const result = await reverseGeocode(TEST_LAT, TEST_LON, {
+			fetchImpl: async () =>
+				new Response(
+					JSON.stringify({
+						address: {
+							postcode: "00-024",
+							state: "mazowieckie",
+							county: "Warszawa",
+							city: "Warszawa",
+							road: "Aleje Jerozolimskie",
+							house_number: "54",
+						},
+					}),
+					{ status: 200, headers: { "content-type": "application/json" } },
+				),
+		});
+		expect(result.provider).toBe("nominatim");
+		expect(result.parts.postcode).toBe("00-024");
+		expect(result.parts.voivodeship).toBe("mazowieckie");
+		expect(result.parts.houseNumber).toBe("54");
 	});
 });
