@@ -87,8 +87,6 @@ interface Candidate {
 	confidence: number;
 }
 
-type CopyStatus = "idle" | "copied" | "error";
-
 const ACCESS_OPTIONS = [
 	{ value: "always", label: "Dostępny całą dobę (24/7)" },
 	{ value: "business_hours", label: "W godzinach pracy" },
@@ -150,7 +148,7 @@ function AddAedPage() {
 	const [issues, setIssues] = useState<FormIssue[]>([]);
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [saved, setSaved] = useState<{ name: string } | null>(null);
-	const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle");
+	const [copyFailed, setCopyFailed] = useState(false);
 	const navigate = useNavigate();
 
 	const lat = Number.parseFloat(values.lat ?? "");
@@ -267,9 +265,9 @@ function AddAedPage() {
 	async function copyPostText(text: string) {
 		try {
 			await navigator.clipboard.writeText(text);
-			setCopyStatus("copied");
+			setCopyFailed(false);
 		} catch {
-			setCopyStatus("error");
+			setCopyFailed(true);
 		}
 	}
 
@@ -285,7 +283,7 @@ function AddAedPage() {
 		setCandidates([]);
 		setIssues([]);
 		setServerError(null);
-		setCopyStatus("idle");
+		setCopyFailed(false);
 	}
 
 	if (saved) {
@@ -302,10 +300,10 @@ function AddAedPage() {
 				</Alert>
 				<Card>
 					<CardHeader>
-						<CardTitle>Poraź dobrem</CardTitle>
+						<CardTitle>⚡ Poraź dobrem</CardTitle>
 						<CardDescription>
-							Podziel się akcją na Facebooku. Tekst posta skopiujemy
-							automatycznie — wystarczy wkleić go w oknie udostępniania.
+							Daj znać o nowym defibrylatorze! Udostępnij post jednym
+							kliknięciem i zachęć innych do akcji.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-3">
@@ -314,7 +312,6 @@ function AddAedPage() {
 							className="w-fit bg-[#1877F2] text-white hover:bg-[#166FE5]"
 						>
 							<a
-								aria-label="Poraź dobrem — udostępnij na Facebooku"
 								href={FACEBOOK_SHARE_URL}
 								onClick={() => {
 									copyPostText(postText);
@@ -323,28 +320,23 @@ function AddAedPage() {
 								target="_blank"
 							>
 								<Facebook aria-hidden="true" className="fill-current" />
-								Poraź dobrem
+								Udostępnij na Facebooku
 							</a>
 						</Button>
-						<p
-							aria-live="polite"
-							className="min-h-5 text-muted-foreground text-sm"
-						>
-							{copyStatus === "copied"
-								? "Tekst posta skopiowany do schowka. Wklej go w oknie Facebooka."
-								: null}
-							{copyStatus === "error"
-								? "Nie udało się skopiować tekstu. Skopiuj go ręcznie z pola poniżej."
-								: null}
-						</p>
-						{copyStatus === "error" ? (
-							<Textarea
-								aria-label="Tekst posta do skopiowania"
-								className="min-h-28"
-								onFocus={(event) => event.currentTarget.select()}
-								readOnly={true}
-								value={postText}
-							/>
+						{copyFailed ? (
+							<>
+								<p className="text-destructive text-sm" role="alert">
+									Nie udało się skopiować tekstu. Skopiuj go ręcznie z pola
+									poniżej.
+								</p>
+								<Textarea
+									aria-label="Tekst posta do skopiowania"
+									className="min-h-28"
+									onFocus={(event) => event.currentTarget.select()}
+									readOnly={true}
+									value={postText}
+								/>
+							</>
 						) : null}
 					</CardContent>
 				</Card>
