@@ -79,11 +79,11 @@ Aliasy ścieżek: `#/*` → `frontend/*`, `#backend/*` → `backend/*`
 
 | Warstwa | Moduł | Status | Sekcja |
 | --- | --- | --- | --- |
-| frontend | auth-form | planowane | [Logowanie i rejestracja](#logowanie-i-rejestracja-auth-form) |
+| frontend | auth-form | działa | [Logowanie i rejestracja](#logowanie-i-rejestracja-auth-form) |
 | frontend | aed-form | działa (dev) | [Formularz AED](#formularz-aed-aed-form) |
 | frontend | map | działa (mapa + wybór punktu) | [Mapa AED](#mapa-aed-map) |
 | frontend | social-media | planowane | [Propozycje postów](#propozycje-postów-social-media) |
-| backend | auth | częściowo istnieje | [Uwierzytelnianie](#uwierzytelnianie-auth) |
+| backend | auth | działa (podstawy) | [Uwierzytelnianie](#uwierzytelnianie-auth) |
 | backend | ingest | działa (dev) | [Pobieranie danych](#pobieranie-danych-ingest) |
 | backend | normalize | planowane | [Standaryzacja danych](#standaryzacja-danych-normalize) |
 | backend | store | działa (dev) | [Baza danych](#baza-danych-store) |
@@ -163,27 +163,40 @@ hooki, style) oraz implementacje modułów.
 
 ### Logowanie i rejestracja (auth-form)
 
-**Status:** planowane · **Kod:** brak
+**Status:** działa · **Kod:** `frontend/auth-form/`, `backend/auth/`
 
-**Cel:** pozwolić osobom zarządzającym danymi (opiekunowie AED, redakcja)
-zalogować się i założyć konto, zanim dopuszczone zostanie dodawanie lub edycja
-rekordów.
+**Cel:** pozwolić użytkownikom założyć konto i zalogować się nazwą użytkownika
+oraz hasłem, zanim w przyszłości dojdzie podpisywanie dodawanych punktów AED.
 
-**Zakres:**
+**Co działa:**
 
-- formularz logowania (e-mail + hasło),
-- formularz rejestracji z potwierdzeniem hasła,
-- walidacja pól i komunikaty błędów po polsku,
-- stany: ładowanie, błąd serwera, sukces,
-- obsługa klawiatury i czytników ekranu, widoczny fokus, kontrast 4.5:1.
+- rejestracja i logowanie **nazwa użytkownika + hasło** (bez e-maila w UI),
+- better-auth tworzy wewnętrzny adres `<nazwa>@users.local`; nie jest on
+  pokazywany ani weryfikowany,
+- hasła są hashowane przez better-auth (scrypt), nigdy nie trafiają do bazy
+  jawnie,
+- sesja w cookie HttpOnly (`better-auth.session_token`), wylogowanie czyści
+  cookie,
+- walidacja po polsku: nazwa 3–30 znaków (`a-z`, `0-9`, `_`), hasło min. 8,
+  potwierdzenie hasła przy rejestracji,
+- komunikaty błędów m.in. dla zajętej nazwy i błędnych danych logowania,
+- strona główna to nagłówek + mapa; w prawym górnym rogu nagłówka jest
+  przycisk **„Zaloguj / Zarejestruj”** prowadzący do `/logowanie`,
+- strona `/logowanie` ma wyśrodkowany panel z polami nazwa użytkownika i
+  hasło oraz przyciskami **Zaloguj** i **Zarejestruj**,
+- pod formularzem na `/logowanie` jest **wyłączony** przycisk
+  **„Zaloguj z gov.pl”** — placeholder, który nic nie robi,
+- po udanym logowaniu lub rejestracji użytkownik wraca na stronę główną,
+  a w nagłówku zamiast „Zaloguj / Zarejestruj” pojawia się
+  **Witaj {nazwa}!** oraz **Wyloguj**.
 
-**Zależności:** [backend/auth](#uwierzytelnianie-auth) — sesje i role,
-`frontend/lib/auth-client.ts` — klient better-auth,
-`frontend/components/ui/` — pola i przyciski shadcn.
+**Pliki:** `frontend/auth-form/auth-panel.tsx` (formularze),
+`frontend/auth-form/site-header.tsx` (przyciski w nagłówku),
+`frontend/routes/logowanie.tsx` (strona logowania),
+`frontend/lib/auth-client.ts` (klient z pluginem `username`).
 
-**Stan obecny:** skonfigurowany jest better-auth po stronie serwera
-(`backend/auth/auth.ts`, `frontend/routes/api/auth/$.ts`). Brak jakiegokolwiek
-interfejsu logowania.
+**Czego jeszcze nie ma:** dodawania punktów AED, podpisywania rekordów
+identyfikatorem użytkownika, ról i uprawnień, logowania przez gov.pl.
 
 ### Formularz AED (aed-form)
 
@@ -310,7 +323,7 @@ katalogu); `frontend/map/` — link do mapy w treści posta.
 ### UI
 
 Projekt używa wyłącznie natywnych komponentów shadcn/ui generowanych przez CLI:
-`alert`, `badge`, `button` i `card`. Są zarządzane przez rejestr shadcn, bazują
+`alert`, `badge`, `button`, `card`, `input` i `label`. Są zarządzane przez rejestr shadcn, bazują
 na Radix UI i zachowują styl `new-york` oraz motyw oparty na zmiennych CSS w
 `frontend/styles.css`. Nie edytuj wygenerowanych plików w
 `frontend/components/ui/` ręcznie i nie dodawaj własnych prymitywów zamiast
@@ -327,31 +340,26 @@ uwierzytelnianie, ingest, integracja z dane.gov.pl).
 
 ### Uwierzytelnianie (auth)
 
-**Status:** częściowo istnieje · **Kod:** `backend/auth/auth.ts`, `frontend/routes/api/auth/$.ts`
+**Status:** działa (podstawy) · **Kod:** `backend/auth/`, `frontend/auth-form/`
 
-**Cel:** wiedzieć, kto modyfikuje dane, i dopuszczać do tego tylko osoby
-uprawnione.
+**Cel:** wiedzieć, kto korzysta z aplikacji, i przygotować grunt pod
+podpisywanie danych identyfikatorem użytkownika.
 
-**Zakres:**
+**Co działa:**
 
-- logowanie e-mail + hasło (better-auth),
-- sesja w cookie HttpOnly, wygaśnięcie i wylogowanie,
-- role: administrator, redakcja, opiekun urządzenia,
-- ochrona server functions i tras API (401 vs 403),
-- limitowanie prób logowania,
-- ślad audytowy zmian uprawnień i danych.
+- better-auth z adapterem Drizzle (`better-auth/adapters/drizzle`) na
+  `bun:sqlite`,
+- logowanie **nazwa użytkownika + hasło** (plugin `username`),
+- tabele `user`, `session`, `account`, `verification` w tej samej bazie co
+  dane AED (schemat w `backend/auth/schema.ts`),
+- każdy użytkownik ma unikalne `user.id` (string generowany przez better-auth),
+- sesja w cookie HttpOnly, ważna 7 dni; wylogowanie unieważnia sesję,
+- rejestracja nie wymaga e-maila — UI tworzy techniczny adres
+  `<nazwa>@users.local`.
 
-**Zależności:** [Baza danych](#baza-danych-store) — tabele better-auth w
-istniejącej bazie, [frontend auth-form](#logowanie-i-rejestracja-auth-form) —
-interfejs logowania.
-
-**Stan obecny:** skonfigurowany better-auth z logowaniem e-mail/hasło oraz
-montaż `/api/auth/*`. Brak ról, brak guardów na poziomie aplikacji, brak
-limitowania prób.
-
-better-auth jest skonfigurowany w `backend/auth/auth.ts` (logowanie e-mailem i
-hasłem, plugin `tanstackStartCookies`), klient w `frontend/lib/auth-client.ts`,
-a handler w `frontend/routes/api/auth/$.ts`.
+**Pliki:** `backend/auth/auth.ts` (konfiguracja + adapter),
+`backend/auth/schema.ts` (tabele), `frontend/lib/auth-client.ts` (klient),
+`frontend/routes/api/auth/$.ts` (handler `/api/auth/*`).
 
 Ustaw w `.env.local`:
 
@@ -360,7 +368,11 @@ BETTER_AUTH_SECRET=...
 BETTER_AUTH_URL=http://localhost:3000
 ```
 
-Sekret wygenerujesz przez `bunx --bun @better-auth/cli secret`.
+Sekret wygenerujesz przez `openssl rand -hex 32` (albo
+`bunx --bun @better-auth/cli secret`).
+
+**Czego jeszcze nie ma:** ról i uprawnień, limitowania prób logowania,
+weryfikacji e-maila, logowania przez gov.pl, podpisywania rekordów.
 
 ### Pobieranie danych (ingest)
 
@@ -455,6 +467,10 @@ Aplikacja używa natywnego sterownika SQLite Buna przez
 `dev.db`), a `backend/store/index.ts` włącza WAL i `synchronous = NORMAL`.
 Schemat znajduje się w `backend/store/schema.ts`.
 
+Schemat jest podzielony na dwa pliki: `backend/store/schema.ts` (dane AED) i
+`backend/auth/schema.ts` (tabele better-auth). `drizzle.config.ts` wskazuje oba,
+więc migracje obejmują całość.
+
 W wersji deweloperskiej istnieje jedna tabela domenowa `aed_devices` (tymczasowa,
 kolumny mogą się zmieniać):
 
@@ -468,6 +484,9 @@ kolumny mogą się zmieniać):
 | `status` | text | `operational` / `out_of_service` / `unknown` |
 | `source` | text | skąd rekord (`seed`, `manual`, …) |
 | `created_at`, `updated_at` | integer | znaczniki czasu |
+
+Tabele uwierzytelniania: `user`, `session`, `account`, `verification`
+(szczegóły w sekcji [Uwierzytelnianie](#uwierzytelnianie-auth)).
 
 Funkcje dla innych modułów (`backend/store/aed-store.ts`):
 
