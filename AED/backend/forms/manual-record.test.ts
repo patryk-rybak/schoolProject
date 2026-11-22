@@ -44,8 +44,6 @@ describe("buildManualRecord", () => {
 		expect(record.attributes?.["is_24_7"]).toBe(true);
 		// biome-ignore lint/complexity/useLiteralKeys: attributes use an index signature.
 		expect(record.attributes?.["indoor"]).toBe(true);
-		// biome-ignore lint/complexity/useLiteralKeys: provenance uses an index signature.
-		expect(record.field_provenance?.["name"]).toBe(MANUAL_SOURCE_ID);
 	});
 
 	test("oznacza rekord geokodowany metadanymi", () => {

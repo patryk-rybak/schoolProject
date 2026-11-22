@@ -2,6 +2,44 @@ import { describe, expect, test } from "bun:test";
 
 import { toAedMapPoint } from "./poland-map.tsx";
 
+const mapSource = await Bun.file(
+	new URL("./poland-map.tsx", import.meta.url),
+).text();
+
+const aedSourcePattern =
+	/map\.addSource\(\s*"aed"\s*,\s*\{[\s\S]*?type:\s*"geojson"[\s\S]*?data:\s*`\$\{globalThis\.location\.origin\}\/data\/aed\.points\.geojson/u;
+const aedPointsLayerPattern =
+	/map\.addLayer\(\s*\{[\s\S]*?id:\s*"aed-points"[\s\S]*?type:\s*"circle"[\s\S]*?source:\s*"aed"[\s\S]*?"circle-radius"[\s\S]*?"circle-color":\s*\[\s*"case"\s*,\s*\["==",\s*\["get",\s*"verification_status"\],\s*"verified"\],\s*VERIFIED_COLOR,\s*UNVERIFIED_COLOR,\s*\]/u;
+
+function functionBody(name: string): string {
+	const marker = `function ${name}(`;
+	const start = mapSource.indexOf(marker);
+	if (start === -1) {
+		throw new Error(`missing ${name} in poland-map.tsx`);
+	}
+	const bodyStart = mapSource.indexOf("): void {", start);
+	if (bodyStart === -1) {
+		throw new Error(`missing ${name} body in poland-map.tsx`);
+	}
+	const brace = mapSource.indexOf("{", bodyStart);
+	if (brace === -1) {
+		throw new Error(`missing ${name} body brace in poland-map.tsx`);
+	}
+	let depth = 0;
+	for (let index = brace; index < mapSource.length; index += 1) {
+		if (mapSource[index] === "{") {
+			depth += 1;
+		}
+		if (mapSource[index] === "}") {
+			depth -= 1;
+			if (depth === 0) {
+				return mapSource.slice(brace + 1, index);
+			}
+		}
+	}
+	throw new Error(`unterminated ${name} body in poland-map.tsx`);
+}
+
 describe("toAedMapPoint", () => {
 	test("maps compact points GeoJSON properties into the popup model", () => {
 		const point = toAedMapPoint({
@@ -81,5 +119,23 @@ describe("toAedMapPoint", () => {
 		});
 
 		expect(point).toBeNull();
+	});
+});
+
+describe("AED map source and circle layer", () => {
+	test("loads the compact points GeoJSON URL as the aed source", () => {
+		const body = functionBody("addAedPoints");
+		const source = body.match(aedSourcePattern);
+
+		expect(source?.[0]).toBeDefined();
+	});
+
+	test("defines an aed-points circle layer colored by verification status", () => {
+		const body = functionBody("addAedPoints");
+		const layer = body.match(aedPointsLayerPattern);
+
+		expect(layer?.[0]).toBeDefined();
+		expect(mapSource).toContain('export const VERIFIED_COLOR = "#16a34a"');
+		expect(mapSource).toContain('export const UNVERIFIED_COLOR = "#9ca3af"');
 	});
 });

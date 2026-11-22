@@ -13,10 +13,10 @@
     "#backend/*": "./backend/*"
   },
   "scripts": {
-    "dev": "bun node_modules/vite/bin/vite.js dev --port 3000",
+    "dev": "bun scripts/bootstrap-dev-store.ts && bun node_modules/vite/bin/vite.js dev --port 3000",
     "dev:tls": "bun frontend/scripts/dev-tls-proxy.ts",
     "build": "bun node_modules/vite/bin/vite.js build",
-    "preview": "bun .output/server/index.mjs",
+    "preview": "bun scripts/bootstrap-dev-store.ts && bun .output/server/index.mjs",
     "typecheck": "bun node_modules/typescript/bin/tsc --noEmit",
     "format": "bun node_modules/@biomejs/biome/bin/biome format --write",
     "lint": "bun node_modules/@biomejs/biome/bin/biome lint --only=a11y --only=complexity --only=correctness --only=nursery --only=performance --only=security --only=style --only=suspicious --skip=nursery/useExplicitType --skip=nursery/noTernary --skip=nursery/noJsxPropsBind --skip=style/noJsxLiterals --skip=style/useNamingConvention --skip=style/useFilenamingConvention --skip=style/useExportsLast --skip=style/useComponentExportOnlyModules --skip=style/noHeadElement --skip=performance/noImgElement --skip=correctness/useQwikValidLexicalScope --skip=suspicious/noReactSpecificProps --error-on-warnings --skip=suspicious/noConsole --skip=correctness/noNodejsModules --skip=style/noNonNullAssertion",
@@ -35,6 +35,7 @@
     "ingest:run": "bun scripts/ingest-run.ts",
     "db:seed": "bun backend/store/seed.ts",
     "db:load-core": "bun scripts/load-core-to-store.ts",
+    "db:bootstrap": "bun scripts/bootstrap-dev-store.ts",
     "db:refresh-sources": "bun run ingest:run && bun run db:load-core",
     "map:tiles": "bash frontend/scripts/fetch-poland-pmtiles.sh"
   },

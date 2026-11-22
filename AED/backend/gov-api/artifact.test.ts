@@ -6,6 +6,15 @@ import { buildGeoJson } from "./geojson";
 import type { FeedRecord } from "./types";
 import { buildXlsx } from "./xlsx";
 
+const artifactSource = await Bun.file(
+	new URL("./artifact.ts", import.meta.url),
+).text();
+
+const isPublishedRowPattern =
+	/function isPublishedRow[\s\S]*?row\.lat !== null[\s\S]*?row\.lon !== null[\s\S]*?PUBLISHED_LOCATION_STATUSES\.some/u;
+const publishedRowsFilterPattern =
+	/listCombinedAedDevices\(\)\.filter\(isPublishedRow\)/u;
+
 const records: readonly FeedRecord[] = [
 	{
 		id: 1,
@@ -89,5 +98,31 @@ describe("export artifacts", () => {
 
 		expect((await response.arrayBuffer()).byteLength).toBe(bytes.byteLength);
 		expect(bytes.byteLength).toBeGreaterThan(0);
+	});
+});
+
+describe("published row filtering", () => {
+	test("exports filter to geolocated point/geocoded rows", () => {
+		expect(artifactSource).toContain("PUBLISHED_LOCATION_STATUSES");
+		expect(artifactSource).toContain('["point", "geocoded"] as const');
+		expect(artifactSource).toMatch(isPublishedRowPattern);
+		expect(artifactSource).toMatch(publishedRowsFilterPattern);
+	});
+
+	test("published GeoJSON rows expose location_status and geom_source", () => {
+		const [published] = records;
+		if (!published) {
+			throw new Error("fixture is missing the published record");
+		}
+		const collection = JSON.parse(buildGeoJson([published])) as {
+			features: { properties: Record<string, unknown> }[];
+		};
+
+		expect(collection.features[0]?.properties["location_status"]).toBe(
+			published.locationStatus,
+		);
+		expect(collection.features[0]?.properties["geom_source"]).toBe(
+			published.geomSource,
+		);
 	});
 });
