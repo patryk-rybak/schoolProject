@@ -40,7 +40,7 @@ function Home() {
 							</Link>
 						</Button>
 					</div>
-					<PolandMap />
+					<PolandMap showLocateControl={true} />
 				</CardContent>
 			</Card>
 		</main>

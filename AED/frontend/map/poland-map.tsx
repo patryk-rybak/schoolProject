@@ -1,6 +1,6 @@
 import { layers, namedFlavor } from "@protomaps/basemaps";
 import { Link } from "@tanstack/react-router";
-import { CircleAlert } from "lucide-react";
+import { CircleAlert, LocateFixed } from "lucide-react";
 // biome-ignore lint/performance/noNamespaceImport: MapLibre is used as both a value namespace and a type namespace here.
 import * as maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
@@ -26,6 +26,8 @@ const POLAND_ZOOM = 5.4;
 const POLAND_MIN_ZOOM = 4;
 const POLAND_MAX_ZOOM = 18;
 const TILE_SOURCE_MAX_ZOOM = 15;
+const USER_LOCATION_ZOOM = 16;
+const GEOLOCATION_TIMEOUT_MS = 10_000;
 
 // Tiles come from frontend/routes/api/pmtiles.ts (HTTP range support).
 function createStyle(origin: string): maplibregl.StyleSpecification {
@@ -193,10 +195,48 @@ export interface PolandMapProps {
 	initialCenter?: { lat: number; lon: number } | null;
 	/** Wysokość kontenera mapy; domyślnie 70vh jak na stronie głównej. */
 	className?: string;
+	/** Pokazuje przycisk „Moja lokalizacja” (mapa główna). */
+	showLocateControl?: boolean;
 }
 
 const PICK_ZOOM = 16;
 const COORD_DECIMALS = 6;
+
+function createUserLocationElement(): HTMLDivElement {
+	const wrapper = document.createElement("div");
+	wrapper.className = "flex flex-col items-center gap-1";
+	wrapper.title = "Twoja lokalizacja";
+
+	const label = document.createElement("span");
+	label.className =
+		"rounded-full border bg-background/95 px-2 py-0.5 font-medium text-[10px] shadow-sm";
+	label.textContent = "Twoja lokalizacja";
+
+	const dotWrapper = document.createElement("span");
+	dotWrapper.className = "relative flex size-5 items-center justify-center";
+	const halo = document.createElement("span");
+	halo.className =
+		"absolute inline-flex size-5 animate-ping rounded-full bg-blue-500/40 motion-reduce:animate-none";
+	const dot = document.createElement("span");
+	dot.className =
+		"relative inline-flex size-4 rounded-full border-2 border-white bg-blue-600 shadow-md";
+	dotWrapper.append(halo, dot);
+	wrapper.append(label, dotWrapper);
+	return wrapper;
+}
+
+function geolocationErrorMessage(error: GeolocationPositionError): string {
+	switch (error.code) {
+		case error.PERMISSION_DENIED:
+			return "Dostęp do lokalizacji jest zablokowany. Zezwól na niego w ustawieniach przeglądarki.";
+		case error.POSITION_UNAVAILABLE:
+			return "Nie udało się ustalić Twojej lokalizacji. Spróbuj ponownie.";
+		case error.TIMEOUT:
+			return "Ustalanie lokalizacji trwa zbyt długo. Spróbuj ponownie.";
+		default:
+			return "Nie udało się pobrać Twojej lokalizacji.";
+	}
+}
 
 function AddHerePopup({ lat, lon }: { lat: number; lon: number }) {
 	return (
@@ -219,13 +259,17 @@ export function PolandMap({
 	picked,
 	initialCenter,
 	className,
+	showLocateControl = false,
 }: PolandMapProps = {}) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const mapRef = useRef<maplibregl.Map | null>(null);
 	const markerRef = useRef<maplibregl.Marker | null>(null);
+	const userMarkerRef = useRef<maplibregl.Marker | null>(null);
 	const pickRef = useRef<((lat: number, lon: number) => void) | null>(null);
 	const popupRootRef = useRef<Root | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [locating, setLocating] = useState(false);
+	const [locationError, setLocationError] = useState<string | null>(null);
 	pickRef.current = onPick ?? null;
 
 	useEffect(() => {
@@ -290,6 +334,8 @@ export function PolandMap({
 			popupRootRef.current = null;
 			markerRef.current?.remove();
 			markerRef.current = null;
+			userMarkerRef.current?.remove();
+			userMarkerRef.current = null;
 			mapRef.current = null;
 			map.remove();
 		};
@@ -318,6 +364,50 @@ export function PolandMap({
 		});
 	}, [picked]);
 
+	function locateMe() {
+		const map = mapRef.current;
+		if (!map) {
+			return;
+		}
+		if (!("geolocation" in navigator)) {
+			setLocationError("Twoja przeglądarka nie obsługuje geolokalizacji.");
+			return;
+		}
+		setLocating(true);
+		setLocationError(null);
+		navigator.geolocation.getCurrentPosition(
+			(position) => {
+				const activeMap = mapRef.current;
+				if (!activeMap) {
+					return;
+				}
+				const { latitude, longitude } = position.coords;
+				if (!userMarkerRef.current) {
+					userMarkerRef.current = new maplibregl.Marker({
+						element: createUserLocationElement(),
+						anchor: "bottom",
+					});
+				}
+				userMarkerRef.current.setLngLat([longitude, latitude]).addTo(activeMap);
+				activeMap.flyTo({
+					center: [longitude, latitude],
+					zoom: Math.max(activeMap.getZoom(), USER_LOCATION_ZOOM),
+					essential: true,
+				});
+				setLocating(false);
+			},
+			(geoError) => {
+				setLocating(false);
+				setLocationError(geolocationErrorMessage(geoError));
+			},
+			{
+				enableHighAccuracy: true,
+				timeout: GEOLOCATION_TIMEOUT_MS,
+				maximumAge: 0,
+			},
+		);
+	}
+
 	return (
 		<div
 			className={
@@ -328,6 +418,30 @@ export function PolandMap({
 			{/* MapLibre's CSS forces position:relative on its container, which
 			    would defeat `absolute inset-0`. Size the element directly. */}
 			<div ref={containerRef} className="h-full w-full" />
+			{showLocateControl ? (
+				<>
+					<Button
+						type="button"
+						variant="secondary"
+						size="sm"
+						className="absolute top-4 left-4 z-10 shadow-md"
+						disabled={locating}
+						onClick={locateMe}
+					>
+						<LocateFixed className={locating ? "animate-pulse" : undefined} />
+						{locating ? "Lokalizuję…" : "Moja lokalizacja"}
+					</Button>
+					{locationError ? (
+						<Alert
+							variant="destructive"
+							className="absolute top-20 left-4 z-10 w-auto max-w-xs bg-background/95"
+						>
+							<CircleAlert />
+							<AlertDescription>{locationError}</AlertDescription>
+						</Alert>
+					) : null}
+				</>
+			) : null}
 			{error ? (
 				<Alert
 					variant="destructive"

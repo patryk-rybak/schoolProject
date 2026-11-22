@@ -3,8 +3,6 @@ import {
 	parseCanonicalAedRecord,
 } from "../../src/server/ingest/canonical.ts";
 import type { CanonicalField } from "../../src/server/ingest/config/schema.ts";
-import { addUserAedDevice } from "../store/aed-store.ts";
-import type { AedDevice } from "../store/schema.ts";
 
 /**
  * Row-by-row manual entry ("manual" connector family).
@@ -294,10 +292,4 @@ export function buildManualRecord(
 			},
 		]);
 	}
-}
-
-/** Validates and stores one manual AED record; returns the stored row. */
-export function saveManualRecord(input: ManualRecordInput): AedDevice {
-	const record = buildManualRecord(input);
-	return addUserAedDevice(record, input.createdById);
 }

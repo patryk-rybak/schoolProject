@@ -300,9 +300,16 @@ działają — tak szybko, jak to możliwe, również na telefonie.
 - kolor punktu pokazuje weryfikację: **zielony** = zweryfikowany (rekord
   użytkownika), **szary** = niezweryfikowany (import/seed),
 - popup pokazuje nazwę, miasto i informację o weryfikacji,
+- przycisk **„Moja lokalizacja”** (na stronie głównej) pobiera bieżącą pozycję
+  przez Geolocation API, przybliża mapę i pokazuje niebieską kropkę z etykietą
+  „Twoja lokalizacja”; błędy uprawnień są komunikowane w alercie,
 - kliknięcie w mapę otwiera popup „Dodaj AED tutaj” z linkiem do formularza
   i wypełnionymi współrzędnymi,
 - ten sam komponent mapy służy w formularzu do wyboru punktu.
+
+Geolokalizacja wymaga bezpiecznego kontekstu: działa na `localhost` oraz pod
+HTTPS. Przy dostępie przez zwykłe HTTP z adresu LAN przeglądarka zablokuje
+`navigator.geolocation`.
 
 **Czego jeszcze nie ma:** klastrowania, filtrów, panelu szczegółów z pełnym
 adresem i licencją, funkcji „najbliższy AED”, tabelarycznej alternatywy dla
