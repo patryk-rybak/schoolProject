@@ -120,7 +120,7 @@ Dowód: `README.md` → „Test end-to-end: nasza aplikacja → lokalny dane.gov
 - Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`.
 - Konfiguracja obejmuje 11 źródeł; włączone są `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`.
 - Pozostałe wpisy konfiguracji pozostają wyłączone do decyzji licencyjnej.
-- Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`.
+- Każdy rekord zachowuje `zrodlo_danych`, `url_zrodla` i `status_weryfikacji`.
 
 Dowód: `README.md` → „Źródła danych i provenance”, `INSTRUKCJA-DLA-JURY.md`.
 

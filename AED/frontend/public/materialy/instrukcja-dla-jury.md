@@ -25,7 +25,7 @@ Nasze rozwiązanie:
 
 ### Źródła danych i provenance
 
-Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
+Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje `zrodlo_danych`, `url_zrodla` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
 
 | Identyfikator źródła | Nazwa | Status |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/d
 | `tczew` | AED Tczew (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
 | `zielona-gora` | AED w Zielonej Górze (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
 
-Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`.
+Każdy rekord zachowuje `zrodlo_danych`, `url_zrodla` i `status_weryfikacji`.
 
 ## 3. Instrukcja krok po kroku dla jury
 
@@ -101,7 +101,7 @@ Feed XML używa oficjalnego schematu `urn:otwarte-dane:harvester:1.13`. Suma MD5
 
 ### Krok 6. Otwórz materiały konkursowe
 
-Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`) pobiera aktualną, pełną bazę AED znormalizowaną do wspólnego rekordu kanonicznego. To nie jest pusty arkusz wzorca: eksport ma jeden wiersz na urządzenie, a kolumny łączą nazwy pól kanonicznych, polskie aliasy i metadane dodawane przez system.
+Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`) pobiera aktualną, pełną bazę AED znormalizowaną do wspólnego rekordu kanonicznego. To nie jest pusty arkusz wzorca: eksport ma jeden wiersz na urządzenie, a kolumny używają wyłącznie polskich nazw pól oraz metadanych dodawanych przez system.
 
 | Wymaganie | Plik |
 | --- | --- |
@@ -138,9 +138,9 @@ W eksportach CSV, GeoJSON i XLSX system uwzględnia pola techniczne: `id` (stabi
 Najważniejsze zasady:
 
 - współrzędne w WGS84; w CSV jako `szerokosc_geo,dlugosc_geo`, w GeoJSON jako `[dlugosc_geo,szerokosc_geo]`,
-- `location_status` informuje, czy punkt pochodzi ze źródła, geokodowania albo czy jest tylko adres,
-- `verification_status=verified` wymaga wskazania weryfikatora lub daty weryfikacji,
-- `source_id`, `source_record_id` i `source_url` zachowują provenance,
+- `status_lokalizacji` informuje, czy punkt pochodzi ze źródła, geokodowania albo czy jest tylko adres,
+- `status_weryfikacji=verified` wymaga wskazania weryfikatora lub daty weryfikacji,
+- `zrodlo_danych`, `identyfikator_w_zrodle` i `url_zrodla` zachowują provenance,
 - licencja źródła jest deklarowana w metadanych; źródła bez licencji są wyłączone z agregacji.
 
 ## 5. Ograniczenia

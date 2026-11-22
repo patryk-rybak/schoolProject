@@ -352,7 +352,7 @@ działają — tak szybko, jak to możliwe, również na telefonie.
 **Co działa:**
 
 - strona główna to nagłówek + mapa Polski (MapLibre, kafelki Protomaps),
-- punkty AED pochodzą z `/data/aed.geojson`, czyli z tabeli
+- punkty AED pochodzą z kompaktowego `/data/aed.points.geojson`, czyli z tabeli
   `aed_devices_combined`; publikowane są tylko rekordy `point`/`geocoded`,
 - kolor punktu pokazuje weryfikację: **zielony** = zweryfikowany (rekord
   użytkownika), **szary** = niezweryfikowany (import/seed),
@@ -1283,7 +1283,7 @@ function Osoby() {
 
 W tym projekcie:
 
-- mapa ładuje `/data/aed.geojson` i `/api/pmtiles` po stronie klienta,
+- mapa ładuje `/data/aed.points.geojson` i `/api/pmtiles` po stronie klienta,
 - `/zrodla` korzysta z loadera `listSourcesFn`,
 - formularze wysyłają dane przez server functions (`saveManualAedFn`,
   `importSourceFn`, …),

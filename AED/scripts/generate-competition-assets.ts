@@ -165,8 +165,8 @@ type Tier = "Wymagane" | "Zalecane" | "Opcjonalne";
 
 /**
  * Canonical submission schema for dane.gov.pl, grouped by the three tiers
- * requested by the competition task. `legacy` names are the existing
- * ingest/export fields still accepted for backward compatibility.
+ * requested by the competition task. `legacy` lists historical names for
+ * documentation only; the current public exports emit Polish names only.
  */
 const FIELDS: FieldRow[] = [
 	{
