@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { CSV_CONTENT_TYPE, getCsv } from "#backend/gov-api/index.ts";
+import { CSV_CONTENT_TYPE, getExportSnapshot } from "#backend/gov-api/index.ts";
 
 const HEADERS = {
-	"cache-control": "no-store",
+	"cache-control": "public, max-age=60, stale-while-revalidate=300",
 	"content-disposition": 'inline; filename="aed.csv"',
 	"content-type": CSV_CONTENT_TYPE,
+	vary: "Accept-Encoding",
 } as const;
 
 function byteLength(value: string): string {
@@ -16,11 +17,25 @@ function byteLength(value: string): string {
 export const Route = createFileRoute("/data/aed.csv")({
 	server: {
 		handlers: {
-			GET: () => new Response(getCsv(), { headers: HEADERS }),
+			GET: () => {
+				const snapshot = getExportSnapshot();
+				return new Response(snapshot.csv, {
+					headers: {
+						...HEADERS,
+						etag: `"${snapshot.key}"`,
+						"last-modified": new Date(snapshot.latest).toUTCString(),
+					},
+				});
+			},
 			HEAD: () => {
-				const body = getCsv();
+				const snapshot = getExportSnapshot();
 				return new Response(null, {
-					headers: { ...HEADERS, "content-length": byteLength(body) },
+					headers: {
+						...HEADERS,
+						"content-length": byteLength(snapshot.csv),
+						etag: `"${snapshot.key}"`,
+						"last-modified": new Date(snapshot.latest).toUTCString(),
+					},
 				});
 			},
 		},

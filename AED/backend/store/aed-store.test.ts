@@ -19,6 +19,7 @@ const KRAKOW: readonly [number, number] = [50.06, 19.94];
 const GDANSK: readonly [number, number] = [54.35, 18.64];
 const WROCLAW: readonly [number, number] = [51.11, 17.03];
 const EXPECTED_COMBINED_ROWS = 3;
+const MISSING_DEVICE_ID = 999_999;
 
 // biome-ignore lint/complexity/useLiteralKeys: Bun.env is an index signature.
 Bun.env["DATABASE_URL"] = TEST_DB;
@@ -106,7 +107,8 @@ describe("canonical store", () => {
 		expect(row?.type).toBe("table");
 	});
 
-	test("user record is signed and verified by its author", () => {
+	test("user record is signed and verified by its author", async () => {
+		const { getAedDetail } = await import("../aed-detail.ts");
 		const row = store.addUserAedDevice(
 			record("manual", "user:one", ...WARSAW),
 			USER_ID,
@@ -122,6 +124,19 @@ describe("canonical store", () => {
 		expect(combined?.recordId).toBe(row.recordId);
 		expect(combined?.createdById).toBe(USER_ID);
 		expect(combined?.origin).toBe("user");
+		expect(combined ? store.getCombinedAedDevice(combined.id) : null).toEqual(
+			combined ?? null,
+		);
+		expect(store.getCombinedAedDevice(MISSING_DEVICE_ID)).toBeNull();
+		const detail = combined ? getAedDetail(combined.id) : null;
+		expect(detail?.id).toBe(combined?.id);
+		expect(detail?.name).toBe("AED user:one");
+		expect(detail?.city).toBe("Warszawa");
+		expect(detail?.source).toBe("manual");
+		expect(detail?.verificationStatus).toBe("verified");
+		// biome-ignore lint/complexity/useLiteralKeys: CanonicalDetail has an index signature.
+		expect(detail?.canonical?.["record_id"]).toBe("user:one");
+		expect(getAedDetail(MISSING_DEVICE_ID)).toBeNull();
 		expect(store.listUserAedDevices(USER_ID)).toHaveLength(1);
 		expect(store.listUserAedDevices("another-user")).toHaveLength(0);
 	});

@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-
-import { GEOJSON_CONTENT_TYPE, getGeoJson } from "#backend/gov-api/index.ts";
+import { acceptEncodingAllowsGzip } from "#/lib/gzip-negotiation";
+import {
+	GEOJSON_CONTENT_TYPE,
+	getExportSnapshot,
+} from "#backend/gov-api/index.ts";
 
 const HEADERS = {
-	"cache-control": "no-store",
+	"cache-control": "public, max-age=60, stale-while-revalidate=300",
 	"content-disposition": 'inline; filename="aed.geojson"',
 	"content-type": GEOJSON_CONTENT_TYPE,
+	vary: "Accept-Encoding",
 } as const;
 
 function byteLength(value: string): string {
@@ -16,13 +20,55 @@ function byteLength(value: string): string {
 export const Route = createFileRoute("/data/aed.geojson")({
 	server: {
 		handlers: {
-			GET: () => new Response(getGeoJson(), { headers: HEADERS }),
+			GET: ({ request }) => {
+				const snapshot = getExportSnapshot();
+				const body = snapshot.geojson;
+				const headers = {
+					...HEADERS,
+					etag: `"${snapshot.key}"`,
+					"last-modified": new Date(snapshot.latest).toUTCString(),
+				};
+
+				if (!acceptEncodingAllowsGzip(request.headers.get("accept-encoding"))) {
+					return new Response(body, { headers });
+				}
+
+				const gzipped = gzipForSnapshot(snapshot.key, body);
+				return new Response(gzipped, {
+					headers: {
+						...headers,
+						"content-encoding": "gzip",
+						"content-length": String(gzipped.byteLength),
+					},
+				});
+			},
 			HEAD: () => {
-				const body = getGeoJson();
+				const snapshot = getExportSnapshot();
 				return new Response(null, {
-					headers: { ...HEADERS, "content-length": byteLength(body) },
+					headers: {
+						...HEADERS,
+						"content-length": byteLength(snapshot.geojson),
+						etag: `"${snapshot.key}"`,
+						"last-modified": new Date(snapshot.latest).toUTCString(),
+					},
 				});
 			},
 		},
 	},
 });
+
+let gzipCache: {
+	readonly key: string;
+	readonly bytes: Uint8Array<ArrayBuffer>;
+} | null = null;
+
+/**
+ * Gzip once per snapshot key and reuse the bytes on every request.
+ * Bun.gzipSync is deterministic and reliable, so no round-trip verification.
+ */
+function gzipForSnapshot(key: string, body: string): Uint8Array<ArrayBuffer> {
+	if (gzipCache?.key !== key) {
+		gzipCache = { key, bytes: Bun.gzipSync(new TextEncoder().encode(body)) };
+	}
+	return gzipCache.bytes;
+}

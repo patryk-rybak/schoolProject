@@ -15,6 +15,7 @@ import {
 	aedDevices,
 	aedDevicesCombined,
 	aedSourceDevices,
+	type CombinedAedDevice,
 	type NewCombinedAedDevice,
 } from "./schema.ts";
 
@@ -189,12 +190,22 @@ export function listSourceAedDevices(): AedSourceDevice[] {
 }
 
 /** Materialized combined table: user records first, then imported records. */
-export function listCombinedAedDevices() {
+export function listCombinedAedDevices(): CombinedAedDevice[] {
 	return db
 		.select()
 		.from(aedDevicesCombined)
 		.orderBy(aedDevicesCombined.id)
 		.all();
+}
+
+export function getCombinedAedDevice(id: number): CombinedAedDevice | null {
+	return (
+		db
+			.select()
+			.from(aedDevicesCombined)
+			.where(eq(aedDevicesCombined.id, id))
+			.get() ?? null
+	);
 }
 
 export function countAedDevices(): number {

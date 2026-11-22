@@ -1,24 +1,50 @@
 import { layers, namedFlavor } from "@protomaps/basemaps";
-import { Link } from "@tanstack/react-router";
-import { CircleAlert, LocateFixed } from "lucide-react";
+import { Link, RouterContextProvider, useRouter } from "@tanstack/react-router";
+import {
+	CircleAlert,
+	LoaderCircle,
+	LocateFixed,
+	Maximize2,
+	ShieldCheck,
+	ShieldQuestion,
+	X,
+} from "lucide-react";
 // biome-ignore lint/performance/noNamespaceImport: MapLibre is used as both a value namespace and a type namespace here.
 import * as maplibregl from "maplibre-gl";
+// Vite emits the MapLibre worker as a hashed asset and returns its URL.
+// Configure it once before any map is constructed; no copied public asset or
+// cache-busting query parameter is needed.
+import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { Protocol } from "pmtiles";
 import { useEffect, useRef, useState } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import { createPortal } from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
+import { AedDetailContent } from "#/components/aed-detail-content";
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
+import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
+import { Card, CardContent } from "#/components/ui/card";
+import { Separator } from "#/components/ui/separator";
+import { getAedDetailFn } from "#/server/forms";
+import {
+	ACCESS_LABELS,
+	displayValue,
+	labelFor,
+	STATUS_LABELS,
+} from "#/lib/aed-labels";
+import type { AedDetail } from "#backend/aed-detail.ts";
 
+import type { AedMapPoint } from "./aed-point.ts";
 import polandBorder from "./poland-border.geo.json" with { type: "json" };
 
-// MapLibre v6 loads its worker from a URL. Serve the file copied into
-// public/ by scripts/copy-maplibre-worker.ts as a static asset: Nitro's dev
-// middleware bypasses server routes for Sec-Fetch-Dest: worker requests.
-// Keep ?v= in sync with the maplibre-gl version to bust caches on upgrades.
-const WORKER_URL = "/maplibre-gl-worker.mjs?v=6.19.0";
+// MapLibre v6 loads its worker from a URL. Set the Vite-generated URL once at
+// startup (browser only) so every map instance uses the bundled worker asset.
+if (typeof globalThis.window !== "undefined") {
+	maplibregl.setWorkerUrl(maplibreWorkerUrl);
+}
 
 // biome-ignore lint/style/noMagicNumbers: the geographic centre of Poland is a named constant here.
 const POLAND_CENTER: [number, number] = [19.1451, 51.9194];
@@ -28,6 +54,7 @@ const POLAND_MAX_ZOOM = 18;
 const TILE_SOURCE_MAX_ZOOM = 15;
 const USER_LOCATION_ZOOM = 16;
 const GEOLOCATION_TIMEOUT_MS = 10_000;
+const NUMERIC_ID_PATTERN = /^\d+$/u;
 
 // Tiles come from frontend/routes/api/pmtiles.ts (HTTP range support).
 function createStyle(origin: string): maplibregl.StyleSpecification {
@@ -98,45 +125,53 @@ function addPolandMask(map: maplibregl.Map): void {
 	});
 }
 
-// Verified points are green, unverified gray.
-const VERIFIED_COLOR = "#16a34a";
-const UNVERIFIED_COLOR = "#9ca3af";
+// Punkty są wyróżniane wyłącznie według stanu weryfikacji.
+export const VERIFIED_COLOR = "#16a34a";
+export const UNVERIFIED_COLOR = "#9ca3af";
 
-function escapeHtml(value: string): string {
-	return value
-		.replaceAll("&", "&amp;")
-		.replaceAll("<", "&lt;")
-		.replaceAll(">", "&gt;")
-		.replaceAll('"', "&quot;");
+/** Converts untrusted GeoJSON properties into the popup's display model. */
+export function toAedMapPoint(
+	properties: Record<string, unknown> | null | undefined,
+): AedMapPoint | null {
+	if (!properties) {
+		return null;
+	}
+	const prop = (key: string): string => displayValue(properties[key]);
+	const idText = prop("id");
+	const id = NUMERIC_ID_PATTERN.test(idText) ? Number(idText) : null;
+	const name = prop("name");
+	if (id === null && name === "") {
+		return null;
+	}
+
+	return {
+		id,
+		name: name || "AED",
+		city: prop("city") || null,
+		address: prop("address") || null,
+		description: prop("description") || null,
+		access: prop("access") || "unknown",
+		status: prop("status") || "unknown",
+		source: prop("source_id") || "Niepodano",
+		verificationStatus: prop("verification_status") || "unverified",
+		sourceUrl: prop("source_url") || null,
+	};
 }
 
-function verificationHtml(props: Record<string, unknown>): string {
-	// biome-ignore lint/complexity/useLiteralKeys: GeoJSON properties use an index signature.
-	const verified = props["verification_status"] === "verified";
-	if (!verified) {
-		return "Niezweryfikowany";
-	}
-	// biome-ignore lint/complexity/useLiteralKeys: GeoJSON properties use an index signature.
-	const by = props["verified_by"];
-	// biome-ignore lint/complexity/useLiteralKeys: GeoJSON properties use an index signature.
-	const at = props["verified_at"];
-	const parts = ["Zweryfikowany"];
-	if (by) {
-		parts.push(`przez ${escapeHtml(String(by))}`);
-	}
-	if (at) {
-		parts.push(escapeHtml(String(at)));
-	}
-	return parts.join(" · ");
+/** Aktywny popup mapy wraz z funkcją zamykającą (sprząta też korzeń React). */
+interface ActivePopup {
+	readonly popup: maplibregl.Popup;
+	readonly close: () => void;
 }
 
 function addAedPoints(
 	map: maplibregl.Map,
 	pickRef: { current: ((lat: number, lon: number) => void) | null },
+	popupRef: { current: ActivePopup | null },
 ): void {
 	map.addSource("aed", {
 		type: "geojson",
-		data: `${globalThis.location.origin}/data/aed.geojson`,
+		data: `${globalThis.location.origin}/data/aed.points.geojson`,
 	});
 	map.addLayer({
 		id: "aed-points",
@@ -159,23 +194,21 @@ function addAedPoints(
 		if (!feature || feature.geometry.type !== "Point") {
 			return;
 		}
-		const props = feature.properties ?? {};
-		// biome-ignore lint/complexity/useLiteralKeys: GeoJSON properties use an index signature.
-		const name = props["name"] ?? "AED";
-		// biome-ignore lint/complexity/useLiteralKeys: GeoJSON properties use an index signature.
-		const city = props["city"] ?? "";
+		const point = toAedMapPoint(feature.properties);
 		const [lon, lat] = feature.geometry.coordinates as [number, number];
-		new maplibregl.Popup({ maxWidth: "280px" })
-			.setLngLat(feature.geometry.coordinates as [number, number])
-			.setHTML(
-				`<strong>${escapeHtml(String(name))}</strong><br/>${escapeHtml(String(city))}<br/>${verificationHtml(props)}`,
-			)
-			.addTo(map);
+		if (point) {
+			showPopup({
+				map,
+				lngLat: event.lngLat,
+				content: <AedPopup point={point} />,
+				popupRef,
+			});
+		}
 		// W trybie wyboru punktu kliknięcie w istniejący AED też ustawia punkt.
 		if (pickRef.current) {
 			pickRef.current(lat, lon);
 		}
-		// Nie otwieraj popupu „Dodaj AED tutaj” pod klikniętym punktem.
+		// Kliknięcie w istniejący AED nie otwiera komunikatu o braku punktu.
 		event.preventDefault();
 	});
 	map.on("mouseenter", "aed-points", () => {
@@ -254,6 +287,227 @@ function AddHerePopup({ lat, lon }: { lat: number; lon: number }) {
 	);
 }
 
+function AedPopup({ point }: { point: AedMapPoint }) {
+	const verified = point.verificationStatus === "verified";
+	const [detailOpen, setDetailOpen] = useState(false);
+	const location = [point.city, point.address]
+		.filter((part) => part !== null && part !== "")
+		.join(", ");
+
+	return (
+		<div className="flex max-w-72 flex-col gap-2 p-1">
+			<div className="flex flex-col gap-1">
+				<p className="font-semibold text-sm leading-snug">{point.name}</p>
+				{point.description !== null ? (
+					<p className="text-sm leading-snug">{point.description}</p>
+				) : null}
+				<p className="text-muted-foreground text-xs">
+					{location === "" ? "Brak danych adresowych" : location}
+				</p>
+			</div>
+			<div className="flex flex-wrap items-center gap-1.5">
+				<Badge
+					variant="secondary"
+					className={
+						verified
+							? "bg-green-100 text-green-800"
+							: "bg-muted text-muted-foreground"
+					}
+				>
+					{verified ? <ShieldCheck /> : <ShieldQuestion />}
+					{verified ? "Zweryfikowany" : "Niezweryfikowany"}
+				</Badge>
+			</div>
+			<p className="text-muted-foreground text-xs">
+				{labelFor(point.access, ACCESS_LABELS)} ·{" "}
+				{labelFor(point.status, STATUS_LABELS)}
+			</p>
+			{point.id !== null ? (
+				<>
+					<Separator />
+					<div className="flex flex-wrap gap-2">
+						<Button
+							size="sm"
+							onClick={() => {
+								setDetailOpen(true);
+							}}
+						>
+							<Maximize2 />
+							Więcej
+						</Button>
+					</div>
+					{detailOpen ? (
+						<AedDetailDialog
+							id={point.id}
+							onClose={() => {
+								setDetailOpen(false);
+							}}
+						/>
+					) : null}
+				</>
+			) : null}
+		</div>
+	);
+}
+
+/**
+ * Wyśrodkowany modal ze wszystkimi danymi AED. Portal do document.body, żeby
+ * dialog nie był przycinany ani przesuwany przez kontener popupu MapLibre.
+ * Szczegóły są pobierane leniwie dopiero po kliknięciu „Więcej”.
+ */
+function AedDetailDialog({ id, onClose }: { id: number; onClose: () => void }) {
+	const [detail, setDetail] = useState<AedDetail | null>(null);
+	const [error, setError] = useState<string | null>(null);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		let cancelled = false;
+		getAedDetailFn({ data: { id: String(id) } })
+			.then((result) => {
+				if (cancelled) {
+					return;
+				}
+				if (result === null) {
+					setError("Nie znaleziono danych tego AED.");
+				} else {
+					setDetail(result);
+				}
+			})
+			.catch((cause: unknown) => {
+				if (!cancelled) {
+					console.error("Błąd pobierania szczegółów AED:", cause);
+					setError("Nie udało się pobrać szczegółów AED. Spróbuj ponownie.");
+				}
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [id]);
+
+	useEffect(() => {
+		const onKeyDown = (event: KeyboardEvent): void => {
+			if (event.key === "Escape") {
+				onClose();
+			}
+		};
+		globalThis.document.addEventListener("keydown", onKeyDown);
+		return () => {
+			globalThis.document.removeEventListener("keydown", onKeyDown);
+		};
+	}, [onClose]);
+
+	return createPortal(
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+			{/* Tło: kliknięcie poza dialogiem zamyka go. */}
+			<button
+				type="button"
+				className="absolute inset-0 cursor-default bg-black/50"
+				aria-label="Zamknij szczegóły AED"
+				onClick={onClose}
+			/>
+			<Card
+				role="dialog"
+				aria-modal={true}
+				aria-label="Szczegóły AED"
+				className="relative flex max-h-[80vh] w-full max-w-lg flex-col gap-0 overflow-hidden py-0 shadow-lg"
+			>
+				<div className="flex items-center justify-between gap-4 border-b p-4">
+					<h1 className="font-semibold text-lg">Szczegóły AED</h1>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={onClose}
+						aria-label="Zamknij szczegóły AED"
+					>
+						<X />
+						Zamknij
+					</Button>
+				</div>
+				<CardContent className="flex-1 overflow-y-auto p-4">
+					{loading ? (
+						<p className="flex items-center gap-2 text-muted-foreground text-sm">
+							<LoaderCircle className="animate-spin" />
+							Wczytywanie danych AED…
+						</p>
+					) : error !== null ? (
+						<Alert variant="destructive">
+							<CircleAlert />
+							<AlertTitle>Nie udało się wczytać danych</AlertTitle>
+							<AlertDescription>{error}</AlertDescription>
+						</Alert>
+					) : detail !== null ? (
+						<AedDetailContent detail={detail} />
+					) : null}
+				</CardContent>
+			</Card>
+		</div>,
+		globalThis.document.body,
+	);
+}
+
+function showPopup(options: {
+	map: maplibregl.Map;
+	lngLat: maplibregl.LngLat;
+	content: React.ReactNode;
+	popupRef: { current: ActivePopup | null };
+}): void {
+	const { map, lngLat, content, popupRef } = options;
+	popupRef.current?.close();
+	popupRef.current = null;
+
+	// MapLibre v6 tworzy kontener popupu leniwie w _update() i tylko gdy ma
+	// treść, więc getElement() zaraz po addTo() może zwrócić undefined.
+	// Tworzymy własny węzeł i przekazujemy go przez setDOMContent PRZED addTo,
+	// a React montujemy na tym właśnie węźle.
+	const container = globalThis.document.createElement("div");
+	const popup = new maplibregl.Popup({ maxWidth: "320px", closeOnClick: false })
+		.setLngLat(lngLat)
+		.setDOMContent(container);
+	const root = createRoot(container);
+
+	// Zamknięcie z zewnątrz (X popupu): usuń popup i odmontuj React dopiero po
+	// zakończeniu bieżącego cyklu renderowania (unmount w trakcie renderu
+	// Reacta wywołuje ostrzeżenie).
+	let disposed = false;
+	const dispose = (): void => {
+		if (disposed) {
+			return;
+		}
+		disposed = true;
+		popup.remove();
+		queueMicrotask(() => {
+			root.unmount();
+		});
+	};
+	popup.on("close", dispose);
+
+	// Zamknięcie z naszej strony: najpierw odmontuj React (poza cyklem
+	// renderowania), potem usuń popup. Zdarzenie „close” jest wtedy no-opem.
+	const close = (): void => {
+		if (disposed) {
+			return;
+		}
+		disposed = true;
+		popup.off("close", dispose);
+		if (popupRef.current?.popup === popup) {
+			popupRef.current = null;
+		}
+		queueMicrotask(() => {
+			root.unmount();
+			popup.remove();
+		});
+	};
+
+	popup.addTo(map);
+	root.render(content);
+	popupRef.current = { popup, close };
+}
+
 export function PolandMap({
 	onPick,
 	picked,
@@ -266,7 +520,14 @@ export function PolandMap({
 	const markerRef = useRef<maplibregl.Marker | null>(null);
 	const userMarkerRef = useRef<maplibregl.Marker | null>(null);
 	const pickRef = useRef<((lat: number, lon: number) => void) | null>(null);
-	const popupRootRef = useRef<Root | null>(null);
+	const popupRef = useRef<ActivePopup | null>(null);
+	// Popupy żyją w osobnych korzeniach React (createRoot), więc kontekst
+	// routera nie dociera do nich automatycznie. Przechwytujemy instancję
+	// routera i owijamy treść popupu w RouterContextProvider, żeby Link
+	// w „Dodaj AED tutaj” działał (nawigacja kliencka zamiast przeładowania).
+	const router = useRouter();
+	const routerRef = useRef(router);
+	routerRef.current = router;
 	const [error, setError] = useState<string | null>(null);
 	const [locating, setLocating] = useState(false);
 	const [locationError, setLocationError] = useState<string | null>(null);
@@ -278,7 +539,6 @@ export function PolandMap({
 			return;
 		}
 
-		maplibregl.setWorkerUrl(WORKER_URL);
 		maplibregl.addProtocol("pmtiles", new Protocol().tile);
 
 		const map = new maplibregl.Map({
@@ -297,41 +557,53 @@ export function PolandMap({
 		map.addControl(new maplibregl.NavigationControl(), "top-right");
 		map.addControl(new maplibregl.ScaleControl({ unit: "metric" }));
 		map.on("error", (event) => {
-			setError(event.error.message);
+			console.error("Błąd wczytywania mapy:", event.error);
+			setError(
+				"Nie udało się wczytać mapy. Sprawdź połączenie z internetem i dostępność danych mapy.",
+			);
 		});
 
-		// AED points from the dev store via /data/aed.geojson (gov-api module).
+		// AED points from the dev store via /data/aed.points.geojson (gov-api).
 		map.on("load", () => {
 			addPolandMask(map);
-			addAedPoints(map, pickRef);
+			addAedPoints(map, pickRef, popupRef);
 		});
 
 		// Kliknięcie mapy: w trybie pickera ustawia punkt. Na mapie bez pickera
-		// otwiera popup „Dodaj AED tutaj”; kliknięcia w istniejące punkty AED
+		// otwiera popup z informacją o braku AED; kliknięcia w istniejące punkty
 		// obsługuje warstwa aed-points (event.defaultPrevented).
 		map.on("click", (event) => {
-			if (event.defaultPrevented) {
+			const pointLayer = map.getLayer("aed-points");
+			if (
+				event.defaultPrevented ||
+				(pointLayer &&
+					map.queryRenderedFeatures(event.point, { layers: [pointLayer.id] })
+						.length > 0)
+			) {
 				return;
 			}
 			const { lat, lng } = event.lngLat;
 			if (pickRef.current) {
+				popupRef.current?.close();
+				popupRef.current = null;
 				pickRef.current(lat, lng);
 				return;
 			}
-			popupRootRef.current?.unmount();
-			const node = document.createElement("div");
-			const root = createRoot(node);
-			popupRootRef.current = root;
-			root.render(<AddHerePopup lat={lat} lon={lng} />);
-			new maplibregl.Popup({ closeButton: true, maxWidth: "260px" })
-				.setLngLat(event.lngLat)
-				.setDOMContent(node)
-				.addTo(map);
+			showPopup({
+				map,
+				lngLat: event.lngLat,
+				content: (
+					<RouterContextProvider router={routerRef.current}>
+						<AddHerePopup lat={lat} lon={lng} />
+					</RouterContextProvider>
+				),
+				popupRef,
+			});
 		});
 
 		return () => {
-			popupRootRef.current?.unmount();
-			popupRootRef.current = null;
+			popupRef.current?.close();
+			popupRef.current = null;
 			markerRef.current?.remove();
 			markerRef.current = null;
 			userMarkerRef.current?.remove();
@@ -445,10 +717,10 @@ export function PolandMap({
 			{error ? (
 				<Alert
 					variant="destructive"
-					className="absolute inset-x-4 bottom-4 w-auto bg-background/95"
+					className="absolute inset-x-4 top-4 z-20 mx-auto max-w-2xl bg-background/95 shadow-lg"
 				>
 					<CircleAlert />
-					<AlertTitle>Nie udało się wczytać mapy</AlertTitle>
+					<AlertTitle>Nie udało się wczytać mapy.</AlertTitle>
 					<AlertDescription>
 						{error} Uruchom <code>bun run map:tiles</code>, aby pobrać dane
 						mapy.

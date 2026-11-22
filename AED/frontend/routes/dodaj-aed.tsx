@@ -1,9 +1,4 @@
-import {
-	createFileRoute,
-	Link,
-	redirect,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	CircleAlert,
 	CircleCheck,
@@ -11,9 +6,33 @@ import {
 	MapPin,
 	Search,
 } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { z } from "zod";
 
+import {
+	ACCESS_OPTIONS,
+	BOOLEAN_FIELDS,
+	type Candidate,
+	DATE_FIELDS,
+	DERIVED_ADDRESS_KEYS,
+	FACILITY_LABELS,
+	FACILITY_OPTIONS,
+	type GeocodeState,
+	initialValues,
+	issueFor,
+	STATUS_OPTIONS,
+	type Values,
+} from "#/components/aed-form/model";
+import {
+	DerivedAddressField,
+	TextField,
+} from "#/components/aed-form/text-field";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "#/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -44,11 +63,11 @@ import {
 } from "#/components/ui/select";
 import { Textarea } from "#/components/ui/textarea";
 import { buildFacebookPostText, FACEBOOK_SHARE_URL } from "#/lib/social-share";
-import { PolandMap } from "#/map/poland-map";
+import { LazyPolandMap } from "#/map/lazy-poland-map";
 import {
 	type FormIssue,
 	geocodeAddressFn,
-	getSessionUserFn,
+	reverseGeocodeFn,
 	saveManualAedFn,
 } from "#/server/forms";
 
@@ -57,93 +76,36 @@ const searchSchema = z.object({
 	lon: z.number().min(-180).max(180).optional(),
 });
 
+/**
+ * Administrative AED entry route. It is not linked from public navigation.
+ * Keep it only for adding a verified device from an approved, config-defined
+ * source; it must not be presented as public evidence or an open submission.
+ */
 export const Route = createFileRoute("/dodaj-aed")({
 	validateSearch: searchSchema,
-	beforeLoad: async () => {
-		const session = await getSessionUserFn();
-		if (!session) {
-			throw redirect({ to: "/logowanie" });
-		}
-	},
 	component: AddAedPage,
-	head: () => ({ meta: [{ title: "Dodaj AED — Mapa AED" }] }),
+	head: () => ({ meta: [{ title: "Wpis AED — Mapa AED" }] }),
 });
-
-type Values = {
-	[K in keyof import("../../backend/forms/manual-record").ManualFormValues]?: string;
-};
-
-interface GeocodeState {
-	provider: string;
-	displayName: string;
-	input: string;
-	confidence: number | null;
-}
-
-interface Candidate {
-	lat: number;
-	lon: number;
-	displayName: string;
-	confidence: number;
-}
-
-const ACCESS_OPTIONS = [
-	{ value: "always", label: "Dostępny całą dobę (24/7)" },
-	{ value: "business_hours", label: "W godzinach pracy" },
-	{ value: "restricted", label: "Na klucz / po zgłoszeniu" },
-	{ value: "unknown", label: "Nieznana" },
-];
-
-const STATUS_OPTIONS = [
-	{ value: "operational", label: "Sprawny" },
-	{ value: "out_of_service", label: "Niesprawny / wycofany" },
-	{ value: "unknown", label: "Nieznany" },
-];
-
-const FACILITY_OPTIONS = [
-	"unknown",
-	"dworzec",
-	"urząd",
-	"szkoła",
-	"szpital",
-	"przychodnia",
-	"galeria handlowa",
-	"biurowiec",
-	"obiekt sportowy",
-	"kultura",
-	"gastronomia",
-	"przestrzeń publiczna",
-	"inne",
-];
-
-const BOOLEAN_FIELDS = [
-	{ key: "indoor", label: "Urządzenie wewnątrz budynku" },
-	{ key: "is_24_7", label: "Dostępne 24/7" },
-	{ key: "requires_dispatcher", label: "Wymaga zgłoszenia dyspozytorowi" },
-	{ key: "fee", label: "Dostęp płatny" },
-	{ key: "wheelchair_access", label: "Dostępne dla osób na wózkach" },
-	{ key: "is_public", label: "Publicznie dostępne" },
-] as const;
-
-function issueFor(issues: FormIssue[], field: string): string | undefined {
-	return issues.find((issue) => issue.field === field)?.message;
-}
 
 function AddAedPage() {
 	const search = Route.useSearch();
 	const formId = useId();
-	const [values, setValues] = useState<Values>(() => ({
-		access_type: "unknown",
-		status: "unknown",
-		facility_type: "unknown",
-		...(search.lat !== undefined ? { lat: String(search.lat) } : {}),
-		...(search.lon !== undefined ? { lon: String(search.lon) } : {}),
-	}));
+	const [values, setValues] = useState<Values>(() =>
+		initialValues(search.lat, search.lon),
+	);
 	const [flags, setFlags] = useState<Record<string, boolean>>({});
 	const [geocode, setGeocode] = useState<GeocodeState | null>(null);
 	const [candidates, setCandidates] = useState<Candidate[]>([]);
 	const [geocoding, setGeocoding] = useState(false);
 	const [geocodeError, setGeocodeError] = useState<string | null>(null);
+	const [reverseGeocoding, setReverseGeocoding] = useState(false);
+	const [reverseGeocodeError, setReverseGeocodeError] = useState<string | null>(
+		null,
+	);
+	const [derivedAddressSource, setDerivedAddressSource] = useState<
+		string | null
+	>(null);
+	const deriveRequest = useRef(0);
 	const [saving, setSaving] = useState(false);
 	const [issues, setIssues] = useState<FormIssue[]>([]);
 	const [serverError, setServerError] = useState<string | null>(null);
@@ -155,6 +117,7 @@ function AddAedPage() {
 	const lon = Number.parseFloat(values.lon ?? "");
 	const picked =
 		Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+	const showOpeningHours = values.access_type === "business_hours";
 
 	const set = (key: string, value: string) => {
 		setValues((previous) => ({ ...previous, [key]: value }));
@@ -164,13 +127,61 @@ function AddAedPage() {
 		}
 	};
 
-	const pickPoint = (nextLat: number, nextLon: number) => {
+	async function deriveAddress(nextLat: number, nextLon: number) {
+		const requestId = ++deriveRequest.current;
+		setReverseGeocoding(true);
+		setReverseGeocodeError(null);
+		try {
+			const result = await reverseGeocodeFn({
+				data: { lat: nextLat, lon: nextLon },
+			});
+			if (requestId !== deriveRequest.current) {
+				return;
+			}
+			if (!result.ok) {
+				setReverseGeocodeError(result.message);
+				return;
+			}
+			const { parts } = result;
+			setValues((previous) => ({
+				...previous,
+				...Object.fromEntries(
+					DERIVED_ADDRESS_KEYS.map((key) => [
+						key,
+						parts[key === "house_number" ? "houseNumber" : key] ?? "",
+					]),
+				),
+			}));
+			setDerivedAddressSource(result.provider);
+		} catch (error) {
+			if (requestId === deriveRequest.current) {
+				setReverseGeocodeError(
+					error instanceof Error ? error.message : String(error),
+				);
+			}
+		} finally {
+			if (requestId === deriveRequest.current) {
+				setReverseGeocoding(false);
+			}
+		}
+	}
+
+	const setPoint = (
+		nextLat: number,
+		nextLon: number,
+		geocodeInfo: GeocodeState | null,
+	) => {
 		setValues((previous) => ({
 			...previous,
 			lat: nextLat.toFixed(6),
 			lon: nextLon.toFixed(6),
 		}));
-		setGeocode(null);
+		setGeocode(geocodeInfo);
+		deriveAddress(nextLat, nextLon);
+	};
+
+	const pickPoint = (nextLat: number, nextLon: number) => {
+		setPoint(nextLat, nextLon, null);
 	};
 
 	async function resolveAddress() {
@@ -183,7 +194,7 @@ function AddAedPage() {
 			.filter((part) => part && part.trim().length > 0)
 			.join(", ");
 		if (query.trim().length < 3) {
-			setGeocodeError("Podaj adres (ulica, numer, miejscowość).");
+			setGeocodeError("Podaj adres, w tym ulicę, numer budynku i miejscowość.");
 			return;
 		}
 		setGeocoding(true);
@@ -196,7 +207,9 @@ function AddAedPage() {
 				return;
 			}
 			if (result.candidates.length === 0) {
-				setGeocodeError("Nie znaleziono adresu. Spróbuj go uprościć.");
+				setGeocodeError(
+					"Nie znaleziono adresu. Sprawdź wpisane dane lub podaj adres w bardziej ogólnej formie.",
+				);
 				return;
 			}
 			const [first, ...rest] = result.candidates;
@@ -216,12 +229,7 @@ function AddAedPage() {
 		query: string,
 		provider: string,
 	) {
-		setValues((previous) => ({
-			...previous,
-			lat: candidate.lat.toFixed(6),
-			lon: candidate.lon.toFixed(6),
-		}));
-		setGeocode({
+		setPoint(candidate.lat, candidate.lon, {
 			provider,
 			displayName: candidate.displayName,
 			input: query,
@@ -272,15 +280,16 @@ function AddAedPage() {
 	}
 
 	function resetForm() {
+		deriveRequest.current++;
 		setSaved(null);
-		setValues({
-			access_type: "unknown",
-			status: "unknown",
-			facility_type: "unknown",
-		});
+		setValues(initialValues());
 		setFlags({});
 		setGeocode(null);
 		setCandidates([]);
+		setGeocodeError(null);
+		setReverseGeocodeError(null);
+		setDerivedAddressSource(null);
+		setReverseGeocoding(false);
 		setIssues([]);
 		setServerError(null);
 		setCopyFailed(false);
@@ -293,7 +302,7 @@ function AddAedPage() {
 			<main className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
 				<Alert>
 					<CircleCheck />
-					<AlertTitle>Zapisano AED „{saved.name}”</AlertTitle>
+					<AlertTitle>Zapisano zgłoszenie AED „{saved.name}”</AlertTitle>
 					<AlertDescription>
 						Rekord jest już widoczny na mapie i w eksportach danych.
 					</AlertDescription>
@@ -347,10 +356,10 @@ function AddAedPage() {
 				</div>
 				<div className="flex flex-wrap gap-3">
 					<Button asChild={true}>
-						<Link to="/">Zobacz na mapie</Link>
+						<Link to="/">Wyświetl na mapie</Link>
 					</Button>
 					<Button variant="outline" onClick={resetForm}>
-						Dodaj kolejny rekord
+						Złóż kolejne zgłoszenie
 					</Button>
 				</div>
 			</main>
@@ -362,10 +371,10 @@ function AddAedPage() {
 	return (
 		<main className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
 			<div>
-				<h1 className="font-bold text-3xl">Dodaj AED</h1>
+				<h1 className="font-bold text-3xl">Zgłoś lokalizację AED</h1>
 				<p className="mt-1 text-muted-foreground">
-					Wypełnij pełny schemat rekordu. Punkt wybierz klikając mapę albo
-					wyznacz go z adresu.
+					Podaj dane urządzenia i wskaż jego lokalizację na mapie lub wyznacz ją
+					na podstawie adresu. Pozostałe pola są opcjonalne.
 				</p>
 			</div>
 			<form onSubmit={submit} noValidate={true}>
@@ -373,20 +382,22 @@ function AddAedPage() {
 					<div className="flex flex-col gap-6">
 						<Card>
 							<CardHeader>
-								<CardTitle>Podstawowe informacje</CardTitle>
+								<CardTitle>Dane podstawowe</CardTitle>
 								<CardDescription>
-									Nazwa i opis urządzenia oraz miejsca.
+									Nazwa i opis urządzenia oraz jego lokalizacji.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<FieldGroup>
 									<Field data-invalid={Boolean(issueFor(issues, "name"))}>
-										<FieldLabel htmlFor={idFor("name")}>Nazwa *</FieldLabel>
+										<FieldLabel htmlFor={idFor("name")}>
+											Nazwa urządzenia *
+										</FieldLabel>
 										<Input
 											id={idFor("name")}
 											value={values.name ?? ""}
 											onChange={(event) => set("name", event.target.value)}
-											placeholder="np. AED — Dworzec Główny, hala główna"
+											placeholder="np. AED – Dworzec Główny, hala główna"
 											required={true}
 											aria-invalid={Boolean(issueFor(issues, "name"))}
 										/>
@@ -395,76 +406,66 @@ function AddAedPage() {
 										/>
 									</Field>
 									<Field>
-										<FieldLabel htmlFor={idFor("description")}>Opis</FieldLabel>
+										<FieldLabel htmlFor={idFor("description")}>
+											Opis lokalizacji (opcjonalny)
+										</FieldLabel>
 										<Textarea
 											id={idFor("description")}
 											value={values.description ?? ""}
 											onChange={(event) =>
 												set("description", event.target.value)
 											}
-											placeholder="np. przy wejściu głównym, obok recepcji"
+											placeholder="Podaj dokładną lokalizację: piętro, korytarz, część budynku lub sąsiedztwo charakterystycznego punktu."
 										/>
 									</Field>
 									<Field>
-										<FieldLabel htmlFor={idFor("note")}>Uwagi</FieldLabel>
+										<FieldLabel htmlFor={idFor("note")}>
+											Uwagi (opcjonalne)
+										</FieldLabel>
 										<Textarea
 											id={idFor("note")}
 											value={values.note ?? ""}
 											onChange={(event) => set("note", event.target.value)}
 										/>
 									</Field>
-									<div className="grid gap-4 sm:grid-cols-2">
-										<Field>
-											<FieldLabel htmlFor={idFor("facility_type")}>
-												Typ obiektu
-											</FieldLabel>
-											<Select
-												value={values.facility_type ?? "unknown"}
-												onValueChange={(value) => set("facility_type", value)}
+									<Field>
+										<FieldLabel htmlFor={idFor("facility_type")}>
+											Typ obiektu
+										</FieldLabel>
+										<Select
+											value={values.facility_type ?? "unknown"}
+											onValueChange={(value) => set("facility_type", value)}
+										>
+											<SelectTrigger
+												id={idFor("facility_type")}
+												className="w-full"
 											>
-												<SelectTrigger
-													id={idFor("facility_type")}
-													className="w-full"
-												>
-													<SelectValue />
-												</SelectTrigger>
-												<SelectContent>
-													{FACILITY_OPTIONS.map((option) => (
-														<SelectItem key={option} value={option}>
-															{option}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("device_type")}>
-												Typ urządzenia
-											</FieldLabel>
-											<Input
-												id={idFor("device_type")}
-												value={values.device_type ?? ""}
-												onChange={(event) =>
-													set("device_type", event.target.value)
-												}
-												placeholder="public_aed"
-											/>
-										</Field>
-									</div>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{FACILITY_OPTIONS.map((option) => (
+													<SelectItem key={option} value={option}>
+														{FACILITY_LABELS[option] ?? option}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</Field>
 								</FieldGroup>
 							</CardContent>
 						</Card>
 
 						<Card>
 							<CardHeader>
-								<CardTitle>Lokalizacja</CardTitle>
+								<CardTitle>Lokalizacja i adres</CardTitle>
 								<CardDescription>
-									Kliknij mapę, aby ustawić punkt, albo wyznacz współrzędne z
-									adresu.
+									Wskaż lokalizację na mapie lub wyznacz współrzędne na
+									podstawie adresu. Kod pocztowy i dane administracyjne są
+									uzupełniane automatycznie.
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="flex flex-col gap-4">
-								<PolandMap
+								<LazyPolandMap
 									onPick={pickPoint}
 									picked={picked}
 									initialCenter={picked}
@@ -507,7 +508,7 @@ function AddAedPage() {
 								{geocode ? (
 									<Alert>
 										<MapPin />
-										<AlertTitle>Punkt wyznaczony z adresu</AlertTitle>
+										<AlertTitle>Lokalizacja wyznaczona z adresu</AlertTitle>
 										<AlertDescription>
 											{geocode.displayName}
 											<Badge variant="secondary" className="ml-2">
@@ -518,7 +519,9 @@ function AddAedPage() {
 								) : null}
 								{candidates.length > 0 ? (
 									<FieldSet>
-										<FieldLegend variant="label">Inne dopasowania</FieldLegend>
+										<FieldLegend variant="label">
+											Pozostałe dopasowania adresu
+										</FieldLegend>
 										<div className="flex flex-col gap-2">
 											{candidates.map((candidate) => (
 												<Button
@@ -544,21 +547,10 @@ function AddAedPage() {
 								{geocodeError ? (
 									<Alert variant="destructive">
 										<CircleAlert />
-										<AlertTitle>Geokodowanie nie powiodło się</AlertTitle>
+										<AlertTitle>Nie udało się wyznaczyć lokalizacji</AlertTitle>
 										<AlertDescription>{geocodeError}</AlertDescription>
 									</Alert>
 								) : null}
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<CardTitle>Adres</CardTitle>
-								<CardDescription>
-									Adres pełny albo rozbity na pola; posłuży też do geokodowania.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
 								<FieldGroup>
 									<Field>
 										<FieldLabel htmlFor={idFor("address_text")}>
@@ -573,95 +565,72 @@ function AddAedPage() {
 											placeholder="Al. Jerozolimskie 54, 00-024 Warszawa"
 										/>
 									</Field>
-									<div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
-										<Field>
-											<FieldLabel htmlFor={idFor("street")}>Ulica</FieldLabel>
-											<Input
-												id={idFor("street")}
-												value={values.street ?? ""}
-												onChange={(event) => set("street", event.target.value)}
-											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("house_number")}>
-												Numer
-											</FieldLabel>
-											<Input
-												id={idFor("house_number")}
-												value={values.house_number ?? ""}
-												onChange={(event) =>
-													set("house_number", event.target.value)
-												}
-											/>
-										</Field>
-									</div>
-									<div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
-										<Field>
-											<FieldLabel htmlFor={idFor("postcode")}>
-												Kod pocztowy
-											</FieldLabel>
-											<Input
-												id={idFor("postcode")}
-												value={values.postcode ?? ""}
-												onChange={(event) =>
-													set("postcode", event.target.value)
-												}
-												placeholder="00-024"
-											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("city")}>
-												Miejscowość
-											</FieldLabel>
-											<Input
-												id={idFor("city")}
-												value={values.city ?? ""}
-												onChange={(event) => set("city", event.target.value)}
-											/>
-										</Field>
+									<Field>
+										<Button
+											type="button"
+											variant="secondary"
+											onClick={resolveAddress}
+											disabled={geocoding}
+										>
+											<Search />
+											{geocoding
+												? "Szukam adresu…"
+												: "Wyznacz współrzędne z adresu"}
+										</Button>
+									</Field>
+									<div className="grid gap-4 sm:grid-cols-3">
+										<DerivedAddressField
+											id={idFor("postcode")}
+											label="Kod pocztowy"
+											value={values.postcode ?? ""}
+										/>
+										<DerivedAddressField
+											id={idFor("voivodeship")}
+											label="Województwo"
+											value={values.voivodeship ?? ""}
+										/>
+										<DerivedAddressField
+											id={idFor("county")}
+											label="Powiat"
+											value={values.county ?? ""}
+										/>
 									</div>
 									<div className="grid gap-4 sm:grid-cols-3">
-										<Field>
-											<FieldLabel htmlFor={idFor("voivodeship")}>
-												Województwo
-											</FieldLabel>
-											<Input
-												id={idFor("voivodeship")}
-												value={values.voivodeship ?? ""}
-												onChange={(event) =>
-													set("voivodeship", event.target.value)
-												}
-											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("county")}>Powiat</FieldLabel>
-											<Input
-												id={idFor("county")}
-												value={values.county ?? ""}
-												onChange={(event) => set("county", event.target.value)}
-											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("commune")}>Gmina</FieldLabel>
-											<Input
-												id={idFor("commune")}
-												value={values.commune ?? ""}
-												onChange={(event) => set("commune", event.target.value)}
-											/>
-										</Field>
+										<DerivedAddressField
+											id={idFor("commune")}
+											label="Gmina"
+											value={values.commune ?? ""}
+										/>
+										<DerivedAddressField
+											id={idFor("city")}
+											label="Miejscowość"
+											value={values.city ?? ""}
+										/>
+										<DerivedAddressField
+											id={idFor("house_number")}
+											label="Numer domu"
+											value={values.house_number ?? ""}
+										/>
 									</div>
-									<Button
-										type="button"
-										variant="secondary"
-										onClick={resolveAddress}
-										disabled={geocoding}
-									>
-										<Search />
-										{geocoding
-											? "Szukam adresu…"
-											: "Wyznacz współrzędne z adresu"}
-									</Button>
+									<Field>
+										<FieldDescription>
+											{reverseGeocoding
+												? "Pobieranie danych adresowych dla wskazanej lokalizacji…"
+												: derivedAddressSource
+													? `Dane adresowe: ${derivedAddressSource} (tylko do odczytu).`
+													: "Kod pocztowy i dane administracyjne zostaną uzupełnione po wskazaniu lokalizacji."}
+										</FieldDescription>
+									</Field>
 								</FieldGroup>
+								{reverseGeocodeError ? (
+									<Alert variant="destructive">
+										<CircleAlert />
+										<AlertTitle>
+											Nie udało się pobrać danych adresowych
+										</AlertTitle>
+										<AlertDescription>{reverseGeocodeError}</AlertDescription>
+									</Alert>
+								) : null}
 							</CardContent>
 						</Card>
 					</div>
@@ -669,23 +638,26 @@ function AddAedPage() {
 					<div className="flex flex-col gap-6">
 						<Card>
 							<CardHeader>
-								<CardTitle>Dostępność</CardTitle>
+								<CardTitle>Warunki dostępu</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<FieldGroup>
-									<Field>
+									<Field
+										data-invalid={Boolean(issueFor(issues, "access_type"))}
+									>
 										<FieldLabel htmlFor={idFor("access_type")}>
-											Dostęp
+											Typ dostępu *
 										</FieldLabel>
 										<Select
-											value={values.access_type ?? "unknown"}
+											value={values.access_type ?? ""}
 											onValueChange={(value) => set("access_type", value)}
 										>
 											<SelectTrigger
 												id={idFor("access_type")}
 												className="w-full"
+												aria-invalid={Boolean(issueFor(issues, "access_type"))}
 											>
-												<SelectValue />
+												<SelectValue placeholder="Wybierz typ dostępu" />
 											</SelectTrigger>
 											<SelectContent>
 												{ACCESS_OPTIONS.map((option) => (
@@ -695,54 +667,48 @@ function AddAedPage() {
 												))}
 											</SelectContent>
 										</Select>
-									</Field>
-									<Field>
-										<FieldLabel htmlFor={idFor("opening_hours")}>
-											Godziny dostępności
-										</FieldLabel>
-										<Input
-											id={idFor("opening_hours")}
-											value={values.opening_hours ?? ""}
-											onChange={(event) =>
-												set("opening_hours", event.target.value)
-											}
-											placeholder="np. Mo-Fr 08:00-16:00"
+										<FieldError
+											errors={[{ message: issueFor(issues, "access_type") }]}
 										/>
 									</Field>
+									{showOpeningHours ? (
+										<TextField
+											id={idFor("opening_hours")}
+											label="Godziny otwarcia obiektu"
+											value={values.opening_hours ?? ""}
+											onChange={(value) => set("opening_hours", value)}
+											placeholder="np. poniedziałek–piątek 08:00–16:00"
+										/>
+									) : null}
 									<div className="grid gap-4 sm:grid-cols-3">
-										<Field>
-											<FieldLabel htmlFor={idFor("level")}>Piętro</FieldLabel>
-											<Input
-												id={idFor("level")}
-												value={values.level ?? ""}
-												onChange={(event) => set("level", event.target.value)}
-											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("room")}>
-												Pomieszczenie
-											</FieldLabel>
-											<Input
-												id={idFor("room")}
-												value={values.room ?? ""}
-												onChange={(event) => set("room", event.target.value)}
-											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("entrance_description")}>
-												Wejście
-											</FieldLabel>
-											<Input
-												id={idFor("entrance_description")}
-												value={values.entrance_description ?? ""}
-												onChange={(event) =>
-													set("entrance_description", event.target.value)
-												}
-											/>
-										</Field>
+										<TextField
+											id={idFor("level")}
+											label="Piętro lub poziom"
+											value={values.level ?? ""}
+											onChange={(value) => set("level", value)}
+										/>
+										<TextField
+											id={idFor("room")}
+											label="Pomieszczenie"
+											value={values.room ?? ""}
+											onChange={(value) => set("room", value)}
+										/>
+										<TextField
+											id={idFor("entrance_description")}
+											label="Opis wejścia"
+											value={values.entrance_description ?? ""}
+											onChange={(value) => set("entrance_description", value)}
+										/>
 									</div>
+								</FieldGroup>
+							</CardContent>
+						</Card>
+
+						<Accordion type="multiple" className="rounded-xl border">
+							<AccordionItem value="features" className="border-b px-4">
+								<AccordionTrigger>Cechy i dostępność</AccordionTrigger>
+								<AccordionContent>
 									<FieldSet>
-										<FieldLegend variant="label">Cechy dostępności</FieldLegend>
 										<FieldGroup className="gap-3">
 											{BOOLEAN_FIELDS.map(({ key, label }) => (
 												<Field key={key} orientation="horizontal">
@@ -761,206 +727,162 @@ function AddAedPage() {
 											))}
 										</FieldGroup>
 									</FieldSet>
-								</FieldGroup>
-							</CardContent>
-						</Card>
+								</AccordionContent>
+							</AccordionItem>
 
-						<Card>
-							<CardHeader>
-								<CardTitle>Urządzenie i przeglądy</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<FieldGroup>
-									<div className="grid gap-4 sm:grid-cols-2">
-										<Field>
-											<FieldLabel htmlFor={idFor("status")}>Status</FieldLabel>
-											<Select
-												value={values.status ?? "unknown"}
-												onValueChange={(value) => set("status", value)}
-											>
-												<SelectTrigger id={idFor("status")} className="w-full">
-													<SelectValue />
-												</SelectTrigger>
-												<SelectContent>
-													{STATUS_OPTIONS.map((option) => (
-														<SelectItem key={option.value} value={option.value}>
-															{option.label}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("status_reason")}>
-												Powód statusu
-											</FieldLabel>
-											<Input
+							<AccordionItem
+								value="device"
+								className="border-b px-4 last:border-b-0"
+							>
+								<AccordionTrigger>Dane urządzenia i przeglądy</AccordionTrigger>
+								<AccordionContent>
+									<FieldGroup>
+										<div className="grid gap-4 sm:grid-cols-2">
+											<Field>
+												<FieldLabel htmlFor={idFor("status")}>
+													Status urządzenia
+												</FieldLabel>
+												<Select
+													value={values.status ?? "unknown"}
+													onValueChange={(value) => set("status", value)}
+												>
+													<SelectTrigger
+														id={idFor("status")}
+														className="w-full"
+													>
+														<SelectValue />
+													</SelectTrigger>
+													<SelectContent>
+														{STATUS_OPTIONS.map((option) => (
+															<SelectItem
+																key={option.value}
+																value={option.value}
+															>
+																{option.label}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</Field>
+											<TextField
 												id={idFor("status_reason")}
+												label="Uzasadnienie statusu"
 												value={values.status_reason ?? ""}
-												onChange={(event) =>
-													set("status_reason", event.target.value)
-												}
+												onChange={(value) => set("status_reason", value)}
 											/>
-										</Field>
-									</div>
-									<div className="grid gap-4 sm:grid-cols-2">
-										<Field>
-											<FieldLabel htmlFor={idFor("manufacturer")}>
-												Producent
-											</FieldLabel>
-											<Input
+										</div>
+										<div className="grid gap-4 sm:grid-cols-2">
+											<TextField
 												id={idFor("manufacturer")}
+												label="Producent"
 												value={values.manufacturer ?? ""}
-												onChange={(event) =>
-													set("manufacturer", event.target.value)
-												}
+												onChange={(value) => set("manufacturer", value)}
 											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("model")}>Model</FieldLabel>
-											<Input
+											<TextField
 												id={idFor("model")}
+												label="Model"
 												value={values.model ?? ""}
-												onChange={(event) => set("model", event.target.value)}
+												onChange={(value) => set("model", value)}
 											/>
-										</Field>
-									</div>
-									<div className="grid gap-4 sm:grid-cols-2">
-										<Field>
-											<FieldLabel htmlFor={idFor("serial_number")}>
-												Numer seryjny
-											</FieldLabel>
-											<Input
+										</div>
+										<div className="grid gap-4 sm:grid-cols-2">
+											<TextField
 												id={idFor("serial_number")}
+												label="Numer seryjny"
 												value={values.serial_number ?? ""}
-												onChange={(event) =>
-													set("serial_number", event.target.value)
-												}
+												onChange={(value) => set("serial_number", value)}
 											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("pads_type")}>
-												Typ elektrod
-											</FieldLabel>
-											<Input
+											<TextField
 												id={idFor("pads_type")}
+												label="Typ elektrod"
 												value={values.pads_type ?? ""}
-												onChange={(event) =>
-													set("pads_type", event.target.value)
-												}
+												onChange={(value) => set("pads_type", value)}
 												placeholder="dla dorosłych / pediatryczne"
 											/>
-										</Field>
-									</div>
-									<div className="grid gap-4 sm:grid-cols-2">
-										{(
-											[
-												["installed_at", "Data instalacji"],
-												["battery_expiry", "Ważność baterii"],
-												["pads_expiry", "Ważność elektrod"],
-												["last_inspection_at", "Ostatni przegląd"],
-												["next_inspection_at", "Następny przegląd"],
-											] as const
-										).map(([key, label]) => (
-											<Field key={key}>
-												<FieldLabel htmlFor={idFor(key)}>{label}</FieldLabel>
-												<Input
+										</div>
+										<div className="grid gap-4 sm:grid-cols-2">
+											{DATE_FIELDS.map(([key, label]) => (
+												<TextField
+													key={key}
 													id={idFor(key)}
+													label={label}
 													type="date"
 													value={values[key] ?? ""}
-													onChange={(event) => set(key, event.target.value)}
+													onChange={(value) => set(key, value)}
 												/>
-											</Field>
-										))}
-									</div>
-								</FieldGroup>
-							</CardContent>
-						</Card>
+											))}
+										</div>
+									</FieldGroup>
+								</AccordionContent>
+							</AccordionItem>
 
-						<Card>
-							<CardHeader>
-								<CardTitle>Opiekun i weryfikacja</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<FieldGroup>
-									<div className="grid gap-4 sm:grid-cols-2">
-										<Field>
-											<FieldLabel htmlFor={idFor("operator_name")}>
-												Opiekun / operator
-											</FieldLabel>
-											<Input
+							<AccordionItem value="caretaker" className="px-4">
+								<AccordionTrigger>Opiekun urządzenia</AccordionTrigger>
+								<AccordionContent>
+									<FieldGroup>
+										<div className="grid gap-4 sm:grid-cols-2">
+											<TextField
 												id={idFor("operator_name")}
+												label="Nazwa opiekuna lub operatora"
 												value={values.operator_name ?? ""}
-												onChange={(event) =>
-													set("operator_name", event.target.value)
-												}
+												onChange={(value) => set("operator_name", value)}
 											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("operator_type")}>
-												Typ operatora
-											</FieldLabel>
-											<Input
+											<TextField
 												id={idFor("operator_type")}
+												label="Rodzaj operatora"
 												value={values.operator_type ?? ""}
-												onChange={(event) =>
-													set("operator_type", event.target.value)
-												}
-												placeholder="np. urząd miasta, firma"
+												onChange={(value) => set("operator_type", value)}
+												placeholder="np. urząd miasta, przedsiębiorstwo"
 											/>
-										</Field>
-									</div>
-									<div className="grid gap-4 sm:grid-cols-3">
-										<Field>
-											<FieldLabel htmlFor={idFor("phone")}>Telefon</FieldLabel>
-											<Input
+										</div>
+										<div className="grid gap-4 sm:grid-cols-3">
+											<TextField
 												id={idFor("phone")}
+												label="Telefon"
 												type="tel"
 												value={values.phone ?? ""}
-												onChange={(event) => set("phone", event.target.value)}
+												onChange={(value) => set("phone", value)}
 											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("email")}>E-mail</FieldLabel>
-											<Input
+											<TextField
 												id={idFor("email")}
+												label="E-mail"
 												type="email"
-												value={values["email"] ?? ""}
-												onChange={(event) => set("email", event.target.value)}
+												value={values.email ?? ""}
+												onChange={(value) => set("email", value)}
 											/>
-										</Field>
-										<Field>
-											<FieldLabel htmlFor={idFor("website")}>WWW</FieldLabel>
-											<Input
+											<TextField
 												id={idFor("website")}
+												label="Strona internetowa"
 												type="url"
-												value={values["website"] ?? ""}
-												onChange={(event) => set("website", event.target.value)}
+												value={values.website ?? ""}
+												onChange={(value) => set("website", value)}
 											/>
+										</div>
+										<Field>
+											<FieldLabel htmlFor={idFor("photo_url")}>
+												Adres zdjęcia (opcjonalny)
+											</FieldLabel>
+											<Input
+												id={idFor("photo_url")}
+												type="url"
+												value={values.photo_url ?? ""}
+												onChange={(event) =>
+													set("photo_url", event.target.value)
+												}
+											/>
+											<FieldDescription>
+												Adres URL zdjęcia urządzenia lub jego lokalizacji.
+											</FieldDescription>
 										</Field>
-									</div>
-									<Field>
-										<FieldLabel htmlFor={idFor("photo_url")}>
-											Zdjęcie (URL)
-										</FieldLabel>
-										<Input
-											id={idFor("photo_url")}
-											type="url"
-											value={values["photo_url"] ?? ""}
-											onChange={(event) => set("photo_url", event.target.value)}
-										/>
-										<FieldDescription>
-											Link do zdjęcia urządzenia lub miejsca.
-										</FieldDescription>
-									</Field>
-								</FieldGroup>
-							</CardContent>
-						</Card>
+									</FieldGroup>
+								</AccordionContent>
+							</AccordionItem>
+						</Accordion>
 
 						{serverError ? (
 							<Alert variant="destructive">
 								<CircleAlert />
-								<AlertTitle>Nie zapisano rekordu</AlertTitle>
+								<AlertTitle>Nie zapisano zgłoszenia</AlertTitle>
 								<AlertDescription>
 									{serverError}
 									{issues.length > 0 ? (
@@ -978,7 +900,7 @@ function AddAedPage() {
 
 						<div className="flex flex-wrap gap-3">
 							<Button type="submit" disabled={saving}>
-								{saving ? "Zapisywanie…" : "Zapisz AED"}
+								{saving ? "Zapisywanie zgłoszenia…" : "Zapisz zgłoszenie"}
 							</Button>
 							<Button asChild={true} variant="outline">
 								<Link to="/">Anuluj</Link>

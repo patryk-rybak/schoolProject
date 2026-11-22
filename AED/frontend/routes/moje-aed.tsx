@@ -1,7 +1,6 @@
 import {
 	createFileRoute,
 	Link,
-	redirect,
 	useNavigate,
 	useRouter,
 } from "@tanstack/react-router";
@@ -18,15 +17,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card";
-import { deleteMyAedFn, getSessionUserFn, listMyAedFn } from "#/server/forms";
+import { deleteMyAedFn, listMyAedFn } from "#/server/forms";
 
 export const Route = createFileRoute("/moje-aed")({
-	beforeLoad: async () => {
-		const session = await getSessionUserFn();
-		if (!session) {
-			throw redirect({ to: "/logowanie" });
-		}
-	},
 	loader: () => listMyAedFn(),
 	component: MyAedPage,
 	head: () => ({ meta: [{ title: "Moje AED — Mapa AED" }] }),
