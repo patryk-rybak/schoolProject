@@ -1,8 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { getAedDetail } from "../../backend/aed-detail.ts";
 import {
 	geocodeAddress,
 	geocodeRequestSchema,
+	reverseGeocode,
+	reverseGeocodeRequestSchema,
 } from "../../backend/forms/geocode.ts";
 import {
 	type ManualFormValues,
@@ -11,7 +14,6 @@ import {
 } from "../../backend/forms/manual-record.ts";
 import {
 	deleteSource,
-	importSource,
 	listSources,
 	previewSource,
 	SourceAdminError,
@@ -24,8 +26,11 @@ import {
  *
  * Errors are returned as `{ ok: false, message, issues }` instead of thrown
  * so the forms can render Polish validation messages per field.
+ *
+ * The /zrodla registry exposes list, save, preview and delete. Importing
+ * sources into the map is a separate scheduled ingest step, not a server
+ * function.
  */
-
 export interface FormIssue {
 	field: string;
 	message: string;
@@ -40,7 +45,7 @@ function failure(error: unknown): FormFailure {
 	if (error instanceof ManualRecordError) {
 		return {
 			ok: false,
-			message: "Popraw zaznaczone pola.",
+			message: "Popraw wskazane pola formularza.",
 			issues: [...error.issues],
 		};
 	}
@@ -60,6 +65,15 @@ function failure(error: unknown): FormFailure {
 		issues: [],
 	};
 }
+
+const aedDetailSchema = z.object({
+	id: z.string().regex(/^\d+$/u),
+});
+
+/** Reads one AED from the server store for the detail route loader. */
+export const getAedDetailFn = createServerFn({ method: "GET" })
+	.validator(aedDetailSchema)
+	.handler(({ data }) => getAedDetail(Number(data.id)));
 
 const manualValuesSchema = z.record(
 	z.string(),
@@ -103,6 +117,17 @@ export const geocodeAddressFn = createServerFn({ method: "POST" })
 		}
 	});
 
+export const reverseGeocodeFn = createServerFn({ method: "POST" })
+	.validator(reverseGeocodeRequestSchema)
+	.handler(async ({ data }) => {
+		try {
+			const result = await reverseGeocode(data.lat, data.lon);
+			return { ok: true as const, ...result };
+		} catch (error) {
+			return failure(error);
+		}
+	});
+
 export const listSourcesFn = createServerFn({ method: "GET" }).handler(() => {
 	try {
 		return { ok: true as const, sources: listSources() };
@@ -129,16 +154,6 @@ export const previewSourceFn = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		try {
 			return { ok: true as const, preview: await previewSource(data) };
-		} catch (error) {
-			return failure(error);
-		}
-	});
-
-export const importSourceFn = createServerFn({ method: "POST" })
-	.validator(z.object({ sourceId: z.string().min(1) }))
-	.handler(async ({ data }) => {
-		try {
-			return { ok: true as const, result: await importSource(data.sourceId) };
 		} catch (error) {
 			return failure(error);
 		}
