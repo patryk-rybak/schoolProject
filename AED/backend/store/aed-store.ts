@@ -1,4 +1,4 @@
-import { count, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 
 import type { CanonicalAedRecord } from "../../src/server/ingest/canonical.ts";
 import { db } from "./index.ts";
@@ -315,6 +315,16 @@ export function listAedDevices(): AedDevice[] {
 	return db.select().from(aedDevices).all();
 }
 
+/** Devices added by one account, newest first. */
+export function listUserAedDevices(createdById: string): AedDevice[] {
+	return db
+		.select()
+		.from(aedDevices)
+		.where(eq(aedDevices.createdById, createdById))
+		.orderBy(desc(aedDevices.id))
+		.all();
+}
+
 export function listSourceAedDevices(): AedSourceDevice[] {
 	return db.select().from(aedSourceDevices).all();
 }
@@ -348,6 +358,39 @@ export function refreshCombinedAedDevices(): {
 	sourceRows: number;
 } {
 	return db.transaction((tx) => rebuildCombined(tx));
+}
+
+/**
+ * Deletes one user-owned record from both the user table and the combined
+ * table. Returns false when the id does not belong to `createdById`.
+ */
+export function deleteUserAedDevice(id: number, createdById: string): boolean {
+	return db.transaction((tx) => {
+		const row = tx
+			.select({ recordId: aedDevices.recordId })
+			.from(aedDevices)
+			.where(
+				and(eq(aedDevices.id, id), eq(aedDevices.createdById, createdById)),
+			)
+			.get();
+		if (!row) {
+			return false;
+		}
+		tx.delete(aedDevices)
+			.where(
+				and(eq(aedDevices.id, id), eq(aedDevices.createdById, createdById)),
+			)
+			.run();
+		tx.delete(aedDevicesCombined)
+			.where(
+				and(
+					eq(aedDevicesCombined.recordId, row.recordId),
+					eq(aedDevicesCombined.origin, USER_ORIGIN),
+				),
+			)
+			.run();
+		return true;
+	});
 }
 
 /** Removes the imported rows of one source and refreshes the combined table. */

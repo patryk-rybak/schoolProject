@@ -122,6 +122,8 @@ describe("canonical store", () => {
 		expect(combined?.recordId).toBe(row.recordId);
 		expect(combined?.createdById).toBe(USER_ID);
 		expect(combined?.origin).toBe("user");
+		expect(store.listUserAedDevices(USER_ID)).toHaveLength(1);
+		expect(store.listUserAedDevices("another-user")).toHaveLength(0);
 	});
 
 	test("source import never touches user rows", () => {
@@ -216,5 +218,27 @@ describe("canonical store", () => {
 			() => store.replaceSourceAedDevices("source-c", [addressOnly]),
 			// biome-ignore lint/security/noSecrets: assertion text, not a credential.
 		).toThrow("nie ma współrzędnych");
+	});
+
+	test("only the owner can delete a device from both tables", () => {
+		const [row] = store.listUserAedDevices(USER_ID);
+		if (!row) {
+			throw new Error("expected a user device");
+		}
+		expect(store.deleteUserAedDevice(row.id, "another-user")).toBe(false);
+		expect(store.countAedDevices()).toBe(1);
+		expect(
+			store
+				.listCombinedAedDevices()
+				.some((combined) => combined.recordId === row.recordId),
+		).toBe(true);
+
+		expect(store.deleteUserAedDevice(row.id, USER_ID)).toBe(true);
+		expect(store.countAedDevices()).toBe(0);
+		expect(
+			store
+				.listCombinedAedDevices()
+				.some((combined) => combined.recordId === row.recordId),
+		).toBe(false);
 	});
 });

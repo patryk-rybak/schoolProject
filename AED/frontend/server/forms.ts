@@ -4,6 +4,11 @@ import { z } from "zod";
 
 import { auth } from "#backend/auth/auth.ts";
 import {
+	deleteUserAedDevice,
+	listUserAedDevices,
+} from "#backend/store/aed-store.ts";
+import type { AedDevice } from "#backend/store/schema.ts";
+import {
 	geocodeAddress,
 	geocodeRequestSchema,
 } from "../../backend/forms/geocode.ts";
@@ -83,6 +88,58 @@ const saveManualSchema = z.object({
 	geocode: geocodeInfoSchema.nullish(),
 });
 
+export interface MyAedItem {
+	readonly id: number;
+	readonly recordId: string;
+	readonly name: string;
+	readonly address: string | null;
+	readonly city: string | null;
+	readonly lat: number;
+	readonly lon: number;
+	readonly createdAt: string;
+}
+
+function rowAttributes(row: AedDevice): Record<string, unknown> {
+	if (row.attributes === null) {
+		return {};
+	}
+	try {
+		const parsed: unknown = JSON.parse(row.attributes);
+		return typeof parsed === "object" && parsed !== null
+			? (parsed as Record<string, unknown>)
+			: {};
+	} catch {
+		return {};
+	}
+}
+
+function rowAttributeText(
+	attributes: Record<string, unknown>,
+	key: string,
+): string | null {
+	const value = attributes[key];
+	return typeof value === "string" && value !== "" ? value : null;
+}
+
+function toMyAedItem(row: AedDevice): MyAedItem {
+	const attributes = rowAttributes(row);
+	const street = rowAttributeText(attributes, "street");
+	const houseNumber = rowAttributeText(attributes, "house_number");
+	const attributeAddress = [street, houseNumber].filter(Boolean).join(" ");
+	return {
+		id: row.id,
+		recordId: row.recordId,
+		name: row.name ?? "AED bez nazwy",
+		address:
+			row.addressText ??
+			(attributeAddress.length > 0 ? attributeAddress : null),
+		city: rowAttributeText(attributes, "city"),
+		lat: row.lat,
+		lon: row.lon,
+		createdAt: row.createdAt.toISOString(),
+	};
+}
+
 /** Minimal session probe used by route guards; never returns secrets. */
 export const getSessionUserFn = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -98,6 +155,51 @@ export const getSessionUserFn = createServerFn({ method: "GET" }).handler(
 		};
 	},
 );
+
+export const listMyAedFn = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const session = await auth.api.getSession({
+			headers: getRequestHeaders(),
+		});
+		if (!session) {
+			return {
+				ok: false as const,
+				code: "unauthorized" as const,
+				message: "Zaloguj się, aby zobaczyć swoje AED.",
+				items: [] as MyAedItem[],
+			};
+		}
+		return {
+			ok: true as const,
+			items: listUserAedDevices(session.user.id).map(toMyAedItem),
+		};
+	},
+);
+
+export const deleteMyAedFn = createServerFn({ method: "POST" })
+	.validator(z.object({ id: z.number().int().positive() }))
+	.handler(async ({ data }) => {
+		const session = await auth.api.getSession({
+			headers: getRequestHeaders(),
+		});
+		if (!session) {
+			return {
+				ok: false as const,
+				code: "unauthorized" as const,
+				message: "Zaloguj się, aby usunąć AED.",
+				issues: [],
+			};
+		}
+		const deleted = deleteUserAedDevice(data.id, session.user.id);
+		if (!deleted) {
+			return {
+				ok: false as const,
+				message: "Nie znaleziono AED lub nie należy do Twojego konta.",
+				issues: [],
+			};
+		}
+		return { ok: true as const };
+	});
 
 export const saveManualAedFn = createServerFn({ method: "POST" })
 	.validator(saveManualSchema)

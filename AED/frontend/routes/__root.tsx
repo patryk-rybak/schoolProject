@@ -59,6 +59,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								Dodaj AED
 							</Link>
 							<Link
+								to="/moje-aed"
+								activeProps={{ className: "font-semibold underline" }}
+								className="text-muted-foreground hover:text-foreground"
+							>
+								Moje AED
+							</Link>
+							<Link
 								to="/zrodla"
 								activeProps={{ className: "font-semibold underline" }}
 								className="text-muted-foreground hover:text-foreground"
