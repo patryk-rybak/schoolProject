@@ -58,6 +58,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 | Apply migrations | `bun run db:migrate` |
 | Push schema to database | `bun run db:push` |
 | Seed development data | `bun run db:seed` |
+| Full daily source refresh (fetch + store) | `bun run db:refresh-sources` |
 | Open Drizzle Studio | `bun run db:studio` |
 | Add a shadcn component | `bunx --bun shadcn@latest add <name>` |
 | Generate Poland map tiles | `bun run map:tiles` |
@@ -114,8 +115,8 @@ Non-default paths to keep in mind: Vite serves static files from `frontend/publi
 - WAL mode is configured in `backend/store/index.ts`. Keep it.
 - Prefer Drizzle's synchronous APIs (`db.select().from(...).all()`) in Bun-native server code.
 - Schema changes require a generated migration and a corresponding `db:push` or `db:migrate`.
-- The domain schema has two physical AED tables in `backend/store/schema.ts`: `aed_devices` (user-added, signed by `created_by_id`, verified) and `aed_source_devices` (imports; wiped/refilled, unverified). Read them through the `aed_devices_combined` view via `backend/store/aed-store.ts`, not by importing `db` directly. Import code must never delete or update `aed_devices`.
-- Both AED tables require `lat`/`lon` and only accept `location_status` `point`/`geocoded`; records without a point are dropped by the importers.
+- The domain schema has three physical AED tables in `backend/store/schema.ts`: `aed_devices` (user-added, signed by `created_by_id`, verified), `aed_source_devices` (imports; wiped/refilled, unverified), and the materialized `aed_devices_combined` read model used by the map and dane.gov.pl. Access them through `backend/store/aed-store.ts`, not by importing `db` directly. User writes and every source refresh update the combined table transactionally; import code must never delete or update `aed_devices`.
+- All three AED tables require `lat`/`lon` and only accept `location_status` `point`/`geocoded`; records without a point are dropped by the importers. `aed_devices_combined` must be rebuilt from the two source tables whenever they change.
 - `frontend/public/poland.pmtiles` is generated locally and ignored by git. Run `bun run map:tiles` after cloning or when the map data is stale. The script defaults to `POLAND_MAXZOOM=15` (about 4 GB), `PMTILES_THREADS=12`, and `PMTILES_ATTEMPTS=3`; override with `POLAND_BBOX` or `PROTOMAPS_PLANET_URL` when needed. The map pins the source `maxzoom` to 15 and overzooms those tiles up to `maxZoom: 18`. The script keeps an existing archive untouched and extracts to a temporary file before swapping, so failed downloads and normal runs never re-download or destroy it; set `POLAND_FORCE=1` to regenerate. Before swapping, it flushes the temporary file with `sync` and validates it with `pmtiles verify`; if the temporary file disappears during the download (the `*.pmtiles.tmp.*` name is ignored, so `git clean -fdX` can unlink it), it retries the extraction.
 - `frontend/public/maplibre-gl-worker.mjs` is copied by `postinstall`/`predev`/`prebuild` and ignored by git. The map loads it as a static asset (`/maplibre-gl-worker.mjs?v=6.19.0`); keep the `?v=` query in sync with the `maplibre-gl` version so caches are invalidated. Do not serve the worker through a server route: Nitro's dev middleware routes `Sec-Fetch-Dest: worker` requests to static assets and skips API routes.
 - The PMTiles archive is served by `frontend/routes/api/pmtiles.ts` with HTTP byte-range support; static hosting does not provide the range responses PMTiles needs.

@@ -95,6 +95,17 @@ describe("canonical store", () => {
 		store.clearAllAedDevices();
 	});
 
+	test("combined model is a physical table", () => {
+		const client = new Database(TEST_DB);
+		const row = client
+			.query(
+				"select type from sqlite_master where name = 'aed_devices_combined'",
+			)
+			.get() as { type: string } | null;
+		client.close();
+		expect(row?.type).toBe("table");
+	});
+
 	test("user record is signed and verified by its author", () => {
 		const row = store.addUserAedDevice(
 			record("manual", "user:one", ...WARSAW),
@@ -106,6 +117,11 @@ describe("canonical store", () => {
 		expect(row.verifiedBy).toBe(USER_ID);
 		expect(row.verifiedByKind).toBe("person");
 		expect(store.countAedDevices()).toBe(1);
+		expect(store.countCombinedAedDevices()).toBe(1);
+		const [combined] = store.listCombinedAedDevices();
+		expect(combined?.recordId).toBe(row.recordId);
+		expect(combined?.createdById).toBe(USER_ID);
+		expect(combined?.origin).toBe("user");
 	});
 
 	test("source import never touches user rows", () => {
@@ -120,6 +136,11 @@ describe("canonical store", () => {
 		expect(sourceRow?.verificationStatus).toBe("unverified");
 		expect(sourceRow?.verifiedBy).toBeNull();
 		expect(sourceRow?.verifiedAt).toBeNull();
+		expect(store.countCombinedAedDevices()).toBe(2);
+		const combinedSource = store
+			.listCombinedAedDevices()
+			.find((row) => row.origin === "source");
+		expect(combinedSource?.createdById).toBeNull();
 	});
 
 	test("re-import replaces only that source", () => {
@@ -135,14 +156,52 @@ describe("canonical store", () => {
 		expect(
 			store.listSourceAedDevices().filter((row) => row.sourceId === "source-a"),
 		).toHaveLength(1);
+		expect(
+			store
+				.listCombinedAedDevices()
+				.filter((row) => row.sourceId === "source-a"),
+		).toHaveLength(1);
 	});
 
-	test("combined view exposes user and source rows", () => {
+	test("combined table exposes user and source rows", () => {
 		const origins = new Set(
 			store.listCombinedAedDevices().map((row) => row.origin),
 		);
 		expect(origins).toEqual(new Set(["user", "source"]));
 		expect(store.countCombinedAedDevices()).toBe(EXPECTED_COMBINED_ROWS);
+	});
+
+	test("deleting a source refreshes only its combined rows", () => {
+		expect(store.deleteSourceAedDevices("source-b")).toBe(1);
+		expect(store.countAedDevices()).toBe(1);
+		expect(store.countSourceAedDevices()).toBe(1);
+		expect(store.countCombinedAedDevices()).toBe(2);
+		const sourceIds = new Set(
+			store
+				.listCombinedAedDevices()
+				.filter((row) => row.origin === "source")
+				.map((row) => row.sourceId),
+		);
+		expect(sourceIds).toEqual(new Set(["source-a"]));
+	});
+
+	test("explicit refresh rebuilds the combined table", () => {
+		const result = store.refreshCombinedAedDevices();
+		expect(result).toEqual({ userRows: 1, sourceRows: 1 });
+		expect(store.countCombinedAedDevices()).toBe(2);
+	});
+
+	test("full source refresh keeps user rows in the combined table", () => {
+		const result = store.replaceAllSourceAedDevices([
+			record("source-c", "source-c:one", ...WARSAW),
+		]);
+		expect(result).toEqual({ deleted: 1, inserted: 1 });
+		expect(store.countAedDevices()).toBe(1);
+		expect(store.countSourceAedDevices()).toBe(1);
+		expect(store.countCombinedAedDevices()).toBe(2);
+		expect(
+			store.listCombinedAedDevices().filter((row) => row.origin === "user"),
+		).toHaveLength(1);
 	});
 
 	test("records without a point are rejected", () => {

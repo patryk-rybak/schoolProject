@@ -64,7 +64,7 @@ AED/
 ├── backend/                  # dane, uwierzytelnianie, integracje
 │   ├── auth/                 # better-auth (serwer)
 │   ├── forms/                # zapis ręczny AED, geokodowanie, admin źródeł
-│   ├── store/                # Drizzle + bun:sqlite, dwie tabele + widok
+│   ├── store/                # Drizzle + bun:sqlite, tabele źródłowe + tabela łączona
 │   ├── ingest/               # rejestr źródeł (konfiguracja)
 │   └── gov-api/              # feed i eksporty dla dane.gov.pl
 ├── src/server/ingest/        # loader, schemat, fetch i core
@@ -130,7 +130,8 @@ Aplikacja działa pod http://localhost:3000.
 | Dane startowe (dev) | `bun run db:seed` |
 | Drizzle Studio | `bun run db:studio` |
 | Ingest źródeł i budowa core | `bun run ingest:run` |
-| Pełny refresh tabeli źródeł | `bun run db:load-core` |
+| Pełny refresh tabeli źródeł z gotowego core | `bun run db:load-core` |
+| Dzienny refresh (fetch + zapis) | `bun run db:refresh-sources` |
 | Kafelki mapy | `bun run map:tiles` |
 | Nowy komponent shadcn | `bunx --bun shadcn@latest add <nazwa>` |
 
@@ -148,8 +149,9 @@ Model danych ma dwa niezależne cykle życia:
   podpisane jego identyfikatorem i od razu zweryfikowane,
 - `aed_source_devices` — rekordy z importów; cała tabela jest odświeżana,
   a rekordy są zawsze niezweryfikowane,
-- `aed_devices_combined` — widok `UNION ALL` obu tabel, z którego czytają
-  mapa i eksporty; import nie może usunąć ani zmienić `aed_devices`.
+- `aed_devices_combined` — materializowana tabela łącząca oba źródła,
+  przebudowywana transakcyjnie; czytają z niej mapa, eksporty i dane.gov.pl,
+  a import nie może usunąć ani zmienić `aed_devices`.
 
 Zasady wspólne dla backendu:
 
@@ -247,7 +249,7 @@ bezpośrednio w aplikacji.
   tracą wpisanych danych przy błędzie.
 
 **Czego jeszcze nie ma:** edycja istniejących rekordów, moderacja zgłoszeń,
-historia zmian, deduplikacja łączonego widoku.
+historia zmian, deduplikacja łączonej tabeli.
 
 **Zależności:** [backend/store](#baza-danych-store) — zapis rekordów,
 `src/server/ingest/` — walidacja konfiguracji i pipeline importu,
@@ -263,7 +265,7 @@ działają — tak szybko, jak to możliwe, również na telefonie.
 **Co działa:**
 
 - strona główna to nagłówek + mapa Polski (MapLibre, kafelki Protomaps),
-- punkty AED pochodzą z `/data/aed.geojson`, czyli z widoku
+- punkty AED pochodzą z `/data/aed.geojson`, czyli z tabeli
   `aed_devices_combined`; publikowane są tylko rekordy `point`/`geocoded`,
 - kolor punktu pokazuje weryfikację: **zielony** = zweryfikowany (rekord
   użytkownika), **szary** = niezweryfikowany (import/seed),
@@ -532,8 +534,8 @@ weryfikacji nie dało się pomylić.
 **Status:** działa (wersja deweloperska) · **Kod:** `backend/store/`
 
 **Cel:** trzymać kanoniczne rekordy AED w dwóch cyklach życia (użytkownik vs
-import), udostępniać jeden łączony widok mapie i eksportom oraz zagwarantować,
-że odświeżenie źródeł nigdy nie usunie danych użytkowników.
+import), udostępniać jedną materializowaną tabelę łączoną mapie i eksportom
+oraz zagwarantować, że odświeżenie źródeł nigdy nie usunie danych użytkowników.
 
 Aplikacja używa natywnego sterownika SQLite Buna przez
 `drizzle-orm/bun-sqlite`. Plik bazy pochodzi z `DATABASE_URL` (domyślnie
@@ -544,20 +546,21 @@ Schemat jest podzielony na dwa pliki: `backend/store/schema.ts` (dane AED) i
 `backend/auth/schema.ts` (tabele better-auth). `drizzle.config.ts` wskazuje oba,
 więc migracje obejmują całość.
 
-Dane AED są przechowywane w dwóch fizycznych tabelach o tym samym schemacie
+Dane AED są przechowywane w trzech fizycznych tabelach o tym samym schemacie
 kanonicznym (`src/server/ingest/canonical.ts`):
 
 | Tabela | Zawartość | Cykl życia |
 | --- | --- | --- |
 | `aed_devices` | rekordy dodane przez zalogowanego użytkownika | trwałe; importy nigdy ich nie usuwają |
 | `aed_source_devices` | rekordy z importów zewnętrznych źródeł i seeda | czyszczone i wypełniane ponownie przy odświeżeniu źródeł |
+| `aed_devices_combined` | materiał źródłowy + użytkownicy | przebudowywana przy każdym zapisie użytkownika i odświeżeniu źródeł; czyta z niej mapa, eksporty i dane.gov.pl |
 
 Kolumny odwzorowują schemat kanoniczny: `record_id`, `source_id`,
 `source_record_id`, `source_url`, `name`, `description`, `note`,
 `facility_type`, `device_type`, `access_type`, `status`, pola weryfikacji,
 `lat`, `lon`, `coord_precision_m`, `location_status`, `geom_source`,
 `address_*`, `geocode_*`, `claim_*` oraz `field_provenance` i `attributes`
-zapisywane jako JSON. `lat`/`lon` są wymagane w obu tabelach.
+zapisywane jako JSON. `lat`/`lon` są wymagane we wszystkich trzech tabelach.
 
 **Podpis i weryfikacja:**
 
@@ -571,19 +574,27 @@ zapisywane jako JSON. `lat`/`lon` są wymagane w obu tabelach.
   wyłącznie z sesji i wymusza pola weryfikacji.
 - ograniczenia `CHECK` w SQLite pilnują obu reguł na poziomie bazy.
 
-**Widok łączony:** `aed_devices_combined` to `UNION ALL` obu tabel. Mapa,
-CSV, GeoJSON i feed dane.gov.pl czytają właśnie z niego. Widok udostępnia
-`created_by_id` (dla źródeł `NULL`) tylko do wewnętrznego przetwarzania;
-eksporty go nie publikują.
+**Tabela łączona:** `aed_devices_combined` jest fizyczną, materializowaną
+tabelą. Mapa, CSV, GeoJSON i feed dane.gov.pl czytają właśnie z niej.
 
-**Odświeżanie źródeł:**
+Synchronizacja jest transakcyjna:
 
+- dodanie rekordu przez użytkownika zapisuje go do `aed_devices` i od razu
+  dopisuje odpowiadający wiersz do `aed_devices_combined` w tej samej
+  transakcji,
 - import jednego źródła (`/zrodla`) w jednej transakcji usuwa tylko wiersze
-  tego `source_id` z `aed_source_devices` i wstawia nowe,
-- pełny refresh (`bun run db:load-core`) czyści całą `aed_source_devices`
-  i wstawia nowy zbiór,
-- `bun run db:seed` to pełny reset deweloperski obu tabel,
+  tego `source_id` z `aed_source_devices`, wstawia nowe i przebudowuje
+  `aed_devices_combined` z obu tabel,
+- pełny refresh (`bun run db:refresh-sources` = `ingest:run` + `db:load-core`)
+  czyści całą `aed_source_devices`, wstawia nowy zbiór i przebudowuje
+  `aed_devices_combined`,
+- `bun run db:seed` to pełny reset deweloperski wszystkich trzech tabel,
+- `refreshCombinedAedDevices()` pozwala jawnie przebudować tabelę łączoną,
 - żadna ścieżka importu nie modyfikuje `aed_devices`.
+
+Tabela łączona udostępnia `created_by_id` (dla źródeł `NULL`) tylko do
+wewnętrznego przetwarzania; eksporty go nie publikują. W przyszłości to właśnie
+tutaj będzie uruchamiana deduplikacja i scalanie.
 
 Rekordy kanoniczne bez punktu (`location_status` = `address_only`,
 `unresolved` albo `conflict`) nie są zapisywane, bo projekt publikuje wyłącznie
@@ -607,7 +618,8 @@ import {
 	countAedDevices,
 	countSourceAedDevices,
 	countCombinedAedDevices,
-	// porządki
+	// tabela łączona i porządki
+	refreshCombinedAedDevices,
 	deleteSourceAedDevices,
 	clearAllAedDevices,
 } from "#backend/store/aed-store";
@@ -615,7 +627,7 @@ import {
 
 **Co już jest:**
 
-- pełny schemat kanoniczny w Drizzle dla obu tabel i widoku łączonego,
+- pełny schemat kanoniczny w Drizzle dla obu tabel źródłowych i tabeli łączonej,
 - podpisywanie i wymuszona weryfikacja rekordów użytkownika,
 - `CHECK`-y blokujące weryfikację rekordów źródłowych i rekordy bez punktu,
 - indeksy na `record_id`, `source_id` i współrzędnych,
@@ -628,14 +640,15 @@ import {
 - zapytania przestrzenne (bbox, najbliższe urządzenia),
 - paginacja i filtry dla interfejsu,
 - historia zmian rekordu (kto, kiedy, co),
-- deduplikacja i scalanie rekordów z łączonego widoku.
+- deduplikacja i scalanie rekordów w tabeli łączonej.
 
 **Uwagi:**
 
 - `dev.db` jest ignorowany przez git; migracje w `backend/store/drizzle/` są
   wersjonowane.
-- Baza zawiera dwie domenowe tabele AED, widok `aed_devices_combined`, cztery
-  tabele better-auth oraz techniczną `__drizzle_migrations`.
+- Baza zawiera trzy domenowe tabele AED (`aed_devices`, `aed_source_devices`,
+  `aed_devices_combined`), cztery tabele better-auth oraz techniczną
+  `__drizzle_migrations`.
 
 ### Integracja z dane.gov.pl (gov-api)
 
@@ -686,7 +699,7 @@ istniejących zbiorach AED na portalu:
 | zasób CSV | `aed-pl-open-csv` | `availability=local` |
 | zasób GeoJSON | `aed-pl-open-geojson` | `availability=local` |
 
-Źródłem eksportów jest widok `aed_devices_combined`, ograniczony do rekordów
+Źródłem eksportów jest tabela `aed_devices_combined`, ograniczona do rekordów
 `location_status` = `point`/`geocoded`. Eksporty pokazują pola weryfikacji, ale
 **nie publikują** `origin` ani `created_by_id`.
 
@@ -1120,7 +1133,7 @@ W tym projekcie:
 - `/zrodla` korzysta z loadera `listSourcesFn`,
 - formularze wysyłają dane przez server functions (`saveManualAedFn`,
   `importSourceFn`, …),
-- eksporty CSV/GeoJSON i feed są budowane na serwerze z widoku
+- eksporty CSV/GeoJSON i feed są budowane na serwerze z tabeli
   `aed_devices_combined`.
 
 ## Environment Variables
@@ -1180,7 +1193,8 @@ Zakres testów:
 - kontrakt feedu XML, MD5, CSV i GeoJSON (`backend/gov-api`),
 - podpisywanie i weryfikacja rekordów użytkownika oraz brak twórcy przy
   rekordach źródłowych (`backend/store/aed-store.test.ts`),
-- zachowanie rekordów użytkownika przy ponownym imporcie źródła,
+- zachowanie rekordów użytkownika i odtwarzanie tabeli łączonej przy
+  ponownym imporcie źródła,
 - odrzucanie rekordów bez współrzędnych,
 - budowa rekordu ręcznego i metadata geokodowania (`backend/forms`).
 

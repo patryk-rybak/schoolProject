@@ -5,7 +5,6 @@ import {
 	integer,
 	real,
 	sqliteTable,
-	sqliteView,
 	text,
 } from "drizzle-orm/sqlite-core";
 
@@ -14,19 +13,20 @@ import { user } from "#backend/auth/schema.ts";
 /**
  * Canonical AED storage.
  *
- * The columns mirror `src/server/ingest/canonical.ts`. There are two physical
+ * The columns mirror `src/server/ingest/canonical.ts`. There are two source
  * tables because user-added and imported records have different lifecycles:
  *
  * - `aed_devices`     — records added by a signed-in user; verified by them.
  * - `aed_source_devices` — records imported from external sources; wiped and
  *   refilled on every source refresh, never verified.
  *
- * `aed_devices_combined` is a read-only SQL view over both tables. Later
- * processing (deduplication, publishing) reads the view and never mutates the
- * physical tables directly.
+ * `aed_devices_combined` is a materialized table rebuilt transactionally from
+ * both source tables. The map, CSV/GeoJSON and the dane.gov.pl feed read this
+ * table; later processing (deduplication, publishing) can replace its contents
+ * with a processed snapshot without mutating the two source tables.
  *
- * Coordinates are mandatory in both tables. Canonical records without a point
- * (`location_status` other than `point`/`geocoded`) are intentionally not
+ * Coordinates are mandatory in all three tables. Canonical records without a
+ * point (`location_status` other than `point`/`geocoded`) are intentionally not
  * stored: the project only publishes geolocated AEDs.
  */
 
@@ -145,18 +145,32 @@ export const aedSourceDevices = sqliteTable(
 );
 
 /**
- * Combined read model used by the map and the dane.gov.pl exports.
+ * Materialized combined table used by the map and the dane.gov.pl exports.
+ *
+ * It is deleted and rebuilt from `aed_devices` + `aed_source_devices` inside
+ * the same transaction as every source refresh. Adding a user record inserts
+ * into `aed_devices` and this table in one transaction.
  *
  * `created_by_id` is internal and is not published; it is exposed here only so
  * later deduplication can prefer/protect user records.
  */
-export const aedDevicesCombined = sqliteView("aed_devices_combined", {
-	...canonicalColumns(),
-	createdById: text("created_by_id"),
-}).existing();
+export const aedDevicesCombined = sqliteTable(
+	"aed_devices_combined",
+	{
+		...canonicalColumns(),
+		createdById: text("created_by_id"),
+	},
+	(table) => [
+		index("aed_devices_combined_record_id_idx").on(table.recordId),
+		index("aed_devices_combined_source_id_idx").on(table.sourceId),
+		index("aed_devices_combined_coords_idx").on(table.lat, table.lon),
+		index("aed_devices_combined_origin_idx").on(table.origin),
+	],
+);
 
 export type AedDevice = typeof aedDevices.$inferSelect;
 export type NewAedDevice = typeof aedDevices.$inferInsert;
 export type AedSourceDevice = typeof aedSourceDevices.$inferSelect;
 export type NewAedSourceDevice = typeof aedSourceDevices.$inferInsert;
 export type CombinedAedDevice = typeof aedDevicesCombined.$inferSelect;
+export type NewCombinedAedDevice = typeof aedDevicesCombined.$inferInsert;

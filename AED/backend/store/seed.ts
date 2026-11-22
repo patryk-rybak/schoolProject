@@ -10,8 +10,9 @@ import {
 } from "../../src/server/ingest/canonical.ts";
 
 /**
- * Development seed: full reset of both AED tables, then a few dummy records in
- * the external-source table (origin `seed`). Never used in production.
+ * Development seed: full reset of all AED tables, then a few dummy records in
+ * the external-source table (origin `seed`) and a rebuild of the combined
+ * table. Never used in production.
  */
 interface SeedSpec {
 	name: string;
