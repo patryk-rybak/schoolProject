@@ -10,6 +10,11 @@ const artifactSource = await Bun.file(
 	new URL("./artifact.ts", import.meta.url),
 ).text();
 
+const isPublishedRowPattern =
+	/function isPublishedRow[\s\S]*?row\.lat !== null[\s\S]*?row\.lon !== null[\s\S]*?PUBLISHED_LOCATION_STATUSES\.some/u;
+const publishedRowsFilterPattern =
+	/listCombinedAedDevices\(\)\.filter\(isPublishedRow\)/u;
+
 const records: readonly FeedRecord[] = [
 	{
 		id: 1,
@@ -100,12 +105,8 @@ describe("published row filtering", () => {
 	test("exports filter to geolocated point/geocoded rows", () => {
 		expect(artifactSource).toContain("PUBLISHED_LOCATION_STATUSES");
 		expect(artifactSource).toContain('["point", "geocoded"] as const');
-		expect(artifactSource).toMatch(
-			/function isPublishedRow[\s\S]*?row\.lat !== null[\s\S]*?row\.lon !== null[\s\S]*?PUBLISHED_LOCATION_STATUSES\.some/u,
-		);
-		expect(artifactSource).toMatch(
-			/listCombinedAedDevices\(\)\.filter\(isPublishedRow\)/u,
-		);
+		expect(artifactSource).toMatch(isPublishedRowPattern);
+		expect(artifactSource).toMatch(publishedRowsFilterPattern);
 	});
 
 	test("published GeoJSON rows expose location_status and geom_source", () => {

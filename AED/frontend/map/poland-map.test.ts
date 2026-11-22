@@ -6,6 +6,11 @@ const mapSource = await Bun.file(
 	new URL("./poland-map.tsx", import.meta.url),
 ).text();
 
+const aedSourcePattern =
+	/map\.addSource\(\s*"aed"\s*,\s*\{[\s\S]*?type:\s*"geojson"[\s\S]*?data:\s*`\$\{globalThis\.location\.origin\}\/data\/aed\.points\.geojson/u;
+const aedPointsLayerPattern =
+	/map\.addLayer\(\s*\{[\s\S]*?id:\s*"aed-points"[\s\S]*?type:\s*"circle"[\s\S]*?source:\s*"aed"[\s\S]*?"circle-radius"[\s\S]*?"circle-color":\s*\[\s*"case"\s*,\s*\["==",\s*\["get",\s*"verification_status"\],\s*"verified"\],\s*VERIFIED_COLOR,\s*UNVERIFIED_COLOR,\s*\]/u;
+
 function functionBody(name: string): string {
 	const marker = `function ${name}(`;
 	const start = mapSource.indexOf(marker);
@@ -120,18 +125,14 @@ describe("toAedMapPoint", () => {
 describe("AED map source and circle layer", () => {
 	test("loads the compact points GeoJSON URL as the aed source", () => {
 		const body = functionBody("addAedPoints");
-		const source = body.match(
-			/map\.addSource\(\s*"aed"\s*,\s*\{[\s\S]*?type:\s*"geojson"[\s\S]*?data:\s*`\$\{globalThis\.location\.origin\}\/data\/aed\.points\.geojson/u,
-		);
+		const source = body.match(aedSourcePattern);
 
 		expect(source?.[0]).toBeDefined();
 	});
 
 	test("defines an aed-points circle layer colored by verification status", () => {
 		const body = functionBody("addAedPoints");
-		const layer = body.match(
-			/map\.addLayer\(\s*\{[\s\S]*?id:\s*"aed-points"[\s\S]*?type:\s*"circle"[\s\S]*?source:\s*"aed"[\s\S]*?"circle-radius"[\s\S]*?"circle-color":\s*\[\s*"case"\s*,\s*\["==",\s*\["get",\s*"verification_status"\],\s*"verified"\],\s*VERIFIED_COLOR,\s*UNVERIFIED_COLOR,\s*\]/u,
-		);
+		const layer = body.match(aedPointsLayerPattern);
 
 		expect(layer?.[0]).toBeDefined();
 		expect(mapSource).toContain('export const VERIFIED_COLOR = "#16a34a"');
