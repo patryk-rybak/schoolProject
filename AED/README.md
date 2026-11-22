@@ -66,7 +66,7 @@ zostają tylko materiały niezwiązane z uruchamianiem aplikacji:
 | Ścieżka | Zawartość |
 | --- | --- |
 | `AED/` | aplikacja: kod, konfiguracja, skrypty, dokumentacja techniczna |
-| `docs/` | statyczna strona kampanii „Poraź dobrem” publikowana przez GitHub Pages (`share.html`, obraz OG) |
+| `docs/` | statyczna strona kampanii „razimy dobrem” publikowana przez GitHub Pages (`share.html`, obraz OG) |
 | `task_description/` | treść zadania konkursowego (PDF) |
 | `dane.gov.pl/` | opublikowane źródła portalu dane.gov.pl (archiwa) i instrukcja uruchomienia |
 
@@ -409,7 +409,7 @@ kopiować pliku do `public/` ani serwować workera przez route serwerowy.
 `frontend/routes/dodaj-aed.tsx`, `docs/share.html`
 
 **Cel:** po zapisaniu AED pozwolić jednym kliknięciem udostępnić kampanię
-„Poraź dobrem” na Facebooku, bez publicznego wdrażania całej aplikacji.
+„razimy dobrem” na Facebooku, bez publicznego wdrażania całej aplikacji.
 
 **Co działa:**
 
@@ -420,6 +420,8 @@ kopiować pliku do `public/` ani serwować workera przez route serwerowy.
 - publiczna strona `https://patryk-rybak.github.io/schoolProject/share.html`
   (GitHub Pages, folder `docs/`) udostępnia obraz i tagi Open Graph; aplikacja
   nadal działa wyłącznie lokalnie,
+- statyczna strona ma nagłówek „⚡ razimy dobrem ⚡” i notkę, że w środowisku
+  produkcyjnym link prowadziłby do mapy z nowo dodanym defibrylatorem,
 - jeśli schowek jest niedostępny, tekst posta pojawia się w polu do ręcznego
   skopiowania.
 

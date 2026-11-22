@@ -319,48 +319,53 @@ function AddAedPage() {
 						Rekord jest już widoczny na mapie i w eksportach danych.
 					</AlertDescription>
 				</Alert>
-				<Card>
-					<CardHeader>
-						<CardTitle>⚡ Poraź dobrem</CardTitle>
-						<CardDescription>
-							Daj znać o nowym defibrylatorze! Udostępnij post jednym
-							kliknięciem i zachęć innych do akcji.
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="flex flex-col gap-3">
-						<Button
-							asChild={true}
-							className="w-fit bg-[#1877F2] text-white hover:bg-[#166FE5]"
-						>
-							<a
-								href={FACEBOOK_SHARE_URL}
-								onClick={() => {
-									copyPostText(postText);
-								}}
-								rel="noopener noreferrer"
-								target="_blank"
+				<div className="animate-share-rainbow rounded-2xl bg-[linear-gradient(90deg,#ff5f6d,#ffc371,#f9f871,#7ee8a2,#4facfe,#a18cd1,#ff5f6d)] bg-[length:300%_300%] p-[3px] shadow-fuchsia-500/10 shadow-lg">
+					<Card className="border-0 shadow-none">
+						<CardHeader className="items-center justify-items-center gap-2 text-center">
+							<CardTitle className="text-2xl">⚡ Poraź dobrem</CardTitle>
+							<CardDescription className="max-w-md">
+								Daj znać o nowym defibrylatorze! Udostępnij post jednym
+								kliknięciem i zachęć innych do akcji.
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="flex flex-col items-center gap-3">
+							<Button
+								asChild={true}
+								className="w-full bg-[#1877F2] text-white hover:bg-[#166FE5] sm:w-fit"
 							>
-								<Facebook aria-hidden="true" className="fill-current" />
-								Udostępnij na Facebooku
-							</a>
-						</Button>
-						{copyFailed ? (
-							<>
-								<p className="text-destructive text-sm" role="alert">
-									Nie udało się skopiować tekstu. Skopiuj go ręcznie z pola
-									poniżej.
-								</p>
-								<Textarea
-									aria-label="Tekst posta do skopiowania"
-									className="min-h-28"
-									onFocus={(event) => event.currentTarget.select()}
-									readOnly={true}
-									value={postText}
-								/>
-							</>
-						) : null}
-					</CardContent>
-				</Card>
+								<a
+									href={FACEBOOK_SHARE_URL}
+									onClick={() => {
+										copyPostText(postText);
+									}}
+									rel="noopener noreferrer"
+									target="_blank"
+								>
+									<Facebook aria-hidden="true" className="fill-current" />
+									Udostępnij na Facebooku
+								</a>
+							</Button>
+							{copyFailed ? (
+								<>
+									<p
+										className="text-center text-destructive text-sm"
+										role="alert"
+									>
+										Nie udało się skopiować tekstu. Skopiuj go ręcznie z pola
+										poniżej.
+									</p>
+									<Textarea
+										aria-label="Tekst posta do skopiowania"
+										className="min-h-28 w-full max-w-xl"
+										onFocus={(event) => event.currentTarget.select()}
+										readOnly={true}
+										value={postText}
+									/>
+								</>
+							) : null}
+						</CardContent>
+					</Card>
+				</div>
 				<div className="flex flex-wrap gap-3">
 					<Button asChild={true}>
 						<Link to="/">Wyświetl na mapie</Link>
