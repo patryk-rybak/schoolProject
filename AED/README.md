@@ -32,9 +32,9 @@ jest zbudowana na TanStack Start, Vite/Nitro i Bunie.
 
 Gotowe materiały do zgłoszenia konkursowego znajdują się w `competition-assets/`.
 
-Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`) pobiera aktualną, pełną bazę AED w formacie XLSX, znormalizowaną do wspólnego rekordu kanonicznego. To nie jest pusty arkusz wzorca: eksport ma jeden wiersz na urządzenie, nagłówki z nazwami pól kanonicznych i polskimi aliasami oraz metadane dodawane przez system.
+Przycisk **Pobierz dane XLSX** na stronie głównej obok mapy (`/data/aed.xlsx`) pobiera aktualną, pełną bazę AED w formacie XLSX, znormalizowaną do wspólnego rekordu kanonicznego. To nie jest pusty arkusz wzorca: eksport ma jeden wiersz na urządzenie, nagłówki wyłącznie z polskimi nazwami pól oraz metadane dodawane przez system.
 
-Eksport XLSX (tak jak CSV i GeoJSON) udostępnia m.in. `id` (klucz bazy), `id_uuid` (stabilny identyfikator kanoniczny), `name` / `nazwa_obiektu`, `lat` / `szerokosc_geo`, `lon` / `dlugosc_geo`, `city` / `miejscowosc`, `access` / `typ_dostepnosci`, `status`, `verification_status` / `status_weryfikacji`, `verified_by`, `verified_by_kind`, `verified_at`, `record_id`, `source_id` / `zrodlo_danych`, `source_record_id`, `source_url`, `location_status`, `geom_source` oraz pola techniczne `data_utworzenia` i `data_aktualizacji`.
+Eksport XLSX (tak jak CSV i GeoJSON) ma jedną kolumnę na pojęcie i wyłącznie polskie nazwy: `id` (stabilny UUID), `nazwa_obiektu`, `szerokosc_geo`, `dlugosc_geo`, `miejscowosc`, `typ_dostepnosci`, `status_sprawnosci`, `status_weryfikacji`, `zweryfikowane_przez`, `typ_weryfikatora`, `data_weryfikacji`, `identyfikator_kanoniczny`, `zrodlo_danych`, `identyfikator_w_zrodle`, `url_zrodla`, `status_lokalizacji`, `zrodlo_geometrii`, `data_utworzenia` i `data_aktualizacji`.
 
 Formularz dodawania AED pokazuje trzy sekcje główne rozwinięte: **Podstawowe informacje**, **Lokalizacja/Adres** i **Dostępność**. **Typ dostępu** jest obowiązkowy (24/7 publiczny, w godzinach otwarcia, ograniczony/na klucz, nieznany), a godziny otwarcia pojawiają się tylko dla dostępu w godzinach otwarcia. Współrzędne pochodzą z kliknięcia na mapie lub geokodowania adresu; kod pocztowy, województwo i powiat są uzupełniane automatycznie. Sekcje **Cechy dostępności**, **Urządzenie i przeglądy** oraz **Opiekun** są zwinięte i opcjonalne, więc zgłoszenie nie wymaga od mieszkańca znajomości dat ważności baterii czy elektrod.
 
@@ -44,7 +44,7 @@ Wzorcowy XLSX (statyczny plik `wzorcowy-zakres-danych-aed.xlsx`) jest zgodny z u
 - **Zalecane** (8): `ulica`, `nr_budynku`, `opis_lokalizacji`, `godziny_otwarcia`, `wewnatrz_zewnatrz`, `status_sprawnosci`, `opiekun_nazwa`, `opiekun_kontakt`,
 - **Opcjonalne** (5): `producent_model`, `elektrody_pediatryczne`, `data_waznosci_baterii`, `data_waznosci_elektrod`, `url_zdjecia`.
 
-W eksportach CSV, GeoJSON i XLSX system uwzględnia pola techniczne: `id` (klucz bazy), `id_uuid` (stabilny identyfikator kanoniczny), `data_utworzenia`, `data_aktualizacji`, `zrodlo_danych` i `status_weryfikacji` (wraz z angielskim `verification_status`). Nie są one wpisywane ręcznie w formularzu; pozwalają jury i dostawcom prześledzić pochodzenie i weryfikację rekordu.
+W eksportach CSV, GeoJSON i XLSX system uwzględnia pola techniczne: `id` (stabilny UUID), `identyfikator_kanoniczny`, `zrodlo_danych`, `identyfikator_w_zrodle`, `url_zrodla`, `status_lokalizacji`, `zrodlo_geometrii`, `data_utworzenia`, `data_aktualizacji` i `status_weryfikacji`. Nie są one wpisywane ręcznie w formularzu; pozwalają jury i dostawcom prześledzić pochodzenie i weryfikację rekordu.
 
 Statyczny plik `wzorcowy-zakres-danych/wzorcowy-zakres-danych-aed.xlsx` pozostaje wyłącznie dokumentacją wzorca (6 arkuszy). Nie zawiera danych z bazy i nie jest plikiem pobieranym przez przycisk na stronie głównej (`/data/aed.xlsx`).
 
@@ -198,7 +198,7 @@ Zasady wspólne dla backendu:
 
 ### Źródła danych i provenance
 
-Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
+Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/datasources-config.json`. Konfiguracja obejmuje 11 źródeł, z których 5 jest włączonych: `krosno`, `marki`, `openaedmap`, `przemysl` i `warszawa`. Pozostałe wpisy (`belchatow`, `lodz`, `olsztyn`, `pawlowice`, `tczew`, `zielona-gora`) pozostają wyłączone do decyzji licencyjnej. Każdy rekord zachowuje źródło (`zrodlo_danych`), URL źródła (`url_zrodla`) i `status_weryfikacji`, więc provenance jest jednoznacznie przypisane do źródła z konfiguracji.
 
 | Identyfikator źródła | Nazwa | Status |
 | --- | --- | --- |
@@ -214,7 +214,7 @@ Zbiór jest budowany wyłącznie ze źródeł zdefiniowanych w `backend/ingest/d
 | `tczew` | AED Tczew (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
 | `zielona-gora` | AED w Zielonej Górze (Google My Maps, KML) | wyłączone do decyzji licencyjnej |
 
-Każdy rekord zachowuje `source_id`, `source_url` i `status_weryfikacji`.
+Każdy rekord zachowuje źródło (`zrodlo_danych`), URL źródła (`url_zrodla`) i `status_weryfikacji`.
 
 Zasady wspólne dla frontendu:
 
@@ -834,12 +834,16 @@ istniejących zbiorach AED na portalu:
 **nie publikują** `origin` ani `created_by_id`.
 
 Kolumny CSV:
-`id, name, lat, lon, city, access, status, verification_status, verified_by,
-verified_by_kind, verified_at`.
+`id, nazwa_obiektu, szerokosc_geo, dlugosc_geo, miejscowosc,
+typ_dostepnosci, status_sprawnosci, status_weryfikacji, zweryfikowane_przez,
+typ_weryfikatora, data_weryfikacji, identyfikator_kanoniczny, zrodlo_danych,
+identyfikator_w_zrodle, url_zrodla, status_lokalizacji, zrodlo_geometrii,
+data_utworzenia, data_aktualizacji`.
 
-W GeoJSON te same wartości trafiają do `properties`, a `lat`/`lon` stają się
-geometrią `[lon, lat]` (kolejność RFC 7946). `id` to kanoniczny `record_id`
-(string, unikalny w obu tabelach).
+W GeoJSON te same wartości trafiają do `properties`, a `szerokosc_geo` /
+`dlugosc_geo` stają się geometrią `[dlugosc_geo, szerokosc_geo]` (kolejność
+RFC 7946). `id` to stabilny UUID rekordu. Nie ma już duplikatów typu
+`name`/`nazwa_obiektu`, `lat`/`szerokosc_geo` ani `id_uuid`.
 
 `extIdent` jest kluczem idempotencji — **nigdy go nie zmieniaj**.
 

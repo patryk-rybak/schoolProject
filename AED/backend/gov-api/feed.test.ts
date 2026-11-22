@@ -133,15 +133,20 @@ describe("published resources", () => {
 		const lines = csv.trimEnd().split("\n");
 
 		expect(lines[0]).toBe(
-			"id,id_uuid,name,nazwa_obiektu,lat,szerokosc_geo,lon,dlugosc_geo,city,miejscowosc,access,typ_dostepnosci,status,verification_status,status_weryfikacji,verified_by,verified_by_kind,verified_at,record_id,source_id,zrodlo_danych,source_record_id,source_url,location_status,geom_source,data_utworzenia,data_aktualizacji",
+			"id,nazwa_obiektu,szerokosc_geo,dlugosc_geo,miejscowosc,typ_dostepnosci,status_sprawnosci,status_weryfikacji,zweryfikowane_przez,typ_weryfikatora,data_weryfikacji,identyfikator_kanoniczny,zrodlo_danych,identyfikator_w_zrodle,url_zrodla,status_lokalizacji,zrodlo_geometrii,data_utworzenia,data_aktualizacji",
 		);
 		expect(lines[1]).toContain('"AED — Dworzec & ""test"" <Centralny>"');
-		expect(lines[1]).toContain("krosno:abc,krosno,krosno,krosno:12");
+		expect(lines[1]).toContain(records[0]?.uuid ?? "");
 		expect(lines[1]).toContain(
-			",2026-06-01T08:00:00.000Z,2026-11-22T10:00:00.000Z",
+			"52.2285,21.0031,Warszawa,always,operational,verified",
+		);
+		expect(lines[1]).toContain(
+			"krosno:abc,krosno,krosno:12,https://example.org/wykaz,point,source",
+		);
+		expect(lines[1]).toContain(
+			"2026-06-01T08:00:00.000Z,2026-11-22T10:00:00.000Z",
 		);
 		expect(lines[2]).toContain("Kraków");
-		expect(lines[2]).toContain(",,");
 	});
 
 	test("GeoJSON uses [longitude, latitude] coordinates", () => {
@@ -165,17 +170,35 @@ describe("published resources", () => {
 			warsaw.lat,
 		]);
 		expect(geojson.features[0]?.properties).toMatchObject({
-			source_id: "krosno",
-			zrodlo_danych: "krosno",
-			record_id: "krosno:abc",
-			source_record_id: "krosno:12",
-			source_url: "https://example.org/wykaz",
-			location_status: "point",
-			geom_source: "source",
-			id_uuid: warsaw.uuid,
+			id: warsaw.uuid,
+			nazwa_obiektu: warsaw.name,
+			szerokosc_geo: warsaw.lat,
+			dlugosc_geo: warsaw.lon,
+			miejscowosc: warsaw.city,
+			typ_dostepnosci: warsaw.access,
+			status_sprawnosci: warsaw.status,
+			status_weryfikacji: warsaw.verificationStatus,
+			zweryfikowane_przez: warsaw.verifiedBy,
+			typ_weryfikatora: warsaw.verifiedByKind,
+			data_weryfikacji: warsaw.verifiedAt,
+			identyfikator_kanoniczny: warsaw.recordId,
+			zrodlo_danych: warsaw.sourceId,
+			identyfikator_w_zrodle: warsaw.sourceRecordId,
+			url_zrodla: warsaw.sourceUrl,
+			status_lokalizacji: warsaw.locationStatus,
+			zrodlo_geometrii: warsaw.geomSource,
 			data_utworzenia: warsaw.createdAt,
 			data_aktualizacji: warsaw.updatedAt,
 		});
+		expect(geojson.features[0]?.properties).not.toHaveProperty("id_uuid");
+		expect(geojson.features[0]?.properties).not.toHaveProperty("name");
+		expect(geojson.features[0]?.properties).not.toHaveProperty("lat");
+		expect(geojson.features[0]?.properties).not.toHaveProperty("lon");
+		expect(geojson.features[0]?.properties).not.toHaveProperty("city");
+		expect(geojson.features[0]?.properties).not.toHaveProperty("access");
+		expect(geojson.features[0]?.properties).not.toHaveProperty(
+			"verification_status",
+		);
 	});
 
 	test("XLSX uses the same canonical and Polish columns as CSV", () => {
@@ -189,30 +212,22 @@ describe("published resources", () => {
 
 		expect(header).toEqual([
 			"id",
-			"id_uuid",
-			"name",
 			"nazwa_obiektu",
-			"lat",
 			"szerokosc_geo",
-			"lon",
 			"dlugosc_geo",
-			"city",
 			"miejscowosc",
-			"access",
 			"typ_dostepnosci",
-			"status",
-			"verification_status",
+			"status_sprawnosci",
 			"status_weryfikacji",
-			"verified_by",
-			"verified_by_kind",
-			"verified_at",
-			"record_id",
-			"source_id",
+			"zweryfikowane_przez",
+			"typ_weryfikatora",
+			"data_weryfikacji",
+			"identyfikator_kanoniczny",
 			"zrodlo_danych",
-			"source_record_id",
-			"source_url",
-			"location_status",
-			"geom_source",
+			"identyfikator_w_zrodle",
+			"url_zrodla",
+			"status_lokalizacji",
+			"zrodlo_geometrii",
 			"data_utworzenia",
 			"data_aktualizacji",
 		]);

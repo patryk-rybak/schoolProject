@@ -5,6 +5,7 @@ import { buildCsv } from "./csv";
 import { buildFeed } from "./feed";
 import { buildGeoJson } from "./geojson";
 import { buildPointsGeoJson } from "./points";
+import { stablePublicUuid } from "./public-id";
 import type { FeedArtifact, FeedRecord } from "./types";
 import { buildXlsx } from "./xlsx";
 
@@ -207,7 +208,7 @@ function toFeedRecord(row: CombinedAedDevice): FeedRecord {
 		verifiedBy: row.verifiedBy,
 		verifiedByKind: row.verifiedByKind,
 		verifiedAt: row.verifiedAt,
-		uuid: stableUuid(row),
+		uuid: stablePublicUuid(row.sourceId, row.recordId),
 		createdAt: row.createdAt.toISOString(),
 		updatedAt: row.updatedAt.toISOString(),
 		recordId: row.recordId,
@@ -217,39 +218,3 @@ function toFeedRecord(row: CombinedAedDevice): FeedRecord {
 		geomSource: row.geomSource,
 	};
 }
-
-/**
- * Deterministic UUID for rows without a native UUID column.
- *
- * The canonical `recordId` is stable across source refreshes, and the public
- * contract needs a UUID-shaped identifier; hashing `sourceId:recordId` keeps
- * repeated exports of the same snapshot byte-identical.
- */
-function stableUuid(row: CombinedAedDevice): string {
-	const hash = new Bun.CryptoHasher("sha256")
-		.update(`${row.sourceId}:${row.recordId}`)
-		.digest("hex");
-	// Keep a valid UUID v4 shape while preserving deterministic bits.
-	const variant = (
-		(Number.parseInt(hash.charAt(UUID_VARIANT_INDEX), 16) % UUID_NIBBLE_COUNT) +
-		UUID_VARIANT_BASE
-	).toString(16);
-	const version = (
-		(Number.parseInt(hash.charAt(UUID_VERSION_INDEX), 16) % UUID_NIBBLE_COUNT) +
-		UUID_VERSION_BASE
-	).toString(16);
-	return [
-		hash.slice(UUID_GROUP_STARTS[0], UUID_GROUP_STARTS[1]),
-		hash.slice(UUID_GROUP_STARTS[1], UUID_GROUP_STARTS[2]),
-		`${version}${hash.slice(UUID_GROUP_STARTS[2] + 1, UUID_GROUP_STARTS[3])}`,
-		`${variant}${hash.slice(UUID_GROUP_STARTS[3] + 1, UUID_GROUP_STARTS[4])}`,
-		hash.slice(UUID_GROUP_STARTS[4]),
-	].join("-");
-}
-
-const UUID_VARIANT_INDEX = 12;
-const UUID_VERSION_INDEX = 16;
-const UUID_NIBBLE_COUNT = 4;
-const UUID_VARIANT_BASE = 8;
-const UUID_VERSION_BASE = 4;
-const UUID_GROUP_STARTS = [0, 8, 12, 16, 24] as const;

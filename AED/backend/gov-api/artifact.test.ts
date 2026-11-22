@@ -79,7 +79,7 @@ describe("export artifacts", () => {
 		const rows = utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
 
 		expect(rows).toHaveLength(records.length + 1);
-		expect(rows[1]).toContain(records[0]?.id);
+		expect(rows[1]).toContain(records[0]?.uuid);
 		expect(rows[2]).toContain(records[1]?.uuid);
 	});
 
