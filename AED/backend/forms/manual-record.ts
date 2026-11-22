@@ -257,7 +257,7 @@ export function buildManualRecord(
 		return parseCanonicalAedRecord({
 			version: 1,
 			// Random id: the same device may be entered by different accounts and
-			// duplicates are resolved later from the combined view.
+			// duplicates are resolved later in the combined table.
 			record_id: `user:${crypto.randomUUID()}`,
 			source_id: MANUAL_SOURCE_ID,
 			source_record_id: recordKey,

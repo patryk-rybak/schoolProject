@@ -38,6 +38,7 @@
     "ingest:run": "bun scripts/ingest-run.ts",
     "db:seed": "bun backend/store/seed.ts",
     "db:load-core": "bun scripts/load-core-to-store.ts",
+    "db:refresh-sources": "bun run ingest:run && bun run db:load-core",
     "map:tiles": "bash frontend/scripts/fetch-poland-pmtiles.sh"
   },
   "dependencies": {

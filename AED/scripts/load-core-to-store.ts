@@ -40,4 +40,4 @@ console.log(
 	`Odświeżono źródła: usunięto ${deleted}, wstawiono ${inserted} rekordów ` +
 		`z ${sourceCount} źródeł do aed_source_devices.`,
 );
-console.log(`Razem w widoku łączonym: ${countCombinedAedDevices()} rekordów.`);
+console.log(`Razem w tabeli łączonej: ${countCombinedAedDevices()} rekordów.`);

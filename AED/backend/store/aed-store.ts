@@ -10,17 +10,21 @@ import {
 	aedSourceDevices,
 	type NewAedDevice,
 	type NewAedSourceDevice,
+	type NewCombinedAedDevice,
 } from "./schema.ts";
 
 /**
  * Data-access layer for the canonical AED tables.
  *
  * Write paths are table-specific:
- * - `addUserAedDevice` stores a signed, verified record in `aed_devices`;
+ * - `addUserAedDevice` stores a signed, verified record in `aed_devices` and
+ *   mirrors it into the combined table in the same transaction;
  * - `replaceSourceAedDevices` stores unverified imported records in
- *   `aed_source_devices` and never touches user rows.
+ *   `aed_source_devices`, then rebuilds the combined table from both source
+ *   tables, never touching user rows.
  *
- * Read paths used by the map and exports go through `aed_devices_combined`.
+ * Read paths used by the map and exports go through the materialized
+ * `aed_devices_combined` table.
  */
 
 /** SQLite stays well below the variable limit with this batch size. */
@@ -180,20 +184,66 @@ function insertInChunks<T>(
 	}
 }
 
-/** Stores one signed, verified user record. */
+type StoreTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+type CombinedInsert = Omit<NewCombinedAedDevice, "id">;
+
+/** Drops the source-table id; the combined table has its own autoincrement id. */
+function omitId<T extends { id: number }>(row: T): Omit<T, "id"> {
+	const { id: _id, ...rest } = row;
+	return rest;
+}
+
+function userRowToCombined(row: AedDevice): CombinedInsert {
+	return { ...omitId(row), createdById: row.createdById };
+}
+
+function sourceRowToCombined(row: AedSourceDevice): CombinedInsert {
+	return { ...omitId(row), createdById: null };
+}
+
+function insertCombinedRows(
+	tx: StoreTransaction,
+	rows: readonly CombinedInsert[],
+): void {
+	insertInChunks(
+		(chunk) => tx.insert(aedDevicesCombined).values(chunk).run(),
+		rows,
+	);
+}
+
+/** Clears and repopulates the materialized combined table inside `tx`. */
+function rebuildCombined(tx: StoreTransaction): {
+	userRows: number;
+	sourceRows: number;
+} {
+	tx.delete(aedDevicesCombined).run();
+	const userRows = tx.select().from(aedDevices).all();
+	const sourceRows = tx.select().from(aedSourceDevices).all();
+	insertCombinedRows(tx, userRows.map(userRowToCombined));
+	insertCombinedRows(tx, sourceRows.map(sourceRowToCombined));
+	return { userRows: userRows.length, sourceRows: sourceRows.length };
+}
+
+/**
+ * Stores one signed, verified user record and mirrors it into the combined
+ * table in the same transaction.
+ */
 export function addUserAedDevice(
 	record: CanonicalAedRecord,
 	createdById: string,
 ): AedDevice {
-	const row = db
-		.insert(aedDevices)
-		.values(canonicalToUserRow(record, createdById))
-		.returning()
-		.get();
-	if (!row) {
-		throw new Error("addUserAedDevice: insert returned no row");
-	}
-	return row;
+	return db.transaction((tx) => {
+		const row = tx
+			.insert(aedDevices)
+			.values(canonicalToUserRow(record, createdById))
+			.returning()
+			.get();
+		if (!row) {
+			throw new Error("addUserAedDevice: insert returned no row");
+		}
+		insertCombinedRows(tx, [userRowToCombined(row)]);
+		return row;
+	});
 }
 
 /** Replaces every imported row for one source inside a transaction. */
@@ -215,6 +265,7 @@ export function replaceSourceAedDevices(
 			(chunk) => tx.insert(aedSourceDevices).values(chunk).run(),
 			rows,
 		);
+		rebuildCombined(tx);
 		return { deleted, inserted: rows.length };
 	});
 }
@@ -239,6 +290,7 @@ export function replaceAllSourceAedDevices(
 			(chunk) => tx.insert(aedSourceDevices).values(chunk).run(),
 			rows,
 		);
+		rebuildCombined(tx);
 		return { deleted, inserted: rows.length };
 	});
 }
@@ -267,9 +319,13 @@ export function listSourceAedDevices(): AedSourceDevice[] {
 	return db.select().from(aedSourceDevices).all();
 }
 
-/** Combined view: user records first, then imported records. */
+/** Materialized combined table: user records first, then imported records. */
 export function listCombinedAedDevices() {
-	return db.select().from(aedDevicesCombined).all();
+	return db
+		.select()
+		.from(aedDevicesCombined)
+		.orderBy(aedDevicesCombined.id)
+		.all();
 }
 
 export function countAedDevices(): number {
@@ -286,18 +342,33 @@ export function countCombinedAedDevices(): number {
 	);
 }
 
-/** Removes the imported rows of one source; user rows are untouched. */
-export function deleteSourceAedDevices(sourceId: string): number {
-	return db
-		.delete(aedSourceDevices)
-		.where(eq(aedSourceDevices.sourceId, sourceId))
-		.returning({ id: aedSourceDevices.id })
-		.all().length;
+/** Rebuilds the materialized combined table from both source tables. */
+export function refreshCombinedAedDevices(): {
+	userRows: number;
+	sourceRows: number;
+} {
+	return db.transaction((tx) => rebuildCombined(tx));
 }
 
-/** Development reset only: removes both user and imported records. */
+/** Removes the imported rows of one source and refreshes the combined table. */
+export function deleteSourceAedDevices(sourceId: string): number {
+	return db.transaction((tx) => {
+		const deleted = tx
+			.delete(aedSourceDevices)
+			.where(eq(aedSourceDevices.sourceId, sourceId))
+			.returning({ id: aedSourceDevices.id })
+			.all().length;
+		if (deleted > 0) {
+			rebuildCombined(tx);
+		}
+		return deleted;
+	});
+}
+
+/** Development reset only: removes user, source and combined rows. */
 export function clearAllAedDevices(): void {
 	db.transaction((tx) => {
+		tx.delete(aedDevicesCombined).run();
 		tx.delete(aedSourceDevices).run();
 		tx.delete(aedDevices).run();
 	});
