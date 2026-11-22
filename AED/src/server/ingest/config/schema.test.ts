@@ -7,6 +7,7 @@ import {
 	CANONICAL_FIELDS,
 	CONNECTOR_FAMILIES,
 	CONNECTOR_PARSER_MATRIX,
+	NON_HTTP_CONNECTOR_FAMILIES,
 	datasourcesConfigJsonSchema,
 	datasourcesConfigSchema,
 	PARSERS,
@@ -50,6 +51,44 @@ function slimSource(
 			required: ["name", "lat", "lon"],
 			coords: { bbox: [14.1, 49.0, 24.2, 54.9] },
 		},
+		...overrides,
+	};
+}
+
+function connectionFor(
+	family: (typeof NON_HTTP_CONNECTOR_FAMILIES)[number],
+): Record<string, unknown> {
+	switch (family) {
+		case "sqlite_db":
+			return {
+				kind: "sqlite",
+				path: ".data/aed.db",
+				query: "SELECT * FROM aed",
+			};
+		case "postgres_db":
+			return {
+				kind: "postgres",
+				env: "AED_POSTGRES_URL",
+				query: "SELECT * FROM aed",
+			};
+		case "s3_object":
+			return { kind: "s3", bucket: "aed", key: "devices/data" };
+	}
+}
+
+function connectionSource(
+	family: (typeof NON_HTTP_CONNECTOR_FAMILIES)[number],
+	parser: string,
+	overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+	const { fetch: _fetch, ...rest } = slimSource();
+	return {
+		...rest,
+		connector: { family, parser },
+		connection: connectionFor(family),
+		parse: {},
+		records: { path: "$" },
+		validate: {},
 		...overrides,
 	};
 }
@@ -242,6 +281,9 @@ describe("connector family/parser matrix", () => {
 
 	test("accepts every compatible family/parser pair", () => {
 		for (const family of CONNECTOR_FAMILIES) {
+			const nonHttp = (
+				NON_HTTP_CONNECTOR_FAMILIES as readonly string[]
+			).includes(family);
 			for (const parser of CONNECTOR_PARSER_MATRIX[family]) {
 				const parse =
 					parser === "pdf_table"
@@ -252,10 +294,16 @@ describe("connector family/parser matrix", () => {
 								},
 							}
 						: {};
-				const config = slimSource({
-					connector: { family, parser },
-					parse,
-				});
+				const config = nonHttp
+					? connectionSource(
+							family as (typeof NON_HTTP_CONNECTOR_FAMILIES)[number],
+							parser,
+							{ parse },
+						)
+					: slimSource({
+							connector: { family, parser },
+							parse,
+						});
 				const result = sourceConfigSchema.safeParse(config);
 				expect(result.success).toBe(true);
 				if (!result.success) {
@@ -402,6 +450,233 @@ describe("fetch contract", () => {
 			user_env: "AED_USER",
 		};
 		expect(sourceConfigSchema.safeParse(config).success).toBe(false);
+	});
+});
+
+describe("connection contract (sqlite_db, postgres_db, s3_object)", () => {
+	test("accepts sqlite/postgres/s3 configs without fetch", () => {
+		for (const family of NON_HTTP_CONNECTOR_FAMILIES) {
+			for (const parser of CONNECTOR_PARSER_MATRIX[family]) {
+				const result = sourceConfigSchema.safeParse(
+					connectionSource(family, parser),
+				);
+				expect(result.success).toBe(true);
+			}
+		}
+	});
+
+	test("rejects fetch on connection families and connection on HTTP families", () => {
+		const withFetch = connectionSource("sqlite_db", "json", {
+			fetch: { url: "https://example.org/aed.json" },
+		});
+		expect(sourceConfigSchema.safeParse(withFetch).success).toBe(false);
+		const withConnection = slimSource({
+			connection: connectionFor("sqlite_db"),
+		});
+		expect(sourceConfigSchema.safeParse(withConnection).success).toBe(false);
+	});
+
+	test("rejects a connection kind that does not match the family", () => {
+		const config = connectionSource("sqlite_db", "json", {
+			connection: connectionFor("postgres_db"),
+		});
+		expect(sourceConfigSchema.safeParse(config).success).toBe(false);
+	});
+
+	test("accepts SELECT/WITH queries with a single trailing semicolon", () => {
+		for (const query of [
+			"SELECT * FROM aed",
+			"  select id, lat, lon from aed;  ",
+			"WITH x AS (SELECT 1 AS n) SELECT n FROM x;",
+			"SELECT * FROM aed WHERE note = 'DROP TABLE';",
+		]) {
+			const config = connectionSource("sqlite_db", "json", {
+				connection: { kind: "sqlite", path: ".data/aed.db", query },
+			});
+			const result = sourceConfigSchema.safeParse(config);
+			expect(result.success).toBe(true);
+		}
+	});
+
+	test("rejects non-SELECT and stacked queries", () => {
+		for (const query of [
+			"DELETE FROM aed",
+			"INSERT INTO aed VALUES (1)",
+			"UPDATE aed SET lat = 0",
+			"PRAGMA table_info(aed)",
+			"SELECT 1; DROP TABLE aed",
+			"SELECT 1; SELECT 2;",
+			"WITH x AS (DELETE FROM aed RETURNING *) SELECT * FROM x",
+			"ATTACH DATABASE 'other.db' AS other",
+			"",
+		]) {
+			for (const family of ["sqlite_db", "postgres_db"] as const) {
+				const connection =
+					family === "sqlite_db"
+						? { kind: "sqlite", path: ".data/aed.db", query }
+						: { kind: "postgres", env: "AED_POSTGRES_URL", query };
+				const config = connectionSource(family, "json", { connection });
+				expect(sourceConfigSchema.safeParse(config).success).toBe(false);
+			}
+		}
+	});
+
+	test("postgres requires exactly one of url/env", () => {
+		const both = connectionSource("postgres_db", "json", {
+			connection: {
+				kind: "postgres",
+				url: "postgres://user:pass@db.example.org:5432/aed",
+				env: "AED_POSTGRES_URL",
+				query: "SELECT 1",
+			},
+		});
+		expect(sourceConfigSchema.safeParse(both).success).toBe(false);
+		const neither = connectionSource("postgres_db", "json", {
+			connection: { kind: "postgres", query: "SELECT 1" },
+		});
+		expect(sourceConfigSchema.safeParse(neither).success).toBe(false);
+		const urlOnly = connectionSource("postgres_db", "json", {
+			connection: {
+				kind: "postgres",
+				url: "postgresql://user:pass@db.example.org:5432/aed",
+				query: "SELECT 1",
+			},
+		});
+		expect(sourceConfigSchema.safeParse(urlOnly).success).toBe(true);
+		const httpUrl = connectionSource("postgres_db", "json", {
+			connection: {
+				kind: "postgres",
+				url: "https://db.example.org/aed",
+				query: "SELECT 1",
+			},
+		});
+		expect(sourceConfigSchema.safeParse(httpUrl).success).toBe(false);
+	});
+
+	test("s3 credentials must be a complete inline or env pair, or none", () => {
+		const valid: Record<string, unknown>[] = [
+			{},
+			{ access_key_id: "AKIA", secret_access_key: "secret" },
+			{
+				access_key_id: "AKIA",
+				secret_access_key: "secret",
+				session_token: "token",
+			},
+			{ access_key_id_env: "AED_S3_KEY", secret_access_key_env: "AED_S3_SECRET" },
+			{
+				access_key_id_env: "AED_S3_KEY",
+				secret_access_key_env: "AED_S3_SECRET",
+				session_token_env: "AED_S3_TOKEN",
+			},
+		];
+		for (const creds of valid) {
+			const config = connectionSource("s3_object", "csv", {
+				connection: { kind: "s3", bucket: "aed", key: "aed.csv", ...creds },
+			});
+			expect(sourceConfigSchema.safeParse(config).success).toBe(true);
+		}
+		const invalid: Record<string, unknown>[] = [
+			{ access_key_id: "AKIA" },
+			{ secret_access_key: "secret" },
+			{ session_token: "token" },
+			{ access_key_id_env: "AED_S3_KEY" },
+			{ secret_access_key_env: "AED_S3_SECRET" },
+			{ session_token_env: "AED_S3_TOKEN" },
+			{ access_key_id: "AKIA", secret_access_key_env: "AED_S3_SECRET" },
+		];
+		for (const creds of invalid) {
+			const config = connectionSource("s3_object", "csv", {
+				connection: { kind: "s3", bucket: "aed", key: "aed.csv", ...creds },
+			});
+			expect(sourceConfigSchema.safeParse(config).success).toBe(false);
+		}
+	});
+
+	test("s3 accepts region and https endpoint (MinIO)", () => {
+		const config = connectionSource("s3_object", "geojson", {
+			connection: {
+				kind: "s3",
+				bucket: "aed",
+				key: "aed.geojson",
+				region: "eu-central-1",
+				endpoint: "https://minio.example.org:9000",
+			},
+			records: { path: "$.features" },
+		});
+		expect(sourceConfigSchema.safeParse(config).success).toBe(true);
+		const httpEndpoint = connectionSource("s3_object", "geojson", {
+			connection: {
+				kind: "s3",
+				bucket: "aed",
+				key: "aed.geojson",
+				endpoint: "http://minio.example.org:9000",
+			},
+		});
+		expect(sourceConfigSchema.safeParse(httpEndpoint).success).toBe(false);
+	});
+
+	test("keeps map/required/bbox checks for connection variants", () => {
+		const emptyMap = connectionSource("sqlite_db", "json", {
+			map: {},
+		});
+		expect(sourceConfigSchema.safeParse(emptyMap).success).toBe(false);
+		const missingMapping = connectionSource("sqlite_db", "json", {
+			validate: { required: ["operator_name"] },
+		});
+		expect(sourceConfigSchema.safeParse(missingMapping).success).toBe(false);
+		const badBbox = connectionSource("s3_object", "json", {
+			validate: { coords: { bbox: [24.2, 54.9, 14.1, 49.0] } },
+		});
+		expect(sourceConfigSchema.safeParse(badBbox).success).toBe(false);
+	});
+
+	test("registry still rejects duplicate ids across connection sources", () => {
+		const result = datasourcesConfigSchema.safeParse({
+			version: 1,
+			sources: [
+				connectionSource("sqlite_db", "json"),
+				connectionSource("postgres_db", "json"),
+			],
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(
+				result.error.issues.some(
+					(issue) =>
+						issue.path.join(".") === "sources.1.source.id" &&
+						issue.message.includes("Zduplikowany"),
+				),
+			).toBe(true);
+		}
+	});
+
+	test("generated JSON schema accepts connection configs and rejects bad queries", () => {
+		const ajv = new Ajv2020({ strict: true, allErrors: true });
+		addFormats(ajv);
+		const validate = ajv.compile(datasourcesConfigJsonSchema);
+		const ok = validate({
+			version: 1,
+			sources: [
+				connectionSource("sqlite_db", "json"),
+				connectionSource("postgres_db", "json"),
+				connectionSource("s3_object", "xlsx"),
+			],
+		});
+		if (!ok) {
+			throw new Error(JSON.stringify(validate.errors, null, 2));
+		}
+		// SELECT-only is a semantic Zod refinement, not expressible in JSON
+		// Schema; the structural contract still rejects a missing query.
+		expect(
+			validate({
+				version: 1,
+				sources: [
+					connectionSource("sqlite_db", "json", {
+						connection: { kind: "sqlite", path: ".data/aed.db" },
+					}),
+				],
+			}),
+		).toBe(false);
 	});
 });
 

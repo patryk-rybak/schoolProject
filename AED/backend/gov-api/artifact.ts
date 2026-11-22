@@ -79,5 +79,9 @@ function toFeedRecord(row: AedDevice): FeedRecord {
 		city: row.city,
 		access: row.access,
 		status: row.status,
+		verificationStatus: row.verificationStatus,
+		verifiedBy: row.verifiedBy,
+		verifiedByKind: row.verifiedByKind,
+		verifiedAt: row.verifiedAt,
 	};
 }

@@ -27,7 +27,7 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 - Vite 8 + Nitro 3 (`bun` preset) for dev, build, and preview
 - Drizzle ORM with `bun:sqlite` (WAL enabled)
 - better-auth for authentication
-- Tailwind CSS v4 + shadcn/ui (`new-york` style, Radix UI base, native components only: alert, badge, button, card, input, label)
+- Tailwind CSS v4 + shadcn/ui (`new-york` style, Radix UI base; registry components: alert, badge, button, card, checkbox, field, input, label, select, separator, tabs, textarea)
 - MapLibre GL JS 6.19.0 + Protomaps/PMTiles, centered on Poland with Polish labels
 - Biome for linting and formatting, TypeScript strict mode
 
@@ -77,10 +77,12 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 
 ## Architecture
 
-- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `api/auth/$.ts`, `api/pmtiles.ts`)
+- `frontend/routes/` — TanStack file routes (`__root.tsx`, `index.tsx`, `dodaj-aed.tsx`, `zrodla/`, `api/auth/$.ts`, `api/pmtiles.ts`)
 - `frontend/router.tsx` — router factory (`getRouter`) consumed by TanStack Start
-- `frontend/components/ui/` — the only shadcn/ui components in use (`alert`, `badge`, `button`, `card`, `input`, `label`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
-- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland
+- `frontend/components/ui/` — shadcn/ui components in use (`alert`, `badge`, `button`, `card`, `checkbox`, `field`, `input`, `label`, `select`, `separator`, `tabs`, `textarea`), managed by the shadcn registry; add or update them with the CLI, do not hand-edit
+- `frontend/server/forms.ts` — TanStack server functions for the AED forms; return `{ok:false,message,issues}` instead of throwing
+- `frontend/map/poland-map.tsx` — MapLibre + Protomaps map of Poland; optional `onPick`/`picked` props turn it into a point picker, plain clicks open a „Dodaj AED tutaj” popup linking to `/dodaj-aed?lat&lon`
+- `backend/forms/` — server-only form logic: `manual-record.ts` (full canonical schema validation + save), `geocode.ts` (Nominatim, throttled, Polish errors), `source-admin.ts` (registry list/save/preview/import/delete)
 - `frontend/hooks/use-mobile.ts` — generated shadcn hook
 - `backend/store/index.ts` — Drizzle client backed by `bun:sqlite`; enables WAL and `synchronous = NORMAL`
 - `backend/store/schema.ts` — Drizzle schema
@@ -132,7 +134,7 @@ Environment variables live in `.env.local` (never committed):
 ## UI Rules
 
 - Add components with `bunx --bun shadcn@latest add <component>`; do not hand-roll shadcn primitives.
-- Keep the component set to the native registry components `alert`, `badge`, `button`, `card`, `input`, and `label` unless the task explicitly needs more.
+- Keep the component set to the registry components currently in `frontend/components/ui/` unless the task explicitly needs more.
 - Keep the generated components on their Radix UI base; do not swap in another primitive library.
 - Use the generated `cn` helper (from the `cn` package) or `#/lib/utils`.
 - Use `lucide-react` for icons.

@@ -1,5 +1,5 @@
-import type { CanonicalAedRecord } from "../canonical";
-import { parseCanonicalAedRecord } from "../canonical";
+import type { CanonicalAedRecord, VerifierKind } from "../canonical";
+import { VERIFIER_KINDS, parseCanonicalAedRecord } from "../canonical";
 import {
 	CANONICAL_FIELDS,
 	type SourceConfig,
@@ -50,6 +50,9 @@ const BASE_KEYS = new Set([
 	"access_type",
 	"status",
 	"verification_status",
+	"verified_by",
+	"verified_by_kind",
+	"verified_at",
 	"confidence",
 	"lat",
 	"lon",
@@ -121,6 +124,14 @@ function inferAddressKind(values: Record<string, unknown>): string {
 	return "none";
 }
 
+function toVerifierKind(value: unknown): VerifierKind | null {
+	const text = toText(value);
+	if (text === null) return null;
+	return (VERIFIER_KINDS as readonly string[]).includes(text)
+		? (text as VerifierKind)
+		: "unknown";
+}
+
 export type MappedRecord = {
 	record: CanonicalAedRecord;
 	index: number;
@@ -185,7 +196,18 @@ export function mapSourceRecord(
 				? "address_only"
 				: "unresolved";
 	const sourceUrl =
-		toText(values["source_url"]) ?? config.fetch.url;
+		toText(values["source_url"]) ??
+		("fetch" in config ? config.fetch.url : null);
+
+	// Verification: who confirmed the point (email / company / organization)
+	// and when. A mapped verification_status wins; otherwise the point counts
+	// as verified when the source provides a verifier or a verification date.
+	const verifiedBy = toText(values["verified_by"]);
+	const verifiedAt =
+		toText(values["verified_at"]) ?? toText(values["last_verified_at"]);
+	const verificationStatus =
+		toText(values["verification_status"]) ??
+		(verifiedBy !== null || verifiedAt !== null ? "verified" : "unverified");
 
 	const attributes: Record<string, unknown> = {};
 	for (const field of CANONICAL_FIELDS) {
@@ -218,8 +240,10 @@ export function mapSourceRecord(
 		device_type: toText(values["device_type"]) ?? "public_aed",
 		access_type: toText(values["access_type"]) ?? "unknown",
 		status: toText(values["status"]) ?? "unknown",
-		verification_status:
-			toText(values["verification_status"]) ?? "unverified",
+		verification_status: verificationStatus,
+		verified_by: verifiedBy,
+		verified_by_kind: toVerifierKind(values["verified_by_kind"]),
+		verified_at: verifiedAt,
 		confidence: toNumber(values["confidence"]) ?? 0.5,
 		lat,
 		lon,

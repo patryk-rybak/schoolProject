@@ -57,10 +57,12 @@ AED/
 │   ├── map/                  # mapa AED (MapLibre + Protomaps)
 │   ├── hooks/, lib/          # hooki i helpery klienta
 │   ├── auth-form/            # moduł: logowanie/rejestracja
+│   ├── server/               # server functions (forms.ts)
 │   ├── aed-form/             # moduł: formularz AED
 │   └── social-media/         # moduł: propozycje postów
 ├── backend/                  # dane, uwierzytelnianie, integracje
 │   ├── auth/                 # better-auth (serwer)
+│   ├── forms/                # zapis ręczny AED, geokodowanie, admin źródeł
 │   ├── store/                # Drizzle + bun:sqlite, repozytorium AED
 │   ├── ingest/               # pobieranie źródeł i budowa rdzenia
 │   ├── normalize/            # standaryzacja danych
@@ -78,8 +80,8 @@ Aliasy ścieżek: `#/*` → `frontend/*`, `#backend/*` → `backend/*`
 | Warstwa | Moduł | Status | Sekcja |
 | --- | --- | --- | --- |
 | frontend | auth-form | działa | [Logowanie i rejestracja](#logowanie-i-rejestracja-auth-form) |
-| frontend | aed-form | planowane | [Formularz AED](#formularz-aed-aed-form) |
-| frontend | map | działa (mapa bazowa) | [Mapa AED](#mapa-aed-map) |
+| frontend | aed-form | działa (dev) | [Formularz AED](#formularz-aed-aed-form) |
+| frontend | map | działa (mapa + wybór punktu) | [Mapa AED](#mapa-aed-map) |
 | frontend | social-media | planowane | [Propozycje postów](#propozycje-postów-social-media) |
 | backend | auth | działa (podstawy) | [Uwierzytelnianie](#uwierzytelnianie-auth) |
 | backend | ingest | działa (dev) | [Pobieranie danych](#pobieranie-danych-ingest) |
@@ -192,28 +194,41 @@ identyfikatorem użytkownika, ról i uprawnień, logowania przez gov.pl.
 
 ### Formularz AED (aed-form)
 
-**Status:** planowane · **Kod:** brak
+**Status:** działa (dev) · **Kod:** `frontend/routes/dodaj-aed.tsx`,
+`frontend/routes/zrodla/`, `backend/forms/`, `frontend/server/forms.ts`
 
-**Cel:** umożliwić dodanie nowego defibrylatora oraz poprawienie istniejącego
-rekordu bezpośrednio w aplikacji — przez opiekuna urządzenia lub redakcję.
+**Cel:** umożliwić dodanie nowego defibrylatora oraz podłączenie źródeł danych
+bezpośrednio w aplikacji.
 
-**Zakres:**
+**Co działa:**
 
-- formularz dodawania/edycji: nazwa, adres, współrzędne (wybór na mapie lub
-  wpisanie), typ lokalizacji (wewnątrz/zewnątrz), dostępność (24/7, godziny
-  pracy, na klucz), status urządzenia, model, numer seryjny, data instalacji,
-  data ostatniego przeglądu, opiekun i kontakt,
-- walidacja po stronie klienta i serwera, czytelne komunikaty,
-- tryb publicznego zgłoszenia („dodaj AED”) z moderacją,
-- historia zmian rekordu,
-- obsługa błędów i stanów częściowych, bez utraty wpisanych danych.
+- `/dodaj-aed` — formularz ręcznego rekordu obejmujący pełny schemat
+  kanoniczny (nazwa, adres, dostępność, urządzenie, przeglądy, opiekun,
+  weryfikacja). Punkt lokalizacji wybiera się klikając mapę albo wyznacza z
+  adresu przyciskiem „Wyznacz współrzędne z adresu” (geokodowanie Nominatim
+  po stronie serwera, `backend/forms/geocode.ts`, z limitem 1 żądania/s).
+- Kliknięcie dowolnego miejsca na mapie głównej otwiera popup „Dodaj AED
+  tutaj” z linkiem do formularza z wypełnionymi współrzędnymi.
+- `/zrodla` — rejestr konektorów (`backend/ingest/datasources-config.json`)
+  z akcjami „Importuj do mapy” (fetch → parse → map → validate → zapis do
+  dev store, zastępuje wiersze danego źródła) i „Usuń”.
+- `/zrodla/nowe` — kreator konektora: plik kolumnowy po HTTPS (CSV, XLSX,
+  JSON, GeoJSON, KML) albo magazyn danych (SQLite, PostgreSQL, S3). Podgląd
+  kolumn i przykładowych wierszy, a następnie mapowanie kolumn na pola
+  schematu AED (w tym tryby współrzędnych: kolumny lat/lon, para, GeoJSON,
+  KML) i walidacja bbox Polski.
+- Poświadczenia (Postgres, S3) podaje się przez nazwy zmiennych
+  środowiskowych — sekrety nie trafiają do rejestru w repozytorium.
+- Walidacja po stronie serwera (`backend/forms/manual-record.ts`,
+  `source-admin.ts`) zwraca polskie komunikaty per pole; formularze nie
+  tracą wpisanych danych przy błędzie.
+
+**Czego jeszcze nie ma:** edycja istniejących rekordów, moderacja zgłoszeń,
+historia zmian, powiązanie z kontami (auth).
 
 **Zależności:** [backend/store](#baza-danych-store) — zapis rekordów,
-[backend/auth](#uwierzytelnianie-auth) — kto może edytować,
+`src/server/ingest/` — walidacja konfiguracji i pipeline importu,
 `frontend/map/` — wspólny komponent wyboru punktu na mapie.
-
-**Stan obecny:** brak formularza i brak modelu danych w bazie. Aplikacja
-renderuje wyłącznie mapę bazową.
 
 ### Mapa AED (map)
 

@@ -10,6 +10,10 @@ const HEADER = [
 	"city",
 	"access",
 	"status",
+	"verification_status",
+	"verified_by",
+	"verified_by_kind",
+	"verified_at",
 ] as const;
 const NEEDS_QUOTING = /[",\n\r]/u;
 
@@ -26,6 +30,10 @@ export function buildCsv(records: readonly FeedRecord[]): string {
 				csvField(record.city ?? ""),
 				csvField(record.access),
 				csvField(record.status),
+				csvField(record.verificationStatus),
+				csvField(record.verifiedBy ?? ""),
+				csvField(record.verifiedByKind ?? ""),
+				csvField(record.verifiedAt ?? ""),
 			].join(","),
 		);
 	}

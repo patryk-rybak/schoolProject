@@ -12,6 +12,10 @@ export interface FeedRecord {
 	readonly city: string | null;
 	readonly access: string;
 	readonly status: string;
+	readonly verificationStatus: string;
+	readonly verifiedBy: string | null;
+	readonly verifiedByKind: string | null;
+	readonly verifiedAt: string | null;
 }
 
 export interface FeedArtifact {

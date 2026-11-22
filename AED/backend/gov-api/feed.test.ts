@@ -17,6 +17,10 @@ const records: readonly FeedRecord[] = [
 		city: "Warszawa",
 		access: "always",
 		status: "operational",
+		verificationStatus: "verified",
+		verifiedBy: "Urząd Miasta Stołecznego Warszawy",
+		verifiedByKind: "public_body",
+		verifiedAt: "2026-06-01",
 	},
 	{
 		id: 2,
@@ -26,6 +30,10 @@ const records: readonly FeedRecord[] = [
 		city: "Kraków",
 		access: "business_hours",
 		status: "unknown",
+		verificationStatus: "unverified",
+		verifiedBy: null,
+		verifiedByKind: null,
+		verifiedAt: null,
 	},
 ];
 
@@ -109,7 +117,9 @@ describe("published resources", () => {
 		const csv = buildCsv(records);
 		const lines = csv.trimEnd().split("\n");
 
-		expect(lines[0]).toBe("id,name,lat,lon,city,access,status");
+		expect(lines[0]).toBe(
+			"id,name,lat,lon,city,access,status,verification_status,verified_by,verified_by_kind,verified_at",
+		);
 		expect(lines[1]).toContain('"AED — Dworzec & ""test"" <Centralny>"');
 		expect(lines[2]).toContain("Kraków");
 	});

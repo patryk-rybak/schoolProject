@@ -1,6 +1,12 @@
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+	createRootRoute,
+	HeadContent,
+	Link,
+	Scripts,
+} from "@tanstack/react-router";
+import { HeartPulse } from "lucide-react";
 
-import { SiteHeader } from "#/auth-form/site-header";
+import { SessionControls } from "#/auth-form/site-header";
 
 import appCss from "../styles.css?url";
 
@@ -9,7 +15,7 @@ export const Route = createRootRoute({
 		meta: [
 			{ charSet: "utf-8" },
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
-			{ title: "Mapa Polski" },
+			{ title: "Mapa AED" },
 		],
 		links: [{ rel: "stylesheet", href: appCss }],
 	}),
@@ -22,8 +28,49 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body>
-				<SiteHeader />
+			<body className="min-h-screen bg-background text-foreground antialiased">
+				<header className="border-b">
+					<nav
+						aria-label="Nawigacja główna"
+						className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3"
+					>
+						<Link
+							to="/"
+							className="flex items-center gap-2 font-semibold"
+							activeOptions={{ exact: true }}
+						>
+							<HeartPulse className="size-5 text-red-600" aria-hidden="true" />
+							Mapa AED
+						</Link>
+						<div className="flex flex-wrap items-center gap-4 text-sm">
+							<Link
+								to="/"
+								activeOptions={{ exact: true }}
+								activeProps={{ className: "font-semibold underline" }}
+								className="text-muted-foreground hover:text-foreground"
+							>
+								Mapa
+							</Link>
+							<Link
+								to="/dodaj-aed"
+								activeProps={{ className: "font-semibold underline" }}
+								className="text-muted-foreground hover:text-foreground"
+							>
+								Dodaj AED
+							</Link>
+							<Link
+								to="/zrodla"
+								activeProps={{ className: "font-semibold underline" }}
+								className="text-muted-foreground hover:text-foreground"
+							>
+								Źródła danych
+							</Link>
+						</div>
+						<div className="ml-auto">
+							<SessionControls />
+						</div>
+					</nav>
+				</header>
 				{children}
 				<Scripts />
 			</body>

@@ -49,6 +49,10 @@ for (const record of dataset) {
 		city: text("city"),
 		access: record.access_type ?? "unknown",
 		status: record.status ?? "unknown",
+		verificationStatus: record.verification_status ?? "unverified",
+		verifiedBy: record.verified_by,
+		verifiedByKind: record.verified_by_kind,
+		verifiedAt: record.verified_at,
 		source: record.source_id,
 	});
 }

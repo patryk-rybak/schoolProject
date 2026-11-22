@@ -23,6 +23,10 @@ export function buildGeoJson(records: readonly FeedRecord[]): string {
 				city: record.city,
 				access: record.access,
 				status: record.status,
+				verification_status: record.verificationStatus,
+				verified_by: record.verifiedBy,
+				verified_by_kind: record.verifiedByKind,
+				verified_at: record.verifiedAt,
 			},
 		})),
 	};

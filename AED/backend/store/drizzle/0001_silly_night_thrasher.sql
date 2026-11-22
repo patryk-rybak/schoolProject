@@ -1,0 +1,1 @@
+ALTER TABLE `aed_devices` ADD `canonical` text;

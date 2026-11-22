@@ -91,6 +91,9 @@ function writeCsv(path: string, records: CanonicalAedRecord[]): void {
 		"city",
 		"access_type",
 		"verification_status",
+		"verified_by",
+		"verified_by_kind",
+		"verified_at",
 		"confidence",
 		"claim_status",
 		"source_url",
@@ -113,6 +116,9 @@ function writeCsv(path: string, records: CanonicalAedRecord[]): void {
 				typeof attributes["city"] === "string" ? attributes["city"] : "",
 				record.access_type,
 				record.verification_status,
+				record.verified_by,
+				record.verified_by_kind,
+				record.verified_at,
 				record.confidence,
 				record.claim_status,
 				record.source_url,
@@ -163,6 +169,9 @@ function writeSqlite(
 			city TEXT,
 			access_type TEXT,
 			verification_status TEXT,
+			verified_by TEXT,
+			verified_by_kind TEXT,
+			verified_at TEXT,
 			confidence REAL,
 			claim_status TEXT NOT NULL,
 			claimed_by TEXT,
@@ -197,7 +206,8 @@ function writeSqlite(
 	const insertRecord = db.prepare(`
 		INSERT INTO aed_core VALUES (
 			$record_id, $source_id, $source_record_id, $name, $lat, $lon,
-			$address_text, $city, $access_type, $verification_status, $confidence,
+			$address_text, $city, $access_type, $verification_status,
+			$verified_by, $verified_by_kind, $verified_at, $confidence,
 			$claim_status, $claimed_by, $claimed_at, $claim_note,
 			$source_url, $attributes_json
 		)
@@ -247,6 +257,9 @@ function writeSqlite(
 				$source_record_id: record.source_record_id,
 				$source_url: record.source_url,
 				$verification_status: record.verification_status,
+				$verified_by: record.verified_by,
+				$verified_by_kind: record.verified_by_kind,
+				$verified_at: record.verified_at,
 			});
 		}
 	});
