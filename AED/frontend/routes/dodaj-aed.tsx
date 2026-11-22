@@ -4,7 +4,13 @@ import {
 	redirect,
 	useNavigate,
 } from "@tanstack/react-router";
-import { CircleAlert, CircleCheck, MapPin, Search } from "lucide-react";
+import {
+	CircleAlert,
+	CircleCheck,
+	Facebook,
+	MapPin,
+	Search,
+} from "lucide-react";
 import { useId, useState } from "react";
 import { z } from "zod";
 
@@ -37,6 +43,7 @@ import {
 	SelectValue,
 } from "#/components/ui/select";
 import { Textarea } from "#/components/ui/textarea";
+import { buildFacebookPostText, FACEBOOK_SHARE_URL } from "#/lib/social-share";
 import { PolandMap } from "#/map/poland-map";
 import {
 	type FormIssue,
@@ -79,6 +86,8 @@ interface Candidate {
 	displayName: string;
 	confidence: number;
 }
+
+type CopyStatus = "idle" | "copied" | "error";
 
 const ACCESS_OPTIONS = [
 	{ value: "always", label: "Dostępny całą dobę (24/7)" },
@@ -141,6 +150,7 @@ function AddAedPage() {
 	const [issues, setIssues] = useState<FormIssue[]>([]);
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [saved, setSaved] = useState<{ name: string } | null>(null);
+	const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle");
 	const navigate = useNavigate();
 
 	const lat = Number.parseFloat(values.lat ?? "");
@@ -254,6 +264,15 @@ function AddAedPage() {
 		}
 	}
 
+	async function copyPostText(text: string) {
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopyStatus("copied");
+		} catch {
+			setCopyStatus("error");
+		}
+	}
+
 	function resetForm() {
 		setSaved(null);
 		setValues({
@@ -266,9 +285,12 @@ function AddAedPage() {
 		setCandidates([]);
 		setIssues([]);
 		setServerError(null);
+		setCopyStatus("idle");
 	}
 
 	if (saved) {
+		const postText = buildFacebookPostText(saved.name);
+
 		return (
 			<main className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
 				<Alert>
@@ -278,6 +300,54 @@ function AddAedPage() {
 						Rekord jest już widoczny na mapie i w eksportach danych.
 					</AlertDescription>
 				</Alert>
+				<Card>
+					<CardHeader>
+						<CardTitle>Poraź dobrem</CardTitle>
+						<CardDescription>
+							Podziel się akcją na Facebooku. Tekst posta skopiujemy
+							automatycznie — wystarczy wkleić go w oknie udostępniania.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-3">
+						<Button
+							asChild={true}
+							className="w-fit bg-[#1877F2] text-white hover:bg-[#166FE5]"
+						>
+							<a
+								aria-label="Poraź dobrem — udostępnij na Facebooku"
+								href={FACEBOOK_SHARE_URL}
+								onClick={() => {
+									copyPostText(postText);
+								}}
+								rel="noopener noreferrer"
+								target="_blank"
+							>
+								<Facebook aria-hidden="true" className="fill-current" />
+								Poraź dobrem
+							</a>
+						</Button>
+						<p
+							aria-live="polite"
+							className="min-h-5 text-muted-foreground text-sm"
+						>
+							{copyStatus === "copied"
+								? "Tekst posta skopiowany do schowka. Wklej go w oknie Facebooka."
+								: null}
+							{copyStatus === "error"
+								? "Nie udało się skopiować tekstu. Skopiuj go ręcznie z pola poniżej."
+								: null}
+						</p>
+						{copyStatus === "error" ? (
+							<Textarea
+								aria-label="Tekst posta do skopiowania"
+								className="min-h-28"
+								onFocus={(event) => event.currentTarget.select()}
+								readOnly={true}
+								value={postText}
+							/>
+						) : null}
+					</CardContent>
+				</Card>
 				<div className="flex flex-wrap gap-3">
 					<Button asChild={true}>
 						<Link to="/">Zobacz na mapie</Link>

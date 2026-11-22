@@ -18,7 +18,8 @@ Guidance for AI coding agents working in this repository. Keep this file current
 
 The application lives in `AED/`; all commands below run from that directory. The
 repository root keeps non-app material only: `task_description/` (challenge
-brief) and `dane.gov.pl/` (published portal sources and their run guide).
+brief), `dane.gov.pl/` (published portal sources and their run guide), and
+`docs/` (the static GitHub Pages share card).
 
 ## Project Snapshot
 
@@ -91,6 +92,8 @@ brief) and `dane.gov.pl/` (published portal sources and their run guide).
 - `backend/auth/schema.ts` — better-auth tables (`user`, `session`, `account`, `verification`)
 - `frontend/auth-form/` — login/register panel and header with sign-out
 - `frontend/lib/auth-client.ts` — better-auth client
+- `frontend/lib/social-share.ts` — Facebook sharer URL and the post text copied after saving an AED; its landing-page URL must match `docs/share.html`
+- `docs/share.html`, `docs/razimy-dobrem.png` — static GitHub Pages campaign card published from `main` `/docs`; keep the canonical and `og:*` URLs in sync with `frontend/lib/social-share.ts`
 - `frontend/styles.css` — Tailwind v4 theme and CSS variables
 - `drizzle.config.ts` — Drizzle Kit config
 - `vite.config.ts` — Vite, TanStack Start, Tailwind, and Nitro plugins
@@ -140,7 +143,7 @@ Environment variables live in `.env.local` (never committed):
 - Keep the generated components on their Radix UI base; do not swap in another primitive library.
 - Use the generated `cn` helper (from the `cn` package) or `#/lib/utils`.
 - Use `lucide-react` for icons.
-- Preserve the `new-york` style and CSS-variable theme in `components.json` and `frontend/styles.css`.
+- Preserve the `new-york` style and CSS-variable theme in `components.json` and `frontend/styles.css`. The Facebook share button intentionally uses Facebook brand blue (`#1877F2`); it is the only non-theme color in that card.
 
 ## Code Style
 

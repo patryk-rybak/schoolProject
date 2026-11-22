@@ -35,6 +35,7 @@ zostają tylko materiały niezwiązane z uruchamianiem aplikacji:
 | Ścieżka | Zawartość |
 | --- | --- |
 | `AED/` | aplikacja: kod, konfiguracja, skrypty, dokumentacja techniczna |
+| `docs/` | statyczna strona kampanii „Poraź dobrem” publikowana przez GitHub Pages (`share.html`, obraz OG) |
 | `task_description/` | treść zadania konkursowego (PDF) |
 | `dane.gov.pl/` | opublikowane źródła portalu dane.gov.pl (archiwa) i instrukcja uruchomienia |
 
@@ -83,6 +84,7 @@ Aliasy ścieżek: `#/*` → `frontend/*`, `#backend/*` → `backend/*`
 | frontend | aed-form | działa (dev) | [Formularz AED](#formularz-aed-aed-form) |
 | frontend | my-aed | działa | [Moje AED](#moje-aed-my-aed) |
 | frontend | map | działa (mapa + wybór punktu) | [Mapa AED](#mapa-aed-map) |
+| frontend | social-share | działa | [Udostępnianie na Facebooku](#udostępnianie-na-facebooku-social-share) |
 | frontend | social-media | planowane | [Propozycje postów](#propozycje-postów-social-media) |
 | backend | auth | działa | [Uwierzytelnianie](#uwierzytelnianie-auth) |
 | backend | ingest | działa (dev) | [Pobieranie danych](#pobieranie-danych-ingest) |
@@ -347,6 +349,35 @@ Worker MapLibre jest ładowany jako statyczny zasób z
 cache po aktualizacji. Nie serwuj workera przez route serwerowy: middleware
 Nitro w trybie dev kieruje żądania z `Sec-Fetch-Dest: worker` do plików
 statycznych i pomija route API.
+
+### Udostępnianie na Facebooku (social-share)
+
+**Status:** działa · **Kod:** `frontend/lib/social-share.ts`,
+`frontend/routes/dodaj-aed.tsx`, `docs/share.html`
+
+**Cel:** po zapisaniu AED pozwolić jednym kliknięciem udostępnić kampanię
+„Poraź dobrem” na Facebooku, bez publicznego wdrażania całej aplikacji.
+
+**Co działa:**
+
+- ekran sukcesu `/dodaj-aed` pokazuje kartę **Poraź dobrem** z przyciskiem
+  w kolorach Facebooka,
+- kliknięcie kopiuje tekst posta z nazwą zapisanego AED i otwiera
+  `https://www.facebook.com/sharer/sharer.php?u=…` w nowej karcie,
+- publiczna strona `https://patryk-rybak.github.io/schoolProject/share.html`
+  (GitHub Pages, folder `docs/`) udostępnia obraz i tagi Open Graph; aplikacja
+  nadal działa wyłącznie lokalnie,
+- jeśli schowek jest niedostępny, tekst posta pojawia się w polu do ręcznego
+  skopiowania.
+
+**Uwagi:**
+
+- podgląd linku na Facebooku jest stały (obraz, tytuł, opis); nazwa AED
+  znajduje się tylko w kopiowanym tekście,
+- po zmianie obrazu użyj nowej nazwy pliku albo odśwież podgląd w
+  [Sharing Debugger](https://developers.facebook.com/tools/debug/),
+- publiczna strona nie zawiera danych aplikacji ani bazy; publikowany jest
+  wyłącznie folder `docs/`.
 
 ### Propozycje postów (social-media)
 
