@@ -520,14 +520,14 @@ ma ten sam kształt:
 | `unresolved` | nie udało się ustalić lokalizacji | nie |
 | `conflict` | sprzeczne lokalizacje w źródłach | nie |
 
-Obie tabele AED wymagają `lat`/`lon`, dlatego trzy ostatnie statusy są
+Wszystkie tabele AED wymagają `lat`/`lon`, dlatego trzy ostatnie statusy są
 pomijane przy zapisie i liczone w raporcie importu. Mogą zostać później
 zgeokodowane i zapisane jako `geocoded`.
 
-W bazie dochodzą kolumny spoza schematu kanonicznego: `origin` (`user` dla
-`aed_devices`, `source`/`seed` dla `aed_source_devices`) oraz `created_by_id`
-tylko w tabeli użytkowników. SQLite `CHECK` pilnuje, żeby cykli życia i pól
-weryfikacji nie dało się pomylić.
+W bazie dochodzą kolumny spoza schematu kanonicznego: `origin`
+(`user`/`source`/`seed`) oraz `created_by_id` (identyfikator autora rekordu
+użytkownika; `NULL` dla rekordów źródłowych, także w tabeli łączonej). SQLite
+`CHECK` pilnuje, żeby cykli życia i pól weryfikacji nie dało się pomylić.
 
 ### Baza danych (store)
 
